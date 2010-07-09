@@ -13,14 +13,13 @@ Download WQuery
 *------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------+
 | Package                                                                            | URL                                                                                                                |
 *------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------+
-| WQuery ${project.version}                                                          | {{{http://www.wquery.org/archives/wquery-${project.version}-bin.zip} wquery-${project.version}-bin.zip}}           |
+| WQuery ${project.version}                                                          | {{{archives/wquery-${project.version}-bin.zip} wquery-${project.version}-bin.zip}}           |
 *------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------+
-| WQuery ${project.version}                                                          | {{{http://www.wquery.org/archives/wquery-${project.version}-bin.tar.gz} wquery-${project.version}-bin.tar.gz}}           |
+| WQuery ${project.version}                                                          | {{{archives/wquery-${project.version}-bin.tar.gz} wquery-${project.version}-bin.tar.gz}}           |
 *------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------+
-| WQuery ${project.version}                                                          | {{{http://www.wquery.org/archives/wquery-${project.version}-bin.tar.bz2} wquery-${project.version}-bin.tar.bz2}}           |
+| WQuery ${project.version}                                                          | {{{archives/wquery-${project.version}-bin.tar.bz2} wquery-${project.version}-bin.tar.bz2}}           |
 *------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------+
-
 
 * Previous Releases
 
-  Previous releases of WQuery may be found {{{http://www.wquery.org/archives/} here.}}
+  Previous releases of WQuery may be found {{{archives/} here.}}
