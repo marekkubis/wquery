@@ -1,0 +1,307 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>org.wquery</groupId>
+	<artifactId>wquery</artifactId>
+	<packaging>jar</packaging>
+	<version>0.3.0-SNAPSHOT</version>
+	<name>WQuery</name>
+	<description>WQuery is a domain specific query language designed to process wordnet-like lexical ontologies. 
+	It operates on wordnet-related terms like synsets, word senses, word forms etc. It is especially useful 
+	for dealing with elaborate querying tasks like searching for cycles in semantic relations 
+	or calculating average depth of synsets participating in hypernymy hierarchy.
+	
+    WQuery operates on platforms that provide Java Runtime Environment and works with wordnets stored in XML files.
+    It may be used as a standalone application or as an API to a lexical ontology in Java based systems.
+	
+	</description>
+	<url>http://www.wquery.org</url>
+	<inceptionYear>2007</inceptionYear>
+	<licenses>
+		<license>
+			<name>WQuery License</name>
+			<url>http://www.wquery.org/LICENSE.txt</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+
+	<developers>
+		<developer>
+			<id>marek</id>
+			<name>Marek Kubis</name>
+			<email>marek.kubis@gmail.com</email>
+			<roles>
+				<role>developer</role>
+			</roles>
+			<timezone>1</timezone>
+		</developer>
+	</developers>
+	
+<!--	<issueManagement>-->
+<!--		<system>Mantis</system>-->
+<!--		<url>http://wquery.org/mantis/</url>-->
+<!--	</issueManagement>-->
+
+	<mailingLists>
+		<mailingList>
+			<name>WQuery Discussions List</name>
+			<subscribe>wquery+subscribe@googlegroups.com</subscribe>
+			<unsubscribe>wquery+unsubscribe@googlegroups.com</unsubscribe>
+			<post>wquery@googlegroups.com</post>
+			<archive>http://groups.google.com/group/wquery</archive>
+		</mailingList>
+	</mailingLists>
+
+<!--	<scm>-->
+<!--		-->
+<!--			<connection>scm:svn:http://127.0.0.1/svn/my-project</connection>-->
+<!--		-->
+<!--		<developerConnection>scm:svn:svn+ssh://wquery.org/var/svn/repos</developerConnection>-->
+<!--		<tag>HEAD</tag>-->
+<!--		 <url>http://127.0.0.1/websvn/my-project</url>-->
+<!--	</scm>-->
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+
+	<repositories>
+		<repository>
+			<id>codehaus-repository</id>
+			<url>http://repository.codehaus.org/</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+		<repository>
+			<id>scala-tools.org</id>
+			<name>Scala-tools Maven2 Repository</name>
+			<url>http://scala-tools.org/repo-releases</url>
+		</repository>		
+	</repositories>
+	<pluginRepositories>
+		<pluginRepository>
+			<id>scala-tools.org</id>
+			<name>Scala-tools Maven2 Repository</name>
+			<url>http://scala-tools.org/repo-releases</url>
+		</pluginRepository>
+	</pluginRepositories>	
+	<distributionManagement>
+        <!-- <downloadUrl>http://wquery.org/download.html</downloadUrl> -->
+		<repository>
+			<id>wquery-repository</id>
+			<name>WQuery repository</name>
+			<url>scp://wquery.org/var/www/localhost/htdocs/repo</url>
+		</repository>
+		<site>
+			<id>wquery-site</id>
+			<name>WQuery Website</name>
+			<url>scp://wquery.org/var/www/localhost/htdocs</url>
+		</site>
+	</distributionManagement>
+	<dependencies>
+        <dependency>
+            <groupId>org.scala-lang</groupId>
+            <artifactId>scala-library</artifactId>
+            <version>2.7.7</version>
+            <scope>compile</scope>
+        </dependency>
+	    <dependency>
+	      <groupId>org.scala-lang</groupId>
+	      <artifactId>scala-swing</artifactId>
+	      <version>2.7.7</version>
+	    </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.6.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <version>1.6.1</version>
+        </dependency>             
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+            <version>1.2.16</version>
+        </dependency>   
+        <dependency>
+            <groupId>org.mortbay.jetty</groupId>
+            <artifactId>jetty</artifactId>
+            <version>6.1.24</version>
+        </dependency>        
+        <dependency>
+            <groupId>org.scalatest</groupId>
+            <artifactId>scalatest</artifactId>
+            <version>1.0</version>
+            <scope>test</scope>
+        </dependency>       
+	    <dependency>
+  	        <groupId>org.testng</groupId>
+	        <artifactId>testng</artifactId>
+	        <version>5.12.1</version>
+	        <scope>test</scope>
+	    </dependency>                	
+	</dependencies>
+	<build>
+	    <sourceDirectory>src/main/scala</sourceDirectory>
+	    <testSourceDirectory>src/test/scala</testSourceDirectory>	
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+			</resource>
+		</resources>
+		<plugins>
+		    <plugin>
+		        <groupId>org.scala-tools</groupId>
+		        <artifactId>maven-scala-plugin</artifactId>
+		        <version>2.10</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>compile</goal>
+							<goal>testCompile</goal>
+						</goals>
+					</execution>
+				</executions>		        
+		    </plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>2.0.2</version>
+				<configuration>
+					<source>1.5</source>
+					<target>1.5</target>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.4.2</version>
+				<configuration>
+                    <suiteXmlFiles>
+                        <suiteXmlFile>testng.xml</suiteXmlFile>
+                    </suiteXmlFiles>
+					<systemProperties>
+						<property>
+							<name>wquery.test.wordnet</name>
+							<value>${basedir}/src/main/assembly/template/samplenet.xml</value>
+						</property>
+					</systemProperties>
+				</configuration>	
+			</plugin>			
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>2.2</version>
+				<configuration>
+					<archive>
+						<manifest>
+							<mainClass>org.wquery.console.WQueryGuiConsole</mainClass>
+							<addClasspath>true</addClasspath>
+							<classpathPrefix>libs/</classpathPrefix>
+						</manifest>
+					</archive>
+				</configuration>			
+			</plugin>
+			<plugin>
+			    <groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<version>2.2-beta-2</version>
+				<configuration>
+				    <filters>
+                        <filter>src/main/resources/wquery.properties</filter>
+                    </filters>				
+					<descriptors>
+						<descriptor>src/main/assembly/bin.xml</descriptor>
+                        <descriptor>src/main/assembly/service.xml</descriptor>						
+					</descriptors>
+				</configuration>
+				<executions>
+					<execution>
+						<id>make-assembly</id>
+						<phase>site</phase>
+						<goals>
+							<goal>assembly</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>com.agilejava.docbkx</groupId>
+				<artifactId>docbkx-maven-plugin</artifactId>
+				<version>2.0.9</version>
+				<configuration>
+                    <sourceDirectory>src/site/docbook</sourceDirectory>
+                    <targetDirectory>target/site/</targetDirectory>                    
+				</configuration>				
+				<dependencies>
+					<dependency>
+						<groupId>org.docbook</groupId>
+						<artifactId>docbook-xml</artifactId>
+						<version>4.4</version>
+						<scope>runtime</scope>
+					</dependency>
+				</dependencies>
+		        <executions>
+					<execution>
+						<goals>
+							<goal>generate-html</goal>
+							<goal>generate-pdf</goal>
+						</goals>
+						<phase>pre-site</phase>
+					</execution>        							          
+		        </executions>				
+			</plugin>			
+			<plugin>			
+                <groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<version>1.1</version>
+				<executions>			
+					<execution>
+					    <id>Copy license to remote site</id>
+						<phase>pre-site</phase>
+						<configuration>
+							<tasks>
+							    <copy file="src/main/assembly/template/docs/licenses/wquery-LICENSE.txt"
+							         tofile="target/LICENSE.txt"/>
+								<scp file="target/LICENSE.txt"
+									todir="marek@wquery.org:/var/www/localhost/htdocs"
+									keyfile="${user.home}/.ssh/id_rsa" passphrase="" />
+							</tasks>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+					<!-- copy packages to site? -->
+				</executions>
+				<dependencies>
+					<dependency>
+						<groupId>ant</groupId>
+						<artifactId>ant-jsch</artifactId>
+						<version>1.6.5</version>
+					</dependency>
+					<dependency>
+						<groupId>com.jcraft</groupId>
+						<artifactId>jsch</artifactId>
+						<version>0.1.25</version>
+					</dependency>
+				</dependencies>
+			</plugin>
+		</plugins>
+	</build>
+	<reporting>
+	    <plugins>
+			<plugin>
+				<groupId>org.scala-tools</groupId>
+				<artifactId>maven-scala-plugin</artifactId>
+				<version>2.10</version>
+			</plugin>		
+		</plugins>
+	</reporting>
+</project>

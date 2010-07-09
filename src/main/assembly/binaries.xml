@@ -1,0 +1,91 @@
+<component>
+	<dependencySets>
+		<dependencySet>
+			<outputDirectory>/</outputDirectory>
+			<includes>
+				<include>org.wquery:wquery</include>
+			</includes>
+		</dependencySet>						
+		<dependencySet>
+			<outputDirectory>/libs</outputDirectory>
+			<excludes>
+				<exclude>org.wquery:wquery</exclude>
+			</excludes>
+		</dependencySet>
+	</dependencySets>
+	<files>	  
+        <file>
+            <source>src/main/assembly/template/wconsole</source>
+            <outputDirectory>/</outputDirectory>
+            <filtered>true</filtered>
+        </file>
+        <file>
+            <source>src/main/assembly/template/wguiconsole</source>
+            <outputDirectory>/</outputDirectory>
+            <filtered>true</filtered>
+        </file>                    
+        <file>
+            <source>src/main/assembly/template/wconsole.bat</source>
+            <outputDirectory>/</outputDirectory>
+            <filtered>true</filtered>
+        </file>
+        <file>
+            <source>src/main/assembly/template/wguiconsole.bat</source>
+            <outputDirectory>/</outputDirectory>
+            <filtered>true</filtered>
+        </file>            
+
+        <!-- README -->
+        <file>
+            <source>src/main/assembly/template/README.txt</source>
+            <outputDirectory>/</outputDirectory>
+            <filtered>true</filtered>
+        </file>
+        
+        <!-- ChangeLog -->
+        <file>
+            <source>src/main/assembly/template/ChangeLog.txt</source>
+            <outputDirectory>/</outputDirectory>
+        </file>                          
+
+        <!-- logfile -->
+        <file>
+            <source>src/main/assembly/template/wquery.log</source>
+            <outputDirectory>/</outputDirectory>
+        </file>
+        
+        <!-- sample wordnet -->
+        <file>
+            <source>src/main/assembly/template/samplenet.xml</source>
+            <outputDirectory>/</outputDirectory>
+        </file>          
+            
+        <!-- template/docs -->     
+        <file>
+            <source>target/site/user-guide.pdf</source>
+            <outputDirectory>/docs</outputDirectory>
+        </file>       
+        
+        <!-- template/docs/licenses -->
+        <file>
+            <source>src/main/assembly/template/docs/licenses/log4j-LICENSE.txt</source>
+            <outputDirectory>/docs/licenses/</outputDirectory>
+        </file>                     
+        <file>
+            <source>src/main/assembly/template/docs/licenses/log4j-NOTICE.txt</source>
+            <outputDirectory>/docs/licenses/</outputDirectory>
+        </file>                     
+        <file>
+            <source>src/main/assembly/template/docs/licenses/scala-LICENSE.txt</source>
+            <outputDirectory>/docs/licenses/</outputDirectory>
+        </file>                     
+        <file>
+            <source>src/main/assembly/template/docs/licenses/slf4j-LICENSE.txt</source>
+            <outputDirectory>/docs/licenses/</outputDirectory>
+        </file>                     
+        <file>
+            <source>src/main/assembly/template/docs/licenses/wquery-LICENSE.txt</source>
+            <outputDirectory>/docs/licenses/</outputDirectory>
+        </file>                             
+	</files>   	
+</component>
