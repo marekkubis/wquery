@@ -28,11 +28,13 @@
             <source>src/main/assembly/template/wconsole.bat</source>
             <outputDirectory>/</outputDirectory>
             <filtered>true</filtered>
+            <lineEnding>crlf</lineEnding>            
         </file>
         <file>
             <source>src/main/assembly/template/wguiconsole.bat</source>
             <outputDirectory>/</outputDirectory>
             <filtered>true</filtered>
+            <lineEnding>crlf</lineEnding>            
         </file>            
 
         <!-- README -->
@@ -40,12 +42,14 @@
             <source>src/main/assembly/template/README.txt</source>
             <outputDirectory>/</outputDirectory>
             <filtered>true</filtered>
+            <lineEnding>crlf</lineEnding>            
         </file>
         
         <!-- ChangeLog -->
         <file>
             <source>src/main/assembly/template/ChangeLog.txt</source>
             <outputDirectory>/</outputDirectory>
+            <lineEnding>crlf</lineEnding>            
         </file>                          
 
         <!-- logfile -->
@@ -58,6 +62,7 @@
         <file>
             <source>src/main/assembly/template/samplenet.xml</source>
             <outputDirectory>/</outputDirectory>
+            <lineEnding>crlf</lineEnding>            
         </file>          
             
         <!-- template/docs -->     
@@ -70,22 +75,27 @@
         <file>
             <source>src/main/assembly/template/docs/licenses/log4j-LICENSE.txt</source>
             <outputDirectory>/docs/licenses/</outputDirectory>
+            <lineEnding>crlf</lineEnding>
         </file>                     
         <file>
             <source>src/main/assembly/template/docs/licenses/log4j-NOTICE.txt</source>
             <outputDirectory>/docs/licenses/</outputDirectory>
+            <lineEnding>crlf</lineEnding>
         </file>                     
         <file>
             <source>src/main/assembly/template/docs/licenses/scala-LICENSE.txt</source>
             <outputDirectory>/docs/licenses/</outputDirectory>
+            <lineEnding>crlf</lineEnding>
         </file>                     
         <file>
             <source>src/main/assembly/template/docs/licenses/slf4j-LICENSE.txt</source>
             <outputDirectory>/docs/licenses/</outputDirectory>
+            <lineEnding>crlf</lineEnding>
         </file>                     
         <file>
             <source>src/main/assembly/template/docs/licenses/wquery-LICENSE.txt</source>
             <outputDirectory>/docs/licenses/</outputDirectory>
+            <lineEnding>crlf</lineEnding>
         </file>                             
 	</files>   	
 </component>
