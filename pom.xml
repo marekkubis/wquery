@@ -226,9 +226,9 @@
 				<executions>
 					<execution>
 						<id>make-assembly</id>
-						<phase>site</phase>
+						<phase>package</phase>
 						<goals>
-							<goal>assembly</goal>
+							<goal>single</goal>
 						</goals>
 					</execution>
 				</executions>
@@ -255,7 +255,7 @@
 							<goal>generate-html</goal>
 							<goal>generate-pdf</goal>
 						</goals>
-						<phase>pre-site</phase>
+						<phase>prepare-package</phase>
 					</execution>        							          
 		        </executions>				
 			</plugin>
