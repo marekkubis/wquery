@@ -27,19 +27,23 @@
             <source>src/main/assembly/template/wservice.bat</source>
             <outputDirectory>/</outputDirectory>
             <filtered>true</filtered>
+            <lineEnding>crlf</lineEnding>            
         </file>
         <file>
             <source>src/main/assembly/template/README-service.txt</source>
             <outputDirectory>/</outputDirectory>
             <filtered>true</filtered>
+            <lineEnding>crlf</lineEnding>            
         </file>                
         <file>
             <source>src/main/assembly/template/docs/licenses/jetty-LICENSE.txt</source>
             <outputDirectory>/docs/licenses/</outputDirectory>
+            <lineEnding>crlf</lineEnding>            
         </file>                     
         <file>
             <source>src/main/assembly/template/docs/licenses/jetty-NOTICE.txt</source>
             <outputDirectory>/docs/licenses/</outputDirectory>
+            <lineEnding>crlf</lineEnding>            
         </file>         
 	</files>   	
 </assembly>

@@ -1,10 +1,9 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.wquery</groupId>
 	<artifactId>wquery</artifactId>
 	<packaging>jar</packaging>
-	<version>0.3.0-SNAPSHOT</version>
+	<version>0.3.0</version>
 	<name>WQuery</name>
 	<description>WQuery is a domain specific query language designed to process wordnet-like lexical ontologies. 
 	It operates on wordnet-related terms like synsets, word senses, word forms etc. It is especially useful 
@@ -12,15 +11,16 @@
 	or calculating average depth of synsets participating in hypernymy hierarchy.
 	
     WQuery operates on platforms that provide Java Runtime Environment and works with wordnets stored in XML files.
-    It may be used as a standalone application or as an API to a lexical ontology in Java based systems.
-	
+    It may be used as a standalone application or as an API to a lexical ontology in Java based systems.	
 	</description>
+	
 	<url>http://www.wquery.org</url>
 	<inceptionYear>2007</inceptionYear>
+	
 	<licenses>
 		<license>
 			<name>WQuery License</name>
-			<url>http://www.wquery.org/LICENSE.txt</url>
+			<url>src/main/assembly/template/docs/licenses/wquery-LICENSE.txt</url>
 			<distribution>repo</distribution>
 		</license>
 	</licenses>
@@ -37,29 +37,27 @@
 		</developer>
 	</developers>
 	
-<!--	<issueManagement>-->
-<!--		<system>Mantis</system>-->
-<!--		<url>http://wquery.org/mantis/</url>-->
-<!--	</issueManagement>-->
+	<issueManagement>
+		<system>sourceforge</system>
+		<url>http://sourceforge.net/tracker/?group_id=333671</url>
+	</issueManagement>
 
-	<mailingLists>
-		<mailingList>
-			<name>WQuery Discussions List</name>
-			<subscribe>wquery+subscribe@googlegroups.com</subscribe>
-			<unsubscribe>wquery+unsubscribe@googlegroups.com</unsubscribe>
-			<post>wquery@googlegroups.com</post>
-			<archive>http://groups.google.com/group/wquery</archive>
-		</mailingList>
+	<mailingLists>	
+        <mailingList>
+            <name>WQuery Users list</name>
+            <subscribe>http://lists.sourceforge.net/mailman/listinfo/wquery-users</subscribe>
+            <unsubscribe>http://lists.sourceforge.net/mailman/listinfo/wquery-users</unsubscribe>
+            <archive>https://sourceforge.net/mailarchive/forum.php?forum_name=wquery-users</archive>
+            <post>wquery-users@lists.sourceforge.net</post>
+        </mailingList>
 	</mailingLists>
 
-<!--	<scm>-->
-<!--		-->
-<!--			<connection>scm:svn:http://127.0.0.1/svn/my-project</connection>-->
-<!--		-->
-<!--		<developerConnection>scm:svn:svn+ssh://wquery.org/var/svn/repos</developerConnection>-->
-<!--		<tag>HEAD</tag>-->
-<!--		 <url>http://127.0.0.1/websvn/my-project</url>-->
-<!--	</scm>-->
+	<scm>
+		<connection>scm:svn:https://wquery.svn.sourceforge.net/svnroot/wquery/tags/wquery-0.3.0</connection>
+		<developerConnection>scm:svn:https://wquery.svn.sourceforge.net/svnroot/wquery/tags/wquery-0.3.0</developerConnection>
+		<url>http://wquery.svn.sourceforge.net/viewvc/wquery/tags/wquery-0.3.0</url>
+	</scm>
+
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
@@ -81,6 +79,7 @@
 			<url>http://scala-tools.org/repo-releases</url>
 		</repository>		
 	</repositories>
+	
 	<pluginRepositories>
 		<pluginRepository>
 			<id>scala-tools.org</id>
@@ -88,19 +87,21 @@
 			<url>http://scala-tools.org/repo-releases</url>
 		</pluginRepository>
 	</pluginRepositories>	
+	
 	<distributionManagement>
         <!-- <downloadUrl>http://wquery.org/download.html</downloadUrl> -->
 		<repository>
 			<id>wquery-repository</id>
-			<name>WQuery repository</name>
-			<url>scp://wquery.org/var/www/localhost/htdocs/repo</url>
+			<name>WQuery Repository</name>
+			<url>scp://shell.sourceforge.net/home/groups/w/wq/wquery/htdocs/repo</url>
 		</repository>
 		<site>
 			<id>wquery-site</id>
 			<name>WQuery Website</name>
-			<url>scp://wquery.org/var/www/localhost/htdocs</url>
+			<url>scp://shell.sourceforge.net/home/groups/w/wq/wquery/htdocs</url>
 		</site>
-	</distributionManagement>
+	</distributionManagement>	
+	
 	<dependencies>
         <dependency>
             <groupId>org.scala-lang</groupId>
@@ -159,7 +160,7 @@
 		    <plugin>
 		        <groupId>org.scala-tools</groupId>
 		        <artifactId>maven-scala-plugin</artifactId>
-		        <version>2.10</version>
+		        <version>2.12</version>
 				<executions>
 					<execution>
 						<goals>
@@ -168,7 +169,7 @@
 						</goals>
 					</execution>
 				</executions>		        
-		    </plugin>
+		    </plugin>		        		   
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -224,9 +225,9 @@
 				<executions>
 					<execution>
 						<id>make-assembly</id>
-						<phase>site</phase>
+						<phase>package</phase>
 						<goals>
-							<goal>assembly</goal>
+							<goal>single</goal>
 						</goals>
 					</execution>
 				</executions>
@@ -253,45 +254,9 @@
 							<goal>generate-html</goal>
 							<goal>generate-pdf</goal>
 						</goals>
-						<phase>pre-site</phase>
+						<phase>prepare-package</phase>
 					</execution>        							          
 		        </executions>				
-			</plugin>			
-			<plugin>			
-                <groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-antrun-plugin</artifactId>
-				<version>1.1</version>
-				<executions>			
-					<execution>
-					    <id>Copy license to remote site</id>
-						<phase>pre-site</phase>
-						<configuration>
-							<tasks>
-							    <copy file="src/main/assembly/template/docs/licenses/wquery-LICENSE.txt"
-							         tofile="target/LICENSE.txt"/>
-								<scp file="target/LICENSE.txt"
-									todir="marek@wquery.org:/var/www/localhost/htdocs"
-									keyfile="${user.home}/.ssh/id_rsa" passphrase="" />
-							</tasks>
-						</configuration>
-						<goals>
-							<goal>run</goal>
-						</goals>
-					</execution>
-					<!-- copy packages to site? -->
-				</executions>
-				<dependencies>
-					<dependency>
-						<groupId>ant</groupId>
-						<artifactId>ant-jsch</artifactId>
-						<version>1.6.5</version>
-					</dependency>
-					<dependency>
-						<groupId>com.jcraft</groupId>
-						<artifactId>jsch</artifactId>
-						<version>0.1.25</version>
-					</dependency>
-				</dependencies>
 			</plugin>
 		</plugins>
 	</build>
@@ -300,8 +265,8 @@
 			<plugin>
 				<groupId>org.scala-tools</groupId>
 				<artifactId>maven-scala-plugin</artifactId>
-				<version>2.10</version>
-			</plugin>		
+				<version>2.12</version>
+			</plugin>					
 		</plugins>
 	</reporting>
 </project>
