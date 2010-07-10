@@ -35,10 +35,10 @@ Download WQuery
   
   WQuery package has the following coordinates
   
-+-------------------------------------+  
++----------------------------------------+  
 <dependency>
     <groupId>org.wquery</groupId>
     <artifactId>wquery</artifactId>
     <version>0.3.0</version>
 </dependency>
-+-------------------------------------+
++----------------------------------------+

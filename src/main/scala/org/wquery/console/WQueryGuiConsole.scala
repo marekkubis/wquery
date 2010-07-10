@@ -146,10 +146,17 @@ object WQueryGuiConsole extends SimpleGUIApplication {
         
         reactions += {
           case ButtonClicked(_) =>
-            if (!queryArea.text.trim.isEmpty) {
-              val result = wquery.execute(queryArea.text)
-              plainResultArea.text = plainEmitter.emit(result)
-              xmlResultArea.text = xmlEmitter.emit(result)
+            if (wquery != null) {
+              if (!queryArea.text.trim.isEmpty) {
+                val result = wquery.execute(queryArea.text)
+                plainResultArea.text = plainEmitter.emit(result)
+                xmlResultArea.text = xmlEmitter.emit(result)
+              }
+            } else {               
+              Dialog.showConfirmation(this,
+                                      "You have to load a wordnet before executing a query (File -> Load Wordnet...)", 
+                                      "Error", Dialog.Options.Default, Dialog.Message.Error, null)
+                           
             }
         }
       }
