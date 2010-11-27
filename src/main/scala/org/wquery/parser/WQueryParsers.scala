@@ -3,7 +3,7 @@ package org.wquery.parser
 import scala.util.parsing.combinator.RegexParsers
 import org.wquery.engine._
 
-class WQueryParsers extends RegexParsers {
+trait WQueryParsers extends RegexParsers {
 
   def parse(input: String): EvaluableExpr = {
     parse(query, input) match {
@@ -15,7 +15,7 @@ class WQueryParsers extends RegexParsers {
         throw new WQueryParsingErrorException(message)      
     }
   }
-    
+  
   // combinators
   
   def select(expr: Parser[Expr]) = (
@@ -28,21 +28,21 @@ class WQueryParsers extends RegexParsers {
   def query = (
       imp_expr
       | multipath_expr ^^ { x => FunctionExpr(WQueryFunctions.Sort, FunctionExpr(WQueryFunctions.Distinct, x)) }
-  )
-
+  ) 
+  
   def expr = (
       imp_expr
       | multipath_expr
   )
-
+  
   // imperative exprs
   
   def imp_expr: Parser[ImperativeExpr] = (
-      "do" ~> rep(instruction) <~ "end" ^^ { x => BlockExpr(x) }
-      | instruction  
+      "do" ~> rep(statement) <~ "end" ^^ { x => BlockExpr(x) }
+      | statement  
   )  
   
-  def instruction = (
+  def statement = (
       iterator
       | emission
       | assignment

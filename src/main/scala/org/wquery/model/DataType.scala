@@ -28,6 +28,6 @@ object DataType {
     case _:Boolean =>
       BooleanType
     case obj =>
-      throw new IllegalArgumentException("Object " + obj + " has no data type binded")
+      throw new IllegalArgumentException("Object " + obj + " has no data type bound")
   }     
 }

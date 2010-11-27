@@ -12,14 +12,13 @@ import org.wquery.engine.WQueryFunctions
 import org.wquery.loader.WordNetLoader
 import org.wquery.loader.GridLoader
 import org.wquery.model.FunctionArgumentType
-import org.wquery.model.FunctionType
 import org.wquery.model.WordNet
 import org.wquery.parser.WQueryParsers
 import org.wquery.utils.Logging
 
 class WQuery(wnet:WordNet) extends Logging {
   private val wordNet = wnet
-  private val parser = new WQueryParsers  
+  private val parser = new Object with WQueryParsers  
   private val bindings = new Bindings(None)
   private val functions = new FunctionSet
   
@@ -33,11 +32,14 @@ class WQuery(wnet:WordNet) extends Logging {
     }
   } 
   
-  def registerFunction(name: String, args: List[FunctionArgumentType], result: FunctionArgumentType, 
-                       ftype: FunctionType, clazz: java.lang.Class[_] , methodname: String) {  
-    functions.addFunction(name, args, result, ftype, clazz, methodname)
+  def registerScalarFunction(name: String, args: List[FunctionArgumentType], result: FunctionArgumentType, clazz: java.lang.Class[_] , methodname: String) {  
+    functions.addScalarFunction(name, args, result, clazz, methodname)
   }
 
+  def registerAggregateFunction(name: String, args: List[FunctionArgumentType], result: FunctionArgumentType, clazz: java.lang.Class[_] , methodname: String) {  
+    functions.addAggregateFunction(name, args, result, clazz, methodname)
+  }  
+  
   def unregisterFunction(name: String, args: List[FunctionArgumentType]) { 
     functions.removeFunction(name, args) 
   }

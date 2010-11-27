@@ -204,7 +204,7 @@ class GridHandler(builder: InMemoryWordNetImplBuilder) extends DefaultHandler wi
                 case None => warn("ILR tag with type '" + relname + "' found in synset '" + synset.id + "' points to unknown synset '" + reldest + "'")
               }
             case dtype =>
-              throw new RuntimeException("ILR tag points to the relation " + relation + " that has incorrect destination type " + dtype)
+              throw new RuntimeException("ILR tag points to relation " + relation + " that has incorrect destination type " + dtype)
           }
         case None => {
           throw new RuntimeException("Relation '" + relname + "' not found")
@@ -217,7 +217,7 @@ class GridHandler(builder: InMemoryWordNetImplBuilder) extends DefaultHandler wi
   
   private def createGenericRelations {    
     // create relations datatypes
-    val genericRelationsDestTypes = Map[String, DataType]()    
+    val genericRelationsDestTypes = Map[String, BasicDataType]()    
     
     for ((synset, relname, reldest) <- genericRelationsTuples) {
       val dtype = getType(builder, reldest)
@@ -250,7 +250,7 @@ class GridHandler(builder: InMemoryWordNetImplBuilder) extends DefaultHandler wi
               builder.addSuccessor(synset, relation, Relation.Destination, reldest)
             case dtype =>
               throw new RuntimeException("Incorrect destination type " + dtype +
-                                           " as a successor of the relation '" + relation + "'")
+                                           " as a successor of relation '" + relation + "'")
           }
         case None => {
           throw new RuntimeException("Relation '" + relname + "' not found")

@@ -136,8 +136,7 @@ case class EvaluableAssignmentExpr(vars: List[String], expr: EvaluableExpr) exte
       
       DataSet.empty
     } else {
-      throw new WQueryEvaluationException("Exactly one tuple shall be returned by the " +
-                                            "multipath expression in an assignment")
+      throw new WQueryEvaluationException("A multipath expression in an assignment should contain exactly one tuple")     
     }    
   }  
 }
@@ -162,7 +161,7 @@ case class BinaryPathExpr(op: String, left: EvaluableExpr, right: EvaluableExpr)
         DataSet(leval.types ++ reval.types, join(leval.content, reval.content))
       case op => 
         if (leval.types != reval.types) 
-          throw new WQueryEvaluationException("Arguments of union operator have different types")
+          throw new WQueryEvaluationException("Arguments of 'union' have different types")
       
         DataSet(
             leval.types, 
@@ -220,8 +219,7 @@ case class BinaryArithmExpr(op: String, left: EvaluableExpr, right: EvaluableExp
         DataSet(List(IntegerType), combineUsingIntArithmOp(op, lresult.content, rresult.content))        
       }
     } else {
-      throw new WQueryEvaluationException("Operator '" + op + 
-                                            "' requires arguments that contain only singleton tuples")
+      throw new WQueryEvaluationException("'" + op + "' requires arguments that contain only singleton tuples")
     }
   }
   
@@ -268,7 +266,7 @@ case class BinaryArithmExpr(op: String, left: EvaluableExpr, right: EvaluableExp
           case (List(lval), List(rval)) =>            
             buffer append List(func(lval.asInstanceOf[A], rval.asInstanceOf[A]))            
           case _ =>
-            throw new WQueryEvaluationException("Operator '" + op + "' requires singleton tuples")
+            throw new WQueryEvaluationException("'" + op + "' requires singleton tuples as arguments")
         }
       }
     }
@@ -287,18 +285,17 @@ case class MinusExpr(expr: EvaluableExpr) extends EvaluableExpr {
           case List(value: Double) =>
             -value
           case tuple =>
-            throw new WQueryEvaluationException("Tuple " + tuple + " contains value forbidden in float context")
+            throw new WQueryEvaluationException("Tuple " + tuple + " contains a value forbidden in float context")
       })      
       case List(IntegerType) =>
         DataSet.fromList(IntegerType, eresult.content.map {
           case List(value: Int) =>
             -value
           case tuple => 
-            throw new WQueryEvaluationException("Tuple " + tuple + " contains value forbidden in integer context")
+            throw new WQueryEvaluationException("Tuple " + tuple + " contains a value forbidden in integer context")
       })
       case _ => 
-        throw new WQueryEvaluationException("Unary '-' may be applied only to contexts that consist" + 
-                                              " of integer or float singletons")
+        throw new WQueryEvaluationException("Unary '-' requires a context that consist of integer or float singletons")
     }
   }
 }
@@ -335,10 +332,10 @@ case class FunctionExpr(name: String, args: EvaluableExpr) extends EvaluableExpr
         }
     }  
     
-    func.functionType match {
-      case AggregateType =>
+    func match {
+      case func: AggregateFunction =>
         method.invoke(WQueryFunctions, aresult).asInstanceOf[DataSet]        
-      case ScalarType =>
+      case func: ScalarFunction =>
         val buffer = new ListBuffer[List[Any]]()      
         val margs = new Array[AnyRef](aresult.types.size)
         var stop = false
@@ -354,7 +351,7 @@ case class FunctionExpr(name: String, args: EvaluableExpr) extends EvaluableExpr
           case ValueType(dtype) => 
             DataSet(List(dtype), buffer.toList)
           case TupleType => 
-            throw new RuntimeException("Scalar function '" + func.name + "' returned TupleType")
+            throw new RuntimeException("ScalarFunction '" + func.name + "' returned TupleType")
         }
     }
   }
@@ -544,7 +541,7 @@ case class UnaryRelationalExpr(identifier: IdentifierLit) extends RelationalExpr
           if (pos == 0) {
             useIdentifierAsGenerator(wordForm, wordNet, context, invert)          
           } else {
-            throw new WQueryEvaluationException("Quoted identifier cannot occur after dot operator")
+            throw new WQueryEvaluationException("Quoted identifier found after '.'")
           }
         case NotQuotedIdentifierLit(relname) =>
           if (pos == 0) { // we are in a generator 
@@ -597,7 +594,7 @@ case class UnaryRelationalExpr(identifier: IdentifierLit) extends RelationalExpr
           DataSet.fromOptionalValue(wordNet.getWordForm(id), StringType)
         } else {
           if (context.isEmpty)
-            throw new WQueryEvaluationException("Path generator shall not involve inverse")
+            throw new WQueryEvaluationException("'^' applied to the path generator")
           else
             throw new WQueryEvaluationException("Relation '" + id + "' not found")
         }
@@ -688,8 +685,7 @@ case class BinaryRelationalExpr(op: String, lexpr: RelationalExpr, rexpr: Relati
           DataSet(lresult.types, lresult.content intersect rresult.content)          
         }
       } else {
-        throw new WQueryEvaluationException("Unable to apply '" + 
-                                              op + "' operator to relations that have different types")        
+        throw new WQueryEvaluationException("Unable to apply '" + op + "' to relations that have different types")        
       }      
     } else {
       throw new IllegalArgumentException("Unknown binary relational operator '" + op + "'")
@@ -703,7 +699,7 @@ case class BinaryRelationalExpr(op: String, lexpr: RelationalExpr, rexpr: Relati
     if (lcount == rcount) 
       lcount 
     else 
-      throw new WQueryEvaluationException("Operator '" + op + "' requires proper relation names on both sides")
+      throw new WQueryEvaluationException("'" + op + "' requires proper relation names on both sides")
   }
 }
  
@@ -763,13 +759,13 @@ case class ComparisonExpr(op: String, lexpr: EvaluableExpr, rexpr: EvaluableExpr
                 false
             }                       
           } else {
-            throw new WQueryEvaluationException("Right side of '" + op + 
-                                                  "' shall return exactly one character string value")
+            throw new WQueryEvaluationException("The right side of '" + op + 
+                                                  "' should return exactly one character string value")
           }
         } else if (rresult.content.size == 0) {
-          throw new WQueryEvaluationException("Right side of '" + op + "' returns no values")
+          throw new WQueryEvaluationException("The right side of '" + op + "' returns no values")
         } else { // rresult.content.size > 0
-          throw new WQueryEvaluationException("Right side of '" + op + "' returns more than one values")          
+          throw new WQueryEvaluationException("The right side of '" + op + "' returns more than one values")          
         }                   
       case _ => 
         if (lresult.content.size == 1 && rresult.content.size == 1) {          
@@ -788,16 +784,16 @@ case class ComparisonExpr(op: String, lexpr: EvaluableExpr, rexpr: EvaluableExpr
           }
         } else {
           if (lresult.content.size == 0)
-              throw new WQueryEvaluationException("Left side of '" + op + "' returns no values")
+              throw new WQueryEvaluationException("The left side of '" + op + "' returns no values")
           if (lresult.content.size > 1)
-              throw new WQueryEvaluationException("Left side of '" + op + "' returns more than one value")
+              throw new WQueryEvaluationException("The left side of '" + op + "' returns more than one value")
           if (rresult.content.size == 0)
-              throw new WQueryEvaluationException("Right side of '" + op + "' returns no values")
+              throw new WQueryEvaluationException("The right side of '" + op + "' returns no values")
           if (rresult.content.size > 1)
-              throw new WQueryEvaluationException("Right side of '" + op + "' returns more than one values")
+              throw new WQueryEvaluationException("The right side of '" + op + "' returns more than one values")
 
           // the following shall not happen
-          throw new WQueryEvaluationException("Both sides of '" + op + "' shall return exactly one value")          
+          throw new WQueryEvaluationException("Both sides of '" + op + "' should return exactly one value")          
         }   
     }  
   }
@@ -820,16 +816,16 @@ case class SynsetByExprReq(expr: EvaluableExpr) extends EvaluableExpr {
           case List(sense: Sense) =>
             wordNet.getSynsetBySense(sense)
           case tuple =>
-            throw new RuntimeException("{...} generator found illegal tuple " + tuple + " instead of a sense")        
+            throw new RuntimeException("Tuple " + tuple + " found in {...} instead of a sense")        
         }      
       case List(StringType) => eresult.content.flatMap {
         case List(wordForm: String) =>
           wordNet.getSynsetsByWordForm(wordForm)
         case tuple =>
-          throw new RuntimeException("{...} generator found illegal tuple " + tuple + " instead of a word form")        
+          throw new RuntimeException("Tuple " + tuple + " found in {...} instead of a word form")        
       }             
       case _ =>
-        throw new WQueryEvaluationException("{...} generator requires an expression that generates senses or word forms")      
+        throw new WQueryEvaluationException("{...} requires an expression that generates senses or word forms")      
     })
   }
 }
@@ -892,7 +888,7 @@ case class ContextByVariableReq(variable: String) extends ContextFreeExpr {
       case Some(value) =>
         DataSet.fromValue(value)      
       case None =>
-        throw new WQueryEvaluationException("Reference to unknown variable $" + variable)
+        throw new WQueryEvaluationException("A reference to unknown variable $" + variable + " found")
     }    
   }
 }
