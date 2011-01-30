@@ -1,10 +1,54 @@
 package org.wquery.model
 
+import org.wquery.WQueryModelException
+
 import scala.collection.mutable.Set
 import scala.collection.mutable.Map
 import java.lang.reflect.Method
 
+trait WordNetStore {
+  
+  def synsets: Set[Synset]
+  
+  def senses: Set[Sense]
+  
+  def words: Set[String]
+
+  //def follow(objects: List[Any], link: String): List[Any] // DataSet -> DataSet tak czy n-arg?
+  def follow // from object as param to params
+  
+  // getobjectsbycond
+  
+  // create objects
+
+  def addLink(relation: Relation, objects: List[Any])
+  
+  def removeLink(relation: Relation, objects: List[Any])
+  
+  def flush  
+}
+
+trait WordNetAlgebra { // create algebra.scala ????
+  def mpath_union
+  def mpath_except
+  def mpath_intersect
+  
+  def path_select  
+  def path_dot
+  def pat_comma
+  def path_filter
+  def rel_or
+  def rel_and
+  def rel_inv
+  def rel_tc
+}
+
+
+// plus default impl of algebra using store
+
+
 trait WordNet {    
+
   def synsets: Set[Synset]
   
   def senses: Set[Sense]
@@ -13,23 +57,21 @@ trait WordNet {
   
   def relations: Map[(String, DataType), Relation]
   
-  def successors: Map[(Any, Relation, String), List[Any]]
-
   def getSuccessors(obj: Any, relation: Relation, destination: String): List[Any]
   
-  def getPredecessors(obj: Any, relation: Relation, destination: String): List[Any]
+  def getPredecessors(obj: Any, relation: Relation, destination: String): List[Any]  
   
   def getSynsetsByWordForm(word: String) = getSuccessors(word, WordNet.WordFormToSynsets, Relation.Destination)  
 
   def getSynsetBySense(sense: Sense) = {
     val succs = getSuccessors(sense, WordNet.SenseToSynset, Relation.Destination)
-    if (!succs.isEmpty) succs.first else throw new WQueryModelException("No synset found for sense " + sense)    
+    if (!succs.isEmpty) succs.head else throw new WQueryModelException("No synset found for sense " + sense)    
   }
   
   def getSenseByWordFormAndSenseNumberAndPos(word: String, num: Int, pos: String) = {
     try {
       val succs = getSuccessors(word + ":" + num + ":" + pos, WordNet.WordFormAndSenseNumberAndPosToSense, Relation.Destination)
-      if (succs.isEmpty) None else Some(succs.first)
+      if (succs.isEmpty) None else Some(succs.head)
     } catch {
       case  _: java.util.NoSuchElementException => None
     }
@@ -52,6 +94,7 @@ trait WordNet {
   }
   
   def containsRelation(name: String, sourceType: DataType) = relations contains (name, sourceType)   
+  
 }
 
 

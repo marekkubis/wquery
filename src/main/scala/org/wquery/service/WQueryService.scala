@@ -1,5 +1,6 @@
 package org.wquery.service;
 
+import org.wquery.WQuery
 import java.io.File
 import java.io.FileReader
 import org.mortbay.jetty.Server
@@ -32,7 +33,7 @@ object WQueryService {
       
       val wquery = WQuery.getInstance(wfile)
       
-      qargs.foreach {qarg =>
+      qargs.asInstanceOf[List[String]].foreach {qarg =>
         val qin = new QueryReader(new FileReader(qarg))
         var query = ""
           

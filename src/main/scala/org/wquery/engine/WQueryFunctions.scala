@@ -1,5 +1,7 @@
 package org.wquery.engine
 
+import org.wquery.WQuery
+import org.wquery.WQueryEvaluationException
 import org.wquery.model._
 import java.lang.reflect.Method
 
@@ -52,15 +54,15 @@ object WQueryFunctions {
     wquery.registerScalarFunction(Upper, List(ValueType(StringType)), ValueType(StringType), getClass, Upper)      
   }                                                
   
-  def distinct(result: DataSet) = DataSet(result.types, result.content.removeDuplicates)
+  def distinct(result: DataSet) = DataSet(result.types, result.content.distinct)
   
-  def sort(result: DataSet) = DataSet(result.types, result.content.sort((x, y) => compare(x, y) < 0))
+  def sort(result: DataSet) = DataSet(result.types, result.content.sortWith((x, y) => compare(x, y) < 0))
 
   def count(result: DataSet) = DataSet.fromValue(result.content.size)  
 
   def min(result: DataSet) = {
     val sresult = sort(result)
-    DataSet(sresult.types, List(sresult.content.first))    
+    DataSet(sresult.types, List(sresult.content.head))    
   }  
   
   def max(result: DataSet) = {
@@ -72,7 +74,7 @@ object WQueryFunctions {
     var sum: Int = 0
     
     for (tuple <- result.content) {
-        sum += tuple.first.asInstanceOf[Int]
+        sum += tuple.head.asInstanceOf[Int]
     }
   
     DataSet.fromValue(sum)
@@ -82,19 +84,19 @@ object WQueryFunctions {
     var sum: Double = 0
     
     for (tuple <- result.content) {
-        sum += tuple.first.asInstanceOf[Double]
+        sum += tuple.head.asInstanceOf[Double]
     }
   
     DataSet.fromValue(sum)
   }  
   
   def avg(result: DataSet) = {
-    if (result.types.first == IntegerType)
-      DataSet.fromValue(sumInt(result).content.first.first.asInstanceOf[Int].toDouble / result.content.size)
-    else if (result.types.first == FloatType)
-      DataSet.fromValue(sumFloat(result).content.first.first.asInstanceOf[Double] / result.content.size)
+    if (result.types.head == IntegerType)
+      DataSet.fromValue(sumInt(result).content.head.head.asInstanceOf[Int].toDouble / result.content.size)
+    else if (result.types.head == FloatType)
+      DataSet.fromValue(sumFloat(result).content.head.head.asInstanceOf[Double] / result.content.size)
     else 
-      throw new WQueryEvaluationException("Function 'avg' cannot compute average for type " + result.types.first)  
+      throw new WQueryEvaluationException("Function 'avg' cannot compute average for type " + result.types.head)  
   }
   
   def size(result: DataSet) = DataSet(List(IntegerType), result.content.map{x => List(x.size)})  
@@ -146,7 +148,7 @@ object WQueryFunctions {
           if (right.isEmpty) {
             1
           } else {
-            val res = compare(left.first, right.first)
+            val res = compare(left.head, right.head)
             if (res != 0) {
               res
             } else {

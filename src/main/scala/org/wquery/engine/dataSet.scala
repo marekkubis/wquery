@@ -13,8 +13,8 @@ class DataSet(t: List[DataType], c: List[List[Any]]) {
         false
     } else {
       if (types.size == 1) {
-        if (types.first == BooleanType) 
-          content.forall(x => x.first.asInstanceOf[Boolean])
+        if (types.head == BooleanType) 
+          content.forall(x => x.head.asInstanceOf[Boolean])
         else 
           true         
       } else { 
@@ -78,17 +78,17 @@ class DataSetBuffer {
               case UnionType(rtypes) => {
                 tbuffer.append(UnionType(ltypes ++ rtypes))
               }
-              case rtype @ BasicDataType() => {
+              case rtype: BasicDataType => {
                 tbuffer.append(UnionType(ltypes + rtype))
               }
             }            
           } 
-          case ltype @ BasicDataType() => {
+          case ltype: BasicDataType => {
             right(i) match {
               case UnionType(rtypes) => {
                 tbuffer.append(UnionType(rtypes + ltype))
               }
-              case rtype @ BasicDataType() => {
+              case rtype: BasicDataType => {
                 tbuffer.append(UnionType(Set(ltype, rtype)))                
               }
             }                        

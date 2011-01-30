@@ -1,5 +1,10 @@
 package org.wquery.model.impl
 
+import org.wquery.model.WordNet
+import org.wquery.model.Relation
+import org.wquery.model.DataType
+import org.wquery.model.Synset
+import org.wquery.model.Sense
 import scala.collection.mutable.Map
 import scala.collection.mutable.Set
 
@@ -60,7 +65,7 @@ class InMemoryWordNetImplBuilder {
   def getSynsetById(id: String) = {
     try {
       val succs = successors((id, WordNet.IdToSynset, Relation.Destination))
-      if (succs.isEmpty) None else Some(succs.first)
+      if (succs.isEmpty) None else Some(succs.head)
     } catch {
       case  _: java.util.NoSuchElementException => None
     }

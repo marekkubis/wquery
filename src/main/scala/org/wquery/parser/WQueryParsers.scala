@@ -2,6 +2,8 @@ package org.wquery.parser
 
 import scala.util.parsing.combinator.RegexParsers
 import org.wquery.engine._
+import org.wquery.WQueryParsingFailureException
+import org.wquery.WQueryParsingErrorException
 
 trait WQueryParsers extends RegexParsers {
 
@@ -58,6 +60,7 @@ trait WQueryParsers extends RegexParsers {
   def assignment = (
       var_decls ~ "=" ~ multipath_expr ^^ { case vdecls~_~mexpr => EvaluableAssignmentExpr(vdecls, mexpr) }
       | notQuotedId ~ "=" ~ rel_expr  ^^ { case name~_~rexpr => RelationalAssignmentExpr(name, rexpr) }
+      // | expr ~ ("+="|"-="|"=") ~ expr ^^ { case lexpr~op~rexpr => UpdateExpr(lexpr, op, rexpr) }
   )
   
   def ifelse = "if" ~> multipath_expr ~ imp_expr ~ opt("else" ~> imp_expr) ^^ {
@@ -217,7 +220,11 @@ trait WQueryParsers extends RegexParsers {
   def variable_generator = var_decl ^^ { x => ContextByVariableReq(x) }
   
   // literals
-  def alphaLit = stringLit|idLit ^^ { case IdentifierLit(x) => StringLit(x) }    
+  def alphaLit = stringLit|idLit ^^ { 
+      case NotQuotedIdentifierLit(x) => StringLit(x)
+      case QuotedIdentifierLit(x) => StringLit(x)
+  }
+  
   def floatLit: Parser[FloatLit] = "([0-9]+(([eE][+-]?[0-9]+)|\\.(([0-9]+[eE][+-]?[0-9]+)|([eE][+-]?[0-9]+)|([0-9]+))))|(\\.[0-9]+([eE][+-]?[0-9]+)?)".r ^^ { x => FloatLit(x.toDouble) }  
   def integerLit: Parser[IntegerLit] = "[0-9]+".r ^^ { x => IntegerLit(x.toInt) }
   

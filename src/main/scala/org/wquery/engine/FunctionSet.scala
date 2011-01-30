@@ -54,7 +54,7 @@ class FunctionSet {
       (name, args), 
       (
         new AggregateFunction(name, args, result), 
-        clazz.getMethod(methodname, Array.make(args.size, classOf[DataSet]):_*)
+        clazz.getMethod(methodname, Array.fill(args.size)(classOf[DataSet]):_*)
       )
     ))
   }  

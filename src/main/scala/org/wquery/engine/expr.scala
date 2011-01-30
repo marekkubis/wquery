@@ -1,6 +1,7 @@
 package org.wquery.engine
 
 import org.wquery.model._
+import org.wquery.WQueryEvaluationException
 import scala.collection.mutable.ListBuffer
 
 sealed abstract class Expr
@@ -121,7 +122,7 @@ case class EvaluableAssignmentExpr(vars: List[String], expr: EvaluableExpr) exte
     val eresult = expr.evaluate(functions, wordNet, bindings, context)
     
     if (eresult.content.size == 1) {
-      val tuple = eresult.content.first
+      val tuple = eresult.content.head
       
       if (vars.size == tuple.size) {
         for (i <- 0 until vars.size) {
@@ -169,7 +170,7 @@ case class BinaryPathExpr(op: String, left: EvaluableExpr, right: EvaluableExpr)
               case "union" =>
                 leval.content union reval.content
               case "except" =>
-                leval.content -- reval.content
+                leval.content.filterNot(reval.content.contains)
               case "intersect" =>
                 leval.content intersect reval.content    
               case _ =>
@@ -201,8 +202,8 @@ case class BinaryArithmExpr(op: String, left: EvaluableExpr, right: EvaluableExp
     val rresult = right.evaluate(functions, wordNet, bindings, context)
         
     if (lresult.types.size == 1 && rresult.types.size == 1) {      
-      if (lresult.types.first == FloatType) {        
-        if (rresult.types.first == FloatType) {          
+      if (lresult.types.head == FloatType) {        
+        if (rresult.types.head == FloatType) {          
           DataSet(List(FloatType), combineUsingDoubleArithmOp(op, lresult.content, rresult.content))          
         } else {
           DataSet(List(FloatType), 
@@ -210,7 +211,7 @@ case class BinaryArithmExpr(op: String, left: EvaluableExpr, right: EvaluableExp
                                              lresult.content, 
                                              rresult.content map { case List(x:Int) => List(x.doubleValue) }))          
         }
-      } else if (rresult.types.first == FloatType) {
+      } else if (rresult.types.head == FloatType) {
         DataSet(List(FloatType),
                 combineUsingDoubleArithmOp(op, 
                                            lresult.content map { case List(x:Int) => List(x.doubleValue) }, 
@@ -310,7 +311,7 @@ case class FunctionExpr(name: String, args: EvaluableExpr) extends EvaluableExpr
     val atypes = aresult.types.map {
       case UnionType(utypes) => 
         if (utypes == Set(FloatType, IntegerType)) ValueType(FloatType) else TupleType        
-      case t @ BasicDataType() => 
+      case t: BasicDataType => 
         ValueType(t)
     }
     
@@ -375,9 +376,9 @@ case class SelectableSelectorExpr(expr: SelectorExpr) extends SelectableExpr {
   def selected(functions: FunctionSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
     expr match {
       case SkipExpr(cexpr @ ContextByRelationalExprReq(_)) => 
-        List.make(cexpr.stepCount(wordNet, bindings, context), false)
+        List.fill(cexpr.stepCount(wordNet, bindings, context))(false)
       case SelectExpr(cexpr @ ContextByRelationalExprReq(_)) =>
-        List.make(cexpr.stepCount(wordNet, bindings, context), true)
+        List.fill(cexpr.stepCount(wordNet, bindings, context))(true)
       case _ => 
         List(expr.selected)
     }
@@ -449,7 +450,7 @@ case class StepExpr(lexpr: SelectableExpr, rexpr: TransformationDesc) extends Se
       filtered
     } else {
       val result = new ListBuffer[List[Any]]
-      val newForbidden:Set[Any] = forbidden ++ filtered.map { x => x.last }
+      val newForbidden:Set[Any] = forbidden.++[Any, Set[Any]](filtered.map { x => x.last }) // TODO ugly
       
       result.appendAll(filtered)
       
@@ -462,7 +463,7 @@ case class StepExpr(lexpr: SelectableExpr, rexpr: TransformationDesc) extends Se
   }    
 }
 
-abstract case class TransformationDesc() extends Expr
+abstract class TransformationDesc extends Expr
 
 case class RelationTransformationDesc(pos: Int, expr: SelectorExpr, quant: QuantifierLit) extends TransformationDesc
 case class FilterTransformationDesc(expr: SelectorExpr) extends TransformationDesc
@@ -472,7 +473,7 @@ case class PathExpr(expr: SelectableExpr) extends EvaluableExpr {
     var selected = expr.selected(functions, wordNet, bindings, context)
     
     if (selected.forall(_ == false)) {
-      selected = List.make(selected.size - 1, false) ++ List(true)        
+      selected = List.fill(selected.size - 1)(false) ++ List(true)        
     }
     
     val eresult = expr.evaluate(functions, wordNet, bindings, context)    
@@ -503,7 +504,7 @@ case class PathExpr(expr: SelectableExpr) extends EvaluableExpr {
 /*
  * Relational Expressions
  */
-abstract case class RelationalExpr() extends Expr {
+abstract class RelationalExpr extends Expr {
   def transform(wordNet: WordNet, bindings: Bindings, context: Context, data: DataSet, pos: Int, invert: Boolean, force: Boolean): DataSet
   
   def stepCount(wordNet: WordNet, bindings: Bindings, context: Context, data: DataSet, pos: Int, invert: Boolean, force: Boolean): Int
@@ -649,7 +650,7 @@ case class QuantifiedRelationalExpr(expr: RelationalExpr, quantifier: Quantifier
       filtered
     } else {
       val result = new ListBuffer[Any]
-      val newForbidden:Set[Any] = forbidden ++ filtered
+      val newForbidden:Set[Any] = forbidden.++[Any, Set[Any]](filtered) //TODO ugly
       
       result.appendAll(filtered)
       filtered.foreach { x => result.appendAll(closure(wordNet, bindings, context, expr, inverted, x, newForbidden)) }          
@@ -706,7 +707,7 @@ case class BinaryRelationalExpr(op: String, lexpr: RelationalExpr, rexpr: Relati
 /*
  * Conditional Expressions
  */
-abstract case class ConditionalExpr() extends Expr {
+abstract class ConditionalExpr extends Expr {
   def satisfied(functions: FunctionSet, wordNet: WordNet, bindings: Bindings, context: Context): Boolean  
 }
 
@@ -735,17 +736,17 @@ case class ComparisonExpr(op: String, lexpr: EvaluableExpr, rexpr: EvaluableExpr
         lresult == rresult
       case "!=" => 
         lresult != rresult
-      case "in" => 
-        lresult.types == rresult.types && (lresult.content union rresult.content) == rresult.content      
+      case "in" =>
+        lresult.types == rresult.types && lresult.content.forall(rresult.content.contains)      
       case "pin" => 
         lresult.types == rresult.types &&
-          (lresult.content union rresult.content) == rresult.content && 
-          lresult.content.size != rresult.content.size
+          lresult.content.forall(rresult.content.contains) && 
+          lresult.content.size < rresult.content.size
       case "=~" =>        
         if (rresult.content.size == 1) {          
           // element context
-          if (rresult.types.size == 1 && rresult.types.first == StringType) {
-            val regex = rresult.content.first.first.asInstanceOf[String].r
+          if (rresult.types.size == 1 && rresult.types.head == StringType) {
+            val regex = rresult.content.head.head.asInstanceOf[String].r
 
             lresult.content.forall {
               case List(elem:String) =>
@@ -875,9 +876,9 @@ case class ContextByReferenceReq(ref: Int) extends EvaluableExpr {
       val value = context.values(context.size - ref)
       DataSet.fromValue(if (value.isInstanceOf[List[_]]) value.asInstanceOf[List[_]].last else value)      
     } else {
-      throw new WQueryEvaluationException("Backward reference '" + List.make(ref, "#").mkString + 
+      throw new WQueryEvaluationException("Backward reference '" + List.fill(ref)("#").mkString + 
                                             "' too far, the longest possible backward reference in this context is '" + 
-                                            List.make(context.size, "#").mkString + "'")
+                                            List.fill(context.size)("#").mkString + "'")
     }
   }
 }
@@ -927,10 +928,10 @@ case class BooleanLit(v: Boolean) extends SelfEvaluableExpr {
 
 case class QuantifierLit(l: Int, r: Option[Int]) extends Expr
 
-abstract case class IdentifierLit(v: String) extends SelfEvaluableExpr {  
+abstract class IdentifierLit(v: String) extends SelfEvaluableExpr {  
   def evaluate = DataSet.fromValue(v)
   def value = v
 }
 
-case class NotQuotedIdentifierLit(override val v: String) extends IdentifierLit(v)
-case class QuotedIdentifierLit(override val v: String) extends IdentifierLit(v)
+case class NotQuotedIdentifierLit(val v: String) extends IdentifierLit(v)
+case class QuotedIdentifierLit(val v: String) extends IdentifierLit(v)

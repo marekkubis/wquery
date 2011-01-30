@@ -25,7 +25,7 @@ class JSonEmitter extends WQueryEmitter {
     builder append "["     
     
     if (!content.isEmpty) {
-        emitTuple(content.first, builder)
+        emitTuple(content.head, builder)
         
         for (i <- 1 until content.size) {
           builder append ","
@@ -41,7 +41,7 @@ class JSonEmitter extends WQueryEmitter {
     builder append "["
     
     if (!tuple.isEmpty) {
-        emitElement(tuple.first, builder)
+        emitElement(tuple.head, builder)
         
         for (i <- 1 until tuple.size) {
           builder append ","

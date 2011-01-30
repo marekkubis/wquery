@@ -76,7 +76,7 @@ class GridHandler(builder: InMemoryWordNetImplBuilder) extends DefaultHandler wi
   }
     
   override def characters(chars: Array[Char], start: Int, length: Int) {      
-    text.append(chars, start, length)
+    text.appendAll(chars, start, length)
   }
 
   override def endElement(uri: String, localName: String, tagName: String) {
@@ -93,12 +93,12 @@ class GridHandler(builder: InMemoryWordNetImplBuilder) extends DefaultHandler wi
             synsetPos = content            
             endGenericTag("POS", content)            
           case "LITERAL" =>
-            synsetSenses += (content, literalSense)
+            synsetSenses += ((content, literalSense))
             literalSense = null
           case "SENSE" =>
             literalSense = content
           case "ILR" =>
-            synsetIlrRelationsTuples += (ilrType, content)    
+            synsetIlrRelationsTuples += ((ilrType, content))    
             ilrType = null
           case "TYPE" =>
             ilrType = content
@@ -155,12 +155,12 @@ class GridHandler(builder: InMemoryWordNetImplBuilder) extends DefaultHandler wi
         if (ilrType == null || ilrType.trim.isEmpty) {
           warnInvalidSubtag("ILR", content, "type")      
         } else {
-          ilrRelationsTuples += (synset, ilrType.trim, content)
+          ilrRelationsTuples += ((synset, ilrType.trim, content))
         }        
       }
       
       for ((tagName, content) <- synsetGenericRelationsTuples) {
-        genericRelationsTuples += (synset, tagName, content)
+        genericRelationsTuples += ((synset, tagName, content))
       }      
     }
   }  
@@ -172,7 +172,7 @@ class GridHandler(builder: InMemoryWordNetImplBuilder) extends DefaultHandler wi
       case "word" =>
         // skip
       case relName =>
-        synsetGenericRelationsTuples += (relName, content)
+        synsetGenericRelationsTuples += ((relName, content))
     }
   }
     

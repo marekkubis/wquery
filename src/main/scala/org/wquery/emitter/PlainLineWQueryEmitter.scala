@@ -23,7 +23,7 @@ class PlainLineWQueryEmitter extends PlainWQueryEmitter {
 
       for (tuple <- content) {
         if (!tuple.isEmpty) {
-            emitElement(tuple.first, builder)
+            emitElement(tuple.head, builder)
                     
             for (i <- (1 until tuple.size)) {
               builder append " "

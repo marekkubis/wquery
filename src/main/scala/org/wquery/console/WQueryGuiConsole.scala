@@ -11,10 +11,12 @@ import java.io.BufferedWriter
 import javax.swing.UIManager
 import javax.swing.filechooser.FileNameExtensionFilter
 
+import org.wquery.WQuery
+import org.wquery.WQueryProperties
 import org.wquery.emitter.PlainLineWQueryEmitter
 import org.wquery.emitter.XmlWQueryEmitter
 
-object WQueryGuiConsole extends SimpleGUIApplication {    
+object WQueryGuiConsole extends SimpleSwingApplication {    
   var args: Array[String] = null
   var frameCount = 0 
   val plainEmitter = new PlainLineWQueryEmitter
@@ -29,8 +31,8 @@ object WQueryGuiConsole extends SimpleGUIApplication {
     var xmlResultArea: TextArea = null
     
     if (!args.isEmpty && frameCount == 1) {
-        wquery = WQuery.getInstance(args.first)
-        title = new File(args.first).getAbsolutePath + " - WQuery Console"
+        wquery = WQuery.getInstance(args.head)
+        title = new File(args.head).getAbsolutePath + " - WQuery Console"
     } else {
         title = "WQuery Console"
     }    

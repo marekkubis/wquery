@@ -2,6 +2,8 @@ package org.wquery.console
 
 import java.io.BufferedReader
 import java.io.FileReader
+import org.wquery.WQuery
+import org.wquery.WQueryProperties
 import org.wquery.emitter.PlainLineWQueryEmitter
 import org.wquery.utils.Logging
 import org.wquery.engine.Answer
@@ -14,9 +16,9 @@ object WQueryConsole extends Logging {
       System.exit(1)
     }
     
-    val quiet = args.first == "-q"
+    val quiet = args.head == "-q"
     val fargs = if (quiet) args.slice(1, args.size) else args
-    val wquery = WQuery.getInstance(fargs.first)
+    val wquery = WQuery.getInstance(fargs.head)
     val emitter = new PlainLineWQueryEmitter
     
     for (i <- 1 until fargs.size) {
