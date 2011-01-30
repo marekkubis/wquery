@@ -6,30 +6,30 @@ import scala.collection.mutable.ListBuffer
 
 sealed abstract class Expr
 
-abstract class EvaluableExpr extends Expr {
+sealed abstract class EvaluableExpr extends Expr {
   def evaluate(functions: FunctionSet, wordNet: WordNet, bindings: Bindings, context: Context): DataSet
 }
 
-abstract class ContextFreeExpr extends EvaluableExpr {
+sealed abstract class ContextFreeExpr extends EvaluableExpr {
   def evaluate(functions: FunctionSet, wordNet: WordNet, bindings: Bindings): DataSet  
   
   def evaluate(functions: FunctionSet, wordNet: WordNet, bindings: Bindings, context: Context): DataSet 
     = evaluate(functions, wordNet, bindings)  
 }
 
-abstract class BindingsFreeExpr extends ContextFreeExpr {
+sealed abstract class BindingsFreeExpr extends ContextFreeExpr {
   def evaluate(functions: FunctionSet, wordNet: WordNet): DataSet
   
   def evaluate(functions: FunctionSet, wordNet: WordNet, bindings: Bindings): DataSet = evaluate(functions, wordNet)
 }
 
-abstract class FunctionsFreeExpr extends BindingsFreeExpr {
+sealed abstract class FunctionsFreeExpr extends BindingsFreeExpr {
   def evaluate(wordNet: WordNet): DataSet
   
   def evaluate(functions: FunctionSet, wordNet: WordNet): DataSet = evaluate(wordNet)  
 }
 
-abstract class SelfEvaluableExpr extends FunctionsFreeExpr {
+sealed abstract class SelfEvaluableExpr extends FunctionsFreeExpr {
   def evaluate(): DataSet
   
   def evaluate(wordNet: WordNet): DataSet = evaluate  
@@ -38,7 +38,7 @@ abstract class SelfEvaluableExpr extends FunctionsFreeExpr {
 /*
  * Selectors <...> releated expressions 
  */
-abstract class SelectorExpr(expr: Expr) extends Expr {
+sealed abstract class SelectorExpr(expr: Expr) extends Expr {
   def argument = expr
   
   def selected: Boolean
@@ -56,7 +56,7 @@ case class SkipExpr(expr: Expr) extends SelectorExpr(expr) {
  * Imperative expressions
  */
 
-abstract class ImperativeExpr extends EvaluableExpr
+sealed abstract class ImperativeExpr extends EvaluableExpr
 
 case class EmissionExpr(expr: EvaluableExpr) extends ImperativeExpr {
   def evaluate(functions: FunctionSet, wordNet: WordNet, bindings: Bindings, context: Context) = { 
@@ -361,7 +361,7 @@ case class FunctionExpr(name: String, args: EvaluableExpr) extends EvaluableExpr
 /*
  * Path related expressions
  */
-abstract class SelectableExpr extends EvaluableExpr {
+sealed abstract class SelectableExpr extends EvaluableExpr {
   def selected(functions: FunctionSet, wordNet: WordNet, bindings: Bindings, context: Context): List[Boolean]
 }
 
@@ -463,7 +463,7 @@ case class StepExpr(lexpr: SelectableExpr, rexpr: TransformationDesc) extends Se
   }    
 }
 
-abstract class TransformationDesc extends Expr
+sealed abstract class TransformationDesc extends Expr
 
 case class RelationTransformationDesc(pos: Int, expr: SelectorExpr, quant: QuantifierLit) extends TransformationDesc
 case class FilterTransformationDesc(expr: SelectorExpr) extends TransformationDesc
@@ -504,7 +504,7 @@ case class PathExpr(expr: SelectableExpr) extends EvaluableExpr {
 /*
  * Relational Expressions
  */
-abstract class RelationalExpr extends Expr {
+sealed abstract class RelationalExpr extends Expr {
   def transform(wordNet: WordNet, bindings: Bindings, context: Context, data: DataSet, pos: Int, invert: Boolean, force: Boolean): DataSet
   
   def stepCount(wordNet: WordNet, bindings: Bindings, context: Context, data: DataSet, pos: Int, invert: Boolean, force: Boolean): Int
@@ -707,7 +707,7 @@ case class BinaryRelationalExpr(op: String, lexpr: RelationalExpr, rexpr: Relati
 /*
  * Conditional Expressions
  */
-abstract class ConditionalExpr extends Expr {
+sealed abstract class ConditionalExpr extends Expr {
   def satisfied(functions: FunctionSet, wordNet: WordNet, bindings: Bindings, context: Context): Boolean  
 }
 
@@ -928,7 +928,7 @@ case class BooleanLit(v: Boolean) extends SelfEvaluableExpr {
 
 case class QuantifierLit(l: Int, r: Option[Int]) extends Expr
 
-abstract class IdentifierLit(v: String) extends SelfEvaluableExpr {  
+sealed abstract class IdentifierLit(v: String) extends SelfEvaluableExpr {  
   def evaluate = DataSet.fromValue(v)
   def value = v
 }

@@ -2,7 +2,7 @@ package org.wquery.model
 
 sealed abstract class DataType
 
-abstract class BasicDataType extends DataType
+sealed abstract class BasicDataType extends DataType
 
 case object SynsetType extends BasicDataType
 case object SenseType extends BasicDataType
