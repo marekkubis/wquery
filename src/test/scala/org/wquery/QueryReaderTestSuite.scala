@@ -1,8 +1,6 @@
 package org.wquery
-
 import java.io.StringReader
 import org.testng.annotations.Test
-
 import org.wquery.console.QueryReader
 
 class QueryReaderTestSuite extends WQueryTestSuite {

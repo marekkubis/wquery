@@ -1,9 +1,6 @@
 package org.wquery.engine
-
-import org.wquery.WQuery
-import org.wquery.WQueryEvaluationException
-import org.wquery.model._
-import java.lang.reflect.Method
+import org.wquery.{WQueryEvaluationException, WQuery}
+import org.wquery.model.{ValueType, TupleType, IntegerType, FloatType, StringType, Synset, Sense}
 
 /**
  * WQuery built-in functions

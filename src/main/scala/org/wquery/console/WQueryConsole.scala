@@ -1,13 +1,8 @@
 package org.wquery.console
-
-import java.io.BufferedReader
-import java.io.FileReader
-import org.wquery.WQuery
-import org.wquery.WQueryProperties
+import java.io.{FileReader, BufferedReader}
+import org.wquery.{WQueryProperties, WQuery}
 import org.wquery.emitter.PlainLineWQueryEmitter
 import org.wquery.utils.Logging
-import org.wquery.engine.Answer
-import org.wquery.model.Synset
 
 object WQueryConsole extends Logging {
   def main(args: Array[String]) {

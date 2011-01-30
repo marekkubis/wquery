@@ -1,10 +1,6 @@
 package org.wquery.model
-
 import org.wquery.WQueryModelException
-
-import scala.collection.mutable.Set
-import scala.collection.mutable.Map
-import java.lang.reflect.Method
+import scala.collection.mutable.{Map, Set}
 
 trait WordNetStore {
   

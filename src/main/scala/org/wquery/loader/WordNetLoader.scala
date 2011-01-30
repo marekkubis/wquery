@@ -1,5 +1,4 @@
 package org.wquery.loader
-
 import org.wquery.model.WordNet
 
 trait WordNetLoader {

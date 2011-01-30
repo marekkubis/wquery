@@ -1,12 +1,7 @@
 package org.wquery.service
-
 import org.wquery.emitter.WQueryEmitter
-import org.wquery.engine.DataSet
-import org.wquery.engine.Result
-import org.wquery.engine.Answer
-import org.wquery.engine.Error
-import org.wquery.model.Synset
-import org.wquery.model.Sense
+import org.wquery.engine.{Error, Answer, Result, DataSet}
+import org.wquery.model.{Sense, Synset}
 
 class JSonEmitter extends WQueryEmitter {
   def emit(result: Result):String = {

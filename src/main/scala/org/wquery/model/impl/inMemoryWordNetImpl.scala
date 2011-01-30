@@ -1,12 +1,6 @@
 package org.wquery.model.impl
-
-import org.wquery.model.WordNet
-import org.wquery.model.Relation
-import org.wquery.model.DataType
-import org.wquery.model.Synset
-import org.wquery.model.Sense
-import scala.collection.mutable.Map
-import scala.collection.mutable.Set
+import org.wquery.model.{Sense, Synset, DataType, Relation, WordNet}
+import scala.collection.mutable.{Set, Map}
 
 class InMemoryWordNetImpl (synsetsSet: Set[Synset], sensesSet: Set[Sense], wordsSet: Set[String], 
                            relationsMap: Map[(String, DataType), Relation],

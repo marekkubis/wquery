@@ -1,7 +1,6 @@
 package org.wquery.engine
-
-import org.wquery.model._
 import org.wquery.WQueryEvaluationException
+import org.wquery.model.{AggregateFunction, ScalarFunction, WordNet, FloatType, IntegerType, UnionType, BasicDataType, ValueType, TupleType, StringType, Relation, SynsetType, SenseType, Sense}
 import scala.collection.mutable.ListBuffer
 
 sealed abstract class Expr
@@ -310,7 +309,7 @@ case class FunctionExpr(name: String, args: EvaluableExpr) extends EvaluableExpr
     
     val atypes = aresult.types.map {
       case UnionType(utypes) => 
-        if (utypes == Set(FloatType, IntegerType)) ValueType(FloatType) else TupleType        
+        if (utypes == Set(FloatType, IntegerType)) ValueType(FloatType) else TupleType
       case t: BasicDataType => 
         ValueType(t)
     }

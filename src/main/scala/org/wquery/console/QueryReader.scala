@@ -1,7 +1,5 @@
 package org.wquery.console
-
-import java.io.Reader
-import java.io.BufferedReader
+import java.io.{BufferedReader, Reader}
 
 class QueryReader(reader: Reader) {
   private val in = new BufferedReader(reader)

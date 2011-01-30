@@ -1,21 +1,12 @@
 package org.wquery.loader
-
-import scala.collection.mutable.ListBuffer
-import scala.collection.mutable.Map
-import scala.collection.mutable.Set
-
+import javax.xml.parsers.{SAXParserFactory, SAXParser}
 import java.io.File
-import javax.xml.parsers.ParserConfigurationException
-import javax.xml.parsers.SAXParser
-import javax.xml.parsers.SAXParserFactory
-import org.xml.sax.Attributes;
-import org.xml.sax.Locator
-import org.xml.sax.SAXException;
-import org.xml.sax.helpers.DefaultHandler;
-
-import org.wquery.model._
+import org.wquery.model.{WordNet, Synset, Sense, Relation, SynsetType, BasicDataType, BooleanType, IntegerType, FloatType, StringType, SenseType, UnionType, DataType}
 import org.wquery.model.impl.InMemoryWordNetImplBuilder
 import org.wquery.utils.Logging
+import org.xml.sax.{Locator, Attributes}
+import org.xml.sax.helpers.DefaultHandler
+import scala.collection.mutable.{Set, Map, ListBuffer}
 
 class GridLoader extends WordNetLoader with Logging {
   override def canLoad(url: String): Boolean = url.endsWith(".xml") // provide a better check

@@ -1,22 +1,8 @@
 package org.wquery.engine
-
 import java.lang.reflect.Method
-import scala.collection.mutable.Map
 import org.wquery.WQueryModelException
-import org.wquery.model.FunctionArgumentType
-import org.wquery.model.Function
-import org.wquery.model.ScalarFunction
-import org.wquery.model.AggregateFunction
-import org.wquery.model.ValueType
-import org.wquery.model.Synset
-import org.wquery.model.SynsetType
-import org.wquery.model.Sense
-import org.wquery.model.SenseType
-import org.wquery.model.StringType
-import org.wquery.model.IntegerType
-import org.wquery.model.FloatType
-import org.wquery.model.BooleanType
-import org.wquery.model.TupleType
+import org.wquery.model.{TupleType, BooleanType, FloatType, IntegerType, StringType, SenseType, Sense, SynsetType, Synset, ValueType, AggregateFunction, ScalarFunction, Function, FunctionArgumentType}
+import scala.collection.mutable.Map
 
 class FunctionSet {
   private val functions = Map[(String, List[FunctionArgumentType]), (Function, Method)]()  

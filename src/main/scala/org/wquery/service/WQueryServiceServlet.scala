@@ -1,8 +1,5 @@
 package org.wquery.service
-
-import javax.servlet.http.HttpServlet
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
+import javax.servlet.http.{HttpServletResponse, HttpServletRequest, HttpServlet}
 import org.wquery.WQuery
 
 class WQueryServiceServlet(wquery: WQuery) extends HttpServlet {

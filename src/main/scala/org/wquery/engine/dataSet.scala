@@ -1,7 +1,5 @@
 package org.wquery.engine
-
 import org.wquery.model._
-
 import scala.collection.mutable.ListBuffer
 
 class DataSet(t: List[DataType], c: List[List[Any]]) {

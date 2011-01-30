@@ -1,5 +1,4 @@
 package org.wquery
-
 import java.util.Properties
 
 object WQueryProperties {

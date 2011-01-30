@@ -1,5 +1,4 @@
 package org.wquery
-
 import org.testng.annotations.Test
 
 class FiltersTestSuite extends WQueryTestSuite {

@@ -1,20 +1,10 @@
 package org.wquery
-
-import scala.collection.mutable.LinkedHashSet
-import org.wquery.engine.Bindings
-import org.wquery.engine.Context
-import org.wquery.engine.Answer
-import org.wquery.engine.Error
-import org.wquery.engine.Result
-import org.wquery.engine.DataSet
-import org.wquery.engine.FunctionSet
-import org.wquery.engine.WQueryFunctions
-import org.wquery.loader.WordNetLoader
-import org.wquery.loader.GridLoader
-import org.wquery.model.FunctionArgumentType
-import org.wquery.model.WordNet
+import org.wquery.engine.{WQueryFunctions, FunctionSet, DataSet, Result, Error, Answer, Context, Bindings}
+import org.wquery.loader.{GridLoader, WordNetLoader}
+import org.wquery.model.{WordNet, FunctionArgumentType}
 import org.wquery.parser.WQueryParsers
 import org.wquery.utils.Logging
+import scala.collection.mutable.LinkedHashSet
 
 class WQuery(wnet:WordNet) extends Logging {
   private val wordNet = wnet

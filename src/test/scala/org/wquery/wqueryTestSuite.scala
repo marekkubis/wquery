@@ -1,10 +1,8 @@
 package org.wquery
-
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.testng.TestNGSuite
-import org.wquery.emitter.WQueryEmitter
-import org.wquery.emitter.PlainLineWQueryEmitter
 import org.testng.annotations.BeforeClass
+import org.wquery.emitter.{PlainLineWQueryEmitter, WQueryEmitter}
 
 object WQueryRuntime {    
   val wquery = WQuery.getInstance(System.getProperty("wquery.test.wordnet"))

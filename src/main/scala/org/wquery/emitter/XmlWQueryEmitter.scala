@@ -1,11 +1,6 @@
 package org.wquery.emitter
-
-import org.wquery.engine.DataSet
-import org.wquery.engine.Answer
-import org.wquery.engine.Error
-import org.wquery.engine.Result
-import org.wquery.model.Synset
-import org.wquery.model.Sense
+import org.wquery.engine.{Result, Error, Answer, DataSet}
+import org.wquery.model.{Sense, Synset}
 
 class XmlWQueryEmitter extends WQueryEmitter {
   def emit(result: Result):String = {

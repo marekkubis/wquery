@@ -1,7 +1,5 @@
 package org.wquery.emitter
-
-import org.wquery.model.Synset
-import org.wquery.model.Sense
+import org.wquery.model.{Sense, Synset}
 
 abstract class PlainWQueryEmitter extends WQueryEmitter {
   protected def emitElement(element: Any, builder: StringBuilder) {

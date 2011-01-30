@@ -1,5 +1,4 @@
 package org.wquery.engine
-
 import org.wquery.WQueryException
 
 sealed abstract class Result

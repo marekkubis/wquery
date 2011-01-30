@@ -1,9 +1,7 @@
 package org.wquery.parser
-
+import org.wquery.{WQueryParsingErrorException, WQueryParsingFailureException}
+import org.wquery.engine.{EvaluableExpr, Expr, SelectExpr, SkipExpr, FunctionExpr, WQueryFunctions, ImperativeExpr, IteratorExpr, EmissionExpr, EvaluableAssignmentExpr, RelationalAssignmentExpr, IfElseExpr, BinaryPathExpr, BlockExpr, BinaryArithmExpr, SelectableExpr, TransformationDesc, StepExpr, SelectableSelectorExpr, RelationalExpr, BinaryRelationalExpr, QuantifierLit, FilterTransformationDesc, OrExpr, NotExpr, AndExpr, ComparisonExpr, BooleanLit, SynsetAllReq, SenseAllReq, DoubleQuotedLit, WordFormByRegexReq, ContextByRelationalExprReq, IntegerLit, ContextByReferenceReq, FloatLit, NotQuotedIdentifierLit, QuotedIdentifierLit, StringLit, ContextByVariableReq, BooleanByFilterReq, SequenceLit, SynsetByExprReq, SenseByWordFormAndSenseNumberAndPosReq, SenseByWordFormAndSenseNumberReq, UnaryRelationalExpr, InvertedRelationalExpr, QuantifiedRelationalExpr, RelationTransformationDesc, PathExpr, MinusExpr}
 import scala.util.parsing.combinator.RegexParsers
-import org.wquery.engine._
-import org.wquery.WQueryParsingFailureException
-import org.wquery.WQueryParsingErrorException
 
 trait WQueryParsers extends RegexParsers {
 

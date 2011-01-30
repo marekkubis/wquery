@@ -1,11 +1,8 @@
 package org.wquery.service;
-
-import org.wquery.WQuery
-import java.io.File
-import java.io.FileReader
+import java.io.{FileReader, File}
 import org.mortbay.jetty.Server
-import org.mortbay.jetty.servlet.Context
-import org.mortbay.jetty.servlet.ServletHolder
+import org.mortbay.jetty.servlet.{ServletHolder, Context}
+import org.wquery.WQuery
 import org.wquery.console.QueryReader
 import org.wquery.emitter.PlainLineWQueryEmitter
 

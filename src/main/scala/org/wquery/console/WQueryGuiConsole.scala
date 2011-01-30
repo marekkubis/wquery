@@ -1,20 +1,13 @@
 package org.wquery.console
-
-import scala.io.Source
-import scala.swing._
-import scala.swing.Swing._
-import scala.swing.event._
-
-import java.io.File
-import java.io.FileWriter
-import java.io.BufferedWriter
 import javax.swing.UIManager
 import javax.swing.filechooser.FileNameExtensionFilter
-
-import org.wquery.WQuery
-import org.wquery.WQueryProperties
-import org.wquery.emitter.PlainLineWQueryEmitter
-import org.wquery.emitter.XmlWQueryEmitter
+import java.awt.Dimension
+import java.io.{BufferedWriter, FileWriter, File}
+import org.wquery.{WQueryProperties, WQuery}
+import org.wquery.emitter.{XmlWQueryEmitter, PlainLineWQueryEmitter}
+import scala.io.Source
+import scala.swing.{SimpleSwingApplication, TextArea, Frame, FileChooser, MenuBar, Menu, MenuItem, Separator, Dialog, BoxPanel, Orientation, Swing, ScrollPane, Component, Button, TabbedPane}
+import scala.swing.event.{ButtonClicked, WindowClosing, Event}
 
 object WQueryGuiConsole extends SimpleSwingApplication {    
   var args: Array[String] = null
@@ -137,7 +130,7 @@ object WQueryGuiConsole extends SimpleSwingApplication {
       
       contents += new ScrollPane(queryArea)
       
-      contents += RigidBox((5, 5))
+      contents += Swing.RigidBox(new Dimension(5, 5))
       
       contents += new Button {
         text = "Execute"
@@ -163,7 +156,7 @@ object WQueryGuiConsole extends SimpleSwingApplication {
         }
       }
       
-      contents += RigidBox((5, 5))
+      contents += Swing.RigidBox(new Dimension(5, 5))
       
       plainResultArea = new TextArea {
         columns = 40

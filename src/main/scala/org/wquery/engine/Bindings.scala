@@ -1,7 +1,5 @@
 package org.wquery.engine
-
 import scala.collection.mutable.Map
-import org.wquery.model.DataType
 
 class Bindings(parent: Option[Bindings]) {
   val bindings = Map[String, Any]()  

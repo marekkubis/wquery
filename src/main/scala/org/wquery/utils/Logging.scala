@@ -1,5 +1,4 @@
 package org.wquery.utils
-
 import org.slf4j.LoggerFactory
 
 trait Logging {
