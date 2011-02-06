@@ -1,6 +1,6 @@
 package org.wquery.parser
 import org.wquery.{WQueryParsingErrorException, WQueryParsingFailureException}
-import org.wquery.engine.{EvaluableExpr, Expr, SelectExpr, SkipExpr, FunctionExpr, WQueryFunctions, ImperativeExpr, IteratorExpr, EmissionExpr, EvaluableAssignmentExpr, RelationalAssignmentExpr, IfElseExpr, BinaryPathExpr, BlockExpr, BinaryArithmExpr, SelectableExpr, TransformationDesc, StepExpr, SelectableSelectorExpr, RelationalExpr, BinaryRelationalExpr, QuantifierLit, FilterTransformationDesc, OrExpr, NotExpr, AndExpr, ComparisonExpr, BooleanLit, SynsetAllReq, SenseAllReq, DoubleQuotedLit, WordFormByRegexReq, ContextByRelationalExprReq, IntegerLit, ContextByReferenceReq, FloatLit, NotQuotedIdentifierLit, QuotedIdentifierLit, StringLit, ContextByVariableReq, BooleanByFilterReq, SequenceLit, SynsetByExprReq, SenseByWordFormAndSenseNumberAndPosReq, SenseByWordFormAndSenseNumberReq, UnaryRelationalExpr, InvertedRelationalExpr, QuantifiedRelationalExpr, RelationTransformationDesc, PathExpr, MinusExpr}
+import org.wquery.engine.{EvaluableExpr, Expr, SelectExpr, SkipExpr, FunctionExpr, WQueryFunctions, ImperativeExpr, IteratorExpr, EmissionExpr, EvaluableAssignmentExpr, RelationalAssignmentExpr, IfElseExpr, BinaryPathExpr, BlockExpr, BinaryArithmExpr, SelectableExpr, TransformationDesc, StepExpr, SelectableSelectorExpr, RelationalExpr, QuantifierLit, FilterTransformationDesc, OrExpr, NotExpr, AndExpr, ComparisonExpr, BooleanLit, SynsetAllReq, SenseAllReq, DoubleQuotedLit, WordFormByRegexReq, ContextByRelationalExprReq, IntegerLit, ContextByReferenceReq, FloatLit, NotQuotedIdentifierLit, QuotedIdentifierLit, StringLit, ContextByVariableReq, BooleanByFilterReq, SequenceLit, SynsetByExprReq, SenseByWordFormAndSenseNumberAndPosReq, SenseByWordFormAndSenseNumberReq, UnaryRelationalExpr, InvertedRelationalExpr, QuantifiedRelationalExpr, RelationTransformationDesc, PathExpr, MinusExpr, UnionRelationalExpr}
 import scala.util.parsing.combinator.RegexParsers
 
 trait WQueryParsers extends RegexParsers {
@@ -120,12 +120,9 @@ trait WQueryParsers extends RegexParsers {
   def dots = rep1(".") ^^ { x => x.size }    
   
   def rel_expr: Parser[RelationalExpr]
-    = chainl1(intersect_rel_expr, 
-               "|" ^^ { x => ((l:RelationalExpr, r:RelationalExpr) => BinaryRelationalExpr(x, l , r)) })
-  
-  def intersect_rel_expr
-    = chainl1(quant_rel_expr, "&" ^^ { x => ((l:RelationalExpr, r:RelationalExpr) => BinaryRelationalExpr(x, l , r))} )     
-      
+    = chainl1(quant_rel_expr, 
+               "|" ^^ { x => ((l:RelationalExpr, r:RelationalExpr) => UnionRelationalExpr(l, r)) })
+        
   def quant_rel_expr = inv_rel_expr ~ quantifierLit ^^ { case iexpr~quant => QuantifiedRelationalExpr(iexpr, quant) }
   
   def inv_rel_expr = opt("^") ~ unary_rel_expr ^^ {
