@@ -18,7 +18,7 @@ class FunctionsTestSuite extends WQueryTestSuite {
     
   @Test def testAvgFloat() = result of ("avg(1..10*1.0)") should equal ("5.5\n")
     
-  @Test def testSize() = result of ("size({car:1}.<hypernym>!)") should equal ("1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n")                                                                                    
+  @Test def testSize() = result of ("size({car:1}.hypernym!)") should equal ("1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n")                                                                                    
     
   // scalars
 

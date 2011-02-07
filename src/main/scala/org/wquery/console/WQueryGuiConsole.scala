@@ -11,7 +11,6 @@ import scala.swing.event.{ButtonClicked, WindowClosing, Event}
 
 object WQueryGuiConsole extends SimpleSwingApplication {    
   var args: Array[String] = null
-  var frameCount = 0 
   val plainEmitter = new PlainLineWQueryEmitter
   val xmlEmitter = new XmlWQueryEmitter
   
@@ -23,7 +22,7 @@ object WQueryGuiConsole extends SimpleSwingApplication {
     var plainResultArea: TextArea = null
     var xmlResultArea: TextArea = null
     
-    if (!args.isEmpty && frameCount == 1) {
+    if (!args.isEmpty) {
         wquery = WQuery.getInstance(args.head)
         title = new File(args.head).getAbsolutePath + " - WQuery Console"
     } else {
@@ -176,12 +175,8 @@ object WQueryGuiConsole extends SimpleSwingApplication {
     
     reactions += {
       case WindowClosing(_) =>
-        frameCount -= 1
-        if (frameCount <= 1) // ATTENTION: first frame seems to be instantiated twice
-            System.exit(0)    
-    }
-    
-    frameCount += 1        
+        System.exit(0)    
+    }  
   }  
   
   override def main(args: Array[String]) {

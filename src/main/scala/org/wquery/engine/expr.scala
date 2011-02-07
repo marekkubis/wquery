@@ -34,23 +34,6 @@ sealed abstract class SelfEvaluableExpr extends FunctionsFreeExpr {
 }
 
 /*
- * Selectors <...> releated expressions 
- */
-sealed abstract class SelectorExpr(expr: Expr) extends Expr {
-  def argument = expr
-
-  def selected: Boolean
-}
-
-case class SelectExpr(expr: Expr) extends SelectorExpr(expr) {
-  def selected = true
-}
-
-case class SkipExpr(expr: Expr) extends SelectorExpr(expr) {
-  def selected = false
-}
-
-/*
  * Imperative expressions
  */
 
@@ -357,82 +340,18 @@ case class FunctionExpr(name: String, args: EvaluableExpr) extends EvaluableExpr
 /*
  * Path related expressions
  */
-sealed abstract class SelectableExpr extends EvaluableExpr {
-  def selected(functions: FunctionSet, wordNet: WordNet, bindings: Bindings, context: Context): List[Boolean]
-}
-
-case class SelectableSelectorExpr(expr: SelectorExpr) extends SelectableExpr {
-  def evaluate(functions: FunctionSet, wordNet: WordNet, bindings: Bindings, context: Context) = expr argument match {
-    case expr: EvaluableExpr =>
-      expr.evaluate(functions, wordNet, bindings, context)
-    case expr =>
-      throw new RuntimeException("An attempt to evaluate non evaluable expression " + expr)
-  }
-
-  def selected(functions: FunctionSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
-    expr match {
-      case SkipExpr(cexpr@ContextByRelationalExprReq(_)) =>
-        List.fill(cexpr.stepCount(wordNet, bindings, context))(false)
-      case SelectExpr(cexpr@ContextByRelationalExprReq(_)) =>
-        List.fill(cexpr.stepCount(wordNet, bindings, context))(true)
-      case _ =>
-        List(expr.selected)
-    }
-  }
-}
-
-case class StepExpr(lexpr: SelectableExpr, rexpr: TransformationDesc) extends SelectableExpr {
-  def selected(functions: FunctionSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
-    rexpr match {
-      case RelationTransformationDesc(_, expr, _) =>
-        val lresult = lexpr.evaluate(functions, wordNet, bindings, context)
-        val rexpr = expr.argument.asInstanceOf[RelationalExpr]
-
-        lexpr.selected(functions, wordNet, bindings, context) ++ List(expr.selected)
-      case FilterTransformationDesc(expr) =>
-        val cond = expr.argument.asInstanceOf[ConditionalExpr]
-        val lresult = lexpr.evaluate(functions, wordNet, bindings, context)
-
-        lexpr.selected(functions, wordNet, bindings, context) ++ List(expr.selected)
-    }
-  }
-
+case class StepExpr(lexpr: EvaluableExpr, rexpr: TransformationDesc) extends EvaluableExpr {
   def evaluate(functions: FunctionSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
     rexpr match {
-      case RelationTransformationDesc(pos, expr, quantifier) =>
-        val lresult = lexpr.evaluate(functions, wordNet, bindings, context)
-        val rexpr = expr.argument.asInstanceOf[RelationalExpr]
-
-        quantifier match {
-          case QuantifierLit(1, Some(1)) =>
-            rexpr.transform(wordNet, bindings, context, lresult, pos, false, false)
-          case QuantifierLit(1, None) =>
-            val head = rexpr.transform(wordNet, bindings, context, lresult, pos, false, true)
-            val content = new ListBuffer[List[Any]]
-
-            for (tuple <- head.content) {
-              content.append(tuple)
-              val prefix = tuple.slice(0, tuple.size - 1) // remove prefix variable put tuple to outer closure
-
-              for (cnode <- outerclosure(wordNet, bindings, context, rexpr, false, List(tuple.last), Set(tuple.last))) {
-                content.append(prefix ++ List(cnode))
-              }
-            }
-
-            DataSet(head.types, content.toList)
-          case _ =>
-            throw new IllegalArgumentException("Unsupported quantifier value " + quantifier)
-        }
-
-      case FilterTransformationDesc(expr) =>
-        val cond = expr.argument.asInstanceOf[ConditionalExpr]
+      case RelationTransformationDesc(pos, rexpr) =>
         val lresult = lexpr.evaluate(functions, wordNet, bindings, context)
 
-        DataSet(
-          lresult.types ++ List(lresult.types.last),
-          lresult.content
-          .filter(tuple => cond.satisfied(functions, wordNet, bindings, Context(lresult.types, tuple)))
-          .map(x => x ::: List(x.last)))
+        rexpr.transform(wordNet, bindings, context, lresult, pos, false, false)
+      case FilterTransformationDesc(cond) =>
+        val lresult = lexpr.evaluate(functions, wordNet, bindings, context)
+
+        DataSet(lresult.types,
+          lresult.content.filter(tuple => cond.satisfied(functions, wordNet, bindings, Context(lresult.types, tuple))))
     }
   }
 
@@ -460,39 +379,12 @@ case class StepExpr(lexpr: SelectableExpr, rexpr: TransformationDesc) extends Se
 
 sealed abstract class TransformationDesc extends Expr
 
-case class RelationTransformationDesc(pos: Int, expr: SelectorExpr, quant: QuantifierLit) extends TransformationDesc
-case class FilterTransformationDesc(expr: SelectorExpr) extends TransformationDesc
+case class RelationTransformationDesc(pos: Int, expr: RelationalExpr) extends TransformationDesc
+case class FilterTransformationDesc(expr: ConditionalExpr) extends TransformationDesc
 
-case class PathExpr(expr: SelectableExpr) extends EvaluableExpr {
-  def evaluate(functions: FunctionSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
-    var selected = expr.selected(functions, wordNet, bindings, context)
-
-    if (selected.forall(_ == false)) {
-      selected = List.fill(selected.size - 1)(false) ++ List(true)
-    }
-
-    val eresult = expr.evaluate(functions, wordNet, bindings, context)
-    val rtypes = eresult.types.zipWithIndex.filter { case (x, i) => selected(i) }.map { case (x, i) => x }
-
-    val rbuffer = new ListBuffer[List[Any]]
-
-    for (tuple <- eresult.content) {
-      val tbuffer = new ListBuffer[Any]
-
-      for (i <- (0 until tuple.size)) {
-        if (selected(i))
-          tuple(i) match {
-            case list: List[_] =>
-              tbuffer appendAll list
-            case obj =>
-              tbuffer append obj
-          }
-      }
-
-      rbuffer append tbuffer.toList
-    }
-
-    DataSet(rtypes, rbuffer.toList)
+case class PathExpr(expr: EvaluableExpr) extends EvaluableExpr {
+  def evaluate(functions: FunctionSet, wordNet: WordNet, bindings: Bindings, context: Context) = { //TODO extend this method or remove this class
+    expr.evaluate(functions, wordNet, bindings, context)
   }
 }
 
@@ -623,35 +515,39 @@ case class QuantifiedRelationalExpr(expr: RelationalExpr, quantifier: Quantifier
 
         for (tuple <- head.content) {
           content.append(tuple)
-          val prefix = tuple.slice(0, tuple.size - 1)
+          val prefix = tuple.slice(0, tuple.size - 1) // remove prefix variable put tuple to outer closure
 
-          for (cnode <- closure(wordNet, bindings, context, expr, invert, tuple.last, Set(tuple.last))) {
+          for (cnode <- closure(wordNet, bindings, context, expr, false, List(tuple.last), Set(tuple.last))) {
             content.append(prefix ++ List(cnode))
           }
         }
-
+        
         DataSet(head.types, content.toList)
       case _ =>
         throw new IllegalArgumentException("Unsupported quantifier value " + quantifier)
     }
   }
-
+  
   private def closure(wordNet: WordNet, bindings: Bindings, context: Context, expr: RelationalExpr,
-    inverted: Boolean, source: Any, forbidden: Set[Any]): List[Any] = {
-    val transformed = expr.transform(wordNet, bindings, context, DataSet.fromValue(source), 1, inverted, true)
-    val filtered = transformed.content.filter { x => !forbidden.contains(x.last) }.map { x => x.last }
+    inverted: Boolean, source: List[Any], forbidden: Set[Any]): List[List[Any]] = {
+    val transformed = expr.transform(wordNet, bindings, context, DataSet.fromTuple(source), 1, inverted, true)
+    val filtered = transformed.content.filter { x => !forbidden.contains(x.last) }
 
     if (filtered.isEmpty) {
       filtered
     } else {
-      val result = new ListBuffer[Any]
-      val newForbidden: Set[Any] = forbidden.++[Any, Set[Any]](filtered) //TODO ugly
+      val result = new ListBuffer[List[Any]]
+      val newForbidden: Set[Any] = forbidden.++[Any, Set[Any]](filtered.map { x => x.last }) // TODO ugly
 
       result.appendAll(filtered)
-      filtered.foreach { x => result.appendAll(closure(wordNet, bindings, context, expr, inverted, x, newForbidden)) }
+
+      filtered.foreach { x =>
+        result.appendAll(closure(wordNet, bindings, context, expr, inverted, x, newForbidden))
+      }
+
       result.toList
     }
-  }
+  }  
 
   def stepCount(wordNet: WordNet, bindings: Bindings, context: Context, data: DataSet, pos: Int, invert: Boolean, force: Boolean) = {
     expr.stepCount(wordNet, bindings, context, data, pos, invert, force)
@@ -711,9 +607,11 @@ case class NotExpr(expr: ConditionalExpr) extends ConditionalExpr {
 }
 
 case class ComparisonExpr(op: String, lexpr: EvaluableExpr, rexpr: EvaluableExpr) extends ConditionalExpr {
+  private def getFringe(dataSet: DataSet) = (dataSet.types.last, dataSet.content.map(tuple => tuple.last))
+
   def satisfied(functions: FunctionSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
-    val lresult = lexpr.evaluate(functions, wordNet, bindings, context)
-    val rresult = rexpr.evaluate(functions, wordNet, bindings, context)
+    val lresult = getFringe(lexpr.evaluate(functions, wordNet, bindings, context))
+    val rresult = getFringe(rexpr.evaluate(functions, wordNet, bindings, context))
 
     op match {
       case "=" =>
@@ -721,19 +619,19 @@ case class ComparisonExpr(op: String, lexpr: EvaluableExpr, rexpr: EvaluableExpr
       case "!=" =>
         lresult != rresult
       case "in" =>
-        lresult.types == rresult.types && lresult.content.forall(rresult.content.contains)
+        lresult._1 == rresult._1 && lresult._2.forall(rresult._2.contains)
       case "pin" =>
-        lresult.types == rresult.types &&
-          lresult.content.forall(rresult.content.contains) &&
-          lresult.content.size < rresult.content.size
+        lresult._1 == rresult._1 &&
+          lresult._2.forall(rresult._2.contains) &&
+          lresult._2.size < rresult._2.size
       case "=~" =>
-        if (rresult.content.size == 1) {
+        if (rresult._2.size == 1) {
           // element context
-          if (rresult.types.size == 1 && rresult.types.head == StringType) {
-            val regex = rresult.content.head.head.asInstanceOf[String].r
+          if (rresult._1 == StringType) {
+            val regex = rresult._2.head.asInstanceOf[String].r
 
-            lresult.content.forall {
-              case List(elem: String) =>
+            lresult._2.forall {
+              case elem: String =>
                 regex findFirstIn (elem) match {
                   case Some(_) =>
                     true
@@ -747,34 +645,34 @@ case class ComparisonExpr(op: String, lexpr: EvaluableExpr, rexpr: EvaluableExpr
             throw new WQueryEvaluationException("The right side of '" + op +
               "' should return exactly one character string value")
           }
-        } else if (rresult.content.size == 0) {
+        } else if (rresult._2.size == 0) {
           throw new WQueryEvaluationException("The right side of '" + op + "' returns no values")
         } else { // rresult.content.size > 0
           throw new WQueryEvaluationException("The right side of '" + op + "' returns more than one values")
         }
       case _ =>
-        if (lresult.content.size == 1 && rresult.content.size == 1) {
+        if (lresult._2.size == 1 && rresult._2.size == 1) {
           // element context
           op match {
             case "<=" =>
-              WQueryFunctions.compare(lresult.content, rresult.content) <= 0
+              WQueryFunctions.compare(lresult._2, rresult._2) <= 0
             case "<" =>
-              WQueryFunctions.compare(lresult.content, rresult.content) < 0
+              WQueryFunctions.compare(lresult._2, rresult._2) < 0
             case ">=" =>
-              WQueryFunctions.compare(lresult.content, rresult.content) >= 0
+              WQueryFunctions.compare(lresult._2, rresult._2) >= 0
             case ">" =>
-              WQueryFunctions.compare(lresult.content, rresult.content) > 0
+              WQueryFunctions.compare(lresult._2, rresult._2) > 0
             case _ =>
               throw new IllegalArgumentException("Unknown comparison operator '" + op + "'")
           }
         } else {
-          if (lresult.content.size == 0)
+          if (lresult._2.size == 0)
             throw new WQueryEvaluationException("The left side of '" + op + "' returns no values")
-          if (lresult.content.size > 1)
+          if (lresult._2.size > 1)
             throw new WQueryEvaluationException("The left side of '" + op + "' returns more than one value")
-          if (rresult.content.size == 0)
+          if (rresult._2.size == 0)
             throw new WQueryEvaluationException("The right side of '" + op + "' returns no values")
-          if (rresult.content.size > 1)
+          if (rresult._2.size > 1)
             throw new WQueryEvaluationException("The right side of '" + op + "' returns more than one values")
 
           // the following shall not happen

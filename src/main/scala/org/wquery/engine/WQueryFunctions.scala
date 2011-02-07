@@ -8,6 +8,7 @@ import org.wquery.model.{ValueType, TupleType, IntegerType, FloatType, StringTyp
 object WQueryFunctions {
   val Sort = "sort"
   val Count = "count"
+  val Last = "last"
   val Sum = "sum"
   val Avg = "avg"
   val Min = "min"  
@@ -30,6 +31,7 @@ object WQueryFunctions {
     wquery.registerAggregateFunction(Sort, List(TupleType), TupleType, getClass, Sort)      
     wquery.registerAggregateFunction(Distinct, List(TupleType), TupleType, getClass, Distinct)      
     wquery.registerAggregateFunction(Count, List(TupleType), TupleType, getClass, Count)
+    wquery.registerAggregateFunction(Last, List(TupleType), TupleType, getClass, Last)    
     wquery.registerAggregateFunction(Sum, List(ValueType(IntegerType)), ValueType(IntegerType), getClass, "sumInt")      
     wquery.registerAggregateFunction(Sum, List(ValueType(FloatType)), ValueType(FloatType), getClass, "sumFloat")
     wquery.registerAggregateFunction(Avg, List(ValueType(IntegerType)), ValueType(FloatType), getClass, Avg)      
@@ -55,7 +57,9 @@ object WQueryFunctions {
   
   def sort(result: DataSet) = DataSet(result.types, result.content.sortWith((x, y) => compare(x, y) < 0))
 
-  def count(result: DataSet) = DataSet.fromValue(result.content.size)  
+  def count(result: DataSet) = DataSet.fromValue(result.content.size)
+  
+  def last(result: DataSet) = DataSet(List(result.types.last), result.content.map(x => List(x.last)))
 
   def min(result: DataSet) = {
     val sresult = sort(result)
