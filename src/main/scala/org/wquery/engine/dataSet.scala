@@ -2,104 +2,91 @@ package org.wquery.engine
 import org.wquery.model._
 import scala.collection.mutable.ListBuffer
 
-class DataSet(t: List[DataType], c: List[List[Any]]) {
-  val types = t
-  val content = c    
-  
-  def isTrue = {    
+class DataSet(val content: List[List[Any]]) {
+  val minPathSize = {// TODO optimize these two
+      val sizes = content.map(x => x.size)
+      if (sizes.size > 0) sizes.min else 0
+  }
+
+  val maxPathSize = {// TODO optimize these two
+      val sizes = content.map(x => x.size)
+      if (sizes.size > 0) sizes.max else 0
+  }
+        
+  val pathCount = content.size
+  val isEmpty = pathCount == 0
+
+  def isTrue = {
     if (content.isEmpty) {
-        false
+      false
     } else {
-      if (types.size == 1) {
-        if (types.head == BooleanType) 
-          content.forall(x => x.head.asInstanceOf[Boolean])
-        else 
-          true         
-      } else { 
-        types.size > 1
+      if (maxPathSize == 1) {
+        val booleans = content.map { x => 
+          if (x.head.isInstanceOf[Boolean]) 
+            x.head.asInstanceOf[Boolean] 
+          else 
+            true
+        }
+
+        booleans.forall(x => x)
+      } else {
+        maxPathSize > 1
       }
-    }       
+    }
+  }
+  
+  def getType(pos: Int): DataType = { // TODO optimize
+    val dataTypes: List[BasicDataType] = content.map { tuple =>
+      DataType(tuple(tuple.size - 1 - pos))        
+    }.distinct
+    
+    if (dataTypes.size == 1) {
+      dataTypes(0)
+    } else {
+      UnionType(dataTypes.toSet)
+    }
+  }
+
+  def isNumeric(pos: Int) = {
+    val dataType = getType(pos)
+    dataType == IntegerType || dataType == FloatType || dataType == UnionType(Set(IntegerType, FloatType))
   }
   
   override def equals(obj: Any) = {
     obj match {
-      case result: DataSet => types == result.types && content == result.content
+      case result: DataSet => content == result.content
       case _ => false
     }
-  }  
+  }
 }
 
 object DataSet {
-  val empty = new DataSet(Nil, Nil) 
-  
-  def apply(types: List[DataType], content: List[List[Any]]) = new DataSet(types, content)
+  val empty = new DataSet(Nil)
 
-  def fromList(vtype: DataType, vlist: List[Any]) = new DataSet(List(vtype), vlist.map(x => List(x)))  
-  
-  def fromTuple(tuple: List[Any]) = new DataSet(tuple.map{x => DataType(x)}, List(tuple))
-  
-  def fromValue(value: Any) = new DataSet(List(DataType(value)), List(List(value)))
-  
-  def fromOptionalValue(option: Option[Any], dtype: DataType) = option match {    
-    case Some(value) => 
+  def apply(content: List[List[Any]]) = new DataSet(content)
+
+  def fromList(vlist: List[Any]) = new DataSet(vlist.map(x => List(x)))
+
+  def fromTuple(tuple: List[Any]) = new DataSet(List(tuple))
+
+  def fromValue(value: Any) = new DataSet(List(List(value)))
+
+  def fromOptionalValue(option: Option[Any]) = option match {
+    case Some(value) =>
       fromValue(value)
-    case None => 
-      new DataSet(List(dtype), Nil)    
-  }  
+    case None =>
+      empty
+  }
 }
 
 class DataSetBuffer { 
   val buffer = new ListBuffer[List[Any]]
   var types = List[DataType]()  
   
-  def append(result: DataSet) {
-    if (types.size >= result.types.size)
-      types = unifyTypes(types, result.types)
-    else
-      types = unifyTypes(result.types, types)
-    
+  def append(result: DataSet) {    
     buffer.appendAll(result.content)
   }
   
-  def toDataSet = DataSet(types, buffer.toList)  
-  
-  private def unifyTypes(left: List[DataType], right: List[DataType]) = {
-    val tbuffer = new ListBuffer[DataType]
-    
-    for (i <- 0 until right.size) {
-      if(left(i) == right(i)) {
-        tbuffer.append(left(i))
-      } else {
-        left(i) match {
-          case UnionType(ltypes) => {
-            right(i) match {
-              case UnionType(rtypes) => {
-                tbuffer.append(UnionType(ltypes ++ rtypes))
-              }
-              case rtype: BasicDataType => {
-                tbuffer.append(UnionType(ltypes + rtype))
-              }
-            }            
-          } 
-          case ltype: BasicDataType => {
-            right(i) match {
-              case UnionType(rtypes) => {
-                tbuffer.append(UnionType(rtypes + ltype))
-              }
-              case rtype: BasicDataType => {
-                tbuffer.append(UnionType(Set(ltype, rtype)))                
-              }
-            }                        
-          }
-        }       
-      }
-    }
-    
-    for (i <- right.size until left.size) {
-      tbuffer.append(left(i))
-    }
-    
-    tbuffer.toList    
-  }
+  def toDataSet = DataSet(buffer.toList)    
 }
- 
+

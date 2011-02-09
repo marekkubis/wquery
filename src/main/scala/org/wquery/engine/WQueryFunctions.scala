@@ -53,22 +53,22 @@ object WQueryFunctions {
     wquery.registerScalarFunction(Upper, List(ValueType(StringType)), ValueType(StringType), getClass, Upper)      
   }                                                
   
-  def distinct(result: DataSet) = DataSet(result.types, result.content.distinct)
+  def distinct(result: DataSet) = DataSet(result.content.distinct)
   
-  def sort(result: DataSet) = DataSet(result.types, result.content.sortWith((x, y) => compare(x, y) < 0))
+  def sort(result: DataSet) = DataSet(result.content.sortWith((x, y) => compare(x, y) < 0))
 
   def count(result: DataSet) = DataSet.fromValue(result.content.size)
   
-  def last(result: DataSet) = DataSet(List(result.types.last), result.content.map(x => List(x.last)))
+  def last(result: DataSet) = DataSet(result.content.map(x => List(x.last)))
 
   def min(result: DataSet) = {
     val sresult = sort(result)
-    DataSet(sresult.types, List(sresult.content.head))    
+    DataSet(List(sresult.content.head))    
   }  
   
   def max(result: DataSet) = {
     val sresult = sort(result)
-    DataSet(sresult.types, List(sresult.content.last))    
+    DataSet(List(sresult.content.last))    
   }
     
   def sumInt(result: DataSet) = {
@@ -85,22 +85,33 @@ object WQueryFunctions {
     var sum: Double = 0
     
     for (tuple <- result.content) {
-        sum += tuple.head.asInstanceOf[Double]
+        tuple match {
+            case List(value:Double) =>
+                sum += value
+            case List(value:Int) =>
+                sum += value
+            case obj =>
+                throw new WQueryEvaluationException("An atempt to sum nonnumeric value " + obj)
+        }
     }
   
     DataSet.fromValue(sum)
   }  
   
-  def avg(result: DataSet) = {
-    if (result.types.head == IntegerType)
-      DataSet.fromValue(sumInt(result).content.head.head.asInstanceOf[Int].toDouble / result.content.size)
-    else if (result.types.head == FloatType)
-      DataSet.fromValue(sumFloat(result).content.head.head.asInstanceOf[Double] / result.content.size)
-    else 
-      throw new WQueryEvaluationException("Function 'avg' cannot compute average for type " + result.types.head)  
+  def avg(result: DataSet) = {      
+    if (result.minPathSize == 1 && result.maxPathSize == 1) {  
+        if (result.getType(0) == IntegerType)
+          DataSet.fromValue(sumInt(result).content.head.head.asInstanceOf[Int].toDouble / result.content.size)
+        else if (result.isNumeric(0))
+          DataSet.fromValue(sumFloat(result).content.head.head.asInstanceOf[Double] / result.content.size)      
+        else 
+          throw new WQueryEvaluationException("Function 'avg' can compute average for numeric types only")
+    } else {
+      throw new WQueryEvaluationException("Function 'avg' requires single element tuples")        
+    }
   }
   
-  def size(result: DataSet) = DataSet(List(IntegerType), result.content.map{x => List(x.size)})  
+  def size(result: DataSet) = DataSet(result.content.map{x => List(x.size)})  
   
   def length(word: String) = word.length
   

@@ -16,7 +16,7 @@ class PlainTreeWQueryEmitter extends PlainWQueryEmitter {
     
     if (!content.isEmpty) {
       val builder = new StringBuilder
-      var prevTuple: List[Any] = (1 to dataSet.types.size).toList.map(x => null) 
+      var prevTuple: List[Any] = Nil
       var element: Any = null
       var i = 0
 

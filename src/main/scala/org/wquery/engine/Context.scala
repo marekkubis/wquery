@@ -1,17 +1,14 @@
 package org.wquery.engine
 import org.wquery.model.DataType
 
-class Context(t: List[DataType], v: List[Any]) {
-  val types = t
-  val values = v  
+class Context(val values: List[Any]) {    
+  def size = values.size
   
-  def size = t.size
-  
-  def isEmpty = t.isEmpty
+  def isEmpty = values.isEmpty
 }
 
 object Context {
-  val empty = new Context(Nil, Nil)  
+  val empty = new Context(Nil)  
   
-  def apply(types: List[DataType], values: List[Any]) = new Context(types, values)
+  def apply(values: List[Any]) = new Context(values)
 }
