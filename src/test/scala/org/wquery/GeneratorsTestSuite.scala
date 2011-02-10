@@ -52,9 +52,9 @@ class GeneratorsTestSuite extends WQueryTestSuite {
 
   @Test def testFilter() = result of ("[1 = 1]") should equal ("true\n")    
     
-  @Test def testParensPair() = result of ("(person.senses).word") should equal ("person person:1:n person\nperson person:2:n person\nperson person:3:n person\n")
+  @Test def testParensPair() = result of ("(person.senses).word") should equal ("person senses person:1:n word person\nperson senses person:2:n word person\nperson senses person:3:n word person\n")
 
-  @Test def testTwoParensPairs() = result of ("((person).senses).word") should equal ("person person:1:n person\nperson person:2:n person\nperson person:3:n person\n")
+  @Test def testTwoParensPairs() = result of ("((person).senses).word") should equal ("person senses person:1:n word person\nperson senses person:2:n word person\nperson senses person:3:n word person\n")
     
   @Test def testRsonEnding() = result of ("\"rson$\"") should equal ("person\n")
    

@@ -113,7 +113,7 @@ class FiltersTestSuite extends WQueryTestSuite {
     
   @Test def testTwoSingleBackReferences() = result of ("last({person}.senses[# != person:2:n].word[# != mortal])") should equal ("individual\nperson\nsomebody\nsomeone\nsoul\n")    
     
-  @Test def testSingleAndDoubleBackReference() = result of ("last({person}.senses.word[## != individual:1:n and # != mortal])") should equal ("person\nsomebody\nsomeone\nsoul\n")
+  @Test def testSingleAndTripleBackReference() = result of ("last({person}.senses.word[### != individual:1:n and # != mortal])") should equal ("person\nsomebody\nsomeone\nsoul\n")
 
   @Test def testSingleBackReferenceDotHypernyms() = result of ("{person}[{organism:1:n} in #.hypernym]") should equal ("{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n }\n")
     

@@ -1,6 +1,6 @@
 package org.wquery.engine
 import org.wquery.{WQueryEvaluationException, WQuery}
-import org.wquery.model.{ValueType, TupleType, IntegerType, FloatType, StringType, Synset, Sense}
+import org.wquery.model.{ValueType, TupleType, IntegerType, FloatType, StringType, Synset, Sense, Arc}
 
 /**
  * WQuery built-in functions
@@ -26,6 +26,7 @@ object WQueryFunctions {
   val Replace = "replace"
   val Lower = "lower"
   val Upper = "upper"
+  val StringLength = "string_length"
     
   def registerFunctionsIn(wquery: WQuery) {
     wquery.registerAggregateFunction(Sort, List(TupleType), TupleType, getClass, Sort)      
@@ -38,14 +39,15 @@ object WQueryFunctions {
     wquery.registerAggregateFunction(Avg, List(ValueType(FloatType)), ValueType(FloatType), getClass, Avg)
     wquery.registerAggregateFunction(Min, List(TupleType), TupleType, getClass, Min)
     wquery.registerAggregateFunction(Max, List(TupleType), TupleType, getClass, Max)
-    wquery.registerAggregateFunction(Size, List(TupleType), TupleType, getClass, Size)    
+    wquery.registerAggregateFunction(Size, List(TupleType), TupleType, getClass, Size) 
+    wquery.registerAggregateFunction(Length, List(TupleType), TupleType, getClass, Length)    
     wquery.registerScalarFunction(Abs, List(ValueType(IntegerType)), ValueType(IntegerType), classOf[Math], Abs)
     wquery.registerScalarFunction(Abs, List(ValueType(FloatType)), ValueType(FloatType), classOf[Math], Abs)
     wquery.registerScalarFunction(Ceil, List(ValueType(FloatType)), ValueType(FloatType), classOf[Math], Ceil)      
     wquery.registerScalarFunction(Floor, List(ValueType(FloatType)), ValueType(FloatType), classOf[Math], Floor)
     wquery.registerScalarFunction(Log, List(ValueType(FloatType)), ValueType(FloatType), classOf[Math], Log)
     wquery.registerScalarFunction(Power, List(ValueType(FloatType), ValueType(FloatType)), ValueType(FloatType), classOf[Math], "pow")
-    wquery.registerScalarFunction(Length, List(ValueType(StringType)), ValueType(IntegerType), getClass, Length)
+    wquery.registerScalarFunction(StringLength, List(ValueType(StringType)), ValueType(IntegerType), getClass, StringLength)    
     wquery.registerScalarFunction(Substring, List(ValueType(StringType), ValueType(IntegerType)), ValueType(StringType), getClass, Substring)
     wquery.registerScalarFunction(Substring, List(ValueType(StringType), ValueType(IntegerType), ValueType(IntegerType)), ValueType(StringType), getClass, Substring)
     wquery.registerScalarFunction(Replace, List(ValueType(StringType), ValueType(StringType), ValueType(StringType)), ValueType(StringType), getClass, Replace)
@@ -111,9 +113,11 @@ object WQueryFunctions {
     }
   }
   
-  def size(result: DataSet) = DataSet(result.content.map{x => List(x.size)})  
+  def size(result: DataSet) = DataSet(result.content.map(path => path.filter(step => !step.isInstanceOf[Arc])).map(path => List(path.size)))  
+
+  def length(result: DataSet) = DataSet(result.content.map{path => List(path.size)})  
   
-  def length(word: String) = word.length
+  def string_length(word: String) = word.size  
   
   def substring(word: String, index: Int) = if (index < word.length) word.substring(index) else ""
 
@@ -151,8 +155,15 @@ object WQueryFunctions {
         left compare right      
       case (left: Double, right: Double) =>
         left compare right      
-      case (left: Boolean, right: Boolean) =>
+      case (left: Boolean, right: Boolean) =>        
         left compare right      
+      case (left: Arc, right: Arc) =>
+        if (left.relation.name != right.relation.name)
+            left.relation.name compare right.relation.name
+        else if (left.from != right.from)
+            left.from compare right.from
+        else
+            left.to compare right.to        
       case (left: List[_], right: List[_]) =>      
         if (left.isEmpty) {
           if (right.isEmpty) 0 else -1

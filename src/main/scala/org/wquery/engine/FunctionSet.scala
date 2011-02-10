@@ -1,7 +1,7 @@
 package org.wquery.engine
 import java.lang.reflect.Method
 import org.wquery.WQueryModelException
-import org.wquery.model.{TupleType, BooleanType, FloatType, IntegerType, StringType, SenseType, Sense, SynsetType, Synset, ValueType, AggregateFunction, ScalarFunction, Function, FunctionArgumentType}
+import org.wquery.model.{TupleType, BooleanType, FloatType, IntegerType, StringType, SenseType, Sense, SynsetType, Synset, ValueType, AggregateFunction, ScalarFunction, Function, FunctionArgumentType, ArcType, Arc}
 import scala.collection.mutable.Map
 
 class FunctionSet {
@@ -26,7 +26,9 @@ class FunctionSet {
           case ValueType(FloatType) =>
             classOf[Double]       
           case ValueType(BooleanType) =>
-            classOf[Boolean]        
+            classOf[Boolean]
+          case ValueType(ArcType) =>
+            classOf[Arc]                 
           case TupleType => 
             throw new IllegalArgumentException("ScalarFunction '" + 
                                                  name + "' must not take TupleType as an argument")

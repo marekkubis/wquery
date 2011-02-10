@@ -36,7 +36,7 @@ class DataSet(val content: List[List[Any]]) {
   }
   
   def getType(pos: Int): DataType = { // TODO optimize
-    val dataTypes: List[BasicDataType] = content.map { tuple =>
+    val dataTypes: List[BasicType] = content.map { tuple =>
       DataType(tuple(tuple.size - 1 - pos))        
     }.distinct
     

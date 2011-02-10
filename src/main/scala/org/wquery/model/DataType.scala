@@ -2,16 +2,20 @@ package org.wquery.model
 
 sealed abstract class DataType
 
-sealed abstract class BasicDataType extends DataType
+sealed abstract class BasicType extends DataType
 
-case object SynsetType extends BasicDataType
-case object SenseType extends BasicDataType
-case object StringType extends BasicDataType
-case object IntegerType extends BasicDataType
-case object FloatType extends BasicDataType
-case object BooleanType extends BasicDataType
+case object ArcType extends BasicType
 
-case class UnionType(types: Set[BasicDataType]) extends DataType
+sealed abstract class NodeType extends BasicType
+
+case object SynsetType extends NodeType
+case object SenseType extends NodeType
+case object StringType extends NodeType
+case object IntegerType extends NodeType
+case object FloatType extends NodeType
+case object BooleanType extends NodeType
+
+case class UnionType(types: Set[BasicType]) extends DataType
 
 object DataType {
   def apply(value: Any) = value match {        
@@ -27,6 +31,8 @@ object DataType {
       FloatType
     case _:Boolean =>
       BooleanType
+    case _:Arc =>
+      ArcType
     case obj =>
       throw new IllegalArgumentException("Object " + obj + " has no data type bound")
   }     

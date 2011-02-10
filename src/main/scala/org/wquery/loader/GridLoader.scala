@@ -1,7 +1,7 @@
 package org.wquery.loader
 import javax.xml.parsers.{SAXParserFactory, SAXParser}
 import java.io.File
-import org.wquery.model.{WordNet, Synset, Sense, Relation, SynsetType, BasicDataType, BooleanType, IntegerType, FloatType, StringType, SenseType, UnionType, DataType}
+import org.wquery.model.{WordNet, Synset, Sense, Relation, SynsetType, BooleanType, IntegerType, FloatType, StringType, SenseType, UnionType, NodeType}
 import org.wquery.model.impl.InMemoryWordNetImplBuilder
 import org.wquery.utils.Logging
 import org.xml.sax.{Locator, Attributes}
@@ -208,7 +208,7 @@ class GridHandler(builder: InMemoryWordNetImplBuilder) extends DefaultHandler wi
   
   private def createGenericRelations {    
     // create relations datatypes
-    val genericRelationsDestTypes = Map[String, BasicDataType]()    
+    val genericRelationsDestTypes = Map[String, NodeType]()    
     
     for ((synset, relname, reldest) <- genericRelationsTuples) {
       val dtype = getType(builder, reldest)
@@ -280,15 +280,13 @@ class GridHandler(builder: InMemoryWordNetImplBuilder) extends DefaultHandler wi
     }
   }
   
-  private def rankType(dtype: DataType) = dtype match {
+  private def rankType(dtype: NodeType) = dtype match {
     case SynsetType => 0
     case SenseType => 1
     case BooleanType => 2
     case IntegerType => 3
     case FloatType => 4
-    case StringType => 5
-    case UnionType(_) =>
-      throw new IllegalArgumentException("Unable to rank UnionType")  
+    case StringType => 5  
   } 
   
   private def warnInvalidSubtag(tag: String, content: String, attr: String) 

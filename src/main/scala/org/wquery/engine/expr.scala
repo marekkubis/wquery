@@ -1,6 +1,6 @@
 package org.wquery.engine
 import org.wquery.WQueryEvaluationException
-import org.wquery.model.{WordNet, IntegerType, Relation, DataType, StringType, SenseType, Sense, BasicDataType, UnionType, ValueType, TupleType, AggregateFunction, ScalarFunction, FloatType, FunctionArgumentType}
+import org.wquery.model.{WordNet, IntegerType, Relation, DataType, StringType, SenseType, Sense, BasicType, UnionType, ValueType, TupleType, AggregateFunction, ScalarFunction, FloatType, FunctionArgumentType, Arc}
 import scala.collection.mutable.ListBuffer
 
 sealed abstract class Expr
@@ -269,45 +269,49 @@ case class MinusExpr(expr: EvaluableExpr) extends EvaluableExpr {
  */
 case class FunctionExpr(name: String, args: EvaluableExpr) extends EvaluableExpr {
   def evaluate(functions: FunctionSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
-    val aresult = args.evaluate(functions, wordNet, bindings, context)
+    val avalues = args.evaluate(functions, wordNet, bindings, context)
     
-    val atypes: List[FunctionArgumentType] = if (aresult.minPathSize  != aresult.maxPathSize ) {
+    val atypes: List[FunctionArgumentType] = if (avalues.minPathSize  != avalues.maxPathSize ) {
       List(TupleType)
     } else {
-      ((aresult.maxPathSize - 1) to 0 by -1).map(x => aresult.getType(x)).toList.map {
+      ((avalues.maxPathSize - 1) to 0 by -1).map(x => avalues.getType(x)).toList.map {
           case UnionType(utypes) =>
             if (utypes == Set(FloatType, IntegerType)) ValueType(FloatType) else TupleType
-          case t: BasicDataType =>
+          case t: BasicType =>
             ValueType(t)
       }
     }
 
-    val (func, method) = functions.getFunction(name, atypes) match {
-      case Some(f) => f
+    functions.getFunction(name, atypes) match {
+      case Some(func) =>
+        invokeFunction(func, atypes, avalues)
       case None =>
         // promote arg types from integers to floats
         functions.getFunction(
           name,
           atypes.map {
-            case ValueType(IntegerType) =>
-              ValueType(FloatType)
+            case ValueType(IntegerType) => ValueType(FloatType)
             case t => t
           }) match {
-          case Some(f) => f
+          case Some(func) => 
+            invokeFunction(func, atypes, avalues)
           case None =>
-            functions.demandFunction(name, List(TupleType))
+            // omit arc data
+            invokeFunction(functions.demandFunction(name, List(TupleType)), atypes, avalues)
         }
     }
-
-    func match {
-      case func: AggregateFunction =>
-        method.invoke(WQueryFunctions, aresult).asInstanceOf[DataSet]
-      case func: ScalarFunction =>
+  }
+  
+  private def invokeFunction(fdesc: (org.wquery.model.Function, java.lang.reflect.Method), atypes: List[FunctionArgumentType], avalues: DataSet) = {
+    fdesc match {
+      case (func: AggregateFunction, method) =>
+        method.invoke(WQueryFunctions, avalues).asInstanceOf[DataSet]
+      case (func: ScalarFunction, method) =>
         val buffer = new ListBuffer[List[Any]]()
         val margs = new Array[AnyRef](atypes.size)
         var stop = false
 
-        for (tuple <- aresult.content) {
+        for (tuple <- avalues.content) {
           for (i <- 0 until margs.size)
             margs(i) = tuple(i).asInstanceOf[AnyRef]
 
@@ -320,7 +324,7 @@ case class FunctionExpr(name: String, args: EvaluableExpr) extends EvaluableExpr
           case TupleType =>
             throw new RuntimeException("ScalarFunction '" + func.name + "' returned TupleType")
         }
-    }
+    }      
   }
 }
 
@@ -434,13 +438,14 @@ case class UnaryRelationalExpr(identifier: IdentifierLit) extends RelationalExpr
   }
 
   private def useIdentifierAsTransformation(id: String, wordNet: WordNet, data: DataSet, pos: Int, invert: Boolean) = {
-    val succfunc = if (invert) wordNet.getPredecessors(_, _, _) else wordNet.getSuccessors(_, _, _)
+    val buffer = new ListBuffer[List[Any]]            
+    val succfunc = if (invert) wordNet.getPredecessors(_, _, _) else wordNet.getSuccessors(_, _, _)      
     val relation = wordNet.demandRelation(id, data.getType(pos - 1))
-    val buffer = new ListBuffer[List[Any]]
+    val arc = if (invert) Arc.inverse(relation) else Arc(relation)
 
     for (tuple <- data.content) {
       for (succ <- succfunc(tuple(tuple.size - pos), relation, Relation.Destination)) {
-        buffer.append(tuple ::: List(succ))
+        buffer.append(tuple ::: List(arc, succ))        
       }
     }
 
