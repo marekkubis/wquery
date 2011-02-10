@@ -296,7 +296,6 @@ case class FunctionExpr(name: String, args: EvaluableExpr) extends EvaluableExpr
           case Some(func) => 
             invokeFunction(func, atypes, avalues)
           case None =>
-            // omit arc data
             invokeFunction(functions.demandFunction(name, List(TupleType)), atypes, avalues)
         }
     }

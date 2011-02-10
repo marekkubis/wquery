@@ -114,18 +114,16 @@ trait WQueryParsers extends RegexParsers {
     = chainl1(quant_rel_expr, 
                "|" ^^ { x => ((l:RelationalExpr, r:RelationalExpr) => UnionRelationalExpr(l, r)) })
         
-  def quant_rel_expr = inv_rel_expr ~ quantifierLit ^^ { case iexpr~quant => QuantifiedRelationalExpr(iexpr, quant) }
-  
-  def inv_rel_expr = opt("^") ~ unary_rel_expr ^^ {
-    case Some(_)~uexpr =>
-      InvertedRelationalExpr(uexpr)
-    case None~uexpr =>
-      uexpr
-  }
-  
+  def quant_rel_expr = unary_rel_expr ~ quantifierLit ^^ { case iexpr~quant => QuantifiedRelationalExpr(iexpr, quant) }
+    
   def unary_rel_expr = (
       "(" ~> rel_expr <~ ")"
-      | idLit ^^ { x => UnaryRelationalExpr(x) }
+      | opt("^") ~ idLit ^^ {
+        case Some(_)~id =>
+          InvertedRelationalExpr(UnaryRelationalExpr(id))
+        case None~id =>
+          UnaryRelationalExpr(id)      
+      }
   )    
 
   def quantifierLit = (
