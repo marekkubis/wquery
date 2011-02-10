@@ -361,33 +361,9 @@ case class PathExpr(expr: EvaluableExpr) extends EvaluableExpr {
  */
 sealed abstract class RelationalExpr extends Expr {
   def transform(wordNet: WordNet, bindings: Bindings, context: Context, data: DataSet, pos: Int, invert: Boolean, force: Boolean): DataSet
-
-  def stepCount(wordNet: WordNet, bindings: Bindings, context: Context, data: DataSet, pos: Int, invert: Boolean, force: Boolean): Int
 }
 
 case class UnaryRelationalExpr(identifier: IdentifierLit) extends RelationalExpr {
-  def stepCount(wordNet: WordNet, bindings: Bindings, context: Context, data: DataSet, pos: Int, invert: Boolean, force: Boolean) = {
-    identifier match {
-      case QuotedIdentifierLit(_) =>
-        1
-      case NotQuotedIdentifierLit(id) =>
-        if (pos == 0) { // we are in a generator 
-          if (context.isEmpty) { // we are not in a filter
-            1
-          } else {
-            useIdentifierAsVariable(id, wordNet, bindings, context, data, pos, invert, force) match {
-              case Some(_) =>
-                2
-              case None =>
-                if (wordNet.containsRelation(id, data.getType(0))) 2 else 1
-            }
-          }
-        } else {
-          1
-        }
-    }
-  }
-
   def transform(wordNet: WordNet, bindings: Bindings, context: Context, data: DataSet, pos: Int, invert: Boolean, force: Boolean) = {
     if (force) {
       useIdentifierAsTransformation(identifier.value, wordNet, data, pos, invert)
@@ -517,19 +493,11 @@ case class QuantifiedRelationalExpr(expr: RelationalExpr, quantifier: Quantifier
       result.toList
     }
   }  
-
-  def stepCount(wordNet: WordNet, bindings: Bindings, context: Context, data: DataSet, pos: Int, invert: Boolean, force: Boolean) = {
-    expr.stepCount(wordNet, bindings, context, data, pos, invert, force)
-  }
 }
 
 case class InvertedRelationalExpr(expr: RelationalExpr) extends RelationalExpr {
   def transform(wordNet: WordNet, bindings: Bindings, context: Context, data: DataSet, pos: Int, invert: Boolean, force: Boolean) = {
     expr.transform(wordNet, bindings, context, data, pos, !invert, force)
-  }
-
-  def stepCount(wordNet: WordNet, bindings: Bindings, context: Context, data: DataSet, pos: Int, invert: Boolean, force: Boolean) = {
-    expr.stepCount(wordNet, bindings, context, data, pos, !invert, force)
   }
 }
 
@@ -539,16 +507,6 @@ case class UnionRelationalExpr(lexpr: RelationalExpr, rexpr: RelationalExpr) ext
     val rresult = rexpr.transform(wordNet, bindings, context, data, pos, invert, force)
 
     DataSet(lresult.content union rresult.content)
-  }
-
-  def stepCount(wordNet: WordNet, bindings: Bindings, context: Context, data: DataSet, pos: Int, invert: Boolean, force: Boolean) = {
-    val lcount = lexpr.stepCount(wordNet, bindings, context, data, pos, invert, force)
-    val rcount = rexpr.stepCount(wordNet, bindings, context, data, pos, invert, force)
-
-    if (lcount == rcount)
-      lcount
-    else
-      throw new WQueryEvaluationException("'union' requires proper relation names on both sides")
   }
 }
 
@@ -733,36 +691,35 @@ case class BooleanByFilterReq(cond: ConditionalExpr) extends ContextFreeExpr {
 /*
  * Literals
  */
-case class DoubleQuotedLit(v: String) extends SelfEvaluableExpr {
-  def evaluate = DataSet.fromValue(v)
+case class DoubleQuotedLit(value: String) extends SelfEvaluableExpr {
+  def evaluate = DataSet.fromValue(value)
 }
 
-case class StringLit(v: String) extends SelfEvaluableExpr {
-  def evaluate = DataSet.fromValue(v)
+case class StringLit(value: String) extends SelfEvaluableExpr {
+  def evaluate = DataSet.fromValue(value)
 }
 
-case class IntegerLit(v: Int) extends SelfEvaluableExpr {
-  def evaluate = DataSet.fromValue(v)
+case class IntegerLit(value: Int) extends SelfEvaluableExpr {
+  def evaluate = DataSet.fromValue(value)
 }
 
-case class SequenceLit(l: Int, r: Int) extends SelfEvaluableExpr {
-  def evaluate = DataSet.fromList((l to r).toList)
+case class SequenceLit(left: Int, right: Int) extends SelfEvaluableExpr {
+  def evaluate = DataSet.fromList((left to right).toList)
 }
 
-case class FloatLit(v: Double) extends SelfEvaluableExpr {
-  def evaluate = DataSet.fromValue(v)
+case class FloatLit(value: Double) extends SelfEvaluableExpr {
+  def evaluate = DataSet.fromValue(value)
 }
 
-case class BooleanLit(v: Boolean) extends SelfEvaluableExpr {
-  def evaluate = DataSet.fromValue(v)
+case class BooleanLit(value: Boolean) extends SelfEvaluableExpr {
+  def evaluate = DataSet.fromValue(value)
 }
 
-case class QuantifierLit(l: Int, r: Option[Int]) extends Expr
+case class QuantifierLit(left: Int, right: Option[Int]) extends Expr
 
-sealed abstract class IdentifierLit(v: String) extends SelfEvaluableExpr {
-  def evaluate = DataSet.fromValue(v)
-  def value = v
+sealed abstract class IdentifierLit(val value: String) extends SelfEvaluableExpr {
+  def evaluate = DataSet.fromValue(value)
 }
 
-case class NotQuotedIdentifierLit(val v: String) extends IdentifierLit(v)
-case class QuotedIdentifierLit(val v: String) extends IdentifierLit(v)
+case class NotQuotedIdentifierLit(override val value: String) extends IdentifierLit(value)
+case class QuotedIdentifierLit(override val value: String) extends IdentifierLit(value)

@@ -58,6 +58,8 @@ class DataSet(val content: List[List[Any]]) {
       case _ => false
     }
   }
+  
+  override def toString = content.toString
 }
 
 object DataSet {

@@ -2,20 +2,11 @@ package org.wquery.model.impl
 import org.wquery.model.{Sense, Synset, DataType, Relation, WordNet}
 import scala.collection.mutable.{Set, Map}
 
-class InMemoryWordNetImpl (synsetsSet: Set[Synset], sensesSet: Set[Sense], wordsSet: Set[String], 
-                           relationsMap: Map[(String, DataType), Relation],
-                           successorsMap: Map[(Any, Relation, String), List[Any]]) extends WordNet {  
+class InMemoryWordNetImpl (val synsets: Set[Synset], val senses: Set[Sense], val words: Set[String], 
+                           val relations: Map[(String, DataType), Relation],
+                           val successors: Map[(Any, Relation, String), List[Any]]) extends WordNet {
+    
   val predecessors = Map[(Any, Relation, String), List[Any]]()  
-  
-  def synsets = synsetsSet
-  
-  def senses = sensesSet
-  
-  def words = wordsSet
-  
-  def relations = relationsMap
-  
-  def successors = successorsMap
   
   for (((obj, rel, dest), succs) <- successors) {
     for (succ <- succs) {

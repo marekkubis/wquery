@@ -1,8 +1,5 @@
 package org.wquery.model
 
-class Synset(i: String, s: List[Sense]) {
-  val id = i
-  val senses = s   
-  
+class Synset(val id: String, val senses: List[Sense]) {  
   override def toString = "{" + senses.mkString(" ") + "}"
 }

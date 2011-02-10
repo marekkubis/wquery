@@ -1,18 +1,16 @@
 package org.wquery.model
 
-class Relation(nm: String, args: Map[String, BasicDataType]) {
-  val name = nm
-  val argumentsTypes = args  
+class Relation(val name: String, val argumentTypes: Map[String, BasicDataType]) {
 
-  def sourceType = args(Relation.Source) 
+  def sourceType = argumentTypes(Relation.Source) 
   
-  def destinationType = args(Relation.Destination)
+  def destinationType = argumentTypes(Relation.Destination)
 
-  if (!args.contains(Relation.Source))
-    throw new IllegalArgumentException("An attempt to create Relation '" + nm + "' without source argument")
+  if (!argumentTypes.contains(Relation.Source))
+    throw new IllegalArgumentException("An attempt to create Relation '" + name + "' without source argument")
   
-  if (!args.contains(Relation.Destination))
-    throw new IllegalArgumentException("An attempt to create Relation '" + nm + "' without destination argument")
+  if (!argumentTypes.contains(Relation.Destination))
+    throw new IllegalArgumentException("An attempt to create Relation '" + name + "' without destination argument")
 }
 
 object Relation {

@@ -1,10 +1,5 @@
 package org.wquery.model
 
-class Sense(i:String, wf: String, sn: Int, ps: String) {
-    val id = i
-    val wordForm = wf
-    val senseNumber = sn
-    val pos = ps
-    
+class Sense(val id: String, val wordForm: String, val senseNumber: Int, val pos: String) {    
     override def toString = wordForm + ":" + senseNumber + ":" + pos
 }

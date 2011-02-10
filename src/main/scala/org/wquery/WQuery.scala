@@ -6,8 +6,7 @@ import org.wquery.parser.WQueryParsers
 import org.wquery.utils.Logging
 import scala.collection.mutable.LinkedHashSet
 
-class WQuery(wnet:WordNet) extends Logging {
-  private val wordNet = wnet
+class WQuery(val wordNet: WordNet) extends Logging {
   private val parser = new Object with WQueryParsers  
   private val bindings = new Bindings(None)
   private val functions = new FunctionSet
