@@ -336,7 +336,7 @@ case class StepExpr(lexpr: EvaluableExpr, rexpr: TransformationDesc) extends Eva
       case RelationTransformationDesc(pos, rexpr) =>
         val lresult = lexpr.evaluate(functions, wordNet, bindings, context)
 
-        rexpr.transform(wordNet, bindings, context, lresult, pos, false, false)
+        rexpr.transform(wordNet, bindings, context, lresult, pos, false)
       case FilterTransformationDesc(cond) =>
         val lresult = lexpr.evaluate(functions, wordNet, bindings, context)
 
@@ -363,60 +363,68 @@ case class PathExpr(expr: EvaluableExpr) extends EvaluableExpr {
  * Relational Expressions
  */
 sealed abstract class RelationalExpr extends Expr {
-  def transform(wordNet: WordNet, bindings: Bindings, context: Context, data: DataSet, pos: Int, invert: Boolean, force: Boolean): DataSet
+  def transform(wordNet: WordNet, bindings: Bindings, context: Context, data: DataSet, pos: Int, force: Boolean): DataSet
 }
 
-case class UnaryRelationalExpr(identifier: IdentifierLit) extends RelationalExpr {
-  def transform(wordNet: WordNet, bindings: Bindings, context: Context, data: DataSet, pos: Int, invert: Boolean, force: Boolean) = {
-    if (force) {
-      useIdentifierAsTransformation(identifier.value, wordNet, data, pos, invert)
+case class UnaryRelationalExpr(idLits: List[IdentifierLit]) extends RelationalExpr {
+  def transform(wordNet: WordNet, bindings: Bindings, context: Context, data: DataSet, pos: Int, force: Boolean) = {
+    if (force || idLits.size > 1) {
+      if (pos == 0) {
+        if (context.isEmpty) {
+            throw new RuntimeException("to be implemented")
+        } else {
+          useIdentifiersAsTransformation(idLits.map(x => x.value), wordNet, data, 1)
+        }
+      } else {
+        useIdentifiersAsTransformation(idLits.map(x => x.value), wordNet, data, pos)  
+      }
     } else {
-      identifier match {
+      idLits.head match {
         case QuotedIdentifierLit(wordForm) =>
           if (pos == 0) {
-            useIdentifierAsGenerator(wordForm, wordNet, context, invert)
+            useIdentifierAsGenerator(wordForm, wordNet, context)
           } else {
             throw new WQueryEvaluationException("Quoted identifier found after '.'")
           }
-        case NotQuotedIdentifierLit(relname) =>
+        case NotQuotedIdentifierLit(id) =>
           if (pos == 0) { // we are in a generator 
             if (context.isEmpty) { // we are not in a filter      
-              useIdentifierAsGenerator(relname, wordNet, context, invert)
+              useIdentifierAsGenerator(id, wordNet, context)
             } else {
-              useIdentifierAsVariable(relname, wordNet, bindings, context, data, pos, invert, force) match {
+              useIdentifierAsRelationalExprAlias(id, wordNet, bindings, context, data, pos, force) match {
                 case Some(result) =>
                   result
                 case None =>
-                  if (wordNet.containsRelation(relname, data.getType(0))) {
-                    useIdentifierAsTransformation(relname, wordNet, data, 1, invert)
+                  if (wordNet.containsRelation(id, data.getType(0))) {
+                    useIdentifiersAsTransformation(List(id), wordNet, data, 1)
                   } else {
-                    useIdentifierAsGenerator(relname, wordNet, context, invert)
+                    useIdentifierAsGenerator(id, wordNet, context)
                   }
               }
             }
           } else {
-            useIdentifierAsVariable(relname, wordNet, bindings, context, data, pos, invert, force) match {
+            useIdentifierAsRelationalExprAlias(id, wordNet, bindings, context, data, pos, force) match {
               case Some(result) =>
                 result
               case None =>
-                useIdentifierAsTransformation(relname, wordNet, data, pos, invert)
+                useIdentifiersAsTransformation(List(id), wordNet, data, pos)
             }
           }
       }
     }
   }
 
-  private def useIdentifierAsVariable(id: String, wordNet: WordNet, bindings: Bindings, context: Context,
-    data: DataSet, pos: Int, invert: Boolean, force: Boolean) = {
+  private def useIdentifierAsRelationalExprAlias(id: String, wordNet: WordNet, bindings: Bindings, context: Context,
+    data: DataSet, pos: Int, force: Boolean) = {
     bindings.lookup(id) match {
       case Some(rexpr: RelationalExpr) =>
-        Some(rexpr.transform(wordNet, bindings, context, data, pos, invert, force))
+        Some(rexpr.transform(wordNet, bindings, context, data, pos, force))
       case _ =>
         None
     }
   }
 
-  private def useIdentifierAsGenerator(id: String, wordNet: WordNet, context: Context, invert: Boolean) = {
+  private def useIdentifierAsGenerator(id: String, wordNet: WordNet, context: Context) = {
     id match {
       case "" =>
         DataSet.fromList(wordNet.words.toList)
@@ -425,47 +433,44 @@ case class UnaryRelationalExpr(identifier: IdentifierLit) extends RelationalExpr
       case "true" =>
         DataSet.fromValue(true)
       case _ =>
-        if (!invert) {
-          DataSet.fromOptionalValue(wordNet.getWordForm(id))
-        } else {
-          if (context.isEmpty)
-            throw new WQueryEvaluationException("'^' applied to the path generator")
-          else
-            throw new WQueryEvaluationException("Relation '" + id + "' not found")
-        }
+        DataSet.fromOptionalValue(wordNet.getWordForm(id))
     }
   }
 
-  private def useIdentifierAsTransformation(id: String, wordNet: WordNet, data: DataSet, pos: Int, invert: Boolean) = {
-    val buffer = new ListBuffer[List[Any]]            
-    val succfunc = if (invert) wordNet.getPredecessors(_, _, _) else wordNet.getSuccessors(_, _, _)      
-    val relation = wordNet.demandRelation(id, data.getType(pos - 1))
-    val arc = if (invert) Arc.inverse(relation) else Arc(relation)
-
-    for (tuple <- data.content) {
-      for (succ <- succfunc(tuple(tuple.size - pos), relation, Relation.Destination)) {
-        buffer.append(tuple ::: List(arc, succ))        
-      }
+  private def useIdentifiersAsTransformation(ids: List[String], wordNet: WordNet, data: DataSet, pos: Int) = {
+    val sourceType = data.getType(pos - 1)  
+    val (relation, source, dests) = ids match {
+      case List(relationName) =>
+        (wordNet.demandRelation(relationName, sourceType), Relation.Source, List(Relation.Destination))
+      case List(left, right) =>
+        wordNet.getRelation(left, sourceType) match {
+          case Some(relation) => 
+            (relation, Relation.Source, List(right))
+          case None =>
+            (wordNet.demandRelation(right, sourceType), left, List(Relation.Destination))  
+        }
+      case source::relationName::dests =>
+        (wordNet.demandRelation(relationName, sourceType), source, dests)
     }
-
-    DataSet(buffer.toList)
+    
+    DataSet(wordNet.follow(data.content, pos, relation, source, dests))            
   }
 }
 
 case class QuantifiedRelationalExpr(expr: RelationalExpr, quantifier: QuantifierLit) extends RelationalExpr {
-  def transform(wordNet: WordNet, bindings: Bindings, context: Context, data: DataSet, pos: Int, invert: Boolean, force: Boolean) = {
+  def transform(wordNet: WordNet, bindings: Bindings, context: Context, data: DataSet, pos: Int, force: Boolean) = {
     quantifier match {
       case QuantifierLit(1, Some(1)) =>
-        expr.transform(wordNet, bindings, context, data, pos, invert, force)
+        expr.transform(wordNet, bindings, context, data, pos, force)
       case QuantifierLit(1, None) =>
-        val head = expr.transform(wordNet, bindings, context, data, pos, invert, force)
+        val head = expr.transform(wordNet, bindings, context, data, pos, force)
         val content = new ListBuffer[List[Any]]
 
         for (tuple <- head.content) {
           content.append(tuple)
           val prefix = tuple.slice(0, tuple.size - 1) // remove prefix variable put tuple to outer closure
 
-          for (cnode <- closure(wordNet, bindings, context, expr, false, List(tuple.last), Set(tuple.last))) {
+          for (cnode <- closure(wordNet, bindings, context, expr, List(tuple.last), Set(tuple.last))) {
             content.append(prefix ++ cnode)
           }
           
@@ -478,8 +483,8 @@ case class QuantifiedRelationalExpr(expr: RelationalExpr, quantifier: Quantifier
   }
   
   private def closure(wordNet: WordNet, bindings: Bindings, context: Context, expr: RelationalExpr,
-    inverted: Boolean, source: List[Any], forbidden: Set[Any]): List[List[Any]] = {
-    val transformed = expr.transform(wordNet, bindings, context, DataSet.fromTuple(source), 1, inverted, true)
+    source: List[Any], forbidden: Set[Any]): List[List[Any]] = {
+    val transformed = expr.transform(wordNet, bindings, context, DataSet.fromTuple(source), 1, true)
     val filtered = transformed.content.filter { x => !forbidden.contains(x.last) }
 
     if (filtered.isEmpty) {
@@ -491,7 +496,7 @@ case class QuantifiedRelationalExpr(expr: RelationalExpr, quantifier: Quantifier
       result.appendAll(filtered)
 
       filtered.foreach { x =>
-        result.appendAll(closure(wordNet, bindings, context, expr, inverted, x, newForbidden))
+        result.appendAll(closure(wordNet, bindings, context, expr, x, newForbidden))
       }
 
       result.toList
@@ -499,16 +504,10 @@ case class QuantifiedRelationalExpr(expr: RelationalExpr, quantifier: Quantifier
   }  
 }
 
-case class InvertedRelationalExpr(expr: RelationalExpr) extends RelationalExpr {
-  def transform(wordNet: WordNet, bindings: Bindings, context: Context, data: DataSet, pos: Int, invert: Boolean, force: Boolean) = {
-    expr.transform(wordNet, bindings, context, data, pos, !invert, force)
-  }
-}
-
 case class UnionRelationalExpr(lexpr: RelationalExpr, rexpr: RelationalExpr) extends RelationalExpr {
-  def transform(wordNet: WordNet, bindings: Bindings, context: Context, data: DataSet, pos: Int, invert: Boolean, force: Boolean) = {
-    val lresult = lexpr.transform(wordNet, bindings, context, data, pos, invert, force)
-    val rresult = rexpr.transform(wordNet, bindings, context, data, pos, invert, force)
+  def transform(wordNet: WordNet, bindings: Bindings, context: Context, data: DataSet, pos: Int, force: Boolean) = {
+    val lresult = lexpr.transform(wordNet, bindings, context, data, pos, force)
+    val rresult = rexpr.transform(wordNet, bindings, context, data, pos, force)
 
     DataSet(lresult.content union rresult.content)
   }
@@ -644,7 +643,7 @@ case class SenseByWordFormAndSenseNumberReq(word: String, num: Int) extends Func
 
 case class ContextByRelationalExprReq(expr: RelationalExpr) extends EvaluableExpr {
   def evaluate(functions: FunctionSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
-    expr.transform(wordNet, bindings, context, DataSet(List(context.values)), 0, false, false)
+    expr.transform(wordNet, bindings, context, DataSet(List(context.values)), 0, false)
   }
 }
 

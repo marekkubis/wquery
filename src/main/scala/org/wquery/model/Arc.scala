@@ -9,7 +9,7 @@ class Arc(val relation: Relation, val from: String, val to: String) {
 }
 
 object Arc {    
-  def apply(relation: Relation, from: String, to: String) = new Arc(relation, Relation.Source , Relation.Destination) 
+  def apply(relation: Relation, from: String, to: String) = new Arc(relation, from , to) 
     
   def apply(relation: Relation) = new Arc(relation, Relation.Source , Relation.Destination)    
     

@@ -1,37 +1,37 @@
 package org.wquery.model.impl
+
+import org.wquery.model.Arc
 import org.wquery.model.{Sense, Synset, DataType, Relation, WordNet}
-import scala.collection.mutable.{Set, Map}
+import scala.collection.mutable.{Set, Map, ListBuffer}
 
 class InMemoryWordNetImpl (val synsets: Set[Synset], val senses: Set[Sense], val words: Set[String], 
                            val relations: Map[(String, DataType), Relation],
-                           val successors: Map[(Any, Relation, String), List[Any]]) extends WordNet {
-    
-  val predecessors = Map[(Any, Relation, String), List[Any]]()  
+                           val successors: Map[(Any, Relation, String), List[Map[String, Any]]]) extends WordNet { 
   
-  for (((obj, rel, dest), succs) <- successors) {
-    for (succ <- succs) {
-      if (!(predecessors contains (succ, rel, dest)))
-        predecessors((succ, rel, dest)) = Nil
+  def follow(content: List[List[Any]], pos: Int, relation: Relation, source: String, dests: List[String]) = {
+    relation.reqArgument(source)
+    dests.foreach(relation.reqArgument)
+      
+    val buffer = new ListBuffer[List[Any]]                      
     
-      predecessors((succ, rel, dest)) = obj :: predecessors((succ, rel, dest))
+    for (tuple <- content) {
+      if (successors.contains((tuple(tuple.size - pos), relation, source))) {
+        for (succs <- successors(tuple(tuple.size - pos), relation, source)) {
+         val tupleBuffer = new ListBuffer[Any]
+         tupleBuffer.appendAll(tuple)
+         dests.foreach { dest => 
+           if (succs.contains(dest)) {
+             tupleBuffer.append(Arc(relation, source, dest))
+             tupleBuffer.append(succs(dest))
+           }
+         }
+         buffer.append(tupleBuffer.toList)
+        }
+      }
     }
-  }
 
-  def getSuccessors(obj: Any, relation: Relation, destination: String): List[Any] = {
-    if (successors contains (obj, relation, destination)) {
-        successors((obj, relation, destination))
-    } else {
-      Nil
-    }
+    buffer.toList
   }
-  
-  def getPredecessors(obj: Any, relation: Relation, destination: String): List[Any] = {
-    if (predecessors contains (obj, relation, destination)) {
-        predecessors((obj, relation, destination))
-    } else {
-      Nil
-    }
-  }  
 }
 
 class InMemoryWordNetImplBuilder {
@@ -40,7 +40,7 @@ class InMemoryWordNetImplBuilder {
   val senses = Set[Sense]()
   val words = Set[String]()  
   val relations = Map[(String, DataType), Relation]()
-  val successors = Map[(Any, Relation, String), List[Any]]()       
+  val successors = Map[(Any, Relation, String), List[Map[String, Any]]]()       
     
   // import built in relations
   for (relation <- WordNet.relations) {    
@@ -49,8 +49,8 @@ class InMemoryWordNetImplBuilder {
   
   def getSynsetById(id: String) = {
     try {
-      val succs = successors((id, WordNet.IdToSynset, Relation.Destination))
-      if (succs.isEmpty) None else Some(succs.head)
+      val succs = successors((id, WordNet.IdToSynset, Relation.Source))
+      if (succs.isEmpty) None else Some(succs.head(Relation.Destination))
     } catch {
       case  _: java.util.NoSuchElementException => None
     }
@@ -65,33 +65,39 @@ class InMemoryWordNetImplBuilder {
   def addSynset(synset: Synset) {
     synsets += synset
     
-    addSuccessor(synset.id, WordNet.IdToSynset, Relation.Destination, synset)    
-    addSuccessor(synset, WordNet.SynsetToId, Relation.Destination, synset.id) // TODO change into algebraic transformation
+    addSuccessor(synset.id, WordNet.IdToSynset, Relation.Source, synset)    
+    addSuccessor(synset, WordNet.SynsetToId, Relation.Source, synset.id) // TODO change into algebraic transformation
     
     for (sense <- synset.senses) {
       senses += sense
       words += sense.wordForm
-      addSuccessor(sense.id, WordNet.IdToSense, Relation.Destination, sense)
-      addSuccessor(sense, WordNet.SenseToId, Relation.Destination, sense.id) // TODO change into algebraic transformation
-      addSuccessor(sense, WordNet.SenseToWordForm, Relation.Destination, sense.wordForm)      
-      addSuccessor(sense, WordNet.SenseToSenseNumber, Relation.Destination, sense.senseNumber)
-      addSuccessor(sense, WordNet.SenseToPos, Relation.Destination, sense.pos)
-      addSuccessor(synset, WordNet.SynsetToSenses, Relation.Destination, sense)
-      addSuccessor(synset, WordNet.SynsetToWordForms, Relation.Destination, sense.wordForm)      
-      addSuccessor(sense.wordForm, WordNet.WordFormToSenses, Relation.Destination, sense)
-      addSuccessor(sense,WordNet. SenseToSynset, Relation.Destination, synset)
-      addSuccessor(sense.wordForm, WordNet.WordFormToSynsets, Relation.Destination, synset)
-      addSuccessor(sense.wordForm + ":" + sense.senseNumber + ":" + sense.pos, WordNet.WordFormAndSenseNumberAndPosToSense, Relation.Destination, sense)
-      addSuccessor(sense.wordForm + ":" + sense.senseNumber, WordNet.WordFormAndSenseNumberToSenses, Relation.Destination, sense)
+      addSuccessor(sense.id, WordNet.IdToSense, Relation.Source, sense)
+      addSuccessor(sense, WordNet.SenseToId, Relation.Source, sense.id) // TODO change into algebraic transformation
+      addSuccessor(sense, WordNet.SenseToWordForm, Relation.Source, sense.wordForm)      
+      addSuccessor(sense, WordNet.SenseToSenseNumber, Relation.Source, sense.senseNumber)
+      addSuccessor(sense, WordNet.SenseToPos, Relation.Source, sense.pos)
+      addSuccessor(synset, WordNet.SynsetToSenses, Relation.Source, sense)
+      addSuccessor(synset, WordNet.SynsetToWordForms, Relation.Source, sense.wordForm)      
+      addSuccessor(sense.wordForm, WordNet.WordFormToSenses, Relation.Source, sense)
+      addSuccessor(sense,WordNet. SenseToSynset, Relation.Source, synset)
+      addSuccessor(sense.wordForm, WordNet.WordFormToSynsets, Relation.Source, synset)
+      addSuccessor(sense.wordForm + ":" + sense.senseNumber + ":" + sense.pos, WordNet.WordFormAndSenseNumberAndPosToSense, Relation.Source, sense)
+      addSuccessor(sense.wordForm + ":" + sense.senseNumber, WordNet.WordFormAndSenseNumberToSenses, Relation.Source, sense)
     }    
-  }  
+  }   
   
-  def addSuccessor(obj: Any, relation: Relation, destination: String, successor: Any) { 
-    if (!(successors contains (obj, relation, destination))) 
-      successors((obj, relation, destination)) = Nil
+  def addSuccessor(obj: Any, relation: Relation, source: String, successor: Any) { 
+    addLink(obj, relation, source, Relation.Destination, successor)
+    addLink(successor, relation, Relation.Destination, source, obj)    
+  } 
+  
+  private def addLink(obj: Any, relation: Relation, source: String, destination: String, successor: Any) {
+    if (!(successors contains (obj, relation, source))) { 
+      successors((obj, relation, source)) = Nil      
+    }
     
-    successors((obj, relation, destination)) = successor :: successors((obj, relation, destination))
-  }  
+    successors((obj, relation, source)) = Map((destination, successor)) :: successors((obj, relation, source))      
+  }
   
   def addRelation(relation: Relation) = relations((relation.name, relation.sourceType)) = relation
 }

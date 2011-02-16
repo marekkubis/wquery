@@ -10,8 +10,7 @@ trait WordNetStore {
   
   def words: Set[String]
 
-  //def follow(objects: List[Any], link: String): List[Any] // DataSet -> DataSet tak czy n-arg?
-  def follow // from object as param to params
+  def follow
   
   // getobjectsbycond
   
@@ -53,27 +52,29 @@ trait WordNet {
   
   def relations: Map[(String, DataType), Relation]
   
-  def getSuccessors(obj: Any, relation: Relation, destination: String): List[Any]
+  def follow(content: List[List[Any]], pos: Int, relation: Relation, source: String, dests: List[String]): List[List[Any]]  
   
-  def getPredecessors(obj: Any, relation: Relation, destination: String): List[Any]  
+  private def getSuccessors(obj: Any, relation: Relation): List[Any] = {
+    follow(List(List(obj)), 1, relation, Relation.Source, List(Relation.Destination)).map(x => x.last) // TO BE rewritten after implementing WordNetStore
+  }
   
-  def getSynsetsByWordForm(word: String) = getSuccessors(word, WordNet.WordFormToSynsets, Relation.Destination)  
+  def getSynsetsByWordForm(word: String) = getSuccessors(word, WordNet.WordFormToSynsets)  
 
   def getSynsetBySense(sense: Sense) = {
-    val succs = getSuccessors(sense, WordNet.SenseToSynset, Relation.Destination)
+    val succs = getSuccessors(sense, WordNet.SenseToSynset)
     if (!succs.isEmpty) succs.head else throw new WQueryModelException("No synset found for sense " + sense)    
   }
   
   def getSenseByWordFormAndSenseNumberAndPos(word: String, num: Int, pos: String) = {
     try {
-      val succs = getSuccessors(word + ":" + num + ":" + pos, WordNet.WordFormAndSenseNumberAndPosToSense, Relation.Destination)
+      val succs = getSuccessors(word + ":" + num + ":" + pos, WordNet.WordFormAndSenseNumberAndPosToSense)
       if (succs.isEmpty) None else Some(succs.head)
     } catch {
       case  _: java.util.NoSuchElementException => None
     }
   }
   
-  def getSensesByWordFormAndSenseNumber(word: String, num: Int) = getSuccessors(word + ":" + num, WordNet.WordFormAndSenseNumberToSenses, Relation.Destination) 
+  def getSensesByWordFormAndSenseNumber(word: String, num: Int) = getSuccessors(word + ":" + num, WordNet.WordFormAndSenseNumberToSenses) 
   
   def getWordForm(word: String) = if (words contains word) Some(word) else None  
 
@@ -109,7 +110,7 @@ object WordNet {
   val SynsetToSenses = Relation("senses", SynsetType, SenseType)
   val WordFormToSenses = Relation("senses", StringType, SenseType)
   val SenseToSynset = Relation("synset", SenseType, SynsetType)
-  val WordFormToSynsets = Relation("synsets", StringType, SynsetType)  
+  val WordFormToSynsets = Relation("synsets", StringType, SynsetType)
   
   val relations = List(IdToSynset, SynsetToId, IdToSense, SenseToId, WordFormAndSenseNumberAndPosToSense,
     WordFormAndSenseNumberToSenses, SenseToWordForm, SenseToSenseNumber, SenseToPos, SynsetToWordForms,

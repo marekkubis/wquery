@@ -1,10 +1,20 @@
 package org.wquery.model
+import org.wquery.WQueryModelException
 
 class Relation(val name: String, val arguments: Map[String, NodeType]) {
 
   def sourceType = arguments(Relation.Source) 
   
   def destinationType = arguments(Relation.Destination)
+  
+  def reqArgument(argument: String) = {
+    if (arguments.contains(argument)) 
+      argument 
+    else 
+      throw new WQueryModelException("Relation '" + name + "' does not have argument '" + argument + "'")
+  }
+  
+  override def toString = name
 
   if (!arguments.contains(Relation.Source))
     throw new IllegalArgumentException("An attempt to create Relation '" + name + "' without source argument")
