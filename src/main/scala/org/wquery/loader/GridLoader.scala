@@ -186,12 +186,12 @@ class GridHandler(builder: InMemoryWordNetImplBuilder) extends DefaultHandler wi
 
     // create semantic relations successors       
     for ((synset, relname, reldest) <- ilrRelationsTuples) {      
-      builder.getRelation(relname, SynsetType) match {            
+      builder.getRelation(relname, SynsetType, Relation.Source) match {            
         case Some(relation) =>           
           relation.destinationType match {
             case SynsetType =>
               builder.getSynsetById(reldest) match {
-                case Some(destSynset) => builder.addSuccessor(synset, relation, Relation.Source, destSynset)
+                case Some(destSynset) => builder.addSuccessor(synset, relation, destSynset)
                 case None => warn("ILR tag with type '" + relname + "' found in synset '" + synset.id + "' points to unknown synset '" + reldest + "'")
               }
             case dtype =>
@@ -226,19 +226,19 @@ class GridHandler(builder: InMemoryWordNetImplBuilder) extends DefaultHandler wi
     
     // create successors
     for ((synset, relname, reldest) <- genericRelationsTuples) {      
-      builder.getRelation(relname, SynsetType) match {            
+      builder.getRelation(relname, SynsetType, Relation.Source) match {            
         case Some(relation) =>           
           relation.destinationType match {
             case SynsetType =>
-              builder.addSuccessor(synset, relation, Relation.Source, builder.getSynsetById(reldest).get)
+              builder.addSuccessor(synset, relation, builder.getSynsetById(reldest).get)
             case BooleanType =>
-              builder.addSuccessor(synset, relation, Relation.Source, reldest.toBoolean)
+              builder.addSuccessor(synset, relation, reldest.toBoolean)
             case IntegerType =>
-              builder.addSuccessor(synset, relation, Relation.Source, reldest.toInt)
+              builder.addSuccessor(synset, relation, reldest.toInt)
             case FloatType =>
-              builder.addSuccessor(synset, relation, Relation.Source, reldest.toFloat)
+              builder.addSuccessor(synset, relation, reldest.toFloat)
             case StringType =>
-              builder.addSuccessor(synset, relation, Relation.Source, reldest)
+              builder.addSuccessor(synset, relation, reldest)
             case dtype =>
               throw new RuntimeException("Incorrect destination type " + dtype +
                                            " as a successor of relation '" + relation + "'")

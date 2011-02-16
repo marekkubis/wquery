@@ -2,46 +2,6 @@ package org.wquery.model
 import org.wquery.WQueryModelException
 import scala.collection.mutable.{Map, Set}
 
-trait WordNetStore {
-  
-  def synsets: Set[Synset]
-  
-  def senses: Set[Sense]
-  
-  def words: Set[String]
-
-  def follow
-  
-  // getobjectsbycond
-  
-  // create objects
-
-  def addLink(relation: Relation, objects: List[Any])
-  
-  def removeLink(relation: Relation, objects: List[Any])
-  
-  def flush  
-}
-
-trait WordNetAlgebra { // create algebra.scala ????
-  def mpath_union
-  def mpath_except
-  def mpath_intersect
-  
-  def path_select  
-  def path_dot
-  def pat_comma
-  def path_filter
-  def rel_or
-  def rel_and
-  def rel_inv
-  def rel_tc
-}
-
-
-// plus default impl of algebra using store
-
-
 trait WordNet {    
 
   def synsets: Set[Synset]
@@ -50,7 +10,7 @@ trait WordNet {
   
   def words: Set[String]
   
-  def relations: Map[(String, DataType), Relation]
+  def relations: Map[(String, DataType, String), Relation]
   
   def follow(content: List[List[Any]], pos: Int, relation: Relation, source: String, dests: List[String]): List[List[Any]]  
   
@@ -76,21 +36,15 @@ trait WordNet {
   
   def getSensesByWordFormAndSenseNumber(word: String, num: Int) = getSuccessors(word + ":" + num, WordNet.WordFormAndSenseNumberToSenses) 
   
-  def getWordForm(word: String) = if (words contains word) Some(word) else None  
+  def getWordForm(word: String) = words.find(_ == word)  
 
-  def demandRelation(name: String, sourceType: DataType) = {
-    if (relations contains (name, sourceType)) {
-      relations((name, sourceType))  
-    } else {
-      throw new WQueryModelException("Relation '" + name + "' with source type " + sourceType + " not found")
-    }
+  def demandRelation(name: String, sourceType: DataType, sourceName: String) = {
+    relations.getOrElse((name, sourceType, sourceName), throw new WQueryModelException("Relation '" + name + "' with source type " + sourceType + " not found"))
   }  
   
-  def getRelation(name: String, sourceType: DataType) = { 
-    if (relations contains (name, sourceType)) Some(relations((name, sourceType))) else None
-  }
+  def getRelation(name: String, sourceType: DataType, sourceName: String) = relations.get((name, sourceType, sourceName)) 
   
-  def containsRelation(name: String, sourceType: DataType) = relations contains (name, sourceType)   
+  def containsRelation(name: String, sourceType: DataType, sourceName: String) = relations.contains(name, sourceType, sourceName)   
   
 }
 
@@ -103,6 +57,7 @@ object WordNet {
   val SenseToId = Relation("id", SenseType, StringType)  
   val WordFormAndSenseNumberAndPosToSense = Relation("word_num_pos_sense", StringType, SenseType)
   val WordFormAndSenseNumberToSenses = Relation("word_num_sense", StringType, SenseType)
+  val SenseToWordFormSenseNumberAndPos = Relation("literal", SenseType, StringType, scala.collection.immutable.Map(("num", IntegerType), ("pos", StringType)))
   val SenseToWordForm = Relation("word", SenseType, StringType)
   val SenseToSenseNumber = Relation("sensenum", SenseType, IntegerType)
   val SenseToPos = Relation("pos", SenseType, StringType)
@@ -114,5 +69,5 @@ object WordNet {
   
   val relations = List(IdToSynset, SynsetToId, IdToSense, SenseToId, WordFormAndSenseNumberAndPosToSense,
     WordFormAndSenseNumberToSenses, SenseToWordForm, SenseToSenseNumber, SenseToPos, SynsetToWordForms,
-    SynsetToSenses, WordFormToSenses, SenseToSynset, WordFormToSynsets)
+    SynsetToSenses, WordFormToSenses, SenseToSynset, WordFormToSynsets, SenseToWordFormSenseNumberAndPos)
 }

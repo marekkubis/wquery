@@ -371,7 +371,7 @@ case class UnaryRelationalExpr(idLits: List[IdentifierLit]) extends RelationalEx
     if (force || idLits.size > 1) {
       if (pos == 0) {
         if (context.isEmpty) {
-            throw new RuntimeException("to be implemented")
+          throw new RuntimeException("to be implemented")
         } else {
           useIdentifiersAsTransformation(idLits.map(x => x.value), wordNet, data, 1)
         }
@@ -391,24 +391,18 @@ case class UnaryRelationalExpr(idLits: List[IdentifierLit]) extends RelationalEx
             if (context.isEmpty) { // we are not in a filter      
               useIdentifierAsGenerator(id, wordNet, context)
             } else {
-              useIdentifierAsRelationalExprAlias(id, wordNet, bindings, context, data, pos, force) match {
-                case Some(result) =>
-                  result
-                case None =>
-                  if (wordNet.containsRelation(id, data.getType(0))) {
+              useIdentifierAsRelationalExprAlias(id, wordNet, bindings, context, data, pos, force) 
+                .getOrElse(
+                  if (wordNet.containsRelation(id, data.getType(0), Relation.Source)) {
                     useIdentifiersAsTransformation(List(id), wordNet, data, 1)
                   } else {
                     useIdentifierAsGenerator(id, wordNet, context)
-                  }
-              }
+                  }                    
+                )
             }
           } else {
-            useIdentifierAsRelationalExprAlias(id, wordNet, bindings, context, data, pos, force) match {
-              case Some(result) =>
-                result
-              case None =>
-                useIdentifiersAsTransformation(List(id), wordNet, data, pos)
-            }
+            useIdentifierAsRelationalExprAlias(id, wordNet, bindings, context, data, pos, force)
+              .getOrElse(useIdentifiersAsTransformation(List(id), wordNet, data, pos))           
           }
       }
     }
@@ -441,16 +435,21 @@ case class UnaryRelationalExpr(idLits: List[IdentifierLit]) extends RelationalEx
     val sourceType = data.getType(pos - 1)  
     val (relation, source, dests) = ids match {
       case List(relationName) =>
-        (wordNet.demandRelation(relationName, sourceType), Relation.Source, List(Relation.Destination))
+        (wordNet.demandRelation(relationName, sourceType, Relation.Source), Relation.Source, List(Relation.Destination))
       case List(left, right) =>
-        wordNet.getRelation(left, sourceType) match {
+        wordNet.getRelation(left, sourceType, Relation.Source) match {
           case Some(relation) => 
             (relation, Relation.Source, List(right))
           case None =>
-            (wordNet.demandRelation(right, sourceType), left, List(Relation.Destination))  
+            (wordNet.demandRelation(right, sourceType, left), left, List(Relation.Destination))  
         }
-      case source::relationName::dests =>
-        (wordNet.demandRelation(relationName, sourceType), source, dests)
+      case first::second::dests =>
+        wordNet.getRelation(first, sourceType, Relation.Source) match {
+          case Some(relation) => 
+            (relation, Relation.Source, second::dests)
+          case None =>
+            (wordNet.demandRelation(second, sourceType, first), first, dests)  
+        }      
     }
     
     DataSet(wordNet.follow(data.content, pos, relation, source, dests))            
@@ -473,7 +472,6 @@ case class QuantifiedRelationalExpr(expr: RelationalExpr, quantifier: Quantifier
           for (cnode <- closure(wordNet, bindings, context, expr, List(tuple.last), Set(tuple.last))) {
             content.append(prefix ++ cnode)
           }
-          
         }
         
         DataSet(content.toList)

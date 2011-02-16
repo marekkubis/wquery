@@ -7,11 +7,8 @@ class Relation(val name: String, val arguments: Map[String, NodeType]) {
   
   def destinationType = arguments(Relation.Destination)
   
-  def reqArgument(argument: String) = {
-    if (arguments.contains(argument)) 
-      argument 
-    else 
-      throw new WQueryModelException("Relation '" + name + "' does not have argument '" + argument + "'")
+  def demandArgument(argument: String) = {
+    arguments.getOrElse(argument, throw new WQueryModelException("Relation '" + name + "' does not have argument '" + argument + "'"))      
   }
   
   override def toString = name

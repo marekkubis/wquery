@@ -50,12 +50,8 @@ class FunctionSet {
   def removeFunction(name: String, args: List[FunctionArgumentType]) { functions -= ((name, args)) }
   
   def demandFunction(name: String, args: List[FunctionArgumentType]) = {
-    if (functions contains (name, args))
-      functions((name, args))  
-    else
-      throw new WQueryModelException("Function '" + name + "' with argument types " + args + " not found")
+    functions.getOrElse((name, args), throw new WQueryModelException("Function '" + name + "' with argument types " + args + " not found"))
   }    
   
-  def getFunction(name: String, args: List[FunctionArgumentType]) 
-    = if (functions contains (name, args)) Some(functions((name, args))) else None    
+  def getFunction(name: String, args: List[FunctionArgumentType]) = functions.get(name, args)    
 }
