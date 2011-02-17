@@ -64,4 +64,15 @@ class GeneratorsTestSuite extends WQueryTestSuite {
       
   @Test def testAllSynsets() = result of ("count({})") should equal ("91\n")    
   
+  @Test def testRelationGenerator() = result of ("count(literal)") should equal ("187\n")
+  
+  @Test def testRelationGeneratorSingleQuoted() = result of ("count('literal')") should equal ("0\n")  
+
+  @Test def testRelationGeneratorBackQuoted() = result of ("count(`literal`)") should equal ("1\n")
+  
+  @Test def testRelationGeneratorInverse() = result of ("count(^hypernym)") should equal ("29\n")    
+  
+  @Test def testRelationGeneratorClosure() = result of ("avg(size(hypernym!))") should startWith ("7.7")  
+  
+  @Test def testRelationGeneratorProjections() = result of ("literal^pos^num[# = 6]") should equal ("unit:6:n literal(source,pos) n literal(source,num) 6\nmachine:6:n literal(source,pos) n literal(source,num) 6\n")
 }

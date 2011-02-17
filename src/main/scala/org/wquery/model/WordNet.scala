@@ -14,6 +14,8 @@ trait WordNet {
   
   def follow(content: List[List[Any]], pos: Int, relation: Relation, source: String, dests: List[String]): List[List[Any]]  
   
+  def getPaths(relation: Relation, source: String, dests: List[String]): List[List[Any]]
+  
   private def getSuccessors(obj: Any, relation: Relation): List[Any] = {
     follow(List(List(obj)), 1, relation, Relation.Source, List(Relation.Destination)).map(x => x.last) // TO BE rewritten after implementing WordNetStore
   }
@@ -42,7 +44,13 @@ trait WordNet {
     relations.getOrElse((name, sourceType, sourceName), throw new WQueryModelException("Relation '" + name + "' with source type " + sourceType + " not found"))
   }  
   
-  def getRelation(name: String, sourceType: DataType, sourceName: String) = relations.get((name, sourceType, sourceName)) 
+  def getRelation(name: String, sourceType: DataType, sourceName: String) = relations.get((name, sourceType, sourceName))
+  
+  def findRelationsByNameAndSource(name: String, sourceName: String) = {
+    List(getRelation(name, SynsetType, sourceName), getRelation(name, SenseType, sourceName), getRelation(name, StringType, sourceName),
+      getRelation(name, IntegerType, sourceName), getRelation(name, FloatType, sourceName), getRelation(name, BooleanType, sourceName))
+      .filter { case Some(_) => true case None => false }.map(_.get)
+  }
   
   def containsRelation(name: String, sourceType: DataType, sourceName: String) = relations.contains(name, sourceType, sourceName)   
   
@@ -50,7 +58,6 @@ trait WordNet {
 
 
 object WordNet {  
-  // default relations
   val IdToSynset = Relation("id_synset", StringType, SynsetType)
   val SynsetToId = Relation("id", SynsetType, StringType)
   val IdToSense = Relation("id_sense", StringType, SenseType)

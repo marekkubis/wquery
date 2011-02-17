@@ -3,9 +3,11 @@ import org.wquery.WQueryModelException
 
 class Relation(val name: String, val arguments: Map[String, NodeType]) {
 
-  def sourceType = arguments(Relation.Source) 
+  val sourceType = arguments(Relation.Source) 
   
-  def destinationType = arguments(Relation.Destination)
+  val destinationType = arguments(Relation.Destination)
+  
+  val argumentNames = Relation.Source :: (arguments - Relation.Source - Relation.Destination).keys.toList.sortWith((x, y) => x < y) ++ List(Relation.Destination)
   
   def demandArgument(argument: String) = {
     arguments.getOrElse(argument, throw new WQueryModelException("Relation '" + name + "' does not have argument '" + argument + "'"))      

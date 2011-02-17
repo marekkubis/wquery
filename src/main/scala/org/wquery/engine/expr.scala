@@ -1,6 +1,6 @@
 package org.wquery.engine
 import org.wquery.WQueryEvaluationException
-import org.wquery.model.{WordNet, IntegerType, Relation, DataType, StringType, SenseType, Sense, BasicType, UnionType, ValueType, TupleType, AggregateFunction, ScalarFunction, FloatType, FunctionArgumentType, Arc}
+import org.wquery.model.{WordNet, IntegerType, Relation, DataType, StringType, SenseType, SynsetType, Sense, BasicType, UnionType, ValueType, TupleType, AggregateFunction, ScalarFunction, FloatType, FunctionArgumentType, Arc}
 import scala.collection.mutable.ListBuffer
 
 sealed abstract class Expr
@@ -367,11 +367,13 @@ sealed abstract class RelationalExpr extends Expr {
 }
 
 case class UnaryRelationalExpr(idLits: List[IdentifierLit]) extends RelationalExpr {
-  def transform(wordNet: WordNet, bindings: Bindings, context: Context, data: DataSet, pos: Int, force: Boolean) = {
+  def transform(wordNet: WordNet, bindings: Bindings, context: Context, data: DataSet, pos: Int, force: Boolean) = { //TODO this method is ugly
     if (force || idLits.size > 1) {
       if (pos == 0) {
         if (context.isEmpty) {
-          throw new RuntimeException("to be implemented")
+          useIdentifiersAsGenerator(idLits.map(x => x.value), wordNet).getOrElse(
+            throw new WQueryEvaluationException("Relation '" + idLits.head.value + "' not found")            
+          )
         } else {
           useIdentifiersAsTransformation(idLits.map(x => x.value), wordNet, data, 1)
         }
@@ -388,8 +390,9 @@ case class UnaryRelationalExpr(idLits: List[IdentifierLit]) extends RelationalEx
           }
         case NotQuotedIdentifierLit(id) =>
           if (pos == 0) { // we are in a generator 
-            if (context.isEmpty) { // we are not in a filter      
-              useIdentifierAsGenerator(id, wordNet, context)
+            if (context.isEmpty) { // we are not in a filter
+              useIdentifiersAsGenerator(List(id), wordNet)
+                .getOrElse(useIdentifierAsGenerator(id, wordNet, context))
             } else {
               useIdentifierAsRelationalExprAlias(id, wordNet, bindings, context, data, pos, force) 
                 .getOrElse(
@@ -407,14 +410,30 @@ case class UnaryRelationalExpr(idLits: List[IdentifierLit]) extends RelationalEx
       }
     }
   }
-
-  private def useIdentifierAsRelationalExprAlias(id: String, wordNet: WordNet, bindings: Bindings, context: Context,
-    data: DataSet, pos: Int, force: Boolean) = {
-    bindings.lookup(id) match {
-      case Some(rexpr: RelationalExpr) =>
-        Some(rexpr.transform(wordNet, bindings, context, data, pos, force))
-      case _ =>
-        None
+  
+  private def useIdentifiersAsGenerator(ids: List[String], wordNet: WordNet) = {
+    ids match {
+      case first::second::dests =>
+        wordNet.findRelationsByNameAndSource(second, first) match {
+          case head::_ =>
+            Some(DataSet(wordNet.getPaths(head, first, dests)))  
+          case Nil =>
+            wordNet.findRelationsByNameAndSource(first, Relation.Source) match {
+              case head::_ =>
+                Some(DataSet(wordNet.getPaths(head, Relation.Source, second::dests)))  
+              case Nil =>
+                None
+            }          
+        }          
+      case List(head) =>
+        wordNet.findRelationsByNameAndSource(ids.head, Relation.Source) match {
+          case head::_ =>
+            Some(DataSet(wordNet.getPaths(head, Relation.Source, head.argumentNames.filter(_ != Relation.Source))))          
+          case Nil =>
+            None        
+        }        
+      case Nil =>
+          None        
     }
   }
 
@@ -426,8 +445,8 @@ case class UnaryRelationalExpr(idLits: List[IdentifierLit]) extends RelationalEx
         DataSet.fromValue(false)
       case "true" =>
         DataSet.fromValue(true)
-      case _ =>
-        DataSet.fromOptionalValue(wordNet.getWordForm(id))
+      case id =>
+        DataSet.fromOptionalValue(wordNet.getWordForm(id))                    
     }
   }
 
@@ -454,6 +473,17 @@ case class UnaryRelationalExpr(idLits: List[IdentifierLit]) extends RelationalEx
     
     DataSet(wordNet.follow(data.content, pos, relation, source, dests))            
   }
+  
+  private def useIdentifierAsRelationalExprAlias(id: String, wordNet: WordNet, bindings: Bindings, context: Context,
+    data: DataSet, pos: Int, force: Boolean) = {
+    bindings.lookup(id) match {
+      case Some(rexpr: RelationalExpr) =>
+        Some(rexpr.transform(wordNet, bindings, context, data, pos, force))
+      case _ =>
+        None
+    }
+  }
+  
 }
 
 case class QuantifiedRelationalExpr(expr: RelationalExpr, quantifier: QuantifierLit) extends RelationalExpr {

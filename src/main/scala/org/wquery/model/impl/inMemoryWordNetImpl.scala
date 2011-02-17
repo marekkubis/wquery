@@ -32,6 +32,30 @@ class InMemoryWordNetImpl (val synsets: Set[Synset], val senses: Set[Sense], val
 
     buffer.toList
   }
+  
+  def getPaths(relation: Relation, source:String, dests: List[String]) = {  
+    val buffer = new ListBuffer[List[Any]]        
+
+    for (((obj, rel, src), destmaps) <- successors) {
+      if (rel == relation && src == source) {
+        val tupleBuffer = new ListBuffer[Any]  
+        tupleBuffer.append(obj)
+        
+        for (destmap <- destmaps) {
+          for (dest <- dests) {
+            if (destmap.contains(dest)) {
+              tupleBuffer.append(Arc(relation, source, dest))
+              tupleBuffer.append(destmap(dest))
+            }              
+          }
+        }
+          
+        buffer.append(tupleBuffer.toList)   
+      }
+    }
+    
+    buffer.toList    
+  }
 }
 
 class InMemoryWordNetImplBuilder {
