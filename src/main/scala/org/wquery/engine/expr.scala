@@ -710,7 +710,7 @@ case class ContextByVariableReq(variable: String) extends ContextFreeExpr {
       case Some(value) =>
         DataSet.fromValue(value)
       case None =>
-        throw new WQueryEvaluationException("A reference to unknown variable $" + variable + " found")
+        throw new WQueryEvaluationException("A reference to unknown variable '" + variable + "' found")
     }
   }
 }

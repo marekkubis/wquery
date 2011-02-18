@@ -6,7 +6,7 @@ class Bindings(parent: Option[Bindings]) {
   
   def bind(name: String, value: Any) = (bindings(name) = value)
   
-  def lookup(name: String): Option[Any] = {        
+  def lookup(name: String): Option[Any] = {
     if (bindings contains name) {
       Some(bindings(name))
     } else {
