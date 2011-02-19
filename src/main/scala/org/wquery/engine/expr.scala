@@ -567,9 +567,9 @@ case class ComparisonExpr(op: String, lexpr: EvaluableExpr, rexpr: EvaluableExpr
 
     op match {
       case "=" =>
-        lresult == rresult
+        lresult.forall(rresult.contains) && rresult.forall(lresult.contains)
       case "!=" =>
-        lresult != rresult
+        !(lresult.forall(rresult.contains) && rresult.forall(lresult.contains))
       case "in" =>
         lresult.forall(rresult.contains)
       case "pin" =>
