@@ -2,7 +2,7 @@ package org.wquery.engine
 import org.wquery.model._
 import scala.collection.mutable.ListBuffer
 
-class DataSet(val content: List[List[Any]]) {
+class DataSet(val content: List[List[Any]], stepVars: Map[String, List[Int]], pathVars: Map[String, List[(Int, Int)]]) {
   val minPathSize = {// TODO optimize these two
       val sizes = content.map(x => x.size)
       if (sizes.size > 0) sizes.min else 0
@@ -63,15 +63,17 @@ class DataSet(val content: List[List[Any]]) {
 }
 
 object DataSet {
-  val empty = new DataSet(Nil)
+  val empty = new DataSet(Nil, Map(), Map())
 
-  def apply(content: List[List[Any]]) = new DataSet(content)
+  def apply(content: List[List[Any]]) = new DataSet(content, Map(), Map())
+  
+  def apply(content: List[List[Any]], stepVars: Map[String, List[Int]], pathVars: Map[String, List[(Int, Int)]]) = new DataSet(content, stepVars, pathVars)
 
-  def fromList(vlist: List[Any]) = new DataSet(vlist.map(x => List(x)))
+  def fromList(vlist: List[Any]) = new DataSet(vlist.map(x => List(x)), Map(), Map())
 
-  def fromTuple(tuple: List[Any]) = new DataSet(List(tuple))
+  def fromTuple(tuple: List[Any]) = new DataSet(List(tuple), Map(), Map())
 
-  def fromValue(value: Any) = new DataSet(List(List(value)))
+  def fromValue(value: Any) = new DataSet(List(List(value)), Map(), Map())
 
   def fromOptionalValue(option: Option[Any]) = option match {
     case Some(value) =>

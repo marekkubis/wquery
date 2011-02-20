@@ -1,4 +1,8 @@
 package org.wquery.parser
+
+import org.wquery.engine.BindExpr
+import org.wquery.engine.PathVariableLit
+import org.wquery.engine.StepVariableLit
 import org.wquery.{WQueryParsingErrorException, WQueryParsingFailureException}
 import org.wquery.engine.{EvaluableExpr, FunctionExpr, WQueryFunctions, ImperativeExpr, IteratorExpr, EmissionExpr, EvaluableAssignmentExpr, RelationalAssignmentExpr, IfElseExpr, BinaryPathExpr, BlockExpr, BinaryArithmExpr, TransformationDesc, StepExpr, RelationalExpr, QuantifierLit, FilterTransformationDesc, OrExpr, NotExpr, AndExpr, ComparisonExpr, BooleanLit, SynsetAllReq, SenseAllReq, DoubleQuotedLit, WordFormByRegexReq, ContextByRelationalExprReq, IntegerLit, ContextByReferenceReq, FloatLit, NotQuotedIdentifierLit, QuotedIdentifierLit, StringLit, ContextByVariableReq, BooleanByFilterReq, SequenceLit, SynsetByExprReq, SenseByWordFormAndSenseNumberAndPosReq, SenseByWordFormAndSenseNumberReq, UnaryRelationalExpr, QuantifiedRelationalExpr, RelationTransformationDesc, PathExpr, MinusExpr, UnionRelationalExpr}
 import scala.util.parsing.combinator.RegexParsers
@@ -42,14 +46,14 @@ trait WQueryParsers extends RegexParsers {
       | ifelse  
   )  
   
-  def iterator = "from" ~ var_decls ~ "in" ~ multipath_expr ~ imp_expr ^^ {
+  def iterator = "from" ~ ivar_decls ~ "in" ~ multipath_expr ~ imp_expr ^^ {
     case _~vdecls~_~mexpr~iexpr => IteratorExpr(vdecls, mexpr, iexpr) 
   }     
   
   def emission = "emit" ~> multipath_expr ^^ { x => EmissionExpr(x) }
   
   def assignment = (
-      var_decls ~ "=" ~ multipath_expr ^^ { case vdecls~_~mexpr => EvaluableAssignmentExpr(vdecls, mexpr) }
+      ivar_decls ~ "=" ~ multipath_expr ^^ { case vdecls~_~mexpr => EvaluableAssignmentExpr(vdecls, mexpr) }
       | notQuotedId ~ "=" ~ rel_expr  ^^ { case name~_~rexpr => RelationalAssignmentExpr(name, rexpr) }
       // | expr ~ ("+="|"-="|":=") ~ expr ^^ { case lexpr~op~rexpr => UpdateExpr(lexpr, op, rexpr) }
   )
@@ -58,9 +62,9 @@ trait WQueryParsers extends RegexParsers {
     case cexpr ~ iexpr ~ eexpr => IfElseExpr(cexpr, iexpr, eexpr)
   }
   
-  def var_decls = repsep(var_decl, ",")
+  def ivar_decls = repsep(ivar_decl, ",")
   
-  def var_decl = "$" ~> notQuotedId
+  def ivar_decl = "$" ~> notQuotedId
   
   // mutlipath exprs
 
@@ -93,7 +97,7 @@ trait WQueryParsers extends RegexParsers {
       notQuotedId ~ ("(" ~> expr <~ ")") ^^ { case name~y => FunctionExpr(name, y) }
       | path  
   )
-    
+  
   // paths
   
   def path 
@@ -104,8 +108,8 @@ trait WQueryParsers extends RegexParsers {
       | filter_trans
   )
   
-  def relational_trans = dots ~ rel_expr ^^ {
-    case pos~expr => RelationTransformationDesc(pos, expr)
+  def relational_trans = dots ~ rel_expr ~ opt(var_decls) ^^ {
+    case pos~expr~decls => RelationTransformationDesc(pos, expr, decls.getOrElse(Nil))
   }
   
   def dots = rep1(".") ^^ { x => x.size }    
@@ -127,7 +131,7 @@ trait WQueryParsers extends RegexParsers {
       |success(QuantifierLit(1, Some(1)))      
   )
     
-  def filter_trans = filter ^^ { x => FilterTransformationDesc(x) }
+  def filter_trans = filter ~ opt(var_decls) ^^ { case x~decls => FilterTransformationDesc(x, decls.getOrElse(Nil)) }
   
   def filter = "[" ~> or_condition <~ "]"
   
@@ -163,7 +167,10 @@ trait WQueryParsers extends RegexParsers {
       |filter_generator
       |expr_generator
       |variable_generator    
-  )
+  ) ~ opt(var_decls) ^^ {
+      case g~Some(b) => BindExpr(g, b)
+      case g~None => g
+  }
 
   def boolean_generator = (
       "true" ^^ { x => BooleanLit(true) }
@@ -197,7 +204,15 @@ trait WQueryParsers extends RegexParsers {
   def back_generator = rep1("#") ^^ { x => ContextByReferenceReq(x.size) }
   def filter_generator = filter ^^ { x => BooleanByFilterReq(x) }
   def expr_generator = "(" ~> expr <~ ")"
-  def variable_generator = var_decl ^^ { x => ContextByVariableReq(x) }
+  def variable_generator = ivar_decl ^^ { x => ContextByVariableReq(x) }
+  
+  // path variables
+  def var_decls = rep1(var_decl)  
+  
+  def var_decl = (
+      "$" ~> notQuotedId ^^ { x => StepVariableLit(x) }
+      | "@" ~> notQuotedId ^^ { x => PathVariableLit(x) }
+  ) 
   
   // literals
   def alphaLit = stringLit|idLit ^^ { 

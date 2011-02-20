@@ -333,25 +333,64 @@ case class FunctionExpr(name: String, args: EvaluableExpr) extends EvaluableExpr
 case class StepExpr(lexpr: EvaluableExpr, rexpr: TransformationDesc) extends EvaluableExpr {
   def evaluate(functions: FunctionSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
     rexpr match {
-      case RelationTransformationDesc(pos, rexpr) =>
+      case RelationTransformationDesc(pos, rexpr, decls) =>
         val lresult = lexpr.evaluate(functions, wordNet, bindings, context)
 
-        rexpr.transform(wordNet, bindings, context, lresult, pos, false)
-      case FilterTransformationDesc(cond) =>
+        bind(rexpr.transform(wordNet, bindings, context, lresult, pos, false), decls)
+      case FilterTransformationDesc(cond, decls) =>
         val lresult = lexpr.evaluate(functions, wordNet, bindings, context)
 
-        DataSet(lresult.content.filter { tuple => 
+        bind(DataSet(lresult.content.filter { tuple => 
           cond.satisfied(functions, wordNet, bindings, Context(tuple))
-        })
+        }), decls)
     }
   }
+  
+  def bind(dataSet: DataSet, decls: List[VariableLit]) = {   
+    val pathVarPos = decls.indexWhere{_.isInstanceOf[PathVariableLit]}
+    
+    if (pathVarPos != decls.lastIndexWhere{_.isInstanceOf[PathVariableLit]}) {
+        throw new WQueryEvaluationException("Variable list '" + decls.map { 
+          case PathVariableLit(v) => "@" + v 
+          case StepVariableLit(v) => "$" + v
+        }.mkString + "' contains more than one path variable")
+    }
 
+    val stepVarIndexes = Map[String, ListBuffer[Int]](decls.filterNot(x => (x.isInstanceOf[PathVariableLit] || x.value == "_")).map(x => (x.value, new ListBuffer[Int])): _*)    
+    val pathVarIndexes = Map[String, ListBuffer[(Int, Int)]](decls.filter(x => (x.isInstanceOf[PathVariableLit] && x.value != "_")).map(x => (x.value, new ListBuffer[(Int, Int)])): _*)
+    
+    if (pathVarPos != -1) {
+      val leftVars = decls.slice(0, pathVarPos).map(_.value).zipWithIndex.filterNot{_._1 == "_"}.toMap
+      val rightVars = decls.slice(pathVarPos + 1, decls.size).map(_.value).zipWithIndex.filterNot{_._1 == "_"}.toMap   
+      val pathVarStart = leftVars.size
+      val pathVarEnd = rightVars.size
+      val pathVarBuffer = pathVarIndexes(decls(pathVarPos).value)
+      
+      for (tuple <- dataSet.content) {  
+        for ((v, pos) <- rightVars)
+          stepVarIndexes(v).append(tuple.size - pos)
+        
+        pathVarBuffer.append((pathVarStart, tuple.size - 1 - pathVarEnd))
+        
+        for ((v, pos) <- leftVars)
+          stepVarIndexes(v).append(pos)
+      }
+    } else {
+      val rightVars = decls.map(_.value).zipWithIndex.filterNot{_._1 == "_"}.toMap        
+        
+      for (tuple <- dataSet.content)  
+        for ((v, pos) <- rightVars)
+          stepVarIndexes(v).append(tuple.size - pos)      
+    }
+    
+    DataSet(dataSet.content, stepVarIndexes.mapValues(_.toList), pathVarIndexes.mapValues(_.toList))
+  }
 }
 
 sealed abstract class TransformationDesc extends Expr
 
-case class RelationTransformationDesc(pos: Int, expr: RelationalExpr) extends TransformationDesc
-case class FilterTransformationDesc(expr: ConditionalExpr) extends TransformationDesc
+case class RelationTransformationDesc(pos: Int, expr: RelationalExpr, decls: List[VariableLit]) extends TransformationDesc
+case class FilterTransformationDesc(expr: ConditionalExpr, decls: List[VariableLit]) extends TransformationDesc
 
 case class PathExpr(expr: EvaluableExpr) extends EvaluableExpr {
   def evaluate(functions: FunctionSet, wordNet: WordNet, bindings: Bindings, context: Context) = { //TODO extend this method or remove this class
@@ -718,6 +757,18 @@ case class ContextByVariableReq(variable: String) extends ContextFreeExpr {
 case class BooleanByFilterReq(cond: ConditionalExpr) extends ContextFreeExpr {
   def evaluate(functions: FunctionSet, wordNet: WordNet, bindings: Bindings) = DataSet.fromValue(cond.satisfied(functions, wordNet, bindings, Context.empty))
 }
+
+/*
+ * Variables
+ */
+case class BindExpr(expr: EvaluableExpr, vars: List[VariableLit]) extends EvaluableExpr  {
+  def evaluate(functions: FunctionSet, wordNet: WordNet, bindings: Bindings, context: Context) = expr.evaluate(functions, wordNet, bindings, context)
+}
+
+sealed abstract class VariableLit(val value: String) extends Expr
+
+case class StepVariableLit(override val value: String) extends VariableLit(value)
+case class PathVariableLit(override val value: String) extends VariableLit(value)
 
 /*
  * Literals
