@@ -16,7 +16,7 @@ class XmlWQueryEmitter extends WQueryEmitter {
     val builder = new StringBuilder
     builder append "<RESULT>\n" 
       
-    dataSet.content.foreach { tuple => 
+    dataSet.paths.foreach { tuple => 
       builder append "<TUPLE>\n"
       tuple.foreach {elem => emitElement(elem, builder)}
       builder append "</TUPLE>\n"        

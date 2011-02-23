@@ -14,7 +14,7 @@ class JSonEmitter extends WQueryEmitter {
   }  
   
   private def emitDataSet(dataSet: DataSet): String = {
-    val content = dataSet.content 
+    val content = dataSet.paths 
     val builder = new StringBuilder    
     
     builder append "["     

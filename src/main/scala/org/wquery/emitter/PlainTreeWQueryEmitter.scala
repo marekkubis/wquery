@@ -12,7 +12,7 @@ class PlainTreeWQueryEmitter extends PlainWQueryEmitter {
   }  
   
   private def emitDataSet(dataSet: DataSet): String = {
-    val content = dataSet.content
+    val content = dataSet.paths
     
     if (!content.isEmpty) {
       val builder = new StringBuilder

@@ -12,7 +12,7 @@ class PlainLineWQueryEmitter extends PlainWQueryEmitter {
   }  
   
   private def emitDataSet(dataSet: DataSet): String = {
-    val content = dataSet.content
+    val content = dataSet.paths
     val pathVarNames = dataSet.pathVars.keys.toSeq.sortWith((x, y) => x < y)
     val stepVarNames = dataSet.stepVars.keys.toSeq.sortWith((x, y) => x < y)
     
