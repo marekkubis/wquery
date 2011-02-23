@@ -59,34 +59,28 @@ object WQueryFunctions {
   
   def sort(dataSet: DataSet) = DataSet.fromBoundPaths(dataSet.toBoundPaths.sortWith((x, y) => compare(x._1, y._1) < 0))
 
-  def count(result: DataSet) = DataSet.fromValue(result.paths.size)
+  def count(dataSet: DataSet) = DataSet.fromValue(dataSet.paths.size)
   
-  def last(result: DataSet) = DataSet(result.paths.map(x => List(x.last)))
+  def last(dataSet: DataSet) = DataSet(dataSet.paths.map(x => List(x.last)))
 
-  def min(result: DataSet) = {
-    val sresult = sort(result)
-    DataSet(List(sresult.paths.head))    
-  }  
+  def min(dataSet: DataSet) = DataSet(List(sort(dataSet).paths.head))
   
-  def max(result: DataSet) = {
-    val sresult = sort(result)
-    DataSet(List(sresult.paths.last))    
-  }
+  def max(dataSet: DataSet) = DataSet(List(sort(dataSet).paths.last))
     
-  def sumInt(result: DataSet) = {
+  def sumInt(dataSet: DataSet) = {
     var sum: Int = 0
     
-    for (tuple <- result.paths) {
+    for (tuple <- dataSet.paths) {
         sum += tuple.head.asInstanceOf[Int]
     }
   
     DataSet.fromValue(sum)
   }
   
-  def sumFloat(result: DataSet) = {
+  def sumFloat(dataSet: DataSet) = {
     var sum: Double = 0
     
-    for (tuple <- result.paths) {
+    for (tuple <- dataSet.paths) {
         tuple match {
             case List(value:Double) =>
                 sum += value
@@ -100,12 +94,12 @@ object WQueryFunctions {
     DataSet.fromValue(sum)
   }  
   
-  def avg(result: DataSet) = {      
-    if (result.minPathSize == 1 && result.maxPathSize == 1) {  
-        if (result.getType(0) == IntegerType)
-          DataSet.fromValue(sumInt(result).paths.head.head.asInstanceOf[Int].toDouble / result.paths.size)
-        else if (result.isNumeric(0))
-          DataSet.fromValue(sumFloat(result).paths.head.head.asInstanceOf[Double] / result.paths.size)      
+  def avg(dataSet: DataSet) = {      
+    if (dataSet.minPathSize == 1 && dataSet.maxPathSize == 1) {  
+        if (dataSet.getType(0) == IntegerType)
+          DataSet.fromValue(sumInt(dataSet).paths.head.head.asInstanceOf[Int].toDouble / dataSet.paths.size)
+        else if (dataSet.isNumeric(0))
+          DataSet.fromValue(sumFloat(dataSet).paths.head.head.asInstanceOf[Double] / dataSet.paths.size)      
         else 
           throw new WQueryEvaluationException("Function 'avg' can compute average for numeric types only")
     } else {
@@ -113,9 +107,9 @@ object WQueryFunctions {
     }
   }
   
-  def size(result: DataSet) = DataSet(result.paths.map(path => path.filter(step => !step.isInstanceOf[Arc])).map(path => List(path.size)))  
+  def size(dataSet: DataSet) = DataSet(dataSet.paths.map(path => path.filter(step => !step.isInstanceOf[Arc])).map(path => List(path.size)))  
 
-  def length(result: DataSet) = DataSet(result.paths.map{path => List(path.size)})  
+  def length(dataSet: DataSet) = DataSet(dataSet.paths.map{path => List(path.size)})  
   
   def string_length(word: String) = word.size  
   
