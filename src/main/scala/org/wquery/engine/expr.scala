@@ -330,7 +330,7 @@ case class FunctionExpr(name: String, args: EvaluableExpr) extends EvaluableExpr
 /*
  * Path related expressions
  */
-case class StepExpr(lexpr: EvaluableExpr, rexpr: TransformationDesc) extends EvaluableExpr {
+case class StepExpr(lexpr: EvaluableExpr, rexpr: TransformationDesc) extends EvaluableExpr with VariableBindings {
   def evaluate(functions: FunctionSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
     rexpr match {
       case RelationTransformationDesc(pos, rexpr, decls) =>
@@ -345,45 +345,65 @@ case class StepExpr(lexpr: EvaluableExpr, rexpr: TransformationDesc) extends Eva
         }), decls)
     }
   }
+}
+
+trait VariableBindings {
+  def bind(dataSet: DataSet, decls: List[VariableLit]) = {
+    if (decls != Nil) {      
+      val stepVarIndexes = Map[String, ListBuffer[Int]](
+        decls.filterNot(x => (x.isInstanceOf[PathVariableLit] || x.value == "_")).map(x => (x.value, new ListBuffer[Int])): _*)    
+      val pathVarIndexes = Map[String, ListBuffer[(Int, Int)]](
+        decls.filter(x => (x.isInstanceOf[PathVariableLit] && x.value != "_")).map(x => (x.value, new ListBuffer[(Int, Int)])): _*)
+    
+      getPathVariablePosition(decls) match {
+        case Some(pathVarPos) => 
+          val leftVars = decls.slice(0, pathVarPos).map(_.value).zipWithIndex.filterNot{_._1 == "_"}.toMap
+          val rightVars = decls.slice(pathVarPos + 1, decls.size).map(_.value).zipWithIndex.filterNot{_._1 == "_"}.toMap   
+          val pathVarStart = leftVars.size
+          val pathVarEnd = rightVars.size
+          val pathVarBuffer = pathVarIndexes(decls(pathVarPos).value)
+      
+          for (tuple <- dataSet.content) {  
+            dataSet.content.foreach(tuple => bindVariablesFromRight(rightVars, stepVarIndexes, tuple.size))            
+            pathVarBuffer.append((pathVarStart, tuple.size - 1 - pathVarEnd))
+            dataSet.content.foreach(tuple => bindVariablesFromLeft(leftVars, stepVarIndexes))            
+          }
+        case None =>
+          val rightVars = decls.map(_.value).zipWithIndex.filterNot{_._1 == "_"}.toMap        
+        
+          dataSet.content.foreach(tuple => bindVariablesFromRight(rightVars, stepVarIndexes, tuple.size))      
+      }
+    
+      DataSet(dataSet.content, stepVarIndexes.mapValues(_.toList), pathVarIndexes.mapValues(_.toList))
+    } else {
+      dataSet
+    }
+  }
   
-  def bind(dataSet: DataSet, decls: List[VariableLit]) = {   
+  private def getPathVariablePosition(decls: List[VariableLit]) = {
     val pathVarPos = decls.indexWhere{_.isInstanceOf[PathVariableLit]}
     
     if (pathVarPos != decls.lastIndexWhere{_.isInstanceOf[PathVariableLit]}) {
-        throw new WQueryEvaluationException("Variable list '" + decls.map { 
-          case PathVariableLit(v) => "@" + v 
-          case StepVariableLit(v) => "$" + v
-        }.mkString + "' contains more than one path variable")
-    }
-
-    val stepVarIndexes = Map[String, ListBuffer[Int]](decls.filterNot(x => (x.isInstanceOf[PathVariableLit] || x.value == "_")).map(x => (x.value, new ListBuffer[Int])): _*)    
-    val pathVarIndexes = Map[String, ListBuffer[(Int, Int)]](decls.filter(x => (x.isInstanceOf[PathVariableLit] && x.value != "_")).map(x => (x.value, new ListBuffer[(Int, Int)])): _*)
-    
-    if (pathVarPos != -1) {
-      val leftVars = decls.slice(0, pathVarPos).map(_.value).zipWithIndex.filterNot{_._1 == "_"}.toMap
-      val rightVars = decls.slice(pathVarPos + 1, decls.size).map(_.value).zipWithIndex.filterNot{_._1 == "_"}.toMap   
-      val pathVarStart = leftVars.size
-      val pathVarEnd = rightVars.size
-      val pathVarBuffer = pathVarIndexes(decls(pathVarPos).value)
-      
-      for (tuple <- dataSet.content) {  
-        for ((v, pos) <- rightVars)
-          stepVarIndexes(v).append(tuple.size - pos)
-        
-        pathVarBuffer.append((pathVarStart, tuple.size - 1 - pathVarEnd))
-        
-        for ((v, pos) <- leftVars)
-          stepVarIndexes(v).append(pos)
-      }
+      throw new WQueryEvaluationException("Variable list '" + decls.map { 
+        case PathVariableLit(v) => "@" + v 
+        case StepVariableLit(v) => "$" + v
+      }.mkString + "' contains more than one path variable")
     } else {
-      val rightVars = decls.map(_.value).zipWithIndex.filterNot{_._1 == "_"}.toMap        
-        
-      for (tuple <- dataSet.content)  
-        for ((v, pos) <- rightVars)
-          stepVarIndexes(v).append(tuple.size - pos)      
+      if (pathVarPos != -1)
+        Some(pathVarPos)
+      else
+        None
     }
-    
-    DataSet(dataSet.content, stepVarIndexes.mapValues(_.toList), pathVarIndexes.mapValues(_.toList))
+  }
+  
+  private def bindVariablesFromLeft(vars: Map[String, Int], varIndexes: Map[String, ListBuffer[Int]]) {
+    for ((v, pos) <- vars)
+      varIndexes(v).append(pos)
+  }    
+  
+  private def bindVariablesFromRight(vars: Map[String, Int], varIndexes: Map[String, ListBuffer[Int]], tupleSize: Int) {
+    for ((v, pos) <- vars)
+      varIndexes(v).append(tupleSize - pos)
   }
 }
 
@@ -761,8 +781,10 @@ case class BooleanByFilterReq(cond: ConditionalExpr) extends ContextFreeExpr {
 /*
  * Variables
  */
-case class BindExpr(expr: EvaluableExpr, vars: List[VariableLit]) extends EvaluableExpr  {
-  def evaluate(functions: FunctionSet, wordNet: WordNet, bindings: Bindings, context: Context) = expr.evaluate(functions, wordNet, bindings, context)
+case class GeneratorExpr(expr: EvaluableExpr, decls: List[VariableLit]) extends EvaluableExpr with VariableBindings {
+  def evaluate(functions: FunctionSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
+    bind(expr.evaluate(functions, wordNet, bindings, context), decls)
+  }
 }
 
 sealed abstract class VariableLit(val value: String) extends Expr

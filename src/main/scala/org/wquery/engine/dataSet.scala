@@ -2,7 +2,7 @@ package org.wquery.engine
 import org.wquery.model._
 import scala.collection.mutable.ListBuffer
 
-class DataSet(val content: List[List[Any]], stepVars: Map[String, List[Int]], pathVars: Map[String, List[(Int, Int)]]) {
+class DataSet(val content: List[List[Any]], val stepVars: Map[String, List[Int]], val pathVars: Map[String, List[(Int, Int)]]) {
   val minPathSize = {// TODO optimize these two
       val sizes = content.map(x => x.size)
       if (sizes.size > 0) sizes.min else 0

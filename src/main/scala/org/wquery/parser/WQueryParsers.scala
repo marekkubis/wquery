@@ -1,6 +1,6 @@
 package org.wquery.parser
 
-import org.wquery.engine.BindExpr
+import org.wquery.engine.GeneratorExpr
 import org.wquery.engine.PathVariableLit
 import org.wquery.engine.StepVariableLit
 import org.wquery.{WQueryParsingErrorException, WQueryParsingFailureException}
@@ -167,10 +167,7 @@ trait WQueryParsers extends RegexParsers {
       |filter_generator
       |expr_generator
       |variable_generator    
-  ) ~ opt(var_decls) ^^ {
-      case g~Some(b) => BindExpr(g, b)
-      case g~None => g
-  }
+  ) ~ opt(var_decls) ^^ { case expr~decls => GeneratorExpr(expr, decls.getOrElse(Nil)) }
 
   def boolean_generator = (
       "true" ^^ { x => BooleanLit(true) }
