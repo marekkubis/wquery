@@ -19,7 +19,9 @@ class PlainLineWQueryEmitter extends PlainWQueryEmitter {
     if (!content.isEmpty) {
       val builder = new StringBuilder 
 
-      for (i <- 0 until content.size) {        
+      for (i <- 0 until content.size) {
+          val tuple = content(i)  
+          
         for (pathVarName <- pathVarNames) {
           builder append "@"
           builder append pathVarName
@@ -32,11 +34,10 @@ class PlainLineWQueryEmitter extends PlainWQueryEmitter {
           builder append "$"
           builder append stepVarName
           builder append "="
-          emitElement(dataSet.stepVars(stepVarName), builder)
+          emitElement(tuple(dataSet.stepVars(stepVarName)(i)), builder)
           builder append " "
         }
           
-        val tuple = content(i)
         emitTuple(tuple, builder)
         builder append "\n"
       }

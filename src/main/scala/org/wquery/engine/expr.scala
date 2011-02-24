@@ -358,7 +358,7 @@ trait VariableBindings {
       getPathVariablePosition(decls) match {
         case Some(pathVarPos) => 
           val leftVars = decls.slice(0, pathVarPos).map(_.value).zipWithIndex.filterNot{_._1 == "_"}.toMap
-          val rightVars = decls.slice(pathVarPos + 1, decls.size).map(_.value).zipWithIndex.filterNot{_._1 == "_"}.toMap   
+          val rightVars = decls.slice(pathVarPos + 1, decls.size).map(_.value).reverse.zipWithIndex.filterNot{_._1 == "_"}.toMap   
           val pathVarStart = leftVars.size
           val pathVarEnd = rightVars.size
           val pathVarBuffer = pathVarIndexes(decls(pathVarPos).value)
@@ -369,7 +369,7 @@ trait VariableBindings {
             dataSet.paths.foreach(tuple => bindVariablesFromLeft(leftVars, stepVarIndexes))            
           }
         case None =>
-          val rightVars = decls.map(_.value).zipWithIndex.filterNot{_._1 == "_"}.toMap        
+          val rightVars = decls.map(_.value).reverse.zipWithIndex.filterNot{_._1 == "_"}.toMap        
         
           dataSet.paths.foreach(tuple => bindVariablesFromRight(rightVars, stepVarIndexes, tuple.size))      
       }
@@ -402,8 +402,14 @@ trait VariableBindings {
   }    
   
   private def bindVariablesFromRight(vars: Map[String, Int], varIndexes: Map[String, ListBuffer[Int]], tupleSize: Int) {
-    for ((v, pos) <- vars)
-      varIndexes(v).append(tupleSize - pos)
+    for ((v, pos) <- vars) {
+      val index = tupleSize - 1 - pos
+      
+      if (index >= 0)
+        varIndexes(v).append(index)
+      else 
+        throw new WQueryEvaluationException("Variable $" + v + " cannot be bound")
+    }
   }
 }
 

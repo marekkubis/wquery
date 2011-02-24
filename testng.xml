@@ -9,6 +9,7 @@
             <class name="org.wquery.FiltersTestSuite" />            
             <class name="org.wquery.ArithmeticsTestSuite" />      
             <class name="org.wquery.MultiPathsTestSuite" />
+            <class name="org.wquery.VariablesTestSuite" />            
             <class name="org.wquery.ImperativeExprsTestSuite" />
             <class name="org.wquery.QueryReaderTestSuite" />
         </classes>
