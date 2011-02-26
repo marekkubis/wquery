@@ -48,7 +48,7 @@ case class EmissionExpr(expr: EvaluableExpr) extends ImperativeExpr {
 case class IteratorExpr(vars: List[String], mexpr: EvaluableExpr, iexpr: ImperativeExpr) extends ImperativeExpr {
   def evaluate(functions: FunctionSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
     val mresult = mexpr.evaluate(functions, wordNet, bindings, context)
-    val tupleBindings = new Bindings(Some(bindings))
+    val tupleBindings = Bindings(bindings)
     val buffer = new DataSetBuffer
 
     for (tuple <- mresult.paths) {
@@ -87,7 +87,7 @@ case class IfElseExpr(cexpr: EvaluableExpr, iexpr: ImperativeExpr, eexpr: Option
 
 case class BlockExpr(exprs: List[ImperativeExpr]) extends ImperativeExpr {
   def evaluate(functions: FunctionSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
-    val blockBindings = new Bindings(Some(bindings))
+    val blockBindings = Bindings(bindings)
     val buffer = new DataSetBuffer
 
     for (expr <- exprs) {
@@ -360,8 +360,9 @@ case class StepExpr(lexpr: EvaluableExpr, rexpr: TransformationDesc) extends Eva
       case FilterTransformationDesc(cond, decls) =>
         val lresult = lexpr.evaluate(functions, wordNet, bindings, context)
 
-        bind(DataSet(lresult.paths.filter { tuple => 
-          cond.satisfied(functions, wordNet, bindings, Context(tuple))
+        bind(DataSet(lresult.paths.filter { tuple =>
+          val binds = Bindings(bindings)        
+          cond.satisfied(functions, wordNet, binds, Context(tuple))
         }), decls)
     }
   }

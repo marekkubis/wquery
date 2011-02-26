@@ -19,3 +19,9 @@ class Bindings(parent: Option[Bindings]) {
     }
   }
 }
+
+object Bindings {
+  def apply() = new Bindings(None)
+  
+  def apply(parent: Bindings) = new Bindings(Some(parent))  
+}
