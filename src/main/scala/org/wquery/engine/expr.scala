@@ -800,13 +800,13 @@ case class ContextByReferenceReq(ref: Int) extends EvaluableExpr {
   }
 }
 
-case class ContextByVariableReq(variable: String) extends ContextFreeExpr {
+case class ContextByVariableReq(variable: VariableLit) extends ContextFreeExpr {
   def evaluate(functions: FunctionSet, wordNet: WordNet, bindings: Bindings) = {
-    bindings.lookup(variable) match {
+    bindings.lookup(variable.value) match {// TODO distinguish between path and step variables
       case Some(value) =>
         DataSet.fromValue(value)
       case None =>
-        throw new WQueryEvaluationException("A reference to unknown variable '" + variable + "' found")
+        throw new WQueryEvaluationException("A reference to unknown variable '" + variable.value + "' found")
     }
   }
 }

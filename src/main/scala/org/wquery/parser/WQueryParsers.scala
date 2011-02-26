@@ -10,7 +10,7 @@ import scala.util.parsing.combinator.RegexParsers
 trait WQueryParsers extends RegexParsers {
 
   def parse(input: String): EvaluableExpr = {
-    parse(query, input) match {
+    parseAll(query, input) match {
       case Success(expr, _) =>
         expr
       case Failure(message, _) =>
@@ -53,8 +53,8 @@ trait WQueryParsers extends RegexParsers {
   def emission = "emit" ~> multipath_expr ^^ { x => EmissionExpr(x) }
   
   def assignment = (
-      ivar_decls ~ "=" ~ multipath_expr ^^ { case vdecls~_~mexpr => EvaluableAssignmentExpr(vdecls, mexpr) }
-      | notQuotedId ~ "=" ~ rel_expr  ^^ { case name~_~rexpr => RelationalAssignmentExpr(name, rexpr) }
+      ivar_decls ~ ":=" ~ multipath_expr ^^ { case vdecls~_~mexpr => EvaluableAssignmentExpr(vdecls, mexpr) }
+      | notQuotedId ~ ":=" ~ rel_expr  ^^ { case name~_~rexpr => RelationalAssignmentExpr(name, rexpr) }
       // | expr ~ ("+="|"-="|":=") ~ expr ^^ { case lexpr~op~rexpr => UpdateExpr(lexpr, op, rexpr) }
   )
   
@@ -201,7 +201,7 @@ trait WQueryParsers extends RegexParsers {
   def back_generator = rep1("#") ^^ { x => ContextByReferenceReq(x.size) }
   def filter_generator = filter ^^ { x => BooleanByFilterReq(x) }
   def expr_generator = "(" ~> expr <~ ")"
-  def variable_generator = ivar_decl ^^ { x => ContextByVariableReq(x) }
+  def variable_generator = var_decl ^^ { x => ContextByVariableReq(x) }
   
   // path variables
   def var_decls = rep1(var_decl)  
