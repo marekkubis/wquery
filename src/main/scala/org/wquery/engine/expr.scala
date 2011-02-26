@@ -140,7 +140,7 @@ case class BinaryPathExpr(op: String, left: EvaluableExpr, right: EvaluableExpr)
 
     op match {
       case "," =>
-        DataSet(join(leval.paths, reval.paths))
+        join(leval, reval)
       case op =>
         DataSet(
           op match {
@@ -156,16 +156,36 @@ case class BinaryPathExpr(op: String, left: EvaluableExpr, right: EvaluableExpr)
     }
   }
 
-  def join(left: List[List[Any]], right: List[List[Any]]) = {
-    val buffer = new ListBuffer[List[Any]]
-
-    for (ltuple <- left) {
-      for (rtuple <- right) {
-        buffer append (ltuple ++ rtuple)
+  def join(left: DataSet, right: DataSet) = {
+    val leftPathVarNames = left.pathVars.keys.toSeq
+    val leftStepVarNames = left.stepVars.keys.toSeq
+    val rightPathVarNames = right.pathVars.keys.toSeq
+    val rightStepVarNames = right.stepVars.keys.toSeq
+    val pathBuffer = DataSetBuffers.createPathBuffer
+    val pathVarBuffers = DataSetBuffers.createPathVarBuffers(leftPathVarNames ++ rightPathVarNames)
+    val stepVarBuffers = DataSetBuffers.createStepVarBuffers(leftStepVarNames ++ rightStepVarNames)
+    
+    for (i <- 0 until left.pathCount) {
+      for (j <- 0 until right.pathCount ) {
+        val leftTuple = left.paths(i)
+        val rightTuple = right.paths(j)        
+          
+        pathBuffer.append(leftTuple ++ rightTuple)
+        leftPathVarNames.foreach(x => pathVarBuffers(x).append(left.pathVars(x)(i)))
+        leftStepVarNames.foreach(x => stepVarBuffers(x).append(left.stepVars(x)(i)))
+        
+        val offset = leftTuple.size
+        
+        rightPathVarNames.foreach { x => 
+          val pos = right.pathVars(x)(j)          
+          pathVarBuffers(x).append((pos._1 + offset, pos._2 + offset))
+        }
+        
+        rightStepVarNames.foreach(x => stepVarBuffers(x).append(right.stepVars(x)(j) + offset))
       }
     }
 
-    buffer.toList
+    DataSet.fromBuffers(pathBuffer, pathVarBuffers, stepVarBuffers)
   }
 }
 
