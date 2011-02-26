@@ -1,6 +1,6 @@
 package org.wquery.engine
 import org.wquery.WQueryEvaluationException
-import org.wquery.model.{WordNet, IntegerType, Relation, DataType, StringType, SenseType, SynsetType, Sense, BasicType, UnionType, ValueType, TupleType, AggregateFunction, ScalarFunction, FloatType, FunctionArgumentType, Arc}
+import org.wquery.model.{WordNet, IntegerType, Relation, DataType, StringType, SenseType, SynsetType, Sense, BasicType, UnionType, ValueType, TupleType, AggregateFunction, ScalarFunction, FloatType, FunctionArgumentType, Arc, DataSet, DataSetBuffer, DataSetBuffers}
 import scala.collection.mutable.ListBuffer
 
 sealed abstract class Expr
@@ -349,11 +349,9 @@ case class StepExpr(lexpr: EvaluableExpr, rexpr: TransformationDesc) extends Eva
 
 trait VariableBindings {
   def bind(dataSet: DataSet, decls: List[VariableLit]) = {
-    if (decls != Nil) {      
-      val stepVarIndexes = Map[String, ListBuffer[Int]](
-        decls.filterNot(x => (x.isInstanceOf[PathVariableLit] || x.value == "_")).map(x => (x.value, new ListBuffer[Int])): _*)    
-      val pathVarIndexes = Map[String, ListBuffer[(Int, Int)]](
-        decls.filter(x => (x.isInstanceOf[PathVariableLit] && x.value != "_")).map(x => (x.value, new ListBuffer[(Int, Int)])): _*)
+    if (decls != Nil) {          
+      val pathVarBuffers = DataSetBuffers.createPathVarBuffers(decls.filter(x => (x.isInstanceOf[PathVariableLit] && x.value != "_")).map(_.value))                
+      val stepVarBuffers = DataSetBuffers.createStepVarBuffers(decls.filterNot(x => (x.isInstanceOf[PathVariableLit] || x.value == "_")).map(_.value))        
     
       getPathVariablePosition(decls) match {
         case Some(pathVarPos) => 
@@ -361,20 +359,20 @@ trait VariableBindings {
           val rightVars = decls.slice(pathVarPos + 1, decls.size).map(_.value).reverse.zipWithIndex.filterNot{_._1 == "_"}.toMap   
           val pathVarStart = leftVars.size
           val pathVarEnd = rightVars.size
-          val pathVarBuffer = pathVarIndexes(decls(pathVarPos).value)
+          val pathVarBuffer = pathVarBuffers(decls(pathVarPos).value)
       
           for (tuple <- dataSet.paths) {  
-            dataSet.paths.foreach(tuple => bindVariablesFromRight(rightVars, stepVarIndexes, tuple.size))            
+            dataSet.paths.foreach(tuple => bindVariablesFromRight(rightVars, stepVarBuffers, tuple.size))            
             pathVarBuffer.append((pathVarStart, tuple.size - 1 - pathVarEnd))
-            dataSet.paths.foreach(tuple => bindVariablesFromLeft(leftVars, stepVarIndexes))            
+            dataSet.paths.foreach(tuple => bindVariablesFromLeft(leftVars, stepVarBuffers))            
           }
         case None =>
           val rightVars = decls.map(_.value).reverse.zipWithIndex.filterNot{_._1 == "_"}.toMap        
         
-          dataSet.paths.foreach(tuple => bindVariablesFromRight(rightVars, stepVarIndexes, tuple.size))      
+          dataSet.paths.foreach(tuple => bindVariablesFromRight(rightVars, stepVarBuffers, tuple.size))      
       }
     
-      DataSet(dataSet.paths, pathVarIndexes.mapValues(_.toList), stepVarIndexes.mapValues(_.toList))
+      DataSet(dataSet.paths, dataSet.pathVars ++ pathVarBuffers.mapValues(_.toList), dataSet.stepVars ++ stepVarBuffers.mapValues(_.toList))
     } else {
       dataSet
     }
@@ -536,7 +534,7 @@ case class UnaryRelationalExpr(idLits: List[IdentifierLit]) extends RelationalEx
         }      
     }
     
-    DataSet(wordNet.follow(data.paths, pos, relation, source, dests))            
+    wordNet.follow(data, pos, relation, source, dests)            
   }
   
   private def useIdentifierAsRelationalExprAlias(id: String, wordNet: WordNet, bindings: Bindings, context: Context,

@@ -1,5 +1,4 @@
-package org.wquery.engine
-import org.wquery.model._
+package org.wquery.model
 import scala.collection.mutable.ListBuffer
 
 class DataSet(val paths: List[List[Any]], val pathVars: Map[String, List[(Int, Int)]], val stepVars: Map[String, List[Int]]) {
@@ -88,9 +87,9 @@ object DataSet {
   def fromBoundPaths(boundPaths: List[(List[Any], Map[String, (Int, Int)], Map[String, Int])]) = {
     val pathVarNames = if (boundPaths.isEmpty) Nil else boundPaths.head._2.keys.toSeq 
     val stepVarNames = if (boundPaths.isEmpty) Nil else boundPaths.head._3.keys.toSeq
-    val pathBuffer = new ListBuffer[List[Any]]
-    val pathVarBuffers = Map[String, ListBuffer[(Int, Int)]](pathVarNames.map(x => (x, new ListBuffer[(Int, Int)])): _*)
-    val stepVarBuffers = Map[String, ListBuffer[Int]](stepVarNames.map(x => (x, new ListBuffer[Int])): _*)    
+    val pathBuffer = DataSetBuffers.createPathBuffer
+    val pathVarBuffers = DataSetBuffers.createPathVarBuffers(pathVarNames)
+    val stepVarBuffers = DataSetBuffers.createStepVarBuffers(stepVarNames)    
     
     for ((path, pathVars, stepVars) <- boundPaths) {
       pathBuffer.append(path)
@@ -102,7 +101,11 @@ object DataSet {
         stepVarBuffers(v).append(pos)
     }
     
-    new DataSet(pathBuffer.toList, pathVarBuffers.mapValues(_.toList), stepVarBuffers.mapValues(_.toList))
+    fromBuffers(pathBuffer, pathVarBuffers, stepVarBuffers)
+  }
+  
+  def fromBuffers(pathBuffer: ListBuffer[List[Any]], pathVarBuffers: Map[String, ListBuffer[(Int, Int)]], stepVarBuffers: Map[String, ListBuffer[Int]]) = {
+      new DataSet(pathBuffer.toList, pathVarBuffers.mapValues(_.toList), stepVarBuffers.mapValues(_.toList)) 
   }
   
   def fromList(vlist: List[Any]) = new DataSet(vlist.map(x => List(x)), Map(), Map())
@@ -117,6 +120,14 @@ object DataSet {
     case None =>
       empty
   }
+}
+
+object DataSetBuffers {
+  def createPathBuffer = new ListBuffer[List[Any]]  
+    
+  def createPathVarBuffers(pathVarNames: Seq[String]) = Map[String, ListBuffer[(Int, Int)]](pathVarNames.map(x => (x, new ListBuffer[(Int, Int)])): _*)
+  
+  def createStepVarBuffers(stepVarNames: Seq[String]) = Map[String, ListBuffer[Int]](stepVarNames.map(x => (x, new ListBuffer[Int])): _*)
 }
 
 class DataSetBuffer { 

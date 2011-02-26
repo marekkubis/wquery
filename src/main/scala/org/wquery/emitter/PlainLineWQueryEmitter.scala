@@ -1,5 +1,6 @@
 package org.wquery.emitter
-import org.wquery.engine.{Result, Error, Answer, DataSet}
+import org.wquery.engine.{Result, Error, Answer}
+import org.wquery.model.DataSet
 
 class PlainLineWQueryEmitter extends PlainWQueryEmitter {
   def emit(result: Result):String = {

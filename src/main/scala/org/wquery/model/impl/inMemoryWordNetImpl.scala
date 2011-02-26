@@ -1,36 +1,49 @@
 package org.wquery.model.impl
 
-import org.wquery.model.Arc
-import org.wquery.model.{Sense, Synset, DataType, Relation, WordNet}
+import org.wquery.model.DataSetBuffers
+import org.wquery.model.{Sense, Synset, DataType, Relation, WordNet, DataSet, Arc}
 import scala.collection.mutable.{Set, Map, ListBuffer}
 
 class InMemoryWordNetImpl (val synsets: Set[Synset], val senses: Set[Sense], val words: Set[String], 
                            val relations: Map[(String, DataType, String), Relation],
                            val successors: Map[(Any, Relation, String), List[Map[String, Any]]]) extends WordNet { 
   
-  def follow(content: List[List[Any]], pos: Int, relation: Relation, source: String, dests: List[String]) = {
+  def follow(dataSet: DataSet, pos: Int, relation: Relation, source: String, dests: List[String]) = {
     relation.demandArgument(source)
     dests.foreach(relation.demandArgument)
       
-    val buffer = new ListBuffer[List[Any]]                      
+    val pathVarNames = dataSet.pathVars.keys.toSeq
+    val stepVarNames = dataSet.stepVars.keys.toSeq
+    val pathBuffer = DataSetBuffers.createPathBuffer
+    val pathVarBuffers = DataSetBuffers.createPathVarBuffers(pathVarNames)
+    val stepVarBuffers = DataSetBuffers.createStepVarBuffers(stepVarNames)
     
-    for (tuple <- content) {
+    for (i <- 0 until dataSet.pathCount) {
+      val tuple = dataSet.paths(i)   
+        
       if (successors.contains((tuple(tuple.size - pos), relation, source))) {
         for (succs <- successors(tuple(tuple.size - pos), relation, source)) {
-         val tupleBuffer = new ListBuffer[Any]
-         tupleBuffer.appendAll(tuple)
-         dests.foreach { dest => 
-           if (succs.contains(dest)) {
-             tupleBuffer.append(Arc(relation, source, dest))
-             tupleBuffer.append(succs(dest))
-           }
-         }
-         buffer.append(tupleBuffer.toList)
+          val tupleBuffer = new ListBuffer[Any]
+          tupleBuffer.appendAll(tuple)
+          dests.foreach { dest => 
+            if (succs.contains(dest)) {
+              tupleBuffer.append(Arc(relation, source, dest))
+              tupleBuffer.append(succs(dest))
+            }
+          }
+         
+          pathBuffer.append(tupleBuffer.toList)
+          
+          for (pathVar <- pathVarNames)
+              pathVarBuffers(pathVar).append(dataSet.pathVars(pathVar)(i))
+          
+          for (stepVar <- stepVarNames)
+              stepVarBuffers(stepVar).append(dataSet.stepVars(stepVar)(i))
         }
       }
     }
 
-    buffer.toList
+    DataSet.fromBuffers(pathBuffer, pathVarBuffers, stepVarBuffers)
   }
   
   def getPaths(relation: Relation, source:String, dests: List[String]) = {  

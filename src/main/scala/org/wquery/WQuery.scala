@@ -1,7 +1,7 @@
 package org.wquery
-import org.wquery.engine.{WQueryFunctions, FunctionSet, DataSet, Result, Error, Answer, Context, Bindings}
+import org.wquery.engine.{WQueryFunctions, FunctionSet, Result, Error, Answer, Context, Bindings}
 import org.wquery.loader.{GridLoader, WordNetLoader}
-import org.wquery.model.{WordNet, FunctionArgumentType}
+import org.wquery.model.{WordNet, FunctionArgumentType, DataSet}
 import org.wquery.parser.WQueryParsers
 import org.wquery.utils.Logging
 import scala.collection.mutable.LinkedHashSet

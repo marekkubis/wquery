@@ -1,6 +1,6 @@
 package org.wquery.engine
 import org.wquery.{WQueryEvaluationException, WQuery}
-import org.wquery.model.{ValueType, TupleType, IntegerType, FloatType, StringType, Synset, Sense, Arc}
+import org.wquery.model.{ValueType, TupleType, IntegerType, FloatType, StringType, Synset, Sense, Arc, DataSet}
 
 /**
  * WQuery built-in functions

@@ -1,5 +1,6 @@
 package org.wquery.engine
 import org.wquery.WQueryException
+import org.wquery.model.DataSet
 
 sealed abstract class Result
 

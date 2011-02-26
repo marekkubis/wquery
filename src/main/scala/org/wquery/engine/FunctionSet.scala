@@ -1,7 +1,7 @@
 package org.wquery.engine
 import java.lang.reflect.Method
 import org.wquery.WQueryModelException
-import org.wquery.model.{TupleType, BooleanType, FloatType, IntegerType, StringType, SenseType, Sense, SynsetType, Synset, ValueType, AggregateFunction, ScalarFunction, Function, FunctionArgumentType, ArcType, Arc}
+import org.wquery.model.{TupleType, BooleanType, FloatType, IntegerType, StringType, SenseType, Sense, SynsetType, Synset, ValueType, AggregateFunction, ScalarFunction, Function, FunctionArgumentType, ArcType, Arc, DataSet}
 import scala.collection.mutable.Map
 
 class FunctionSet {
