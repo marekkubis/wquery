@@ -555,19 +555,29 @@ case class QuantifiedRelationalExpr(expr: RelationalExpr, quantifier: Quantifier
       case QuantifierLit(1, Some(1)) =>
         expr.transform(wordNet, bindings, context, data, pos, force)
       case QuantifierLit(1, None) =>
+        val pathVarNames = data.pathVars.keys.toSeq
+        val stepVarNames = data.stepVars.keys.toSeq
+        val pathBuffer = DataSetBuffers.createPathBuffer
+        val pathVarBuffers = DataSetBuffers.createPathVarBuffers(pathVarNames)
+        val stepVarBuffers = DataSetBuffers.createStepVarBuffers(stepVarNames)        
         val head = expr.transform(wordNet, bindings, context, data, pos, force)
-        val paths = new ListBuffer[List[Any]]
 
-        for (tuple <- head.paths) {
-          paths.append(tuple)
-          val prefix = tuple.slice(0, tuple.size - 1) // remove prefix variable put tuple to outer closure
+        for (i <- 0 until head.pathCount) {
+          val tuple = head.paths(i)
+          val prefix = tuple.slice(0, tuple.size - 1)
+          
+          pathBuffer.append(tuple)
+          pathVarNames.foreach(x => pathVarBuffers(x).append(head.pathVars(x)(i)))
+          stepVarNames.foreach(x => stepVarBuffers(x).append(head.stepVars(x)(i)))          
 
           for (cnode <- closure(wordNet, bindings, context, expr, List(tuple.last), Set(tuple.last))) {
-            paths.append(prefix ++ cnode)
+            pathBuffer.append(prefix ++ cnode)
+            pathVarNames.foreach(x => pathVarBuffers(x).append(head.pathVars(x)(i)))
+            stepVarNames.foreach(x => stepVarBuffers(x).append(head.stepVars(x)(i)))        
           }
         }
         
-        DataSet(paths.toList)
+        DataSet.fromBuffers(pathBuffer, pathVarBuffers, stepVarBuffers)
       case _ =>
         throw new IllegalArgumentException("Unsupported quantifier value " + quantifier)
     }
@@ -600,7 +610,10 @@ case class UnionRelationalExpr(lexpr: RelationalExpr, rexpr: RelationalExpr) ext
     val lresult = lexpr.transform(wordNet, bindings, context, data, pos, force)
     val rresult = rexpr.transform(wordNet, bindings, context, data, pos, force)
 
-    DataSet(lresult.paths union rresult.paths)
+    DataSet(lresult.paths union rresult.paths,
+      lresult.pathVars.map(x => (x._1, x._2 ++ rresult.pathVars(x._1))),
+      lresult.stepVars.map(x => (x._1, x._2 ++ rresult.stepVars(x._1)))
+    )
   }
 }
 
