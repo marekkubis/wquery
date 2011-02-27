@@ -51,7 +51,7 @@ trait WQueryParsers extends RegexParsers {
   def emission = "emit" ~> multipath_expr ^^ { x => EmissionExpr(x) }
   
   def assignment = (
-      ivar_decls ~ ":=" ~ multipath_expr ^^ { case vdecls~_~mexpr => EvaluableAssignmentExpr(vdecls, mexpr) }
+      var_decls ~ ":=" ~ multipath_expr ^^ { case vdecls~_~mexpr => EvaluableAssignmentExpr(vdecls, mexpr) }
       | notQuotedId ~ ":=" ~ rel_expr  ^^ { case name~_~rexpr => RelationalAssignmentExpr(name, rexpr) }
       // | expr ~ ("+="|"-="|":=") ~ expr ^^ { case lexpr~op~rexpr => UpdateExpr(lexpr, op, rexpr) }
   )
@@ -59,10 +59,6 @@ trait WQueryParsers extends RegexParsers {
   def ifelse = "if" ~> multipath_expr ~ imp_expr ~ opt("else" ~> imp_expr) ^^ {
     case cexpr ~ iexpr ~ eexpr => IfElseExpr(cexpr, iexpr, eexpr)
   }
-  
-  def ivar_decls = repsep(ivar_decl, ",")
-  
-  def ivar_decl = "$" ~> notQuotedId
   
   // mutlipath exprs
 
