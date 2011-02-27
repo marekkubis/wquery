@@ -14,8 +14,8 @@ class PlainLineWQueryEmitter extends PlainWQueryEmitter {
   
   private def emitDataSet(dataSet: DataSet): String = {
     val content = dataSet.paths
-    val pathVarNames = dataSet.pathVars.keys.toSeq.sortWith((x, y) => x < y)
-    val stepVarNames = dataSet.stepVars.keys.toSeq.sortWith((x, y) => x < y)
+    val pathVarNames = dataSet.pathVars.keys.toSeq.filterNot(_.startsWith("_")).sortWith((x, y) => x < y)
+    val stepVarNames = dataSet.stepVars.keys.toSeq.filterNot(_.startsWith("_")).sortWith((x, y) => x < y)
     
     if (!content.isEmpty) {
       val builder = new StringBuilder 

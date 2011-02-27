@@ -54,7 +54,7 @@ case class IteratorExpr(vars: List[String], mexpr: EvaluableExpr, iexpr: Imperat
     for (tuple <- mresult.paths) {
       if (tuple.size >= vars.size) {  
         for (i <- 0 until vars.size) {
-          tupleBindings.bind(vars(i), tuple(i))
+          tupleBindings.bindStepVariable(vars(i), tuple(i))
         }
     
         buffer.append(iexpr.evaluate(functions, wordNet, tupleBindings, context))
@@ -107,7 +107,7 @@ case class EvaluableAssignmentExpr(vars: List[String], expr: EvaluableExpr) exte
 
       if (vars.size == tuple.size) {
         for (i <- 0 until vars.size) {
-          bindings.bind(vars(i), tuple(i))
+          bindings.bindStepVariable(vars(i), tuple(i))
         }
 
         DataSet.empty
@@ -125,7 +125,7 @@ case class EvaluableAssignmentExpr(vars: List[String], expr: EvaluableExpr) exte
 
 case class RelationalAssignmentExpr(name: String, rexpr: RelationalExpr) extends ImperativeExpr {
   def evaluate(functions: FunctionSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
-    bindings.bind(name, rexpr)
+    bindings.bindRelationalExprAlias(name, rexpr)
     DataSet.empty
   }
 }
@@ -359,11 +359,34 @@ case class StepExpr(lexpr: EvaluableExpr, rexpr: TransformationDesc) extends Eva
         bind(rexpr.transform(wordNet, bindings, context, lresult, pos, false), decls)
       case FilterTransformationDesc(cond, decls) =>
         val lresult = lexpr.evaluate(functions, wordNet, bindings, context)
-
-        bind(DataSet(lresult.paths.filter { tuple =>
+        val pathVarNames = lresult.pathVars.keys.toSeq
+        val stepVarNames = lresult.stepVars.keys.toSeq                
+        val pathBuffer = DataSetBuffers.createPathBuffer
+        val pathVarBuffers = DataSetBuffers.createPathVarBuffers(pathVarNames)
+        val stepVarBuffers = DataSetBuffers.createStepVarBuffers(stepVarNames)
+        
+        for (i <- 0 until lresult.pathCount) {
+          val tuple = lresult.paths(i)
           val binds = Bindings(bindings)        
-          cond.satisfied(functions, wordNet, binds, Context(tuple))
-        }), decls)
+          
+          for (pathVar <- pathVarNames) {
+            val varPos = lresult.pathVars(pathVar)(i)
+            binds.bindPathVariable(pathVar, tuple.slice(varPos._1, varPos._2))            
+          }
+          
+          for (stepVar <- stepVarNames) {
+            val varPos = lresult.stepVars(stepVar)(i)
+            binds.bindStepVariable(stepVar, tuple(varPos))            
+          }          
+          
+          if (cond.satisfied(functions, wordNet, binds, Context(tuple))) {
+            pathBuffer.append(tuple)
+            pathVarNames.foreach(x => pathVarBuffers(x).append(lresult.pathVars(x)(i)))
+            stepVarNames.foreach(x => stepVarBuffers(x).append(lresult.stepVars(x)(i)))
+          }
+        }
+
+        bind(DataSet.fromBuffers(pathBuffer, pathVarBuffers, stepVarBuffers), decls)
     }
   }
 }
@@ -560,14 +583,8 @@ case class UnaryRelationalExpr(idLits: List[IdentifierLit]) extends RelationalEx
   
   private def useIdentifierAsRelationalExprAlias(id: String, wordNet: WordNet, bindings: Bindings, context: Context,
     data: DataSet, pos: Int, force: Boolean) = {
-    bindings.lookup(id) match {
-      case Some(rexpr: RelationalExpr) =>
-        Some(rexpr.transform(wordNet, bindings, context, data, pos, force))
-      case _ =>
-        None
-    }
+    bindings.lookupRelationalExprAlias(id).map(_.transform(wordNet, bindings, context, data, pos, force))      
   }
-  
 }
 
 case class QuantifiedRelationalExpr(expr: RelationalExpr, quantifier: QuantifierLit) extends RelationalExpr {
@@ -803,11 +820,21 @@ case class ContextByReferenceReq(ref: Int) extends EvaluableExpr {
 
 case class ContextByVariableReq(variable: VariableLit) extends ContextFreeExpr {
   def evaluate(functions: FunctionSet, wordNet: WordNet, bindings: Bindings) = {
-    bindings.lookup(variable.value) match {// TODO distinguish between path and step variables
-      case Some(value) =>
-        DataSet.fromValue(value)
-      case None =>
-        throw new WQueryEvaluationException("A reference to unknown variable '" + variable.value + "' found")
+    variable match {
+      case PathVariableLit(name) =>
+        bindings.lookupPathVariable(name) match {
+          case Some(tuple) =>
+            DataSet.fromTuple(tuple)
+          case None =>
+            throw new WQueryEvaluationException("A reference to unknown variable @'" + name + "' found")
+        }
+      case StepVariableLit(name) =>
+        bindings.lookupStepVariable(name) match {
+          case Some(value) =>
+            DataSet.fromValue(value)
+          case None =>
+            throw new WQueryEvaluationException("A reference to unknown variable $'" + name + "' found")
+        }
     }
   }
 }
