@@ -12,24 +12,11 @@ class Bindings(parent: Option[Bindings]) {
 
   def bindRelationalExprAlias(name: String, value: RelationalExpr) = (relationalExprAliases(name) = value)  
   
-  def lookupPathVariable(name: String): Option[List[Any]] = lookup[List[Any]](name, pathVariables, parent match {case Some(parent) => Some(parent.lookupPathVariable _) case None => None} ) 
-
-  def lookupStepVariable(name: String): Option[Any] = lookup[Any](name, stepVariables, parent match {case Some(parent) => Some(parent.lookupStepVariable _) case None => None} )   
+  def lookupPathVariable(name: String): Option[List[Any]] = pathVariables.get(name).orElse(parent.flatMap(_.lookupPathVariable(name)))
+   
+  def lookupStepVariable(name: String): Option[Any] = stepVariables.get(name).orElse(parent.flatMap(_.lookupStepVariable(name)))
   
-  def lookupRelationalExprAlias(name: String): Option[RelationalExpr] = lookup[RelationalExpr](name, relationalExprAliases, parent match {case Some(parent) => Some(parent.lookupRelationalExprAlias _) case None => None} )   
-    
-  private def lookup[A](name: String, map: Map[String, A], func: Option[String => Option[A]]): Option[A] = {
-    if (map contains name) {
-      Some(map(name))
-    } else {
-      func match {
-        case Some(func) =>
-          func(name)
-        case None =>
-          None
-      }      
-    }
-  }  
+  def lookupRelationalExprAlias(name: String): Option[RelationalExpr] = relationalExprAliases.get(name).orElse(parent.flatMap(_.lookupRelationalExprAlias(name)))   
 }
 
 object Bindings {

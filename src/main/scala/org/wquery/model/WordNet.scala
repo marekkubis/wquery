@@ -17,23 +17,19 @@ trait WordNet {
   def getPaths(relation: Relation, source: String, dests: List[String]): List[List[Any]]
   
   private def getSuccessors(obj: Any, relation: Relation): List[Any] = {
-    follow(DataSet.fromValue(obj), 1, relation, Relation.Source, List(Relation.Destination)).paths.map(x => x.last) // TO BE rewritten after implementing WordNetStore    
+    follow(DataSet.fromValue(obj), 1, relation, Relation.Source, List(Relation.Destination)).paths.map(_.last) // TO BE rewritten after implementing WordNetStore    
   }
   
   def getSynsetsByWordForm(word: String) = getSuccessors(word, WordNet.WordFormToSynsets)  
 
-  def getSynsetBySense(sense: Sense) = {
+  def demandSynsetBySense(sense: Sense) = {
     val succs = getSuccessors(sense, WordNet.SenseToSynset)
     if (!succs.isEmpty) succs.head else throw new WQueryModelException("No synset found for sense " + sense)    
   }
   
   def getSenseByWordFormAndSenseNumberAndPos(word: String, num: Int, pos: String) = {
-    try {
-      val succs = getSuccessors(word + ":" + num + ":" + pos, WordNet.WordFormAndSenseNumberAndPosToSense)
-      if (succs.isEmpty) None else Some(succs.head)
-    } catch {
-      case  _: java.util.NoSuchElementException => None
-    }
+    val succs = getSuccessors(word + ":" + num + ":" + pos, WordNet.WordFormAndSenseNumberAndPosToSense)
+    if (succs.isEmpty) None else Some(succs.head)
   }
   
   def getSensesByWordFormAndSenseNumber(word: String, num: Int) = getSuccessors(word + ":" + num, WordNet.WordFormAndSenseNumberToSenses) 
@@ -49,11 +45,19 @@ trait WordNet {
   def findRelationsByNameAndSource(name: String, sourceName: String) = {
     List(getRelation(name, SynsetType, sourceName), getRelation(name, SenseType, sourceName), getRelation(name, StringType, sourceName),
       getRelation(name, IntegerType, sourceName), getRelation(name, FloatType, sourceName), getRelation(name, BooleanType, sourceName))
-      .filter { case Some(_) => true case None => false }.map(_.get)
+        .filter(_.map(_ => true).getOrElse(false)).map(_.get)
   }
   
-  def containsRelation(name: String, sourceType: DataType, sourceName: String) = relations.contains(name, sourceType, sourceName)   
+  def findFirstRelationByNameAndSource(name: String, sourceName: String) = {
+    findRelationsByNameAndSource(name, sourceName) match {
+      case head::_ =>
+        Some(head)         
+      case Nil =>
+        None        
+    }        
+  }
   
+  def containsRelation(name: String, sourceType: DataType, sourceName: String) = relations.contains(name, sourceType, sourceName)     
 }
 
 

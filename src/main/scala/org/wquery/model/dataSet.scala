@@ -114,12 +114,7 @@ object DataSet {
 
   def fromValue(value: Any) = new DataSet(List(List(value)), Map(), Map())
 
-  def fromOptionalValue(option: Option[Any]) = option match {
-    case Some(value) =>
-      fromValue(value)
-    case None =>
-      empty
-  }
+  def fromOptionalValue(option: Option[Any]) = option.map(fromValue(_)).getOrElse(empty)      
 }
 
 object DataSetBuffers {

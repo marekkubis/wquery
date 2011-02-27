@@ -80,17 +80,12 @@ class InMemoryWordNetImplBuilder {
   val successors = Map[(Any, Relation, String), List[Map[String, Any]]]()       
     
   // import built in relations
-  for (relation <- WordNet.relations) {    
+  for (relation <- WordNet.relations)
     addRelation(relation)
-  }
   
   def getSynsetById(id: String) = {
-    try {
-      val succs = successors((id, WordNet.IdToSynset, Relation.Source))
-      if (succs.isEmpty) None else Some(succs.head(Relation.Destination))
-    } catch {
-      case  _: java.util.NoSuchElementException => None
-    }
+    val succs = successors.get((id, WordNet.IdToSynset, Relation.Source))
+    if (succs.map(_.isEmpty).getOrElse(true)) None else Some(succs.get.head(Relation.Destination))
   }  
   
   def getRelation(name: String, sourceType: DataType, sourceName: String) = relations.get(name, sourceType, sourceName)

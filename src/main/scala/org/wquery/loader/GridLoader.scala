@@ -186,21 +186,16 @@ class GridHandler(builder: InMemoryWordNetImplBuilder) extends DefaultHandler wi
 
     // create semantic relations successors       
     for ((synset, relname, reldest) <- ilrRelationsTuples) {      
-      builder.getRelation(relname, SynsetType, Relation.Source) match {            
-        case Some(relation) =>           
+      builder.getRelation(relname, SynsetType, Relation.Source) 
+        .map { relation =>
           relation.destinationType match {
             case SynsetType =>
-              builder.getSynsetById(reldest) match {
-                case Some(destSynset) => builder.addSuccessor(synset, relation, destSynset)
-                case None => warn("ILR tag with type '" + relname + "' found in synset '" + synset.id + "' points to unknown synset '" + reldest + "'")
-              }
+              builder.getSynsetById(reldest).map(builder.addSuccessor(synset, relation, _))
+                .getOrElse(warn("ILR tag with type '" + relname + "' found in synset '" + synset.id + "' points to unknown synset '" + reldest + "'"))
             case dtype =>
               throw new RuntimeException("ILR tag points to relation " + relation + " that has incorrect destination type " + dtype)
-          }
-        case None => {
-          throw new RuntimeException("Relation '" + relname + "' not found")
-        }
-      }       
+          }        
+        }.getOrElse(throw new RuntimeException("Relation '" + relname + "' not found"))
     }
     
     info("ILR relations loaded")    
@@ -226,8 +221,8 @@ class GridHandler(builder: InMemoryWordNetImplBuilder) extends DefaultHandler wi
     
     // create successors
     for ((synset, relname, reldest) <- genericRelationsTuples) {      
-      builder.getRelation(relname, SynsetType, Relation.Source) match {            
-        case Some(relation) =>           
+      builder.getRelation(relname, SynsetType, Relation.Source) 
+        .map { relation =>
           relation.destinationType match {
             case SynsetType =>
               builder.addSuccessor(synset, relation, builder.getSynsetById(reldest).get)
@@ -240,44 +235,35 @@ class GridHandler(builder: InMemoryWordNetImplBuilder) extends DefaultHandler wi
             case StringType =>
               builder.addSuccessor(synset, relation, reldest)
             case dtype =>
-              throw new RuntimeException("Incorrect destination type " + dtype +
-                                           " as a successor of relation '" + relation + "'")
-          }
-        case None => {
-          throw new RuntimeException("Relation '" + relname + "' not found")
-        }
-      }     
+              throw new RuntimeException("Incorrect destination type " + dtype + " as a successor of relation '" + relation + "'")
+          }          
+      }.getOrElse(throw new RuntimeException("Relation '" + relname + "' not found"))     
     }
     
     info("non-ILR relations loaded")    
   }
     
   private def getType(builder: InMemoryWordNetImplBuilder, destination: String) = {
-    builder.getSynsetById(destination) match {
-      case Some(_) => SynsetType                     
-      case None => {
-        try {
-          destination.toBoolean
-          BooleanType
-        } catch {
-          case _:NumberFormatException => {
-            try {
-              destination.toInt
-              IntegerType
-            } catch {
-              case _:NumberFormatException => {
-                try {
-                  destination.toDouble
-                  FloatType
-                } catch {
-                  case _:NumberFormatException => StringType
-                }                      
+    builder.getSynsetById(destination).map(_ => SynsetType).getOrElse(
+      try {
+        destination.toBoolean
+        BooleanType
+      } catch {
+        case _:NumberFormatException =>
+          try {
+            destination.toInt
+            IntegerType
+          } catch {
+            case _:NumberFormatException =>
+              try {
+                destination.toDouble
+                FloatType
+              } catch {
+                case _:NumberFormatException => StringType
               }
-            }                  
           }
-        }
-      } 
-    }
+      }
+    )
   }
   
   private def rankType(dtype: NodeType) = dtype match {

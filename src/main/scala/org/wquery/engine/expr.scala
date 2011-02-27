@@ -70,18 +70,10 @@ case class IteratorExpr(vars: List[String], mexpr: EvaluableExpr, iexpr: Imperat
 
 case class IfElseExpr(cexpr: EvaluableExpr, iexpr: ImperativeExpr, eexpr: Option[ImperativeExpr]) extends ImperativeExpr {
   def evaluate(functions: FunctionSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
-    val cresult = cexpr.evaluate(functions, wordNet, bindings, context)
-
-    if (cresult.isTrue) {
+    if (cexpr.evaluate(functions, wordNet, bindings, context).isTrue)
       iexpr.evaluate(functions, wordNet, bindings, context)
-    } else {
-      eexpr match {
-        case Some(eexpr) =>
-          eexpr.evaluate(functions, wordNet, bindings, context)
-        case None =>
-          DataSet.empty
-      }
-    }
+    else
+      eexpr.map(_.evaluate(functions, wordNet, bindings, context)).getOrElse(DataSet.empty)        
   }
 }
 
@@ -302,23 +294,16 @@ case class FunctionExpr(name: String, args: EvaluableExpr) extends EvaluableExpr
       }
     }
 
-    functions.getFunction(name, atypes) match {
-      case Some(func) =>
-        invokeFunction(func, atypes, avalues)
-      case None =>
-        // promote arg types from integers to floats
-        functions.getFunction(
-          name,
-          atypes.map {
-            case ValueType(IntegerType) => ValueType(FloatType)
-            case t => t
-          }) match {
-          case Some(func) => 
-            invokeFunction(func, atypes, avalues)
-          case None =>
-            invokeFunction(functions.demandFunction(name, List(TupleType)), atypes, avalues)
-        }
-    }
+    functions.getFunction(name, atypes) 
+      .map(invokeFunction(_, atypes, avalues))
+      .getOrElse(functions.getFunction(
+        name,
+        atypes.map {
+          case ValueType(IntegerType) => ValueType(FloatType)
+          case t => t
+        }).map(invokeFunction(_, atypes, avalues))
+          .getOrElse(invokeFunction(functions.demandFunction(name, List(TupleType)), atypes, avalues))
+      )
   }
   
   private def invokeFunction(fdesc: (org.wquery.model.Function, java.lang.reflect.Method), atypes: List[FunctionArgumentType], avalues: DataSet) = {
@@ -411,8 +396,7 @@ trait VariableBindings {
             dataSet.paths.foreach(tuple => bindVariablesFromLeft(leftVars, stepVarBuffers))            
           }
         case None =>
-          val rightVars = decls.map(_.value).reverse.zipWithIndex.filterNot{_._1 == "_"}.toMap        
-        
+          val rightVars = decls.map(_.value).reverse.zipWithIndex.filterNot{_._1 == "_"}.toMap                
           dataSet.paths.foreach(tuple => bindVariablesFromRight(rightVars, stepVarBuffers, tuple.size))      
       }
     
@@ -521,24 +505,13 @@ case class UnaryRelationalExpr(idLits: List[IdentifierLit]) extends RelationalEx
   private def useIdentifiersAsGenerator(ids: List[String], wordNet: WordNet) = {
     ids match {
       case first::second::dests =>
-        wordNet.findRelationsByNameAndSource(second, first) match {
-          case head::_ =>
-            Some(DataSet(wordNet.getPaths(head, first, dests)))  
-          case Nil =>
-            wordNet.findRelationsByNameAndSource(first, Relation.Source) match {
-              case head::_ =>
-                Some(DataSet(wordNet.getPaths(head, Relation.Source, second::dests)))  
-              case Nil =>
-                None
-            }          
-        }          
+        wordNet.findFirstRelationByNameAndSource(second, first)
+          .map(r => DataSet(wordNet.getPaths(r, first, dests)))
+          .orElse(wordNet.findFirstRelationByNameAndSource(first, Relation.Source)
+            .map(r => DataSet(wordNet.getPaths(r, Relation.Source, second::dests))))
       case List(head) =>
-        wordNet.findRelationsByNameAndSource(ids.head, Relation.Source) match {
-          case head::_ =>
-            Some(DataSet(wordNet.getPaths(head, Relation.Source, head.argumentNames.filter(_ != Relation.Source))))          
-          case Nil =>
-            None        
-        }        
+        wordNet.findFirstRelationByNameAndSource(ids.head, Relation.Source) 
+          .map(r => DataSet(wordNet.getPaths(r, Relation.Source, r.argumentNames.filter(_ != Relation.Source))))        
       case Nil =>
           None        
     }
@@ -563,19 +536,13 @@ case class UnaryRelationalExpr(idLits: List[IdentifierLit]) extends RelationalEx
       case List(relationName) =>
         (wordNet.demandRelation(relationName, sourceType, Relation.Source), Relation.Source, List(Relation.Destination))
       case List(left, right) =>
-        wordNet.getRelation(left, sourceType, Relation.Source) match {
-          case Some(relation) => 
-            (relation, Relation.Source, List(right))
-          case None =>
-            (wordNet.demandRelation(right, sourceType, left), left, List(Relation.Destination))  
-        }
+        wordNet.getRelation(left, sourceType, Relation.Source) 
+          .map((_, Relation.Source, List(right)))
+          .getOrElse((wordNet.demandRelation(right, sourceType, left), left, List(Relation.Destination)))
       case first::second::dests =>
-        wordNet.getRelation(first, sourceType, Relation.Source) match {
-          case Some(relation) => 
-            (relation, Relation.Source, second::dests)
-          case None =>
-            (wordNet.demandRelation(second, sourceType, first), first, dests)  
-        }      
+        wordNet.getRelation(first, sourceType, Relation.Source) 
+          .map((_, Relation.Source, second::dests))
+          .getOrElse((wordNet.demandRelation(second, sourceType, first), first, dests))
     }
     
     wordNet.follow(data, pos, relation, source, dests)            
@@ -696,12 +663,7 @@ case class ComparisonExpr(op: String, lexpr: EvaluableExpr, rexpr: EvaluableExpr
 
             lresult.forall {
               case elem: String =>
-                regex findFirstIn (elem) match {
-                  case Some(_) =>
-                    true
-                  case None =>
-                    false
-                }
+                regex.findFirstIn(elem).map(_ => true).getOrElse(false)
             }
           } else {
             throw new WQueryEvaluationException("The right side of '" + op +
@@ -757,7 +719,7 @@ case class SynsetByExprReq(expr: EvaluableExpr) extends EvaluableExpr {
 
     if (eresult.pathCount == 1 && eresult.minPathSize == 1 && eresult.maxPathSize == 1) {
       if (eresult.getType(0) == SenseType) {
-        DataSet(eresult.paths.map { case List(sense: Sense) => List(wordNet.getSynsetBySense(sense)) })
+        DataSet(eresult.paths.map { case List(sense: Sense) => List(wordNet.demandSynsetBySense(sense)) })
       } else if (eresult.getType(0) == StringType) {          
         DataSet(eresult.paths.flatMap { case List(wordForm: String) => wordNet.getSynsetsByWordForm(wordForm) }.map(x => List(x)))  
       } else {
@@ -792,14 +754,7 @@ case class ContextByRelationalExprReq(expr: RelationalExpr) extends EvaluableExp
 case class WordFormByRegexReq(v: String) extends FunctionsFreeExpr {
   def evaluate(wordNet: WordNet) = {
     val regex = v.r
-    val result = wordNet.words.filter { x =>
-      regex findFirstIn (x) match {
-        case Some(s) =>
-          true
-        case None =>
-          false
-      }
-    }
+    val result = wordNet.words.filter(x => regex.findFirstIn(x).map(_ => true).getOrElse(false))
 
     DataSet.fromList(result.toList)
   }
@@ -822,19 +777,11 @@ case class ContextByVariableReq(variable: VariableLit) extends ContextFreeExpr {
   def evaluate(functions: FunctionSet, wordNet: WordNet, bindings: Bindings) = {
     variable match {
       case PathVariableLit(name) =>
-        bindings.lookupPathVariable(name) match {
-          case Some(tuple) =>
-            DataSet.fromTuple(tuple)
-          case None =>
-            throw new WQueryEvaluationException("A reference to unknown variable @'" + name + "' found")
-        }
+        bindings.lookupPathVariable(name).map(DataSet.fromTuple(_))
+          .getOrElse(throw new WQueryEvaluationException("A reference to unknown variable @'" + name + "' found"))
       case StepVariableLit(name) =>
-        bindings.lookupStepVariable(name) match {
-          case Some(value) =>
-            DataSet.fromValue(value)
-          case None =>
-            throw new WQueryEvaluationException("A reference to unknown variable $'" + name + "' found")
-        }
+        bindings.lookupStepVariable(name).map(DataSet.fromValue(_))
+          .getOrElse(throw new WQueryEvaluationException("A reference to unknown variable $'" + name + "' found"))
     }
   }
 }
