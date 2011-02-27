@@ -458,27 +458,25 @@ sealed abstract class RelationalExpr extends Expr {
 }
 
 case class UnaryRelationalExpr(idLits: List[IdentifierLit]) extends RelationalExpr {
-  def transform(wordNet: WordNet, bindings: Bindings, context: Context, data: DataSet, pos: Int, force: Boolean) = { //TODO this method is ugly
+  def transform(wordNet: WordNet, bindings: Bindings, context: Context, data: DataSet, pos: Int, force: Boolean) = {
     if (force || idLits.size > 1) {
       if (pos == 0) {
         if (context.isEmpty) {
-          useIdentifiersAsGenerator(idLits.map(x => x.value), wordNet).getOrElse(
-            throw new WQueryEvaluationException("Relation '" + idLits.head.value + "' not found")            
-          )
+          useIdentifiersAsGenerator(idLits.map(_.value), wordNet)
+            .getOrElse(throw new WQueryEvaluationException("Relation '" + idLits.head.value + "' not found"))
         } else {
-          useIdentifiersAsTransformation(idLits.map(x => x.value), wordNet, data, 1)
+          useIdentifiersAsTransformation(idLits.map(_.value), wordNet, data, 1)
         }
       } else {
-        useIdentifiersAsTransformation(idLits.map(x => x.value), wordNet, data, pos)  
+        useIdentifiersAsTransformation(idLits.map(_.value), wordNet, data, pos)  
       }
     } else {
       idLits.head match {
         case QuotedIdentifierLit(wordForm) =>
-          if (pos == 0) {
+          if (pos == 0)
             useIdentifierAsGenerator(wordForm, wordNet, context)
-          } else {
+          else
             throw new WQueryEvaluationException("Quoted identifier found after '.'")
-          }
         case NotQuotedIdentifierLit(id) =>
           if (pos == 0) { // we are in a generator 
             if (context.isEmpty) { // we are not in a filter
@@ -486,13 +484,12 @@ case class UnaryRelationalExpr(idLits: List[IdentifierLit]) extends RelationalEx
                 .getOrElse(useIdentifierAsGenerator(id, wordNet, context))
             } else {
               useIdentifierAsRelationalExprAlias(id, wordNet, bindings, context, data, pos, force) 
-                .getOrElse(
-                  if (wordNet.containsRelation(id, data.getType(0), Relation.Source)) {
+                .getOrElse {
+                  if (wordNet.containsRelation(id, data.getType(0), Relation.Source))
                     useIdentifiersAsTransformation(List(id), wordNet, data, 1)
-                  } else {
+                  else
                     useIdentifierAsGenerator(id, wordNet, context)
-                  }                    
-                )
+                }
             }
           } else {
             useIdentifierAsRelationalExprAlias(id, wordNet, bindings, context, data, pos, force)
