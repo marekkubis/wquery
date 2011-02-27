@@ -2,9 +2,9 @@ package org.wquery
 import org.testng.annotations.Test
 
 class ImperativeExprsTestSuite extends WQueryTestSuite {
-  @Test def testIterationAndEmission() = result of ("from $a in {person} emit $a") should equal ("{ person:3:n }\n{ person:2:n }\n{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n }\n")     
+  @Test def testIterationAndEmission() = result of ("from {person}$a emit $a") should equal ("{ person:3:n }\n{ person:2:n }\n{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n }\n")     
 
-  @Test def testBlockAndAssignment() = result of ("from $a, $b in {person:1:n}, {person:2:n} do $c, $d := $b, $a emit $c, $d end") should equal ("{ person:2:n } { person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n }\n")     
+  @Test def testBlockAndAssignment() = result of ("from {person:1:n}$a, {person:2:n}$b do $c, $d := $b, $a emit $c, $d end") should equal ("{ person:2:n } { person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n }\n")     
 
   @Test def testIf() = result of ("if [1 > 2] emit 3") should equal ("(no result)\n")        
     

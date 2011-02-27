@@ -46,9 +46,7 @@ trait WQueryParsers extends RegexParsers {
       | ifelse  
   )  
   
-  def iterator = "from" ~ ivar_decls ~ "in" ~ multipath_expr ~ imp_expr ^^ {
-    case _~vdecls~_~mexpr~iexpr => IteratorExpr(vdecls, mexpr, iexpr) 
-  }     
+  def iterator = "from" ~> multipath_expr ~ imp_expr ^^ { case mexpr~iexpr => IteratorExpr(mexpr, iexpr) }     
   
   def emission = "emit" ~> multipath_expr ^^ { x => EmissionExpr(x) }
   
