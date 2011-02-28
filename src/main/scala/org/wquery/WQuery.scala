@@ -1,5 +1,5 @@
 package org.wquery
-import org.wquery.engine.{WQueryFunctions, FunctionSet, Result, Error, Answer, Context, Bindings}
+import org.wquery.engine.{WQueryFunctions, FunctionSet, Result, Error, Answer, Bindings}
 import org.wquery.loader.{GridLoader, WordNetLoader}
 import org.wquery.model.{WordNet, FunctionArgumentType, DataSet}
 import org.wquery.parser.WQueryParsers
@@ -15,7 +15,7 @@ class WQuery(val wordNet: WordNet) extends Logging {
     try {
       val expr = parser parse input    
       debug(expr.toString)           
-      Answer(expr.evaluate(functions, wordNet, bindings, Context.empty))
+      Answer(expr.evaluate(functions, wordNet, bindings))
     } catch {
       case e: WQueryException => Error(e)
     }

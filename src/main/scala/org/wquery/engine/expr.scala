@@ -6,16 +6,10 @@ import scala.collection.mutable.ListBuffer
 sealed abstract class Expr
 
 sealed abstract class EvaluableExpr extends Expr {
-  def evaluate(functions: FunctionSet, wordNet: WordNet, bindings: Bindings, context: Context): DataSet
-}
-
-sealed abstract class ContextFreeExpr extends EvaluableExpr {
   def evaluate(functions: FunctionSet, wordNet: WordNet, bindings: Bindings): DataSet
-
-  def evaluate(functions: FunctionSet, wordNet: WordNet, bindings: Bindings, context: Context): DataSet = evaluate(functions, wordNet, bindings)
 }
 
-sealed abstract class BindingsFreeExpr extends ContextFreeExpr {
+sealed abstract class BindingsFreeExpr extends EvaluableExpr {
   def evaluate(functions: FunctionSet, wordNet: WordNet): DataSet
 
   def evaluate(functions: FunctionSet, wordNet: WordNet, bindings: Bindings): DataSet = evaluate(functions, wordNet)
@@ -40,14 +34,14 @@ sealed abstract class SelfEvaluableExpr extends FunctionsFreeExpr {
 sealed abstract class ImperativeExpr extends EvaluableExpr
 
 case class EmissionExpr(expr: EvaluableExpr) extends ImperativeExpr {
-  def evaluate(functions: FunctionSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
-    expr.evaluate(functions, wordNet, bindings, context)
+  def evaluate(functions: FunctionSet, wordNet: WordNet, bindings: Bindings) = {
+    expr.evaluate(functions, wordNet, bindings)
   }
 }
 
 case class IteratorExpr(pexpr: EvaluableExpr, iexpr: ImperativeExpr) extends ImperativeExpr {
-  def evaluate(functions: FunctionSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
-    val presult = pexpr.evaluate(functions, wordNet, bindings, context)
+  def evaluate(functions: FunctionSet, wordNet: WordNet, bindings: Bindings) = {
+    val presult = pexpr.evaluate(functions, wordNet, bindings)
     val tupleBindings = Bindings(bindings)
     val buffer = new DataSetBuffer
     val pathVarNames = presult.pathVars.keys.toSeq
@@ -62,7 +56,7 @@ case class IteratorExpr(pexpr: EvaluableExpr, iexpr: ImperativeExpr) extends Imp
       }
 
       stepVarNames.foreach(stepVar => tupleBindings.bindStepVariable(stepVar, tuple(presult.stepVars(stepVar)(i))))
-      buffer.append(iexpr.evaluate(functions, wordNet, tupleBindings, context))
+      buffer.append(iexpr.evaluate(functions, wordNet, tupleBindings))
     }
 
     buffer.toDataSet
@@ -70,21 +64,21 @@ case class IteratorExpr(pexpr: EvaluableExpr, iexpr: ImperativeExpr) extends Imp
 }
 
 case class IfElseExpr(cexpr: EvaluableExpr, iexpr: ImperativeExpr, eexpr: Option[ImperativeExpr]) extends ImperativeExpr {
-  def evaluate(functions: FunctionSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
-    if (cexpr.evaluate(functions, wordNet, bindings, context).isTrue)
-      iexpr.evaluate(functions, wordNet, bindings, context)
+  def evaluate(functions: FunctionSet, wordNet: WordNet, bindings: Bindings) = {
+    if (cexpr.evaluate(functions, wordNet, bindings).isTrue)
+      iexpr.evaluate(functions, wordNet, bindings)
     else
-      eexpr.map(_.evaluate(functions, wordNet, bindings, context)).getOrElse(DataSet.empty)        
+      eexpr.map(_.evaluate(functions, wordNet, bindings)).getOrElse(DataSet.empty)        
   }
 }
 
 case class BlockExpr(exprs: List[ImperativeExpr]) extends ImperativeExpr {
-  def evaluate(functions: FunctionSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
+  def evaluate(functions: FunctionSet, wordNet: WordNet, bindings: Bindings) = {
     val blockBindings = Bindings(bindings)
     val buffer = new DataSetBuffer
 
     for (expr <- exprs) {
-      buffer.append(expr.evaluate(functions, wordNet, blockBindings, context))
+      buffer.append(expr.evaluate(functions, wordNet, blockBindings))
     }
 
     buffer.toDataSet
@@ -92,8 +86,8 @@ case class BlockExpr(exprs: List[ImperativeExpr]) extends ImperativeExpr {
 }
 
 case class EvaluableAssignmentExpr(decls: List[VariableLit], expr: EvaluableExpr) extends ImperativeExpr with VariableBindings {
-  def evaluate(functions: FunctionSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
-    val eresult = expr.evaluate(functions, wordNet, bindings, context)
+  def evaluate(functions: FunctionSet, wordNet: WordNet, bindings: Bindings) = {
+    val eresult = expr.evaluate(functions, wordNet, bindings)
 
     if (eresult.pathCount == 1) { // TODO remove this constraint
       val tuple = eresult.paths.head
@@ -113,7 +107,7 @@ case class EvaluableAssignmentExpr(decls: List[VariableLit], expr: EvaluableExpr
 }
 
 case class RelationalAssignmentExpr(name: String, rexpr: RelationalExpr) extends ImperativeExpr {
-  def evaluate(functions: FunctionSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
+  def evaluate(functions: FunctionSet, wordNet: WordNet, bindings: Bindings) = {
     bindings.bindRelationalExprAlias(name, rexpr)
     DataSet.empty
   }
@@ -123,9 +117,9 @@ case class RelationalAssignmentExpr(name: String, rexpr: RelationalExpr) extends
  * Multipath expressions
  */
 case class BinaryPathExpr(op: String, left: EvaluableExpr, right: EvaluableExpr) extends EvaluableExpr {
-  def evaluate(functions: FunctionSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
-    val leval = left.evaluate(functions, wordNet, bindings, context)
-    val reval = right.evaluate(functions, wordNet, bindings, context)
+  def evaluate(functions: FunctionSet, wordNet: WordNet, bindings: Bindings) = {
+    val leval = left.evaluate(functions, wordNet, bindings)
+    val reval = right.evaluate(functions, wordNet, bindings)
 
     op match {
       case "," =>
@@ -182,9 +176,9 @@ case class BinaryPathExpr(op: String, left: EvaluableExpr, right: EvaluableExpr)
  * Arithmetic expressions
  */
 case class BinaryArithmExpr(op: String, left: EvaluableExpr, right: EvaluableExpr) extends EvaluableExpr {
-  def evaluate(functions: FunctionSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
-    val lresult = left.evaluate(functions, wordNet, bindings, context)
-    val rresult = right.evaluate(functions, wordNet, bindings, context)
+  def evaluate(functions: FunctionSet, wordNet: WordNet, bindings: Bindings) = {
+    val lresult = left.evaluate(functions, wordNet, bindings)
+    val rresult = right.evaluate(functions, wordNet, bindings)
 
     if (lresult.minPathSize > 0 && rresult.minPathSize > 0 && lresult.isNumeric(0) && rresult.isNumeric(0)) {
       if (lresult.getType(0) == IntegerType && rresult.getType(0) == IntegerType) {
@@ -259,8 +253,8 @@ case class BinaryArithmExpr(op: String, left: EvaluableExpr, right: EvaluableExp
 }
 
 case class MinusExpr(expr: EvaluableExpr) extends EvaluableExpr {
-  def evaluate(functions: FunctionSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
-    val eresult = expr.evaluate(functions, wordNet, bindings, context)
+  def evaluate(functions: FunctionSet, wordNet: WordNet, bindings: Bindings) = {
+    val eresult = expr.evaluate(functions, wordNet, bindings)
 
     if (eresult.isNumeric(0)) {
         DataSet(eresult.paths.map(x => x.last).map {
@@ -277,8 +271,8 @@ case class MinusExpr(expr: EvaluableExpr) extends EvaluableExpr {
  * Function call expressions
  */
 case class FunctionExpr(name: String, args: EvaluableExpr) extends EvaluableExpr {
-  def evaluate(functions: FunctionSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
-    val avalues = args.evaluate(functions, wordNet, bindings, context)
+  def evaluate(functions: FunctionSet, wordNet: WordNet, bindings: Bindings) = {
+    val avalues = args.evaluate(functions, wordNet, bindings)
     
     val atypes: List[FunctionArgumentType] = if (avalues.minPathSize  != avalues.maxPathSize ) {
       List(TupleType)
@@ -333,14 +327,14 @@ case class FunctionExpr(name: String, args: EvaluableExpr) extends EvaluableExpr
  * Path related expressions
  */
 case class StepExpr(lexpr: EvaluableExpr, rexpr: TransformationDesc) extends EvaluableExpr with VariableBindings {
-  def evaluate(functions: FunctionSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
+  def evaluate(functions: FunctionSet, wordNet: WordNet, bindings: Bindings) = {
     rexpr match {
       case RelationTransformationDesc(pos, rexpr, decls) =>
-        val lresult = lexpr.evaluate(functions, wordNet, bindings, context)
+        val lresult = lexpr.evaluate(functions, wordNet, bindings)
 
-        bind(rexpr.transform(wordNet, bindings, context, lresult, pos, false), decls)
+        bind(rexpr.transform(wordNet, bindings, lresult, pos, false), decls)
       case FilterTransformationDesc(cond, decls) =>
-        val lresult = lexpr.evaluate(functions, wordNet, bindings, context)
+        val lresult = lexpr.evaluate(functions, wordNet, bindings)
         val pathVarNames = lresult.pathVars.keys.toSeq
         val stepVarNames = lresult.stepVars.keys.toSeq                
         val pathBuffer = DataSetBuffers.createPathBuffer
@@ -361,7 +355,9 @@ case class StepExpr(lexpr: EvaluableExpr, rexpr: TransformationDesc) extends Eva
             binds.bindStepVariable(stepVar, tuple(varPos))            
           }          
           
-          if (cond.satisfied(functions, wordNet, binds, Context(tuple))) {
+          binds.bindContextVariables(tuple)
+          
+          if (cond.satisfied(functions, wordNet, binds)) {
             pathBuffer.append(tuple)
             pathVarNames.foreach(x => pathVarBuffers(x).append(lresult.pathVars(x)(i)))
             stepVarNames.foreach(x => stepVarBuffers(x).append(lresult.stepVars(x)(i)))
@@ -442,8 +438,8 @@ case class RelationTransformationDesc(pos: Int, expr: RelationalExpr, decls: Lis
 case class FilterTransformationDesc(expr: ConditionalExpr, decls: List[VariableLit]) extends TransformationDesc
 
 case class PathExpr(expr: EvaluableExpr) extends EvaluableExpr {
-  def evaluate(functions: FunctionSet, wordNet: WordNet, bindings: Bindings, context: Context) = { //TODO extend this method or remove this class
-    expr.evaluate(functions, wordNet, bindings, context)
+  def evaluate(functions: FunctionSet, wordNet: WordNet, bindings: Bindings) = { //TODO extend this method or remove this class
+    expr.evaluate(functions, wordNet, bindings)
   }
 }
 
@@ -451,14 +447,14 @@ case class PathExpr(expr: EvaluableExpr) extends EvaluableExpr {
  * Relational Expressions
  */
 sealed abstract class RelationalExpr extends Expr {
-  def transform(wordNet: WordNet, bindings: Bindings, context: Context, data: DataSet, pos: Int, force: Boolean): DataSet
+  def transform(wordNet: WordNet, bindings: Bindings, data: DataSet, pos: Int, force: Boolean): DataSet
 }
 
 case class UnaryRelationalExpr(idLits: List[IdentifierLit]) extends RelationalExpr {
-  def transform(wordNet: WordNet, bindings: Bindings, context: Context, data: DataSet, pos: Int, force: Boolean) = {
+  def transform(wordNet: WordNet, bindings: Bindings, data: DataSet, pos: Int, force: Boolean) = {
     if (force || idLits.size > 1) {
       if (pos == 0) {
-        if (context.isEmpty) {
+        if (!bindings.areContextVariablesBound) {// we are not in a filter
           useIdentifiersAsGenerator(idLits.map(_.value), wordNet)
             .getOrElse(throw new WQueryEvaluationException("Relation '" + idLits.head.value + "' not found"))
         } else {
@@ -471,25 +467,25 @@ case class UnaryRelationalExpr(idLits: List[IdentifierLit]) extends RelationalEx
       idLits.head match {
         case QuotedIdentifierLit(wordForm) =>
           if (pos == 0)
-            useIdentifierAsGenerator(wordForm, wordNet, context)
+            useIdentifierAsGenerator(wordForm, wordNet)
           else
             throw new WQueryEvaluationException("Quoted identifier found after '.'")
         case NotQuotedIdentifierLit(id) =>
           if (pos == 0) { // we are in a generator 
-            if (context.isEmpty) { // we are not in a filter
+            if (!bindings.areContextVariablesBound) { // we are not in a filter
               useIdentifiersAsGenerator(List(id), wordNet)
-                .getOrElse(useIdentifierAsGenerator(id, wordNet, context))
+                .getOrElse(useIdentifierAsGenerator(id, wordNet))
             } else {
-              useIdentifierAsRelationalExprAlias(id, wordNet, bindings, context, data, pos, force) 
+              useIdentifierAsRelationalExprAlias(id, wordNet, bindings, data, pos, force) 
                 .getOrElse {
                   if (wordNet.containsRelation(id, data.getType(0), Relation.Source))
                     useIdentifiersAsTransformation(List(id), wordNet, data, 1)
                   else
-                    useIdentifierAsGenerator(id, wordNet, context)
+                    useIdentifierAsGenerator(id, wordNet)
                 }
             }
           } else {
-            useIdentifierAsRelationalExprAlias(id, wordNet, bindings, context, data, pos, force)
+            useIdentifierAsRelationalExprAlias(id, wordNet, bindings, data, pos, force)
               .getOrElse(useIdentifiersAsTransformation(List(id), wordNet, data, pos))           
           }
       }
@@ -511,7 +507,7 @@ case class UnaryRelationalExpr(idLits: List[IdentifierLit]) extends RelationalEx
     }
   }
 
-  private def useIdentifierAsGenerator(id: String, wordNet: WordNet, context: Context) = {
+  private def useIdentifierAsGenerator(id: String, wordNet: WordNet) = {
     id match {
       case "" =>
         DataSet.fromList(wordNet.words.toList)
@@ -542,24 +538,24 @@ case class UnaryRelationalExpr(idLits: List[IdentifierLit]) extends RelationalEx
     wordNet.follow(data, pos, relation, source, dests)            
   }
   
-  private def useIdentifierAsRelationalExprAlias(id: String, wordNet: WordNet, bindings: Bindings, context: Context,
+  private def useIdentifierAsRelationalExprAlias(id: String, wordNet: WordNet, bindings: Bindings,
     data: DataSet, pos: Int, force: Boolean) = {
-    bindings.lookupRelationalExprAlias(id).map(_.transform(wordNet, bindings, context, data, pos, force))      
+    bindings.lookupRelationalExprAlias(id).map(_.transform(wordNet, bindings, data, pos, force))      
   }
 }
 
 case class QuantifiedRelationalExpr(expr: RelationalExpr, quantifier: QuantifierLit) extends RelationalExpr {
-  def transform(wordNet: WordNet, bindings: Bindings, context: Context, data: DataSet, pos: Int, force: Boolean) = {
+  def transform(wordNet: WordNet, bindings: Bindings, data: DataSet, pos: Int, force: Boolean) = {
     quantifier match {
       case QuantifierLit(1, Some(1)) =>
-        expr.transform(wordNet, bindings, context, data, pos, force)
+        expr.transform(wordNet, bindings, data, pos, force)
       case QuantifierLit(1, None) =>
         val pathVarNames = data.pathVars.keys.toSeq
         val stepVarNames = data.stepVars.keys.toSeq
         val pathBuffer = DataSetBuffers.createPathBuffer
         val pathVarBuffers = DataSetBuffers.createPathVarBuffers(pathVarNames)
         val stepVarBuffers = DataSetBuffers.createStepVarBuffers(stepVarNames)        
-        val head = expr.transform(wordNet, bindings, context, data, pos, force)
+        val head = expr.transform(wordNet, bindings, data, pos, force)
 
         for (i <- 0 until head.pathCount) {
           val tuple = head.paths(i)
@@ -569,7 +565,7 @@ case class QuantifiedRelationalExpr(expr: RelationalExpr, quantifier: Quantifier
           pathVarNames.foreach(x => pathVarBuffers(x).append(head.pathVars(x)(i)))
           stepVarNames.foreach(x => stepVarBuffers(x).append(head.stepVars(x)(i)))          
 
-          for (cnode <- closure(wordNet, bindings, context, expr, List(tuple.last), Set(tuple.last))) {
+          for (cnode <- closure(wordNet, bindings, expr, List(tuple.last), Set(tuple.last))) {
             pathBuffer.append(prefix ++ cnode)
             pathVarNames.foreach(x => pathVarBuffers(x).append(head.pathVars(x)(i)))
             stepVarNames.foreach(x => stepVarBuffers(x).append(head.stepVars(x)(i)))        
@@ -582,9 +578,8 @@ case class QuantifiedRelationalExpr(expr: RelationalExpr, quantifier: Quantifier
     }
   }
   
-  private def closure(wordNet: WordNet, bindings: Bindings, context: Context, expr: RelationalExpr,
-    source: List[Any], forbidden: Set[Any]): List[List[Any]] = {
-    val transformed = expr.transform(wordNet, bindings, context, DataSet.fromTuple(source), 1, true)
+  private def closure(wordNet: WordNet, bindings: Bindings, expr: RelationalExpr, source: List[Any], forbidden: Set[Any]): List[List[Any]] = {
+    val transformed = expr.transform(wordNet, bindings, DataSet.fromTuple(source), 1, true)
     val filtered = transformed.paths.filter { x => !forbidden.contains(x.last) }
 
     if (filtered.isEmpty) {
@@ -596,7 +591,7 @@ case class QuantifiedRelationalExpr(expr: RelationalExpr, quantifier: Quantifier
       result.appendAll(filtered)
 
       filtered.foreach { x =>
-        result.appendAll(closure(wordNet, bindings, context, expr, x, newForbidden))
+        result.appendAll(closure(wordNet, bindings, expr, x, newForbidden))
       }
 
       result.toList
@@ -605,9 +600,9 @@ case class QuantifiedRelationalExpr(expr: RelationalExpr, quantifier: Quantifier
 }
 
 case class UnionRelationalExpr(lexpr: RelationalExpr, rexpr: RelationalExpr) extends RelationalExpr {
-  def transform(wordNet: WordNet, bindings: Bindings, context: Context, data: DataSet, pos: Int, force: Boolean) = {
-    val lresult = lexpr.transform(wordNet, bindings, context, data, pos, force)
-    val rresult = rexpr.transform(wordNet, bindings, context, data, pos, force)
+  def transform(wordNet: WordNet, bindings: Bindings, data: DataSet, pos: Int, force: Boolean) = {
+    val lresult = lexpr.transform(wordNet, bindings, data, pos, force)
+    val rresult = rexpr.transform(wordNet, bindings, data, pos, force)
 
     DataSet(lresult.paths union rresult.paths,
       lresult.pathVars.map(x => (x._1, x._2 ++ rresult.pathVars(x._1))),
@@ -620,25 +615,25 @@ case class UnionRelationalExpr(lexpr: RelationalExpr, rexpr: RelationalExpr) ext
  * Conditional Expressions
  */
 sealed abstract class ConditionalExpr extends Expr {
-  def satisfied(functions: FunctionSet, wordNet: WordNet, bindings: Bindings, context: Context): Boolean
+  def satisfied(functions: FunctionSet, wordNet: WordNet, bindings: Bindings): Boolean
 }
 
 case class OrExpr(exprs: List[ConditionalExpr]) extends ConditionalExpr {
-  def satisfied(functions: FunctionSet, wordNet: WordNet, bindings: Bindings, context: Context) = exprs.exists { x => x.satisfied(functions, wordNet, bindings, context) }
+  def satisfied(functions: FunctionSet, wordNet: WordNet, bindings: Bindings) = exprs.exists { x => x.satisfied(functions, wordNet, bindings) }
 }
 
 case class AndExpr(exprs: List[ConditionalExpr]) extends ConditionalExpr {
-  def satisfied(functions: FunctionSet, wordNet: WordNet, bindings: Bindings, context: Context) = exprs.forall { x => x.satisfied(functions, wordNet, bindings, context) }
+  def satisfied(functions: FunctionSet, wordNet: WordNet, bindings: Bindings) = exprs.forall { x => x.satisfied(functions, wordNet, bindings) }
 }
 
 case class NotExpr(expr: ConditionalExpr) extends ConditionalExpr {
-  def satisfied(functions: FunctionSet, wordNet: WordNet, bindings: Bindings, context: Context) = !expr.satisfied(functions, wordNet, bindings, context)
+  def satisfied(functions: FunctionSet, wordNet: WordNet, bindings: Bindings) = !expr.satisfied(functions, wordNet, bindings)
 }
 
 case class ComparisonExpr(op: String, lexpr: EvaluableExpr, rexpr: EvaluableExpr) extends ConditionalExpr {
-  def satisfied(functions: FunctionSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
-    val lresult = lexpr.evaluate(functions, wordNet, bindings, context).paths.map(x => x.last)
-    val rresult = rexpr.evaluate(functions, wordNet, bindings, context).paths.map(x => x.last)
+  def satisfied(functions: FunctionSet, wordNet: WordNet, bindings: Bindings) = {
+    val lresult = lexpr.evaluate(functions, wordNet, bindings).paths.map(_.last)
+    val rresult = rexpr.evaluate(functions, wordNet, bindings).paths.map(_.last)
 
     op match {
       case "=" =>
@@ -708,8 +703,8 @@ case class SynsetAllReq() extends FunctionsFreeExpr {
 }
 
 case class SynsetByExprReq(expr: EvaluableExpr) extends EvaluableExpr {
-  def evaluate(functions: FunctionSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
-    val eresult = expr.evaluate(functions, wordNet, bindings, context)
+  def evaluate(functions: FunctionSet, wordNet: WordNet, bindings: Bindings) = {
+    val eresult = expr.evaluate(functions, wordNet, bindings)
 
     if (eresult.pathCount == 1 && eresult.minPathSize == 1 && eresult.maxPathSize == 1) {
       if (eresult.getType(0) == SenseType) {
@@ -740,8 +735,8 @@ case class SenseByWordFormAndSenseNumberReq(word: String, num: Int) extends Func
 }
 
 case class ContextByRelationalExprReq(expr: RelationalExpr) extends EvaluableExpr {
-  def evaluate(functions: FunctionSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
-    expr.transform(wordNet, bindings, context, DataSet(List(context.values)), 0, false)
+  def evaluate(functions: FunctionSet, wordNet: WordNet, bindings: Bindings) = {
+    expr.transform(wordNet, bindings, DataSet(List(bindings.contextVariables)), 0, false)
   }
 }
 
@@ -755,19 +750,13 @@ case class WordFormByRegexReq(v: String) extends FunctionsFreeExpr {
 }
 
 case class ContextByReferenceReq(ref: Int) extends EvaluableExpr {
-  def evaluate(functions: FunctionSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
-    if (context.size - ref >= 0) {
-      val value = context.values(context.size - ref)
-      DataSet.fromValue(if (value.isInstanceOf[List[_]]) value.asInstanceOf[List[_]].last else value)
-    } else {
-      throw new WQueryEvaluationException("Backward reference '" + List.fill(ref)("#").mkString +
-        "' too far, the longest possible backward reference in this context is '" +
-        List.fill(context.size)("#").mkString + "'")
-    }
+  def evaluate(functions: FunctionSet, wordNet: WordNet, bindings: Bindings) = {
+    bindings.lookupContextVariable(ref).map(DataSet.fromValue(_))
+      .getOrElse(throw new WQueryEvaluationException("Backward reference '" + List.fill(ref)("#").mkString + "' too far"))
   }
 }
 
-case class ContextByVariableReq(variable: VariableLit) extends ContextFreeExpr {
+case class ContextByVariableReq(variable: VariableLit) extends EvaluableExpr {
   def evaluate(functions: FunctionSet, wordNet: WordNet, bindings: Bindings) = {
     variable match {
       case PathVariableLit(name) =>
@@ -780,16 +769,16 @@ case class ContextByVariableReq(variable: VariableLit) extends ContextFreeExpr {
   }
 }
 
-case class BooleanByFilterReq(cond: ConditionalExpr) extends ContextFreeExpr {
-  def evaluate(functions: FunctionSet, wordNet: WordNet, bindings: Bindings) = DataSet.fromValue(cond.satisfied(functions, wordNet, bindings, Context.empty))
+case class BooleanByFilterReq(cond: ConditionalExpr) extends EvaluableExpr {
+  def evaluate(functions: FunctionSet, wordNet: WordNet, bindings: Bindings) = DataSet.fromValue(cond.satisfied(functions, wordNet, bindings))
 }
 
 /*
  * Variables
  */
 case class GeneratorExpr(expr: EvaluableExpr, decls: List[VariableLit]) extends EvaluableExpr with VariableBindings {
-  def evaluate(functions: FunctionSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
-    bind(expr.evaluate(functions, wordNet, bindings, context), decls)
+  def evaluate(functions: FunctionSet, wordNet: WordNet, bindings: Bindings) = {
+    bind(expr.evaluate(functions, wordNet, bindings), decls)
   }
 }
 
