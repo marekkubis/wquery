@@ -382,14 +382,14 @@ trait VariableBindings {
       getPathVariablePosition(decls) match {
         case Some(pathVarPos) => 
           val leftVars = decls.slice(0, pathVarPos).map(_.value).zipWithIndex.filterNot{_._1 == "_"}.toMap
-          val rightVars = decls.slice(pathVarPos + 1, decls.size).map(_.value).reverse.zipWithIndex.filterNot{_._1 == "_"}.toMap   
+          val rightVars = decls.slice(pathVarPos + 1, decls.size).map(_.value).reverse.zipWithIndex.filterNot{_._1 == "_"}.toMap
+          val pathVarBuffer = if (decls(pathVarPos).value != "_") Some(pathVarBuffers(decls(pathVarPos).value)) else None          
           val pathVarStart = leftVars.size
           val pathVarEnd = rightVars.size
-          val pathVarBuffer = pathVarBuffers(decls(pathVarPos).value)
       
           for (tuple <- dataSet.paths) {  
             dataSet.paths.foreach(tuple => bindVariablesFromRight(rightVars, stepVarBuffers, tuple.size))            
-            pathVarBuffer.append((pathVarStart, tuple.size - 1 - pathVarEnd))
+            pathVarBuffer.map(_.append((pathVarStart, tuple.size - pathVarEnd)))
             dataSet.paths.foreach(tuple => bindVariablesFromLeft(leftVars, stepVarBuffers))            
           }
         case None =>

@@ -24,10 +24,14 @@ class PlainLineWQueryEmitter extends PlainWQueryEmitter {
           val tuple = content(i)  
           
         for (pathVarName <- pathVarNames) {
+          val varPos = dataSet.pathVars(pathVarName)(i)   
+            
           builder append "@"
           builder append pathVarName
           builder append "="
-          emitTuple(dataSet.pathVars(pathVarName), builder)          
+          builder append "("
+          emitTuple(tuple.slice(varPos._1, varPos._2), builder)
+          builder append ")"
           builder append " "
         }
         
