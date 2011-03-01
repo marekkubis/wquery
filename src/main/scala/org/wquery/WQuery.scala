@@ -7,8 +7,11 @@ import org.wquery.utils.Logging
 import scala.collection.mutable.LinkedHashSet
 
 class WQuery(val wordNet: WordNet) extends Logging {
+  val bindings = Bindings()
+  
+  WQueryFunctions.functions.foreach(f => bindings.bindFunction(f._1, f._2, f._3))
+  
   private val parser = new Object with WQueryParsers  
-  private val bindings = Bindings()
   
   def execute(input:String): Result = {    
     try {
@@ -19,14 +22,6 @@ class WQuery(val wordNet: WordNet) extends Logging {
       case e: WQueryException => Error(e)
     }
   } 
-  
-  def registerScalarFunction(name: String, args: List[FunctionArgumentType], result: FunctionArgumentType, clazz: java.lang.Class[_] , methodname: String) {  
-    bindings.bindScalarFunction(name, args, result, clazz, methodname)
-  }
-
-  def registerAggregateFunction(name: String, args: List[FunctionArgumentType], result: FunctionArgumentType, clazz: java.lang.Class[_] , methodname: String) {  
-    bindings.bindAggregateFunction(name, args, result, clazz, methodname)
-  }    
 }
 
 object WQuery {
@@ -41,9 +36,7 @@ object WQuery {
   def getInstance(url: String): WQuery = {
     for (loader <- loaders) {
       if (loader.canLoad(url)) {
-        val wquery = new WQuery(loader.load(url))
-        WQueryFunctions.registerFunctionsIn(wquery)
-        return wquery
+        return new WQuery(loader.load(url))
       }
     }
     

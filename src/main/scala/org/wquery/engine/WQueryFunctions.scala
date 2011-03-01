@@ -1,5 +1,8 @@
 package org.wquery.engine
-import org.wquery.{WQueryEvaluationException, WQuery}
+
+import org.wquery.model.ScalarFunction
+import org.wquery.model.AggregateFunction
+import org.wquery.WQueryEvaluationException
 import org.wquery.model.{ValueType, TupleType, IntegerType, FloatType, StringType, Synset, Sense, Arc, DataSet}
 
 /**
@@ -28,32 +31,32 @@ object WQueryFunctions {
   val Upper = "upper"
   val StringLength = "string_length"
     
-  def registerFunctionsIn(wquery: WQuery) {
-    wquery.registerAggregateFunction(Sort, List(TupleType), TupleType, getClass, Sort)      
-    wquery.registerAggregateFunction(Distinct, List(TupleType), TupleType, getClass, Distinct)      
-    wquery.registerAggregateFunction(Count, List(TupleType), TupleType, getClass, Count)
-    wquery.registerAggregateFunction(Last, List(TupleType), TupleType, getClass, Last)    
-    wquery.registerAggregateFunction(Sum, List(ValueType(IntegerType)), ValueType(IntegerType), getClass, "sumInt")      
-    wquery.registerAggregateFunction(Sum, List(ValueType(FloatType)), ValueType(FloatType), getClass, "sumFloat")
-    wquery.registerAggregateFunction(Avg, List(ValueType(IntegerType)), ValueType(FloatType), getClass, Avg)      
-    wquery.registerAggregateFunction(Avg, List(ValueType(FloatType)), ValueType(FloatType), getClass, Avg)
-    wquery.registerAggregateFunction(Min, List(TupleType), TupleType, getClass, Min)
-    wquery.registerAggregateFunction(Max, List(TupleType), TupleType, getClass, Max)
-    wquery.registerAggregateFunction(Size, List(TupleType), TupleType, getClass, Size) 
-    wquery.registerAggregateFunction(Length, List(TupleType), TupleType, getClass, Length)    
-    wquery.registerScalarFunction(Abs, List(ValueType(IntegerType)), ValueType(IntegerType), classOf[Math], Abs)
-    wquery.registerScalarFunction(Abs, List(ValueType(FloatType)), ValueType(FloatType), classOf[Math], Abs)
-    wquery.registerScalarFunction(Ceil, List(ValueType(FloatType)), ValueType(FloatType), classOf[Math], Ceil)      
-    wquery.registerScalarFunction(Floor, List(ValueType(FloatType)), ValueType(FloatType), classOf[Math], Floor)
-    wquery.registerScalarFunction(Log, List(ValueType(FloatType)), ValueType(FloatType), classOf[Math], Log)
-    wquery.registerScalarFunction(Power, List(ValueType(FloatType), ValueType(FloatType)), ValueType(FloatType), classOf[Math], "pow")
-    wquery.registerScalarFunction(StringLength, List(ValueType(StringType)), ValueType(IntegerType), getClass, StringLength)    
-    wquery.registerScalarFunction(Substring, List(ValueType(StringType), ValueType(IntegerType)), ValueType(StringType), getClass, Substring)
-    wquery.registerScalarFunction(Substring, List(ValueType(StringType), ValueType(IntegerType), ValueType(IntegerType)), ValueType(StringType), getClass, Substring)
-    wquery.registerScalarFunction(Replace, List(ValueType(StringType), ValueType(StringType), ValueType(StringType)), ValueType(StringType), getClass, Replace)
-    wquery.registerScalarFunction(Lower, List(ValueType(StringType)), ValueType(StringType), getClass, Lower)
-    wquery.registerScalarFunction(Upper, List(ValueType(StringType)), ValueType(StringType), getClass, Upper)      
-  }                                                
+  val functions = List(
+    (AggregateFunction(Sort, List(TupleType), TupleType), getClass, Sort),      
+    (AggregateFunction(Distinct, List(TupleType), TupleType), getClass, Distinct),      
+    (AggregateFunction(Count, List(TupleType), TupleType), getClass, Count),
+    (AggregateFunction(Last, List(TupleType), TupleType), getClass, Last),    
+    (AggregateFunction(Sum, List(ValueType(IntegerType)), ValueType(IntegerType)), getClass, "sumInt"),      
+    (AggregateFunction(Sum, List(ValueType(FloatType)), ValueType(FloatType)), getClass, "sumFloat"),
+    (AggregateFunction(Avg, List(ValueType(IntegerType)), ValueType(FloatType)), getClass, Avg),      
+    (AggregateFunction(Avg, List(ValueType(FloatType)), ValueType(FloatType)), getClass, Avg),
+    (AggregateFunction(Min, List(TupleType), TupleType), getClass, Min),
+    (AggregateFunction(Max, List(TupleType), TupleType), getClass, Max),
+    (AggregateFunction(Size, List(TupleType), TupleType), getClass, Size), 
+    (AggregateFunction(Length, List(TupleType), TupleType), getClass, Length),    
+    (ScalarFunction(Abs, List(ValueType(IntegerType)), ValueType(IntegerType)), classOf[Math], Abs),
+    (ScalarFunction(Abs, List(ValueType(FloatType)), ValueType(FloatType)), classOf[Math], Abs),
+    (ScalarFunction(Ceil, List(ValueType(FloatType)), ValueType(FloatType)), classOf[Math], Ceil),      
+    (ScalarFunction(Floor, List(ValueType(FloatType)), ValueType(FloatType)), classOf[Math], Floor),
+    (ScalarFunction(Log, List(ValueType(FloatType)), ValueType(FloatType)), classOf[Math], Log),
+    (ScalarFunction(Power, List(ValueType(FloatType), ValueType(FloatType)), ValueType(FloatType)), classOf[Math], "pow"),
+    (ScalarFunction(StringLength, List(ValueType(StringType)), ValueType(IntegerType)), getClass, StringLength),
+    (ScalarFunction(Substring, List(ValueType(StringType), ValueType(IntegerType)), ValueType(StringType)), getClass, Substring),
+    (ScalarFunction(Substring, List(ValueType(StringType), ValueType(IntegerType), ValueType(IntegerType)), ValueType(StringType)), getClass, Substring),
+    (ScalarFunction(Replace, List(ValueType(StringType), ValueType(StringType), ValueType(StringType)), ValueType(StringType)), getClass, Replace),
+    (ScalarFunction(Lower, List(ValueType(StringType)), ValueType(StringType)), getClass, Lower),
+    (ScalarFunction(Upper, List(ValueType(StringType)), ValueType(StringType)), getClass, Upper)     
+  )                                              
   
   def distinct(dataSet: DataSet) = DataSet.fromBoundPaths(dataSet.toBoundPaths.distinct)
   

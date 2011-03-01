@@ -19,31 +19,22 @@ class Bindings(parent: Option[Bindings]) {
 
   def bindRelationalExprAlias(name: String, value: RelationalExpr) = (relationalExprAliases(name) = value)
   
-  def bindScalarFunction(name: String, args: List[FunctionArgumentType], result: FunctionArgumentType, clazz: java.lang.Class[_] , methodName: String) {
-    functions += ((
-      (name, args), 
-      (
-        new ScalarFunction(name, args, result),    
+  def bindFunction(function: Function, clazz: java.lang.Class[_] , methodName: String) {
+    val method = (function match {
+      case ScalarFunction(name, args, result) =>
         clazz.getMethod(methodName, args.map{ 
           case ValueType(basicType) =>
             basicType.associatedClass
           case TupleType => 
             throw new IllegalArgumentException("Scalar function '" + name + "' must not take TupleType as an argument")
-        }.toArray:_*)
-      )
-    ))    
-  }
-  
-  def bindAggregateFunction(name: String, args: List[FunctionArgumentType], result: FunctionArgumentType, clazz: java.lang.Class[_] , methodName: String) {
-    functions += ((
-      (name, args), 
-      (
-        new AggregateFunction(name, args, result), 
+        }.toArray:_*)      
+      case AggregateFunction(name, args, result) =>
         clazz.getMethod(methodName, Array.fill(args.size)(classOf[DataSet]):_*)
-      )
-    ))
-  }    
+    })
     
+    functions((function.name, function.args)) = (function, method)
+  }
+
   def bindContextVariables(vars: List[Any]) = contextVars = vars
     
   def lookupPathVariable(name: String): Option[List[Any]] = pathVariables.get(name).orElse(parent.flatMap(_.lookupPathVariable(name)))
