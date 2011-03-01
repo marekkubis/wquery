@@ -4,10 +4,10 @@ import org.mortbay.jetty.Server
 import org.mortbay.jetty.servlet.{ServletHolder, Context}
 import org.wquery.WQuery
 import org.wquery.console.QueryReader
-import org.wquery.emitter.PlainLineWQueryEmitter
+import org.wquery.emitter.PlainWQueryEmitter
 
 object WQueryService {
-    val emitter = new PlainLineWQueryEmitter
+    val emitter = new PlainWQueryEmitter
   
     def main(args: Array[String]) {
       if (args.isEmpty) {

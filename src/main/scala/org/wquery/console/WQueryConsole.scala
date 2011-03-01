@@ -1,7 +1,7 @@
 package org.wquery.console
 import java.io.{FileReader, BufferedReader}
 import org.wquery.{WQueryProperties, WQuery}
-import org.wquery.emitter.PlainLineWQueryEmitter
+import org.wquery.emitter.PlainWQueryEmitter
 import org.wquery.utils.Logging
 
 object WQueryConsole extends Logging {
@@ -14,7 +14,7 @@ object WQueryConsole extends Logging {
     val quiet = args.head == "-q"
     val fargs = if (quiet) args.slice(1, args.size) else args
     val wquery = WQuery.getInstance(fargs.head)
-    val emitter = new PlainLineWQueryEmitter
+    val emitter = new PlainWQueryEmitter
     
     for (i <- 1 until fargs.size) {
       val qin = new QueryReader(new FileReader(fargs(i)))

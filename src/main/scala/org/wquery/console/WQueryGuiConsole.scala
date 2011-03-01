@@ -4,14 +4,14 @@ import javax.swing.filechooser.FileNameExtensionFilter
 import java.awt.Dimension
 import java.io.{BufferedWriter, FileWriter, File}
 import org.wquery.{WQueryProperties, WQuery}
-import org.wquery.emitter.{XmlWQueryEmitter, PlainLineWQueryEmitter}
+import org.wquery.emitter.{XmlWQueryEmitter, PlainWQueryEmitter}
 import scala.io.Source
 import scala.swing.{SimpleSwingApplication, TextArea, Frame, FileChooser, MenuBar, Menu, MenuItem, Separator, Dialog, BoxPanel, Orientation, Swing, ScrollPane, Component, Button, TabbedPane}
 import scala.swing.event.{ButtonClicked, WindowClosing, Event}
 
 object WQueryGuiConsole extends SimpleSwingApplication {    
   var args: Array[String] = null
-  val plainEmitter = new PlainLineWQueryEmitter
+  val plainEmitter = new PlainWQueryEmitter
   val xmlEmitter = new XmlWQueryEmitter
   
   def top = createConsole
