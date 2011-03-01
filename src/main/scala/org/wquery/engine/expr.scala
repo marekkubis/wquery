@@ -388,7 +388,7 @@ trait VariableBindings {
           for (tuple <- dataSet.paths) {  
             dataSet.paths.foreach(tuple => bindVariablesFromRight(rightVars, stepVarBuffers, tuple.size))            
             pathVarBuffer.map(_.append((pathVarStart, tuple.size - pathVarEnd)))
-            dataSet.paths.foreach(tuple => bindVariablesFromLeft(leftVars, stepVarBuffers))            
+            dataSet.paths.foreach(tuple => bindVariablesFromLeft(leftVars, stepVarBuffers, tuple.size))            
           }
         case None =>
           val rightVars = decls.map(_.value).reverse.zipWithIndex.filterNot{_._1 == "_"}.toMap                
@@ -417,9 +417,12 @@ trait VariableBindings {
     }
   }
   
-  private def bindVariablesFromLeft(vars: Map[String, Int], varIndexes: Map[String, ListBuffer[Int]]) {
-    for ((v, pos) <- vars)
-      varIndexes(v).append(pos)
+  private def bindVariablesFromLeft(vars: Map[String, Int], varIndexes: Map[String, ListBuffer[Int]], tupleSize: Int) {
+    for ((v, pos) <- vars)        
+      if (pos < tupleSize)
+        varIndexes(v).append(pos)
+      else 
+        throw new WQueryEvaluationException("Variable $" + v + " cannot be bound")
   }    
   
   private def bindVariablesFromRight(vars: Map[String, Int], varIndexes: Map[String, ListBuffer[Int]], tupleSize: Int) {
