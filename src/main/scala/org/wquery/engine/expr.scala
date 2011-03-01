@@ -377,6 +377,8 @@ trait VariableBindings {
       val pathVarBuffers = DataSetBuffers.createPathVarBuffers(decls.filter(x => (x.isInstanceOf[PathVariableLit] && x.value != "_")).map(_.value))                
       val stepVarBuffers = DataSetBuffers.createStepVarBuffers(decls.filterNot(x => (x.isInstanceOf[PathVariableLit] || x.value == "_")).map(_.value))        
     
+      demandUniqueVariableNames(decls)
+      
       getPathVariablePosition(decls) match {
         case Some(pathVarPos) => 
           val leftVars = decls.slice(0, pathVarPos).map(_.value).zipWithIndex.filterNot{_._1 == "_"}.toMap
@@ -399,6 +401,13 @@ trait VariableBindings {
     } else {
       dataSet
     }
+  }
+  
+  private def demandUniqueVariableNames(decls: List[VariableLit]) {
+    val vars = decls.filter(x => !x.isInstanceOf[PathVariableLit] && x.value != "_").map(_.value)
+    
+    if (vars.size != vars.distinct.size)
+      throw new WQueryEvaluationException("Variable list contains duplicated variable names")
   }
   
   private def getPathVariablePosition(decls: List[VariableLit]) = {
