@@ -1,5 +1,5 @@
 package org.wquery
-import org.wquery.engine.{WQueryFunctions, FunctionSet, Result, Error, Answer, Bindings}
+import org.wquery.engine.{WQueryFunctions, Result, Error, Answer, Bindings}
 import org.wquery.loader.{GridLoader, WordNetLoader}
 import org.wquery.model.{WordNet, FunctionArgumentType, DataSet}
 import org.wquery.parser.WQueryParsers
@@ -9,29 +9,24 @@ import scala.collection.mutable.LinkedHashSet
 class WQuery(val wordNet: WordNet) extends Logging {
   private val parser = new Object with WQueryParsers  
   private val bindings = Bindings()
-  private val functions = new FunctionSet
   
   def execute(input:String): Result = {    
     try {
       val expr = parser parse input    
       debug(expr.toString)           
-      Answer(expr.evaluate(functions, wordNet, bindings))
+      Answer(expr.evaluate(wordNet, bindings))
     } catch {
       case e: WQueryException => Error(e)
     }
   } 
   
   def registerScalarFunction(name: String, args: List[FunctionArgumentType], result: FunctionArgumentType, clazz: java.lang.Class[_] , methodname: String) {  
-    functions.addScalarFunction(name, args, result, clazz, methodname)
+    bindings.bindScalarFunction(name, args, result, clazz, methodname)
   }
 
   def registerAggregateFunction(name: String, args: List[FunctionArgumentType], result: FunctionArgumentType, clazz: java.lang.Class[_] , methodname: String) {  
-    functions.addAggregateFunction(name, args, result, clazz, methodname)
-  }  
-  
-  def unregisterFunction(name: String, args: List[FunctionArgumentType]) { 
-    functions.removeFunction(name, args) 
-  }
+    bindings.bindAggregateFunction(name, args, result, clazz, methodname)
+  }    
 }
 
 object WQuery {

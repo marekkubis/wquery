@@ -36,7 +36,7 @@ class DataSet(val paths: List[List[Any]], val pathVars: Map[String, List[(Int, I
   
   def getType(pos: Int): DataType = { // TODO optimize
     val dataTypes: List[BasicType] = paths.map { tuple =>
-      DataType(tuple(tuple.size - 1 - pos))        
+      BasicType(tuple(tuple.size - 1 - pos))        
     }.distinct
     
     if (dataTypes.size == 1) {
