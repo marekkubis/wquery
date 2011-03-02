@@ -1,5 +1,6 @@
 package org.wquery.parser
 
+import org.wquery.engine.ProjectionTransformationDesc
 import org.wquery.engine.GeneratorExpr
 import org.wquery.engine.PathVariableLit
 import org.wquery.engine.StepVariableLit
@@ -94,12 +95,12 @@ trait WQueryParsers extends RegexParsers {
   
   // paths
   
-  def path 
-    = chainl1(generator, step, success((l:EvaluableExpr, r:TransformationDesc) => StepExpr(l , r))) ^^ { x => PathExpr(x) }
+  def path = chainl1(generator, step, success((l:EvaluableExpr, r:TransformationDesc) => StepExpr(l , r))) ^^ { x => PathExpr(x) }
     
   def step = (
       relational_trans
       | filter_trans
+      | projection_trans
   )
   
   def relational_trans = dots ~ rel_expr ~ opt(var_decls) ^^ {
@@ -147,6 +148,10 @@ trait WQueryParsers extends RegexParsers {
   def comparison = expr ~ ("<="|"<"|">="|">"|"=~"|"="|"!="|"in"|"pin") ~ expr ^^ {
     case lexpr~op~rexpr => ComparisonExpr(op, lexpr, rexpr)
   }  
+  
+  def projection_trans = projection ~ opt(var_decls) ^^ { case x~y => ProjectionTransformationDesc(x, y.getOrElse(Nil)) }
+  
+  def projection = "<" ~> var_decls <~ ">"
   
   // generators
   def generator = (

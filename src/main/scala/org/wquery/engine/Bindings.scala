@@ -45,7 +45,7 @@ class Bindings(parent: Option[Bindings]) {
   
   def lookupFunction(name: String, args: List[FunctionArgumentType]): Option[(Function, Method)] = functions.get(name, args).orElse(parent.flatMap(_.lookupFunction(name, args)))  
   
-  def lookupContextVariable(pos: Int) = if (contextVars.size - pos >= 0) Some(contextVars(contextVars.size - pos)) else None
+  def lookupContextVariable(pos: Int): Option[Any] = if (contextVars.size - pos >= 0) Some(contextVars(contextVars.size - pos)) else parent.flatMap(_.lookupContextVariable(pos))  
   
   def areContextVariablesBound = contextVars != Nil
   
