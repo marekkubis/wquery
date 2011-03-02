@@ -94,7 +94,7 @@ case class EvaluableAssignmentExpr(decls: List[VariableLit], expr: EvaluableExpr
         bindings.bindPathVariable(pathVar, tuple.slice(varPos._1, varPos._2))
       }
       
-      dataSet.stepVars.keys.foreach(stepVar => bindings.bindStepVariable(stepVar , tuple(dataSet.stepVars(stepVar)(0))))
+      dataSet.stepVars.keys.foreach(stepVar => bindings.bindStepVariable(stepVar, tuple(dataSet.stepVars(stepVar)(0))))
       DataSet.empty
     } else {
       throw new WQueryEvaluationException("A multipath expression in an assignment should contain exactly one tuple")
@@ -109,6 +109,16 @@ case class RelationalAssignmentExpr(name: String, rexpr: RelationalExpr) extends
   }
 }
 
+case class WhileDoExpr(cexpr: EvaluableExpr, iexpr: ImperativeExpr) extends ImperativeExpr {
+  def evaluate(wordNet: WordNet, bindings: Bindings) = {
+    val buffer = new DataSetBuffer      
+      
+    while (cexpr.evaluate(wordNet, bindings).isTrue)
+      buffer.append(iexpr.evaluate(wordNet, bindings))
+      
+    buffer.toDataSet  
+  }
+}
 /*
  * Multipath expressions
  */

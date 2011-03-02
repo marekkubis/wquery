@@ -13,10 +13,28 @@ class Bindings(parent: Option[Bindings]) {
   
   private var contextVars = List[Any]()
 
-  def bindPathVariable(name: String, value: List[Any]) = (pathVariables(name) = value)
-
-  def bindStepVariable(name: String, value: Any) = (stepVariables(name) = value) 
-
+  def bindPathVariable(name: String, value: List[Any]) {
+	parent.map { p =>
+	  if (p.lookupPathVariable(name).isEmpty)
+	    pathVariables(name) = value
+	  else
+	 	p.bindPathVariable(name, value)  
+	}.getOrElse {
+	  pathVariables(name) = value
+	}	   
+  }
+  
+  def bindStepVariable(name: String, value: Any) {
+	parent.map { p =>
+	  if (p.lookupStepVariable(name).isEmpty)
+	    stepVariables(name) = value
+	  else
+	 	p.bindStepVariable(name, value)  
+	}.getOrElse {
+	  stepVariables(name) = value
+	}
+  }
+  
   def bindRelationalExprAlias(name: String, value: RelationalExpr) = (relationalExprAliases(name) = value)
   
   def bindFunction(function: Function, clazz: java.lang.Class[_] , methodName: String) {

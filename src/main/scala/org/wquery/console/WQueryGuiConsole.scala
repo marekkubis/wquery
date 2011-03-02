@@ -147,10 +147,8 @@ object WQueryGuiConsole extends SimpleSwingApplication {
                 xmlResultArea.text = xmlEmitter.emit(result)
               }
             } else {               
-              Dialog.showConfirmation(this,
-                                      "You have to load a wordnet before executing a query (File -> Load Wordnet...)", 
-                                      "Error", Dialog.Options.Default, Dialog.Message.Error, null)
-                           
+              Dialog.showConfirmation(this, "You have to load a wordnet before executing a query (File -> Load Wordnet...)", 
+                "Error", Dialog.Options.Default, Dialog.Message.Error, null)
             }
         }
       }

@@ -1,5 +1,6 @@
 package org.wquery.parser
 
+import org.wquery.engine.WhileDoExpr
 import org.wquery.engine.ProjectionTransformationDesc
 import org.wquery.engine.GeneratorExpr
 import org.wquery.engine.PathVariableLit
@@ -45,6 +46,7 @@ trait WQueryParsers extends RegexParsers {
       | emission
       | assignment
       | ifelse  
+      | whiledo
   )  
   
   def iterator = "from" ~> multipath_expr ~ imp_expr ^^ { case mexpr~iexpr => IteratorExpr(mexpr, iexpr) }     
@@ -60,6 +62,8 @@ trait WQueryParsers extends RegexParsers {
   def ifelse = "if" ~> multipath_expr ~ imp_expr ~ opt("else" ~> imp_expr) ^^ {
     case cexpr ~ iexpr ~ eexpr => IfElseExpr(cexpr, iexpr, eexpr)
   }
+  
+  def whiledo = "while" ~> multipath_expr ~ imp_expr ^^ { case cexpr~iexpr => WhileDoExpr(cexpr, iexpr) } 
   
   // mutlipath exprs
 
