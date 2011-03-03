@@ -96,13 +96,13 @@ trait WQueryParsers extends RegexParsers {
   def path = chainl1(generator, step, success((l:EvaluableExpr, r:TransformationDesc) => StepExpr(l , r))) ^^ { x => PathExpr(x) }
     
   def step = (
-      relational_trans
+      relation_trans
       | filter_trans
       | projection_trans
       | bind_trans
   )
   
-  def relational_trans = dots ~ rel_expr ^^ { case pos~expr => RelationTransformationDesc(pos, expr) }
+  def relation_trans = dots ~ rel_expr ^^ { case pos~expr => RelationTransformationDesc(pos, expr) }
   
   def dots = rep1(".") ^^ { x => x.size }    
   
