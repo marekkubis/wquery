@@ -1,12 +1,6 @@
 package org.wquery.parser
-
-import org.wquery.engine.WhileDoExpr
-import org.wquery.engine.ProjectionTransformationDesc
-import org.wquery.engine.GeneratorExpr
-import org.wquery.engine.PathVariableLit
-import org.wquery.engine.StepVariableLit
 import org.wquery.{WQueryParsingErrorException, WQueryParsingFailureException}
-import org.wquery.engine.{EvaluableExpr, FunctionExpr, WQueryFunctions, ImperativeExpr, IteratorExpr, EmissionExpr, EvaluableAssignmentExpr, RelationalAssignmentExpr, IfElseExpr, BinaryPathExpr, BlockExpr, BinaryArithmExpr, TransformationDesc, StepExpr, RelationalExpr, QuantifierLit, FilterTransformationDesc, OrExpr, NotExpr, AndExpr, ComparisonExpr, BooleanLit, SynsetAllReq, SenseAllReq, DoubleQuotedLit, WordFormByRegexReq, ContextByRelationalExprReq, IntegerLit, ContextByReferenceReq, FloatLit, NotQuotedIdentifierLit, QuotedIdentifierLit, StringLit, ContextByVariableReq, BooleanByFilterReq, SequenceLit, SynsetByExprReq, SenseByWordFormAndSenseNumberAndPosReq, SenseByWordFormAndSenseNumberReq, UnaryRelationalExpr, QuantifiedRelationalExpr, RelationTransformationDesc, PathExpr, MinusExpr, UnionRelationalExpr}
+import org.wquery.engine.{EvaluableExpr, FunctionExpr, WQueryFunctions, ImperativeExpr, IteratorExpr, EmissionExpr, EvaluableAssignmentExpr, RelationalAssignmentExpr, IfElseExpr, BinaryPathExpr, BlockExpr, BinaryArithmExpr, TransformationDesc, StepExpr, RelationalExpr, QuantifierLit, FilterTransformationDesc, OrExpr, NotExpr, AndExpr, ComparisonExpr, BooleanLit, SynsetAllReq, SenseAllReq, DoubleQuotedLit, WordFormByRegexReq, ContextByRelationalExprReq, IntegerLit, ContextByReferenceReq, FloatLit, NotQuotedIdentifierLit, QuotedIdentifierLit, StringLit, ContextByVariableReq, BooleanByFilterReq, SequenceLit, SynsetByExprReq, SenseByWordFormAndSenseNumberAndPosReq, SenseByWordFormAndSenseNumberReq, UnaryRelationalExpr, QuantifiedRelationalExpr, RelationTransformationDesc, PathExpr, MinusExpr, UnionRelationalExpr, StepVariableLit, PathVariableLit, ProjectionTransformationDesc, WhileDoExpr, BindTransformationDesc}
 import scala.util.parsing.combinator.RegexParsers
 
 trait WQueryParsers extends RegexParsers {
@@ -105,11 +99,10 @@ trait WQueryParsers extends RegexParsers {
       relational_trans
       | filter_trans
       | projection_trans
+      | bind_trans
   )
   
-  def relational_trans = dots ~ rel_expr ~ opt(var_decls) ^^ {
-    case pos~expr~decls => RelationTransformationDesc(pos, expr, decls.getOrElse(Nil))
-  }
+  def relational_trans = dots ~ rel_expr ^^ { case pos~expr => RelationTransformationDesc(pos, expr) }
   
   def dots = rep1(".") ^^ { x => x.size }    
   
@@ -130,7 +123,7 @@ trait WQueryParsers extends RegexParsers {
       |success(QuantifierLit(1, Some(1)))      
   )
     
-  def filter_trans = filter ~ opt(var_decls) ^^ { case x~decls => FilterTransformationDesc(x, decls.getOrElse(Nil)) }
+  def filter_trans = filter ^^ { case cond => FilterTransformationDesc(cond) }
   
   def filter = "[" ~> or_condition <~ "]"
   
@@ -153,9 +146,11 @@ trait WQueryParsers extends RegexParsers {
     case lexpr~op~rexpr => ComparisonExpr(op, lexpr, rexpr)
   }  
   
-  def projection_trans = projection ~ opt(var_decls) ^^ { case x~y => ProjectionTransformationDesc(x, y.getOrElse(Nil)) }
+  def projection_trans = projection  ^^ { projs => ProjectionTransformationDesc(projs) }
   
   def projection = "<" ~> var_decls <~ ">"
+  
+  def bind_trans = var_decls ^^ { decls => BindTransformationDesc(decls) }
   
   // generators
   def generator = (
@@ -170,7 +165,7 @@ trait WQueryParsers extends RegexParsers {
       |filter_generator
       |expr_generator
       |variable_generator    
-  ) ~ opt(var_decls) ^^ { case expr~decls => GeneratorExpr(expr, decls.getOrElse(Nil)) }
+  )
 
   def boolean_generator = (
       "true" ^^ { x => BooleanLit(true) }

@@ -341,14 +341,14 @@ case class FunctionExpr(name: String, args: EvaluableExpr) extends EvaluableExpr
 case class StepExpr(lexpr: EvaluableExpr, rexpr: TransformationDesc) extends EvaluableExpr with VariableBindings {
   def evaluate(wordNet: WordNet, bindings: Bindings) = {
     rexpr match {
-      case RelationTransformationDesc(pos, rexpr, decls) =>
-        val lresult = lexpr.evaluate(wordNet, bindings)
-
-        bind(rexpr.transform(wordNet, bindings, lresult, pos, false), decls)
-      case FilterTransformationDesc(cond, decls) =>
-        bind(evaluateFilter(wordNet, bindings, cond), decls)
-      case ProjectionTransformationDesc(projections, decls) =>
-        bind(evaluateProjection(wordNet, bindings, projections), decls)
+      case RelationTransformationDesc(pos, rexpr) =>
+        rexpr.transform(wordNet, bindings, lexpr.evaluate(wordNet, bindings), pos, false)
+      case FilterTransformationDesc(cond) =>
+        evaluateFilter(wordNet, bindings, cond)
+      case ProjectionTransformationDesc(projections) =>
+        evaluateProjection(wordNet, bindings, projections)
+      case BindTransformationDesc(decls) =>
+        bind(lexpr.evaluate(wordNet, bindings), decls)
     }
   }
   
@@ -497,9 +497,10 @@ trait VariableBindings {
 
 sealed abstract class TransformationDesc extends Expr
 
-case class RelationTransformationDesc(pos: Int, expr: RelationalExpr, decls: List[VariableLit]) extends TransformationDesc
-case class FilterTransformationDesc(expr: ConditionalExpr, decls: List[VariableLit]) extends TransformationDesc
-case class ProjectionTransformationDesc(projections: List[VariableLit], decls: List[VariableLit]) extends TransformationDesc
+case class RelationTransformationDesc(pos: Int, expr: RelationalExpr) extends TransformationDesc
+case class FilterTransformationDesc(expr: ConditionalExpr) extends TransformationDesc
+case class ProjectionTransformationDesc(projections: List[VariableLit]) extends TransformationDesc
+case class BindTransformationDesc(decls: List[VariableLit]) extends TransformationDesc
 
 case class PathExpr(expr: EvaluableExpr) extends EvaluableExpr {
   def evaluate(wordNet: WordNet, bindings: Bindings) = { //TODO extend this method or remove this class
@@ -840,12 +841,6 @@ case class BooleanByFilterReq(cond: ConditionalExpr) extends EvaluableExpr {
 /*
  * Variables
  */
-case class GeneratorExpr(expr: EvaluableExpr, decls: List[VariableLit]) extends EvaluableExpr with VariableBindings {
-  def evaluate(wordNet: WordNet, bindings: Bindings) = {
-    bind(expr.evaluate(wordNet, bindings), decls)
-  }
-}
-
 sealed abstract class VariableLit(val value: String) extends Expr
 
 case class StepVariableLit(override val value: String) extends VariableLit(value)
