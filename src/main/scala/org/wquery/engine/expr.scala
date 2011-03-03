@@ -48,7 +48,7 @@ case class IteratorExpr(pexpr: EvaluableExpr, iexpr: ImperativeExpr) extends Imp
         
       pathVarNames.foreach { pathVar =>
         val varPos = presult.pathVars(pathVar)(i)
-        tupleBindings.bindStepVariable(pathVar, tuple.slice(varPos._1, varPos._2))
+        tupleBindings.bindPathVariable(pathVar, tuple.slice(varPos._1, varPos._2))
       }
 
       stepVarNames.foreach(stepVar => tupleBindings.bindStepVariable(stepVar, tuple(presult.stepVars(stepVar)(i))))

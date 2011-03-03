@@ -66,14 +66,7 @@ class DataSet(val paths: List[List[Any]], val pathVars: Map[String, List[(Int, I
     val dataType = getType(pos)
     dataType == IntegerType || dataType == FloatType || dataType == UnionType(Set(IntegerType, FloatType))
   }
-  
-  override def equals(obj: Any) = {
-    obj match {
-      case result: DataSet => paths == result.paths
-      case _ => false
-    }
-  }
-  
+
   override def toString = paths.toString
 }
 
