@@ -77,7 +77,11 @@
 			<id>scala-tools.org</id>
 			<name>Scala-tools Maven2 Repository</name>
 			<url>http://scala-tools.org/repo-releases</url>
-		</repository>		
+		</repository>
+        <repository>
+            <id>undercover</id>
+            <url>http://undercover.googlecode.com/svn/maven/repository</url>
+        </repository>				
 	</repositories>
 	
 	<pluginRepositories>
@@ -85,6 +89,10 @@
 			<id>scala-tools.org</id>
 			<name>Scala-tools Maven2 Repository</name>
 			<url>http://scala-tools.org/repo-releases</url>
+		</pluginRepository>
+		<pluginRepository>
+			<id>undercover</id>
+			<url>http://undercover.googlecode.com/svn/maven/repository</url>
 		</pluginRepository>
 	</pluginRepositories>	
 	
@@ -286,6 +294,11 @@
 				<groupId>org.scala-tools</groupId>
 				<artifactId>maven-scala-plugin</artifactId>
 				<version>2.15.1</version>
+			</plugin>
+			<plugin>
+				<groupId>undercover</groupId>
+				<artifactId>undercover-maven-plugin</artifactId>
+				<version>0.8.3</version>
 			</plugin>					
 		</plugins>
 	</reporting>
