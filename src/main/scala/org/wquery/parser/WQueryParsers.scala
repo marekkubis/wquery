@@ -107,8 +107,7 @@ trait WQueryParsers extends RegexParsers {
   def dots = rep1(".") ^^ { x => x.size }    
   
   def rel_expr: Parser[RelationalExpr]
-    = chainl1(quant_rel_expr, 
-               "|" ^^ { x => ((l:RelationalExpr, r:RelationalExpr) => UnionRelationalExpr(l, r)) })
+    = chainl1(quant_rel_expr, "|" ^^ { x => ((l:RelationalExpr, r:RelationalExpr) => UnionRelationalExpr(l, r)) })
         
   def quant_rel_expr = unary_rel_expr ~ quantifierLit ^^ { case iexpr~quant => QuantifiedRelationalExpr(iexpr, quant) }
     
