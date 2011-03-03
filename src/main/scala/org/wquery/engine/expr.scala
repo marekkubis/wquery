@@ -338,86 +338,8 @@ case class FunctionExpr(name: String, args: EvaluableExpr) extends EvaluableExpr
 /*
  * Path related expressions
  */
-case class StepExpr(lexpr: EvaluableExpr, rexpr: TransformationDesc) extends EvaluableExpr with VariableBindings {
-  def evaluate(wordNet: WordNet, bindings: Bindings) = {
-    rexpr match {
-      case RelationTransformationDesc(pos, rexpr) =>
-        rexpr.transform(wordNet, bindings, lexpr.evaluate(wordNet, bindings), pos, false)
-      case FilterTransformationDesc(cond) =>
-        evaluateFilter(wordNet, bindings, cond)
-      case ProjectionTransformationDesc(projections) =>
-        evaluateProjection(wordNet, bindings, projections)
-      case BindTransformationDesc(decls) =>
-        bind(lexpr.evaluate(wordNet, bindings), decls)
-    }
-  }
-  
-  private def evaluateFilter(wordNet: WordNet, bindings: Bindings, cond: ConditionalExpr) = {
-    val lresult = lexpr.evaluate(wordNet, bindings)
-    val pathVarNames = lresult.pathVars.keys.toSeq
-    val stepVarNames = lresult.stepVars.keys.toSeq                
-    val pathBuffer = DataSetBuffers.createPathBuffer
-    val pathVarBuffers = DataSetBuffers.createPathVarBuffers(pathVarNames)
-    val stepVarBuffers = DataSetBuffers.createStepVarBuffers(stepVarNames)
-    
-    for (i <- 0 until lresult.pathCount) {
-      val tuple = lresult.paths(i)
-      val binds = Bindings(bindings)        
-      
-      for (pathVar <- pathVarNames) {
-        val varPos = lresult.pathVars(pathVar)(i)
-        binds.bindPathVariable(pathVar, tuple.slice(varPos._1, varPos._2))            
-      }
-      
-      for (stepVar <- stepVarNames) {
-        val varPos = lresult.stepVars(stepVar)(i)
-        binds.bindStepVariable(stepVar, tuple(varPos))            
-      }          
-      
-      binds.bindContextVariables(tuple)
-      
-      if (cond.satisfied(wordNet, binds)) {
-        pathBuffer.append(tuple)
-        pathVarNames.foreach(x => pathVarBuffers(x).append(lresult.pathVars(x)(i)))
-        stepVarNames.foreach(x => stepVarBuffers(x).append(lresult.stepVars(x)(i)))
-      }
-    }
-
-    DataSet.fromBuffers(pathBuffer, pathVarBuffers, stepVarBuffers)   
-  }
-  
-  private def evaluateProjection(wordNet: WordNet, bindings: Bindings, projections: List[VariableLit]) = {
-    val lresult = lexpr.evaluate(wordNet, bindings)
-    
-    projections.map {
-      case PathVariableLit(pathVar) =>
-        if (!lresult.pathVars.contains(pathVar))
-          throw new WQueryEvaluationException("Variable @" + pathVar + " referenced in a projection is not bound")
-      case StepVariableLit(stepVar) =>
-        if (!lresult.stepVars.contains(stepVar))
-          throw new WQueryEvaluationException("Variable $" + stepVar + " referenced in a projection is not bound")
-    }
-    
-    val pathBuffer = DataSetBuffers.createPathBuffer
-        
-    for (i <- 0 until lresult.pathCount) {
-      val tuple = lresult.paths(i)
-      val tupleBuffer = new ListBuffer[Any]
-      
-      projections.map {
-        case PathVariableLit(pathVar) =>
-          val varPos = lresult.pathVars(pathVar)(i)
-          tupleBuffer.appendAll(tuple.slice(varPos._1, varPos._2))        
-        case StepVariableLit(stepVar) =>
-          val varPos = lresult.stepVars(stepVar)(i)
-          tupleBuffer.append(tuple(varPos))            
-      }
-      
-      pathBuffer.append(tupleBuffer.toList)
-    }
-    
-    DataSet.fromBuffers(pathBuffer, DataSetBuffers.createPathVarBuffers(Nil), DataSetBuffers.createStepVarBuffers(Nil))   
-  }  
+case class StepExpr(lexpr: EvaluableExpr, rexpr: TransformationExpr) extends EvaluableExpr {
+  def evaluate(wordNet: WordNet, bindings: Bindings) = rexpr.transform(lexpr.evaluate(wordNet, bindings), wordNet, bindings)
 }
 
 trait VariableBindings {
@@ -495,12 +417,87 @@ trait VariableBindings {
   }
 }
 
-sealed abstract class TransformationDesc extends Expr
+sealed abstract class TransformationExpr extends Expr { 
+  def transform(dataSet: DataSet, wordNet: WordNet, bindings: Bindings): DataSet	
+}
 
-case class RelationTransformationDesc(pos: Int, expr: RelationalExpr) extends TransformationDesc
-case class FilterTransformationDesc(expr: ConditionalExpr) extends TransformationDesc
-case class ProjectionTransformationDesc(projections: List[VariableLit]) extends TransformationDesc
-case class BindTransformationDesc(decls: List[VariableLit]) extends TransformationDesc
+case class RelationTransformationExpr(pos: Int, rexpr: RelationalExpr) extends TransformationExpr {
+  def transform(dataSet: DataSet, wordNet: WordNet, bindings: Bindings) = {	
+	rexpr.transform(wordNet, bindings, dataSet, pos, false)
+  }
+}
+
+case class FilterTransformationExpr(cond: ConditionalExpr) extends TransformationExpr {
+  def transform(dataSet: DataSet, wordNet: WordNet, bindings: Bindings) = {
+    val pathVarNames = dataSet.pathVars.keys.toSeq
+    val stepVarNames = dataSet.stepVars.keys.toSeq                
+    val pathBuffer = DataSetBuffers.createPathBuffer
+    val pathVarBuffers = DataSetBuffers.createPathVarBuffers(pathVarNames)
+    val stepVarBuffers = DataSetBuffers.createStepVarBuffers(stepVarNames)
+    
+    for (i <- 0 until dataSet.pathCount) {
+      val tuple = dataSet.paths(i)
+      val binds = Bindings(bindings)        
+      
+      for (pathVar <- pathVarNames) {
+        val varPos = dataSet.pathVars(pathVar)(i)
+        binds.bindPathVariable(pathVar, tuple.slice(varPos._1, varPos._2))            
+      }
+      
+      for (stepVar <- stepVarNames) {
+        val varPos = dataSet.stepVars(stepVar)(i)
+        binds.bindStepVariable(stepVar, tuple(varPos))            
+      }          
+      
+      binds.bindContextVariables(tuple)
+      
+      if (cond.satisfied(wordNet, binds)) {
+        pathBuffer.append(tuple)
+        pathVarNames.foreach(x => pathVarBuffers(x).append(dataSet.pathVars(x)(i)))
+        stepVarNames.foreach(x => stepVarBuffers(x).append(dataSet.stepVars(x)(i)))
+      }
+    }
+
+    DataSet.fromBuffers(pathBuffer, pathVarBuffers, stepVarBuffers)   
+  }	
+}
+
+case class ProjectionTransformationExpr(projections: List[VariableLit]) extends TransformationExpr {
+  def transform(dataSet: DataSet, wordNet: WordNet, bindings: Bindings) = {    
+    projections.map {
+      case PathVariableLit(pathVar) =>
+        if (!dataSet.pathVars.contains(pathVar))
+          throw new WQueryEvaluationException("Variable @" + pathVar + " referenced in a projection is not bound")
+      case StepVariableLit(stepVar) =>
+        if (!dataSet.stepVars.contains(stepVar))
+          throw new WQueryEvaluationException("Variable $" + stepVar + " referenced in a projection is not bound")
+    }
+    
+    val pathBuffer = DataSetBuffers.createPathBuffer
+        
+    for (i <- 0 until dataSet.pathCount) {
+      val tuple = dataSet.paths(i)
+      val tupleBuffer = new ListBuffer[Any]
+      
+      projections.map {
+        case PathVariableLit(pathVar) =>
+          val varPos = dataSet.pathVars(pathVar)(i)
+          tupleBuffer.appendAll(tuple.slice(varPos._1, varPos._2))        
+        case StepVariableLit(stepVar) =>
+          val varPos = dataSet.stepVars(stepVar)(i)
+          tupleBuffer.append(tuple(varPos))            
+      }
+      
+      pathBuffer.append(tupleBuffer.toList)
+    }
+    
+    DataSet.fromBuffers(pathBuffer, DataSetBuffers.createPathVarBuffers(Nil), DataSetBuffers.createStepVarBuffers(Nil))   
+  }  	
+}
+
+case class BindTransformationExpr(decls: List[VariableLit]) extends TransformationExpr with VariableBindings {
+  def transform(dataSet: DataSet, wordNet: WordNet, bindings: Bindings) = bind(dataSet, decls)	
+}
 
 case class PathExpr(expr: EvaluableExpr) extends EvaluableExpr {
   def evaluate(wordNet: WordNet, bindings: Bindings) = { //TODO extend this method or remove this class
