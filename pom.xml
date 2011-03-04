@@ -81,7 +81,7 @@
         <repository>
             <id>undercover</id>
             <url>http://undercover.googlecode.com/svn/maven/repository</url>
-        </repository>				
+        </repository>             				
 	</repositories>
 	
 	<pluginRepositories>
@@ -299,7 +299,12 @@
 				<groupId>undercover</groupId>
 				<artifactId>undercover-maven-plugin</artifactId>
 				<version>0.8.3</version>
-			</plugin>					
+				<configuration>
+				    <excludes>
+                        <exclude>**/*TestSuite</exclude>
+                    </excludes>
+				</configuration>
+			</plugin>								
 		</plugins>
 	</reporting>
 </project>

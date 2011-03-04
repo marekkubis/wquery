@@ -202,7 +202,7 @@ case class BinaryArithmExpr(op: String, left: EvaluableExpr, right: EvaluableExp
         )
       }
     } else {
-      throw new WQueryEvaluationException("Operator '" + op + "' requires numeric type ended datapaths") 
+      throw new WQueryEvaluationException("Operator '" + op + "' requires paths that end with float or integer values") 
     }
   }
 
@@ -683,9 +683,9 @@ case class QuantifiedRelationalExpr(expr: RelationalExpr, quantifier: Quantifier
 case class UnionRelationalExpr(lexpr: RelationalExpr, rexpr: RelationalExpr) extends RelationalExpr {
   def generate(wordNet: WordNet, bindings: Bindings) = {
     val leval = lexpr.generate(wordNet, bindings)
-	val reval = rexpr.generate(wordNet, bindings)
+    val reval = rexpr.generate(wordNet, bindings)
 
-	DataSet(leval.paths  union reval.paths) 	  
+    DataSet(leval.paths  union reval.paths) 	  
   }
   
   def canTransform(wordNet: WordNet, dataSet: DataSet) = {
