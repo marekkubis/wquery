@@ -462,36 +462,31 @@ case class FilterTransformationExpr(cond: ConditionalExpr) extends Transformatio
   }	
 }
 
-case class ProjectionTransformationExpr(projections: List[VariableLit]) extends TransformationExpr {
-  def transform(wordNet: WordNet, bindings: Bindings, dataSet: DataSet) = {    
-    projections.map {
-      case PathVariableLit(pathVar) =>
-        if (!dataSet.pathVars.contains(pathVar))
-          throw new WQueryEvaluationException("Variable @" + pathVar + " referenced in a projection is not bound")
-      case StepVariableLit(stepVar) =>
-        if (!dataSet.stepVars.contains(stepVar))
-          throw new WQueryEvaluationException("Variable $" + stepVar + " referenced in a projection is not bound")
-    }
+case class ProjectionTransformationExpr(expr: EvaluableExpr) extends TransformationExpr {
+  def transform(wordNet: WordNet, bindings: Bindings, dataSet: DataSet) = {
+    val buffer = new DataSetBuffer
+    val pathVarNames = dataSet.pathVars.keys
+    val stepVarNames = dataSet.stepVars.keys    
+    val binds = Bindings(bindings)	    	
     
-    val pathBuffer = DataSetBuffers.createPathBuffer
-        
     for (i <- 0 until dataSet.pathCount) {
       val tuple = dataSet.paths(i)
       val tupleBuffer = new ListBuffer[Any]
       
-      projections.map {
-        case PathVariableLit(pathVar) =>
-          val varPos = dataSet.pathVars(pathVar)(i)
-          tupleBuffer.appendAll(tuple.slice(varPos._1, varPos._2))        
-        case StepVariableLit(stepVar) =>
-          val varPos = dataSet.stepVars(stepVar)(i)
-          tupleBuffer.append(tuple(varPos))            
+      for (pathVar <- pathVarNames) {
+        val varPos = dataSet.pathVars(pathVar)(i)
+        binds.bindPathVariable(pathVar, tuple.slice(varPos._1, varPos._2))
       }
       
-      pathBuffer.append(tupleBuffer.toList)
+      for (stepVar <- stepVarNames) {
+        val varPos = dataSet.stepVars(stepVar)(i)
+        binds.bindStepVariable(stepVar, tuple(varPos))
+      }
+     
+      buffer.append(expr.evaluate(wordNet, binds))
     }
     
-    DataSet.fromBuffers(pathBuffer, DataSetBuffers.createPathVarBuffers(Nil), DataSetBuffers.createStepVarBuffers(Nil))   
+    buffer.toDataSet
   }  	
 }
 

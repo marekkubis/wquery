@@ -145,9 +145,9 @@ trait WQueryParsers extends RegexParsers {
     case lexpr~op~rexpr => ComparisonExpr(op, lexpr, rexpr)
   }  
   
-  def projection_trans = projection  ^^ { projs => ProjectionTransformationExpr(projs) }
+  def projection_trans = projection  ^^ { expr => ProjectionTransformationExpr(expr) }
   
-  def projection = "<" ~> var_decls <~ ">"
+  def projection = "<" ~> expr <~ ">"
   
   def bind_trans = var_decls ^^ { decls => BindTransformationExpr(decls) }
   
