@@ -3,12 +3,12 @@ import scala.collection.mutable.ListBuffer
 
 class DataSet(val paths: List[List[Any]], val pathVars: Map[String, List[(Int, Int)]], val stepVars: Map[String, List[Int]]) {
   val minPathSize = {// TODO optimize these two
-    val sizes = paths.map(x => x.size)
+    val sizes = paths.map(_.size)
     if (sizes.size > 0) sizes.min else 0
   }
 
   val maxPathSize = {// TODO optimize these two
-    val sizes = paths.map(x => x.size)
+    val sizes = paths.map(_.size)
     if (sizes.size > 0) sizes.max else 0
   }
         
@@ -101,7 +101,7 @@ object DataSet {
       new DataSet(pathBuffer.toList, pathVarBuffers.mapValues(_.toList), stepVarBuffers.mapValues(_.toList)) 
   }
   
-  def fromList(vlist: List[Any]) = new DataSet(vlist.map(x => List(x)), Map(), Map())
+  def fromList(vlist: List[Any]) = new DataSet(vlist.map(List(_)), Map(), Map())
 
   def fromTuple(tuple: List[Any]) = new DataSet(List(tuple), Map(), Map())
 

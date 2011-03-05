@@ -188,14 +188,14 @@ case class BinaryArithmExpr(op: String, left: EvaluableExpr, right: EvaluableExp
 
     if (lresult.minPathSize > 0 && rresult.minPathSize > 0 && lresult.isNumeric(0) && rresult.isNumeric(0)) {
       if (lresult.getType(0) == IntegerType && rresult.getType(0) == IntegerType) {
-        combineUsingIntArithmOp(op, lresult.paths.map( x => x.last.asInstanceOf[Int]), rresult.paths.map( x => x.last.asInstanceOf[Int]))
+        combineUsingIntArithmOp(op, lresult.paths.map( _.last.asInstanceOf[Int]), rresult.paths.map( _.last.asInstanceOf[Int]))
       } else {
         combineUsingDoubleArithmOp(op, 
-          lresult.paths.map(x => x.last).map {
+          lresult.paths.map(_.last).map {
             case x: Double => x            
             case x: Int => x.doubleValue
           },
-          rresult.paths.map(x => x.last).map {
+          rresult.paths.map(_.last).map {
             case x: Double => x              
             case x: Int => x.doubleValue
           }
@@ -263,7 +263,7 @@ case class MinusExpr(expr: EvaluableExpr) extends EvaluableExpr {
     val eresult = expr.evaluate(wordNet, bindings)
 
     if (eresult.isNumeric(0)) {
-        DataSet(eresult.paths.map(x => x.last).map {
+        DataSet(eresult.paths.map(_.last).map {
             case x: Int => List(-x)
             case x: Double => List(-x)
         })
@@ -283,7 +283,7 @@ case class FunctionExpr(name: String, args: EvaluableExpr) extends EvaluableExpr
     val atypes: List[FunctionArgumentType] = if (avalues.minPathSize  != avalues.maxPathSize ) {
       List(TupleType)
     } else {
-      ((avalues.maxPathSize - 1) to 0 by -1).map(x => avalues.getType(x)).toList.map {
+      ((avalues.maxPathSize - 1) to 0 by -1).map(avalues.getType(_)).toList.map {
           case UnionType(utypes) =>
             if (utypes == Set(FloatType, IntegerType)) ValueType(FloatType) else TupleType
           case t: BasicType =>
@@ -662,7 +662,7 @@ case class QuantifiedRelationalExpr(expr: RelationalExpr, quantifier: Quantifier
       filtered
     } else {
       val result = new ListBuffer[List[Any]]
-      val newForbidden: Set[Any] = forbidden.++[Any, Set[Any]](filtered.map { x => x.last }) // TODO ugly
+      val newForbidden: Set[Any] = forbidden.++[Any, Set[Any]](filtered.map(_.last)) // TODO ugly
 
       result.appendAll(filtered)
 
@@ -706,11 +706,11 @@ sealed abstract class ConditionalExpr extends Expr {
 }
 
 case class OrExpr(exprs: List[ConditionalExpr]) extends ConditionalExpr {
-  def satisfied(wordNet: WordNet, bindings: Bindings) = exprs.exists { x => x.satisfied(wordNet, bindings) }
+  def satisfied(wordNet: WordNet, bindings: Bindings) = exprs.exists(_.satisfied(wordNet, bindings))
 }
 
 case class AndExpr(exprs: List[ConditionalExpr]) extends ConditionalExpr {
-  def satisfied(wordNet: WordNet, bindings: Bindings) = exprs.forall { x => x.satisfied(wordNet, bindings) }
+  def satisfied(wordNet: WordNet, bindings: Bindings) = exprs.forall(_.satisfied(wordNet, bindings))
 }
 
 case class NotExpr(expr: ConditionalExpr) extends ConditionalExpr {
@@ -797,7 +797,7 @@ case class SynsetByExprReq(expr: EvaluableExpr) extends EvaluableExpr {
       if (eresult.getType(0) == SenseType) {
         DataSet(eresult.paths.map { case List(sense: Sense) => List(wordNet.demandSynsetBySense(sense)) })
       } else if (eresult.getType(0) == StringType) {          
-        DataSet(eresult.paths.flatMap { case List(wordForm: String) => wordNet.getSynsetsByWordForm(wordForm) }.map(x => List(x)))  
+        DataSet(eresult.paths.flatMap { case List(wordForm: String) => wordNet.getSynsetsByWordForm(wordForm) }.map(List(_)))  
       } else {
         throw new WQueryEvaluationException("{...} requires an expression that generates either senses or word forms")  
       }           

@@ -33,7 +33,7 @@ trait WQueryParsers extends RegexParsers {
   // imperative exprs
   
   def imp_expr: Parser[ImperativeExpr] = (
-      "do" ~> rep(statement) <~ "end" ^^ { x => BlockExpr(x) }
+      "do" ~> rep(statement) <~ "end" ^^ { BlockExpr(_) }
       | statement  
   )  
   
@@ -47,7 +47,7 @@ trait WQueryParsers extends RegexParsers {
   
   def iterator = "from" ~> multipath_expr ~ imp_expr ^^ { case mexpr~iexpr => IteratorExpr(mexpr, iexpr) }     
   
-  def emission = "emit" ~> multipath_expr ^^ { x => EmissionExpr(x) }
+  def emission = "emit" ~> multipath_expr ^^ { EmissionExpr(_) }
   
   def assignment = (
       var_decls ~ ":=" ~ multipath_expr ^^ { case vdecls~_~mexpr => EvaluableAssignmentExpr(vdecls, mexpr) }
@@ -83,7 +83,7 @@ trait WQueryParsers extends RegexParsers {
     = chainl1(unary_expr, ("*"|"/"|"%") ^^ { x => ((l:EvaluableExpr, r:EvaluableExpr) => BinaryArithmExpr(x, l , r)) })
   
   def unary_expr = (
-      "-" ~> func_expr ^^ { x => MinusExpr(x) }
+      "-" ~> func_expr ^^ { MinusExpr(_) }
       | "+" ~> func_expr
       | func_expr
   )    
@@ -106,7 +106,7 @@ trait WQueryParsers extends RegexParsers {
   
   def relation_trans = dots ~ rel_expr ^^ { case pos~expr => RelationTransformationExpr(pos, expr) }
   
-  def dots = rep1(".") ^^ { x => x.size }    
+  def dots = rep1(".") ^^ { _.size }    
   
   def rel_expr: Parser[RelationalExpr]
     = chainl1(quant_rel_expr, "|" ^^ { x => ((l:RelationalExpr, r:RelationalExpr) => UnionRelationalExpr(l, r)) })
@@ -119,8 +119,8 @@ trait WQueryParsers extends RegexParsers {
   )    
   
   def unaryRelLit = (
-      "^" ~ idLit ^^ { case _~id => UnaryRelationalExpr(List(QuotedIdentifierLit("destination"), id, QuotedIdentifierLit("source"))) } // syntactic sugar
-      | rep1sep(idLit, "^") ^^ { case ids => UnaryRelationalExpr(ids) }  
+      ("^" ~> idLit) ^^ { id => UnaryRelationalExpr(List(QuotedIdentifierLit("destination"), id, QuotedIdentifierLit("source"))) } // syntactic sugar
+      | rep1sep(idLit, "^") ^^ { UnaryRelationalExpr(_) }  
   )
 
   def quantifierLit = (
@@ -128,16 +128,16 @@ trait WQueryParsers extends RegexParsers {
       | success(QuantifierLit(1, Some(1)))      
   )
     
-  def filter_trans = filter ^^ { case cond => FilterTransformationExpr(cond) }
+  def filter_trans = filter ^^ { FilterTransformationExpr(_) }
   
   def filter = "[" ~> or_condition <~ "]"
   
-  def or_condition: Parser[OrExpr] = repsep(and_condition, "or") ^^ { x => OrExpr(x) }  
+  def or_condition: Parser[OrExpr] = repsep(and_condition, "or") ^^ { OrExpr(_) }  
   
-  def and_condition = repsep(not_condition, "and") ^^ { x => AndExpr(x) }
+  def and_condition = repsep(not_condition, "and") ^^ { AndExpr(_) }
   
   def not_condition = (
-      "not" ~> condition ^^ { x => NotExpr(x) }
+      "not" ~> condition ^^ { NotExpr(_) }
       | condition
   )
   
@@ -151,11 +151,11 @@ trait WQueryParsers extends RegexParsers {
     case lexpr~op~rexpr => ComparisonExpr(op, lexpr, rexpr)
   }  
   
-  def projection_trans = projection  ^^ { expr => ProjectionTransformationExpr(expr) }
+  def projection_trans = projection  ^^ { ProjectionTransformationExpr(_) }
   
   def projection = "<" ~> expr <~ ">"
   
-  def bind_trans = var_decls ^^ { decls => BindTransformationExpr(decls) }
+  def bind_trans = var_decls ^^ { BindTransformationExpr(_) }
   
   // generators
   def generator = (
@@ -174,17 +174,17 @@ trait WQueryParsers extends RegexParsers {
   )
 
   def boolean_generator = (
-      "true" ^^ { x => BooleanLit(true) }
-      | "false" ^^ { x => BooleanLit(false) }
+      "true" ^^ { _ => BooleanLit(true) }
+      | "false" ^^ { _ => BooleanLit(false) }
   ) 
 
   def synset_generator = (
-      "{}" ^^ { x => SynsetAllReq() }
-      | "{" ~> expr <~ "}" ^^ { x => SynsetByExprReq(x) }
+      "{}" ^^ { _ => SynsetAllReq() }
+      | "{" ~> expr <~ "}" ^^ { SynsetByExprReq(_) }
   )
   
   def sense_generator = (
-      "::" ^^ { x => SenseAllReq() }
+      "::" ^^ { _ => SenseAllReq() }
       | alphaLit ~ ":" ~ integerLit ~ ":" ~ alphaLit ^^ {
         case StringLit(word)~_~IntegerLit(num)~_~StringLit(pos) => SenseByWordFormAndSenseNumberAndPosReq(word, num, pos) 
       }   
@@ -196,24 +196,24 @@ trait WQueryParsers extends RegexParsers {
   def word_generator = (
       stringLit
       | doubleQuotedLit ^^ { case DoubleQuotedLit(x) => WordFormByRegexReq(x) }      
-      | rel_expr ^^ { x => ContextByRelationalExprReq(x) }        
+      | rel_expr ^^ { ContextByRelationalExprReq(_) }        
   )  
 
   def float_generator = floatLit  
   def sequence_generator = integerLit ~ ".." ~ integerLit ^^ { case IntegerLit(l)~_~IntegerLit(r) => SequenceLit(l, r) }  
   def integer_generator = integerLit  
   def back_generator = rep1("#") ^^ { x => ContextByReferenceReq(x.size) }
-  def filter_generator = filter ^^ { x => BooleanByFilterReq(x) }
+  def filter_generator = filter ^^ { BooleanByFilterReq(_) }
   def expr_generator = "(" ~> expr <~ ")"
-  def variable_generator = var_decl ^^ { x => ContextByVariableReq(x) }
-  def arc_generator = "\\" ~> unaryRelLit ^^ { x => ArcByUnaryRelationalExprReq(x) }
+  def variable_generator = var_decl ^^ { ContextByVariableReq(_) }
+  def arc_generator = "\\" ~> unaryRelLit ^^ { ArcByUnaryRelationalExprReq(_) }
   
   // path variables
   def var_decls = rep1(var_decl)  
   
   def var_decl = (
-      "$" ~> notQuotedId ^^ { x => StepVariableLit(x) }
-      | "@" ~> notQuotedId ^^ { x => PathVariableLit(x) }
+      "$" ~> notQuotedId ^^ { StepVariableLit(_) }
+      | "@" ~> notQuotedId ^^ { PathVariableLit(_) }
   ) 
   
   // literals
@@ -234,8 +234,8 @@ trait WQueryParsers extends RegexParsers {
   }  
 
   def idLit = (
-      notQuotedId ^^ { x => NotQuotedIdentifierLit(x) }
-      | quotedId ^^ { x => QuotedIdentifierLit(x) }
+      notQuotedId ^^ { NotQuotedIdentifierLit(_) }
+      | quotedId ^^ { QuotedIdentifierLit(_) }
   )    
   
   def quotedId: Parser[String] = "'(\\\\'|[^'])*?'".r ^^ { x => x.substring(1, x.length - 1).replaceAll("\\'","'") }
