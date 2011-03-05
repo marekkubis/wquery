@@ -77,4 +77,18 @@ class GeneratorsTestSuite extends WQueryTestSuite {
   @Test def testRelationGeneratorUnion() = result of ("member_holonym|partial_holonym") should equal ("{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n } member_holonym { people:1:n }\n{ cab:3:n hack:5:n taxi:1:n taxicab:1:n } member_holonym { fleet:2:n }\n{ room:1:n } partial_holonym { building:1:n edifice:1:n }\n{ human body:1:n physical body:1:n material body:1:n soma:3:n build:2:n figure:2:n physique:2:n anatomy:2:n shape:3:n bod:1:n chassis:1:n frame:3:n form:5:n flesh:2:n } partial_holonym { homo:2:n man:4:n human being:1:n human:1:n } partial_holonym { person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n }\n{ apple:1:n } partial_holonym { apple:2:n orchard apple tree:1:n Malus pumila:1:n }\n{ orange:1:n } partial_holonym { orange:3:n orange tree:1:n }\n")  
   
   @Test def testRelationGeneratorProjections() = result of ("literal^pos^num[# = 6]") should equal ("unit:6:n literal(source,pos) n literal(source,num) 6\nmachine:6:n literal(source,pos) n literal(source,num) 6\n")
+  
+  @Test def testSimpleArcGenerator() = result of ("\\hypernym") should equal ("hypernym\n")
+
+  @Test def testUnknownArcGenerator() = result of ("\\lll") should startWith ("ERROR: Arc generator references unknown relation 'lll'")
+  
+  @Test def testInvertedArcGenerator() = result of ("\\^hypernym") should equal ("^hypernym\n")
+  
+  @Test def testInvertedArcByFullDescriptionGenerator() = result of ("\\destination^hypernym^source") should equal ("^hypernym\n")
+  
+  @Test def testDestinationArcGenerator() = result of ("\\hypernym^source") should equal ("hypernym(source,source)\n")
+  
+  @Test def testSourceArcGenerator() = result of ("\\destination^hypernym") should equal ("hypernym(destination,destination)\n")
+
+  @Test def testMultipleArcGenerator() = result of ("\\source^literal^num^pos") should equal ("literal(source,num)\nliteral(source,pos)\n")  
 }

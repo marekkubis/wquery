@@ -107,6 +107,7 @@ class FiltersTestSuite extends WQueryTestSuite {
   //
       
   // [# < 2]
+  
   @Test def testSingleBackReference() = result of ("last({person:1}.senses[# != individual:1:n])") should equal ("person:1:n\nsomeone:1:n\nsomebody:1:n\nmortal:1:n\nsoul:2:n\n")
     
   @Test def testRelationAfterSingleBackReference() = result of ("last({person:1}.senses[# != individual:1:n].word)") should equal ("mortal\nperson\nsomebody\nsomeone\nsoul\n")
@@ -128,5 +129,7 @@ class FiltersTestSuite extends WQueryTestSuite {
   @Test def testHashFreeBackReferenceDotHypernymsCount() = result of ("{person}[count(hypernym)>1]") should equal ("{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n }\n")
 
   @Test def testHashFreeBackReferenceDotHypernymsOrHyponymsWords() = result of ("{person}[organism in hypernym|^hypernym.words]") should equal ("{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n }\n")
-    
+  
+  @Test def testArcFilter() = result of ("{}.partial_holonym|member_holonym$r$_[$r = \\member_holonym]") should equal ("$r=member_holonym { person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n } member_holonym { people:1:n }\n$r=member_holonym { cab:3:n hack:5:n taxi:1:n taxicab:1:n } member_holonym { fleet:2:n }\n")
+  
 }

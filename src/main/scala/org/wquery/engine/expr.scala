@@ -539,7 +539,7 @@ case class UnaryRelationalExpr(idLits: List[IdentifierLit]) extends RelationalEx
           .orElse(wordNet.findFirstRelationByNameAndSource(first, Relation.Source)
             .map(r => DataSet(wordNet.getPaths(r, Relation.Source, second::dests))))
       case List(head) =>
-        wordNet.findFirstRelationByNameAndSource(ids.head, Relation.Source) 
+        wordNet.findFirstRelationByNameAndSource(head, Relation.Source) 
           .map(r => DataSet(wordNet.getPaths(r, Relation.Source, r.argumentNames.filter(_ != Relation.Source))))        
       case Nil =>
           None        
@@ -863,6 +863,42 @@ case class ContextByVariableReq(variable: VariableLit) extends EvaluableExpr {
           .getOrElse(throw new WQueryEvaluationException("A reference to unknown variable $'" + name + "' found"))
     }
   }
+}
+
+case class ArcByUnaryRelationalExprReq(rexpr: UnaryRelationalExpr) extends EvaluableExpr {
+  def evaluate(wordNet: WordNet, bindings: Bindings) = {
+    val ids = (rexpr match {case UnaryRelationalExpr(x) => x}).map(_.value)
+
+    ids match {
+      case first::second::dests =>
+        wordNet.findFirstRelationByNameAndSource(second, first)
+          .map { r => 
+            r.demandArgument(first)
+            
+            if (dests.isEmpty) {
+              DataSet.fromValue(Arc(r, first, Relation.Destination))	
+            } else {
+              DataSet.fromList(dests.map { dest => 
+                r.demandArgument(dest)
+                Arc(r, first, dest)
+              })            	
+            }
+          }
+          .orElse(wordNet.findFirstRelationByNameAndSource(first, Relation.Source)
+            .map { r => 
+              DataSet.fromList((second::dests).map { dest =>
+                r.demandArgument(dest)
+                Arc(r, Relation.Source, dest)		
+            })})
+            .getOrElse(throw new WQueryEvaluationException("Arc generator references an unknown relation"))
+      case List(head) =>
+        wordNet.findFirstRelationByNameAndSource(head, Relation.Source) 
+          .map(r => DataSet.fromValue(Arc(r, Relation.Source, Relation.Destination )))
+          .getOrElse(throw new WQueryEvaluationException("Arc generator references unknown relation '" + head + "'"))
+      case Nil =>
+        throw new RuntimeException("ids is empty in ArcByUnaryRelationalExprReq")
+    }    
+  }  
 }
 
 case class BooleanByFilterReq(cond: ConditionalExpr) extends EvaluableExpr {

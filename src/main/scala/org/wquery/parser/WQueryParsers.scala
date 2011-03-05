@@ -1,4 +1,6 @@
 package org.wquery.parser
+
+import org.wquery.engine.ArcByUnaryRelationalExprReq
 import org.wquery.{WQueryParsingErrorException, WQueryParsingFailureException}
 import org.wquery.engine.{EvaluableExpr, FunctionExpr, WQueryFunctions, ImperativeExpr, IteratorExpr, EmissionExpr, EvaluableAssignmentExpr, RelationalAssignmentExpr, IfElseExpr, BinaryPathExpr, BlockExpr, BinaryArithmExpr, TransformationExpr, StepExpr, RelationalExpr, QuantifierLit, OrExpr, NotExpr, AndExpr, ComparisonExpr, BooleanLit, SynsetAllReq, SenseAllReq, DoubleQuotedLit, WordFormByRegexReq, ContextByRelationalExprReq, IntegerLit, ContextByReferenceReq, FloatLit, NotQuotedIdentifierLit, QuotedIdentifierLit, StringLit, ContextByVariableReq, BooleanByFilterReq, SequenceLit, SynsetByExprReq, SenseByWordFormAndSenseNumberAndPosReq, SenseByWordFormAndSenseNumberReq, UnaryRelationalExpr, QuantifiedRelationalExpr, PathExpr, MinusExpr, UnionRelationalExpr, StepVariableLit, PathVariableLit, WhileDoExpr, FilterTransformationExpr, ProjectionTransformationExpr, BindTransformationExpr, RelationTransformationExpr}
 import scala.util.parsing.combinator.RegexParsers
@@ -113,13 +115,17 @@ trait WQueryParsers extends RegexParsers {
     
   def unary_rel_expr = (
       "(" ~> rel_expr <~ ")" // TBD composition operator and its quantification
-      | "^" ~ idLit ^^ { case _~id => UnaryRelationalExpr(List(QuotedIdentifierLit("destination"), id, QuotedIdentifierLit("source"))) } // syntactic sugar
-      | rep1sep(idLit, "^") ^^ { case ids => UnaryRelationalExpr(ids) }
+      | unaryRelLit
   )    
+  
+  def unaryRelLit = (
+      "^" ~ idLit ^^ { case _~id => UnaryRelationalExpr(List(QuotedIdentifierLit("destination"), id, QuotedIdentifierLit("source"))) } // syntactic sugar
+      | rep1sep(idLit, "^") ^^ { case ids => UnaryRelationalExpr(ids) }  
+  )
 
   def quantifierLit = (
       "!" ^^^ {QuantifierLit(1, None)}      
-      |success(QuantifierLit(1, Some(1)))      
+      | success(QuantifierLit(1, Some(1)))      
   )
     
   def filter_trans = filter ^^ { case cond => FilterTransformationExpr(cond) }
@@ -154,16 +160,17 @@ trait WQueryParsers extends RegexParsers {
   // generators
   def generator = (
       boolean_generator
-      |synset_generator
-      |sense_generator
-      |word_generator
-      |float_generator
-      |sequence_generator
-      |integer_generator
-      |back_generator  
-      |filter_generator
-      |expr_generator
-      |variable_generator    
+      | synset_generator
+      | sense_generator
+      | word_generator
+      | float_generator
+      | sequence_generator
+      | integer_generator
+      | back_generator  
+      | filter_generator
+      | expr_generator
+      | variable_generator    
+      | arc_generator
   )
 
   def boolean_generator = (
@@ -199,6 +206,7 @@ trait WQueryParsers extends RegexParsers {
   def filter_generator = filter ^^ { x => BooleanByFilterReq(x) }
   def expr_generator = "(" ~> expr <~ ")"
   def variable_generator = var_decl ^^ { x => ContextByVariableReq(x) }
+  def arc_generator = "\\" ~> unaryRelLit ^^ { x => ArcByUnaryRelationalExprReq(x) }
   
   // path variables
   def var_decls = rep1(var_decl)  
