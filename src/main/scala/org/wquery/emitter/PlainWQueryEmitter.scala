@@ -81,17 +81,18 @@ class PlainWQueryEmitter extends WQueryEmitter {
       case element: Sense => 
         emitSense(element, builder)
       case element: Arc => 
-        if (element.isInverse)
-          builder append "^"
-            
-        builder append element.relation.name
         
-        if (!element.isCanonical && !element.isInverse) {
-          builder append "("
+        if (element.isCanonical || element.isInverse) {
+          if (element.isInverse)
+            builder append "^"
+        
+          builder append element.relation.name
+        } else {
           builder append element.from
-          builder append ","        
+          builder append "^"
+          builder append element.relation.name          
+          builder append "^"   
           builder append element.to
-          builder append ")"      
         }
       case element => 
         builder append element      
