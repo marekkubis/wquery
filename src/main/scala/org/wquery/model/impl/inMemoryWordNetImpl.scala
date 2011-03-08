@@ -8,21 +8,44 @@ class InMemoryWordNetImpl (val synsets: Set[Synset], val senses: Set[Sense], val
                            val relations: Map[(String, DataType, String), Relation],
                            val successors: Map[(Any, Relation, String), List[Map[String, Any]]]) extends WordNet { 
   
-  def follow(dataSet: DataSet, pos: Int, relation: Relation, source: String, dests: List[String]) = {
+  def followRelation(dataSet: DataSet, pos: Int, relation: Relation, source: String, dests: List[String]) = {
+    val pathBuffer = DataSetBuffers.createPathBuffer
+    val pathVarBuffers = DataSetBuffers.createPathVarBuffers(dataSet.pathVars.keys.toSeq)
+    val stepVarBuffers = DataSetBuffers.createStepVarBuffers(dataSet.stepVars.keys.toSeq)
+    
+    follow(dataSet, pos, relation, source, dests, pathBuffer, pathVarBuffers, stepVarBuffers)
+    
+    DataSet.fromBuffers(pathBuffer, pathVarBuffers, stepVarBuffers)
+  }
+  
+  def followAny(dataSet: DataSet, pos: Int) = {
+    val pathBuffer = DataSetBuffers.createPathBuffer
+    val pathVarBuffers = DataSetBuffers.createPathVarBuffers(dataSet.pathVars.keys.toSeq)
+    val stepVarBuffers = DataSetBuffers.createStepVarBuffers(dataSet.stepVars.keys.toSeq)
+        
+    for (relation <- relations.values.toSeq.distinct) {
+    for (source <- relation.argumentNames)
+    	for (dest <- relation.argumentNames)
+    	  if (source != dest)   
+    	 	follow(dataSet, pos, relation, source, List(dest), pathBuffer, pathVarBuffers, stepVarBuffers)
+    }
+    
+    DataSet.fromBuffers(pathBuffer, pathVarBuffers, stepVarBuffers)
+  }
+
+  private def follow(dataSet: DataSet, pos: Int, relation: Relation, source: String, dests: List[String], pathBuffer: ListBuffer[List[Any]], 
+	  pathVarBuffers: scala.collection.immutable.Map[String, ListBuffer[(Int, Int)]], stepVarBuffers: scala.collection.immutable.Map[String, ListBuffer[Int]]) {
     relation.demandArgument(source)
     dests.foreach(relation.demandArgument)
       
-    val pathVarNames = dataSet.pathVars.keys.toSeq
-    val stepVarNames = dataSet.stepVars.keys.toSeq
-    val pathBuffer = DataSetBuffers.createPathBuffer
-    val pathVarBuffers = DataSetBuffers.createPathVarBuffers(pathVarNames)
-    val stepVarBuffers = DataSetBuffers.createStepVarBuffers(stepVarNames)
+    val pathVarNames = dataSet.pathVars.keys
+    val stepVarNames = dataSet.stepVars.keys
     
     for (i <- 0 until dataSet.pathCount) {
-      val tuple = dataSet.paths(i)   
+      val tuple = dataSet.paths(i)
         
       if (successors.contains((tuple(tuple.size - pos), relation, source))) {
-        for (succs <- successors(tuple(tuple.size - pos), relation, source)) {
+        for (succs <- successors(tuple(tuple.size - pos), relation, source)) {        	
           val tupleBuffer = new ListBuffer[Any]
           tupleBuffer.appendAll(tuple)
           dests.foreach { dest => 
@@ -42,8 +65,6 @@ class InMemoryWordNetImpl (val synsets: Set[Synset], val senses: Set[Sense], val
         }
       }
     }
-
-    DataSet.fromBuffers(pathBuffer, pathVarBuffers, stepVarBuffers)
   }
   
   def getPaths(relation: Relation, source:String, dests: List[String]) = {  

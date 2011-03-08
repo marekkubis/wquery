@@ -12,12 +12,14 @@ trait WordNet {
   
   def relations: Map[(String, DataType, String), Relation]
   
-  def follow(dataset: DataSet, pos: Int, relation: Relation, source: String, dests: List[String]): DataSet  
+  def followRelation(dataSet: DataSet, pos: Int, relation: Relation, source: String, dests: List[String]): DataSet  
+
+  def followAny(dataSet: DataSet, pos: Int): DataSet    
   
   def getPaths(relation: Relation, source: String, dests: List[String]): List[List[Any]]
   
   private def getSuccessors(obj: Any, relation: Relation): List[Any] = {
-    follow(DataSet.fromValue(obj), 1, relation, Relation.Source, List(Relation.Destination)).paths.map(_.last) // TO BE rewritten after implementing WordNetStore    
+    followRelation(DataSet.fromValue(obj), 1, relation, Relation.Source, List(Relation.Destination)).paths.map(_.last) // TO BE rewritten after implementing WordNetStore    
   }
   
   def getSynsetsByWordForm(word: String) = getSuccessors(word, WordNet.WordFormToSynsets)  

@@ -584,21 +584,25 @@ case class UnaryRelationalExpr(idLits: List[IdentifierLit]) extends RelationalEx
   }
 
   private def useIdentifiersAsTransformation(ids: List[String], wordNet: WordNet, dataSet: DataSet, pos: Int) = {
-    val sourceType = dataSet.getType(pos - 1)  
-    val (relation, source, dests) = ids match {
-      case List(relationName) =>
-        (wordNet.demandRelation(relationName, sourceType, Relation.Source), Relation.Source, List(Relation.Destination))
-      case List(left, right) =>
-        wordNet.getRelation(left, sourceType, Relation.Source) 
-          .map((_, Relation.Source, List(right)))
-          .getOrElse((wordNet.demandRelation(right, sourceType, left), left, List(Relation.Destination)))
-      case first::second::dests =>
-        wordNet.getRelation(first, sourceType, Relation.Source) 
-          .map((_, Relation.Source, second::dests))
-          .getOrElse((wordNet.demandRelation(second, sourceType, first), first, dests))
-    }
+	if (ids == List("_")) {
+	  wordNet.followAny(dataSet, pos)	  
+	} else {
+      val sourceType = dataSet.getType(pos - 1)  
+      val (relation, source, dests) = ids match {
+        case List(relationName) =>
+          (wordNet.demandRelation(relationName, sourceType, Relation.Source), Relation.Source, List(Relation.Destination))
+        case List(left, right) =>
+          wordNet.getRelation(left, sourceType, Relation.Source) 
+            .map((_, Relation.Source, List(right)))
+            .getOrElse((wordNet.demandRelation(right, sourceType, left), left, List(Relation.Destination)))
+        case first::second::dests =>
+          wordNet.getRelation(first, sourceType, Relation.Source) 
+            .map((_, Relation.Source, second::dests))
+            .getOrElse((wordNet.demandRelation(second, sourceType, first), first, dests))
+      }
     
-    wordNet.follow(dataSet, pos, relation, source, dests)            
+      wordNet.followRelation(dataSet, pos, relation, source, dests)		
+	}
   }
   
   private def useIdentifierAsRelationalExprAlias(id: String, wordNet: WordNet, bindings: Bindings, dataSet: DataSet, pos: Int) = {
