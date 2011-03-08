@@ -505,7 +505,7 @@ case class PathExpr(expr: EvaluableExpr) extends EvaluableExpr {
  */
 sealed abstract class RelationalExpr extends Expr {
   def generate(wordNet: WordNet, bindings: Bindings): DataSet
-  def canTransform(wordNet: WordNet, dataSet: DataSet): Boolean
+  def canTransform(wordNet: WordNet, bindings: Bindings, dataSet: DataSet): Boolean
   def transform(wordNet: WordNet, bindings: Bindings, dataSet: DataSet, pos: Int): DataSet
 }
 
@@ -559,7 +559,7 @@ case class UnaryRelationalExpr(idLits: List[IdentifierLit]) extends RelationalEx
     }
   }  
   
-  def canTransform(wordNet: WordNet, dataSet: DataSet) = {
+  def canTransform(wordNet: WordNet, bindings: Bindings, dataSet: DataSet) = {
     if (idLits.size > 1) {
       true	          
     } else {
@@ -620,7 +620,7 @@ case class QuantifiedRelationalExpr(expr: RelationalExpr, quantifier: Quantifier
 	}
   }
   
-  def canTransform(wordNet: WordNet, dataSet: DataSet) = expr.canTransform(wordNet, dataSet)
+  def canTransform(wordNet: WordNet, bindings: Bindings, dataSet: DataSet) = expr.canTransform(wordNet, bindings, dataSet)
   
   def transform(wordNet: WordNet, bindings: Bindings, dataSet: DataSet, pos: Int) = {
     quantifier match {
@@ -679,6 +679,20 @@ case class QuantifiedRelationalExpr(expr: RelationalExpr, quantifier: Quantifier
   }  
 }
 
+case class ComposeRelationalExpr(lexpr: RelationalExpr, rexpr: RelationalExpr) extends RelationalExpr {
+  def generate(wordNet: WordNet, bindings: Bindings) = {
+    rexpr.transform(wordNet, bindings, lexpr.generate(wordNet, bindings), 1)
+  }
+  
+  def canTransform(wordNet: WordNet, bindings: Bindings, dataSet: DataSet) = {
+	lexpr.canTransform(wordNet, bindings, dataSet) && rexpr.canTransform(wordNet, bindings, lexpr.transform(wordNet, bindings, dataSet, 1))
+  }
+	
+  def transform(wordNet: WordNet, bindings: Bindings, dataSet: DataSet, pos: Int) = {
+    rexpr.transform(wordNet, bindings, lexpr.transform(wordNet, bindings, dataSet, pos), 1)
+  }
+}
+
 case class UnionRelationalExpr(lexpr: RelationalExpr, rexpr: RelationalExpr) extends RelationalExpr {
   def generate(wordNet: WordNet, bindings: Bindings) = {
     val leval = lexpr.generate(wordNet, bindings)
@@ -687,8 +701,8 @@ case class UnionRelationalExpr(lexpr: RelationalExpr, rexpr: RelationalExpr) ext
     DataSet(leval.paths  union reval.paths) 	  
   }
   
-  def canTransform(wordNet: WordNet, dataSet: DataSet) = {
-	lexpr.canTransform(wordNet, dataSet) && rexpr.canTransform(wordNet, dataSet) 	  
+  def canTransform(wordNet: WordNet, bindings: Bindings, dataSet: DataSet) = {
+	lexpr.canTransform(wordNet, bindings, dataSet) && rexpr.canTransform(wordNet, bindings, dataSet) 	  
   }
 	
   def transform(wordNet: WordNet, bindings: Bindings, dataSet: DataSet, pos: Int) = {
@@ -830,7 +844,7 @@ case class ContextByRelationalExprReq(expr: RelationalExpr) extends EvaluableExp
 	if (bindings.areContextVariablesBound) {
 	  val dataSet = DataSet(List(bindings.contextVariables))
 
-	  if (expr.canTransform(wordNet, dataSet))
+	  if (expr.canTransform(wordNet, bindings, dataSet))
 	    expr.transform(wordNet, bindings, dataSet, 1)
 	  else
         expr.generate(wordNet, bindings)

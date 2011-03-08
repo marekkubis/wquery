@@ -6,6 +6,10 @@ class TransformationsTestSuite extends WQueryTestSuite {
     
   @Test def testSynsetsHypernymsCount() = result of ("count({}.hypernym)") should equal ("71\n")
 
+  @Test def testSynsetsHypernymsHypernymCount() = result of ("count({}.hypernym.hypernym)") should equal ("69\n")  
+
+  @Test def testSynsetsHypernymsHypernymCountByComposition() = result of ("count({}.(hypernym.hypernym))") should equal ("69\n")  
+  
   @Test def testSynsetsHyponymsCount() = result of ("count({}.^hypernym)") should equal ("71\n")    
 
   @Test def testPerson1nSynsetDesc() = result of ("{person:1:n}.desc") should equal ("{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n } desc a human being; \"there was too much for one person to do\"\n")

@@ -1,5 +1,6 @@
 package org.wquery.parser
 
+import org.wquery.engine.ComposeRelationalExpr
 import org.wquery.engine.ArcByUnaryRelationalExprReq
 import org.wquery.{WQueryParsingErrorException, WQueryParsingFailureException}
 import org.wquery.engine.{EvaluableExpr, FunctionExpr, WQueryFunctions, ImperativeExpr, IteratorExpr, EmissionExpr, EvaluableAssignmentExpr, RelationalAssignmentExpr, IfElseExpr, BinaryPathExpr, BlockExpr, BinaryArithmExpr, TransformationExpr, StepExpr, RelationalExpr, QuantifierLit, OrExpr, NotExpr, AndExpr, ComparisonExpr, BooleanLit, SynsetAllReq, SenseAllReq, DoubleQuotedLit, WordFormByRegexReq, ContextByRelationalExprReq, IntegerLit, ContextByReferenceReq, FloatLit, NotQuotedIdentifierLit, QuotedIdentifierLit, StringLit, ContextByVariableReq, BooleanByFilterReq, SequenceLit, SynsetByExprReq, SenseByWordFormAndSenseNumberAndPosReq, SenseByWordFormAndSenseNumberReq, UnaryRelationalExpr, QuantifiedRelationalExpr, PathExpr, MinusExpr, UnionRelationalExpr, StepVariableLit, PathVariableLit, WhileDoExpr, FilterTransformationExpr, ProjectionTransformationExpr, BindTransformationExpr, RelationTransformationExpr}
@@ -114,7 +115,7 @@ trait WQueryParsers extends RegexParsers {
   def quant_rel_expr = unary_rel_expr ~ quantifierLit ^^ { case iexpr~quant => QuantifiedRelationalExpr(iexpr, quant) }
     
   def unary_rel_expr = (
-      "(" ~> rel_expr <~ ")" // TBD composition operator and its quantification
+      "(" ~> chainl1(rel_expr, "." ^^ { x => ((l:RelationalExpr, r:RelationalExpr) => ComposeRelationalExpr(l, r)) }) <~ ")"
       | unaryRelLit
   )    
   
