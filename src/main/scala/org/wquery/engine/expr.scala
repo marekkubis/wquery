@@ -1,8 +1,6 @@
 package org.wquery.engine
-
-import org.wquery.WQueryModelException
-import org.wquery.WQueryEvaluationException
-import org.wquery.model.{WordNet, IntegerType, Relation, DataType, StringType, SenseType, SynsetType, Sense, BasicType, UnionType, ValueType, TupleType, AggregateFunction, ScalarFunction, FloatType, FunctionArgumentType, Arc, DataSet, DataSetBuffer, DataSetBuffers}
+import org.wquery.{WQueryEvaluationException, WQueryModelException}
+import org.wquery.model.{WordNet, IntegerType, Relation, DataType, StringType, SenseType, Sense, BasicType, UnionType, ValueType, TupleType, AggregateFunction, ScalarFunction, FloatType, FunctionArgumentType, Arc, DataSet, DataSetBuffer, DataSetBuffers}
 import scala.collection.mutable.ListBuffer
 
 sealed abstract class Expr
@@ -81,7 +79,7 @@ case class BlockExpr(exprs: List[ImperativeExpr]) extends ImperativeExpr {
   }
 }
 
-case class EvaluableAssignmentExpr(decls: List[VariableLit], expr: EvaluableExpr) extends ImperativeExpr with VariableBindings {
+case class EvaluableAssignmentExpr(decls: List[Variable], expr: EvaluableExpr) extends ImperativeExpr with VariableBindings {
   def evaluate(wordNet: WordNet, bindings: Bindings) = {
     val eresult = expr.evaluate(wordNet, bindings)
 
@@ -343,10 +341,10 @@ case class StepExpr(lexpr: EvaluableExpr, rexpr: TransformationExpr) extends Eva
 }
 
 trait VariableBindings {
-  def bind(dataSet: DataSet, decls: List[VariableLit]) = {
+  def bind(dataSet: DataSet, decls: List[Variable]) = {
     if (decls != Nil) {          
-      val pathVarBuffers = DataSetBuffers.createPathVarBuffers(decls.filter(x => (x.isInstanceOf[PathVariableLit] && x.value != "_")).map(_.value))                
-      val stepVarBuffers = DataSetBuffers.createStepVarBuffers(decls.filterNot(x => (x.isInstanceOf[PathVariableLit] || x.value == "_")).map(_.value))        
+      val pathVarBuffers = DataSetBuffers.createPathVarBuffers(decls.filter(x => (x.isInstanceOf[PathVariable] && x.value != "_")).map(_.value))                
+      val stepVarBuffers = DataSetBuffers.createStepVarBuffers(decls.filterNot(x => (x.isInstanceOf[PathVariable] || x.value == "_")).map(_.value))        
     
       demandUniqueVariableNames(decls)
       
@@ -374,20 +372,20 @@ trait VariableBindings {
     }
   }
   
-  private def demandUniqueVariableNames(decls: List[VariableLit]) {
-    val vars = decls.filter(x => !x.isInstanceOf[PathVariableLit] && x.value != "_").map(_.value)
+  private def demandUniqueVariableNames(decls: List[Variable]) {
+    val vars = decls.filter(x => !x.isInstanceOf[PathVariable] && x.value != "_").map(_.value)
     
     if (vars.size != vars.distinct.size)
       throw new WQueryEvaluationException("Variable list contains duplicated variable names")
   }
   
-  private def getPathVariablePosition(decls: List[VariableLit]) = {
-    val pathVarPos = decls.indexWhere{_.isInstanceOf[PathVariableLit]}
+  private def getPathVariablePosition(decls: List[Variable]) = {
+    val pathVarPos = decls.indexWhere{_.isInstanceOf[PathVariable]}
     
-    if (pathVarPos != decls.lastIndexWhere{_.isInstanceOf[PathVariableLit]}) {
+    if (pathVarPos != decls.lastIndexWhere{_.isInstanceOf[PathVariable]}) {
       throw new WQueryEvaluationException("Variable list '" + decls.map { 
-        case PathVariableLit(v) => "@" + v 
-        case StepVariableLit(v) => "$" + v
+        case PathVariable(v) => "@" + v 
+        case StepVariable(v) => "$" + v
       }.mkString + "' contains more than one path variable")
     } else {
       if (pathVarPos != -1)
@@ -490,7 +488,7 @@ case class ProjectionTransformationExpr(expr: EvaluableExpr) extends Transformat
   }  	
 }
 
-case class BindTransformationExpr(decls: List[VariableLit]) extends TransformationExpr with VariableBindings {
+case class BindTransformationExpr(decls: List[Variable]) extends TransformationExpr with VariableBindings {
   def transform(wordNet: WordNet, bindings: Bindings, dataSet: DataSet) = bind(dataSet, decls)	
 }
 
@@ -509,29 +507,22 @@ sealed abstract class RelationalExpr extends Expr {
   def transform(wordNet: WordNet, bindings: Bindings, dataSet: DataSet, pos: Int): DataSet
 }
 
-case class UnaryRelationalExpr(idLits: List[IdentifierLit]) extends RelationalExpr {
-  def generate(wordNet: WordNet, bindings: Bindings) = {
-	val ids = idLits.map(_.value)
-	
+case class UnaryRelationalExpr(ids: List[String]) extends RelationalExpr {
+  def generate(wordNet: WordNet, bindings: Bindings) = {	
     if (ids.size > 1) {
-        useIdentifiersAsRelationPathsGenerator(ids, wordNet)
+        useIdentifiersAsRelationPathsGenerator(wordNet)
           .getOrElse(throw new WQueryEvaluationException("Relation '" + ids.head + "' not found"))
     } else {
-      idLits.head match {
-        case QuotedIdentifierLit(wordForm) =>
-          useIdentifierAsBasicTypeGenerator(wordForm, wordNet)
-        case NotQuotedIdentifierLit(id) => 
-          if (!bindings.areContextVariablesBound) {
-            useIdentifiersAsRelationPathsGenerator(List(id), wordNet)
-              .getOrElse(useIdentifierAsBasicTypeGenerator(id, wordNet))
-          } else {             
-            useIdentifierAsBasicTypeGenerator(id, wordNet)	                
-          }
+      if (!bindings.areContextVariablesBound) {
+        useIdentifiersAsRelationPathsGenerator(wordNet)
+          .getOrElse(useIdentifierAsBasicTypeGenerator(wordNet))
+      } else {             
+        useIdentifierAsBasicTypeGenerator(wordNet)	                
       }
     }				  
   }
   
-  private def useIdentifiersAsRelationPathsGenerator(ids: List[String], wordNet: WordNet) = {
+  private def useIdentifiersAsRelationPathsGenerator(wordNet: WordNet) = {
     ids match {
       case first::second::dests =>
         wordNet.findFirstRelationByNameAndSource(second, first)
@@ -546,10 +537,8 @@ case class UnaryRelationalExpr(idLits: List[IdentifierLit]) extends RelationalEx
     }
   }
 
-  private def useIdentifierAsBasicTypeGenerator(id: String, wordNet: WordNet) = {
-    id match {
-      case "" =>
-        DataSet.fromList(wordNet.words.toList)
+  private def useIdentifierAsBasicTypeGenerator(wordNet: WordNet) = {
+    ids.head match {
       case "false" =>
         DataSet.fromValue(false)
       case "true" =>
@@ -560,30 +549,19 @@ case class UnaryRelationalExpr(idLits: List[IdentifierLit]) extends RelationalEx
   }  
   
   def canTransform(wordNet: WordNet, bindings: Bindings, dataSet: DataSet) = {
-    if (idLits.size > 1) {
-      true	          
-    } else {
-      idLits.head match {
-        case QuotedIdentifierLit(_) =>
-          false
-        case NotQuotedIdentifierLit(id) => 
-          wordNet.containsRelation(id, dataSet.getType(0), Relation.Source)          
-      }
-    }	  
+    (ids.size > 1) || wordNet.containsRelation(ids.head, dataSet.getType(0), Relation.Source)
   }
 	
-  def transform(wordNet: WordNet, bindings: Bindings, dataSet: DataSet, pos: Int) = {
-	val ids = idLits.map(_.value)  
-	  
+  def transform(wordNet: WordNet, bindings: Bindings, dataSet: DataSet, pos: Int) = {	  
     if (ids.size > 1) {
-      useIdentifiersAsTransformation(ids, wordNet, dataSet, pos)  
-    } else {      
-      useIdentifierAsRelationalExprAlias(ids.head, wordNet, bindings, dataSet, pos)
-        .getOrElse(useIdentifiersAsTransformation(ids, wordNet, dataSet, pos))           
+      useIdentifiersAsTransformation(wordNet, dataSet, pos)  
+    } else {
+      useIdentifierAsRelationalExprAlias(wordNet, bindings, dataSet, pos)
+        .getOrElse(useIdentifiersAsTransformation(wordNet, dataSet, pos))           
     }
   }
 
-  private def useIdentifiersAsTransformation(ids: List[String], wordNet: WordNet, dataSet: DataSet, pos: Int) = {
+  private def useIdentifiersAsTransformation(wordNet: WordNet, dataSet: DataSet, pos: Int) = {
 	if (ids == List("_")) {
 	  wordNet.followAny(dataSet, pos)	  
 	} else {
@@ -605,17 +583,17 @@ case class UnaryRelationalExpr(idLits: List[IdentifierLit]) extends RelationalEx
 	}
   }
   
-  private def useIdentifierAsRelationalExprAlias(id: String, wordNet: WordNet, bindings: Bindings, dataSet: DataSet, pos: Int) = {
-    bindings.lookupRelationalExprAlias(id).map(_.transform(wordNet, bindings, dataSet, pos))      
+  private def useIdentifierAsRelationalExprAlias(wordNet: WordNet, bindings: Bindings, dataSet: DataSet, pos: Int) = {
+    bindings.lookupRelationalExprAlias(ids.head).map(_.transform(wordNet, bindings, dataSet, pos))      
   }
 }
 
-case class QuantifiedRelationalExpr(expr: RelationalExpr, quantifier: QuantifierLit) extends RelationalExpr {
+case class QuantifiedRelationalExpr(expr: RelationalExpr, quantifier: Quantifier) extends RelationalExpr {
   def generate(wordNet: WordNet, bindings: Bindings) = {
     quantifier match {
-	  case QuantifierLit(1, Some(1)) =>
+	  case Quantifier(1, Some(1)) =>
 	    expr.generate(wordNet, bindings)
-	  case QuantifierLit(1, None) =>
+	  case Quantifier(1, None) =>
 	    closureTransformation(wordNet, bindings, expr.generate(wordNet, bindings))
 	}
   }
@@ -624,9 +602,9 @@ case class QuantifiedRelationalExpr(expr: RelationalExpr, quantifier: Quantifier
   
   def transform(wordNet: WordNet, bindings: Bindings, dataSet: DataSet, pos: Int) = {
     quantifier match {
-      case QuantifierLit(1, Some(1)) =>
+      case Quantifier(1, Some(1)) =>
         expr.transform(wordNet, bindings, dataSet, pos)
-      case QuantifierLit(1, None) =>
+      case Quantifier(1, None) =>
 	    closureTransformation(wordNet, bindings, expr.transform(wordNet, bindings, dataSet, pos))
       case _ =>
         throw new IllegalArgumentException("Unsupported quantifier value " + quantifier)
@@ -803,6 +781,10 @@ case class ComparisonExpr(op: String, lexpr: EvaluableExpr, rexpr: EvaluableExpr
 /*
  * Generators
  */
+case class BooleanByValueReq(value: Boolean) extends SelfEvaluableExpr {
+  def evaluate = DataSet.fromValue(value)
+}
+
 case class SynsetAllReq() extends BindingsFreeExpr {
   def evaluate(wordNet: WordNet) = DataSet.fromList(wordNet.synsets.toList)
 }
@@ -854,6 +836,10 @@ case class ContextByRelationalExprReq(expr: RelationalExpr) extends EvaluableExp
   }  
 }
 
+case class StringByValueReq(value: String) extends SelfEvaluableExpr {
+  def evaluate = DataSet.fromValue(value)
+}
+
 case class WordFormByRegexReq(v: String) extends BindingsFreeExpr {
   def evaluate(wordNet: WordNet) = {
     val regex = v.r
@@ -863,6 +849,27 @@ case class WordFormByRegexReq(v: String) extends BindingsFreeExpr {
   }
 }
 
+case class WordFormByValueReq(value: String) extends BindingsFreeExpr {
+  def evaluate(wordNet: WordNet) = {
+    if (value == "")
+      DataSet.fromList(wordNet.words.toList)
+    else
+      DataSet.fromOptionalValue(wordNet.getWordForm(value))
+  }
+}
+
+case class FloatByValueReq(value: Double) extends SelfEvaluableExpr {
+  def evaluate = DataSet.fromValue(value)
+}
+
+case class SequenceByBoundsReq(left: Int, right: Int) extends SelfEvaluableExpr {
+  def evaluate = DataSet.fromList((left to right).toList)
+}
+
+case class IntegerByValueReq(value: Int) extends SelfEvaluableExpr {
+  def evaluate = DataSet.fromValue(value)
+}
+
 case class ContextByReferenceReq(ref: Int) extends EvaluableExpr {
   def evaluate(wordNet: WordNet, bindings: Bindings) = {
     bindings.lookupContextVariable(ref).map(DataSet.fromValue(_))
@@ -870,13 +877,13 @@ case class ContextByReferenceReq(ref: Int) extends EvaluableExpr {
   }
 }
 
-case class ContextByVariableReq(variable: VariableLit) extends EvaluableExpr {
+case class ContextByVariableReq(variable: Variable) extends EvaluableExpr {
   def evaluate(wordNet: WordNet, bindings: Bindings) = {
     variable match {
-      case PathVariableLit(name) =>
+      case PathVariable(name) =>
         bindings.lookupPathVariable(name).map(DataSet.fromTuple(_))
           .getOrElse(throw new WQueryEvaluationException("A reference to unknown variable @'" + name + "' found"))
-      case StepVariableLit(name) =>
+      case StepVariable(name) =>
         bindings.lookupStepVariable(name).map(DataSet.fromValue(_))
           .getOrElse(throw new WQueryEvaluationException("A reference to unknown variable $'" + name + "' found"))
     }
@@ -885,7 +892,7 @@ case class ContextByVariableReq(variable: VariableLit) extends EvaluableExpr {
 
 case class ArcByUnaryRelationalExprReq(rexpr: UnaryRelationalExpr) extends EvaluableExpr {
   def evaluate(wordNet: WordNet, bindings: Bindings) = {
-    val ids = (rexpr match {case UnaryRelationalExpr(x) => x}).map(_.value)
+    val ids = rexpr match {case UnaryRelationalExpr(x) => x}
 
     ids match {
       case first::second::dests =>
@@ -926,43 +933,12 @@ case class BooleanByFilterReq(cond: ConditionalExpr) extends EvaluableExpr {
 /*
  * Variables
  */
-sealed abstract class VariableLit(val value: String) extends Expr
+sealed abstract class Variable(val value: String) extends Expr
 
-case class StepVariableLit(override val value: String) extends VariableLit(value)
-case class PathVariableLit(override val value: String) extends VariableLit(value)
+case class StepVariable(override val value: String) extends Variable(value)
+case class PathVariable(override val value: String) extends Variable(value)
 
 /*
- * Literals
+ * Quantifier
  */
-case class DoubleQuotedLit(value: String) extends SelfEvaluableExpr {
-  def evaluate = DataSet.fromValue(value)
-}
-
-case class StringLit(value: String) extends SelfEvaluableExpr {
-  def evaluate = DataSet.fromValue(value)
-}
-
-case class IntegerLit(value: Int) extends SelfEvaluableExpr {
-  def evaluate = DataSet.fromValue(value)
-}
-
-case class SequenceLit(left: Int, right: Int) extends SelfEvaluableExpr {
-  def evaluate = DataSet.fromList((left to right).toList)
-}
-
-case class FloatLit(value: Double) extends SelfEvaluableExpr {
-  def evaluate = DataSet.fromValue(value)
-}
-
-case class BooleanLit(value: Boolean) extends SelfEvaluableExpr {
-  def evaluate = DataSet.fromValue(value)
-}
-
-case class QuantifierLit(left: Int, right: Option[Int]) extends Expr
-
-sealed abstract class IdentifierLit(val value: String) extends SelfEvaluableExpr {
-  def evaluate = DataSet.fromValue(value)
-}
-
-case class NotQuotedIdentifierLit(override val value: String) extends IdentifierLit(value)
-case class QuotedIdentifierLit(override val value: String) extends IdentifierLit(value)
+case class Quantifier(left: Int, right: Option[Int]) extends Expr

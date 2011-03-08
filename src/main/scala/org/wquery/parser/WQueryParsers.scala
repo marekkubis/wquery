@@ -1,9 +1,6 @@
 package org.wquery.parser
-
-import org.wquery.engine.ComposeRelationalExpr
-import org.wquery.engine.ArcByUnaryRelationalExprReq
 import org.wquery.{WQueryParsingErrorException, WQueryParsingFailureException}
-import org.wquery.engine.{EvaluableExpr, FunctionExpr, WQueryFunctions, ImperativeExpr, IteratorExpr, EmissionExpr, EvaluableAssignmentExpr, RelationalAssignmentExpr, IfElseExpr, BinaryPathExpr, BlockExpr, BinaryArithmExpr, TransformationExpr, StepExpr, RelationalExpr, QuantifierLit, OrExpr, NotExpr, AndExpr, ComparisonExpr, BooleanLit, SynsetAllReq, SenseAllReq, DoubleQuotedLit, WordFormByRegexReq, ContextByRelationalExprReq, IntegerLit, ContextByReferenceReq, FloatLit, NotQuotedIdentifierLit, QuotedIdentifierLit, StringLit, ContextByVariableReq, BooleanByFilterReq, SequenceLit, SynsetByExprReq, SenseByWordFormAndSenseNumberAndPosReq, SenseByWordFormAndSenseNumberReq, UnaryRelationalExpr, QuantifiedRelationalExpr, PathExpr, MinusExpr, UnionRelationalExpr, StepVariableLit, PathVariableLit, WhileDoExpr, FilterTransformationExpr, ProjectionTransformationExpr, BindTransformationExpr, RelationTransformationExpr}
+import org.wquery.engine.{EvaluableExpr, FunctionExpr, WQueryFunctions, ImperativeExpr, IteratorExpr, EmissionExpr, EvaluableAssignmentExpr, RelationalAssignmentExpr, IfElseExpr, BlockExpr, TransformationExpr, RelationalExpr, OrExpr, NotExpr, AndExpr, ComparisonExpr, SynsetAllReq, WordFormByRegexReq, ContextByRelationalExprReq, ContextByReferenceReq, ContextByVariableReq, BooleanByFilterReq, SynsetByExprReq, UnaryRelationalExpr, QuantifiedRelationalExpr, UnionRelationalExpr, WhileDoExpr, FilterTransformationExpr, ProjectionTransformationExpr, BindTransformationExpr, RelationTransformationExpr, ArcByUnaryRelationalExprReq, ComposeRelationalExpr, FloatByValueReq, IntegerByValueReq, BinaryArithmExpr, BinaryPathExpr, StepExpr, SenseAllReq, SenseByWordFormAndSenseNumberAndPosReq, SenseByWordFormAndSenseNumberReq, MinusExpr, PathExpr, StringByValueReq, SequenceByBoundsReq, BooleanByValueReq, Quantifier, WordFormByValueReq, StepVariable, PathVariable}
 import scala.util.parsing.combinator.RegexParsers
 
 trait WQueryParsers extends RegexParsers {
@@ -52,7 +49,7 @@ trait WQueryParsers extends RegexParsers {
   
   def assignment = (
       var_decls ~ ":=" ~ multipath_expr ^^ { case vdecls~_~mexpr => EvaluableAssignmentExpr(vdecls, mexpr) }
-      | notQuotedId ~ ":=" ~ rel_expr  ^^ { case name~_~rexpr => RelationalAssignmentExpr(name, rexpr) }
+      | notQuotedString ~ ":=" ~ rel_expr  ^^ { case name~_~rexpr => RelationalAssignmentExpr(name, rexpr) }
       // | expr ~ ("+="|"-="|":=") ~ expr ^^ { case lexpr~op~rexpr => UpdateExpr(lexpr, op, rexpr) }
   )
   
@@ -90,7 +87,7 @@ trait WQueryParsers extends RegexParsers {
   )    
   
   def func_expr = (
-      notQuotedId ~ ("(" ~> expr <~ ")") ^^ { case name~y => FunctionExpr(name, y) }
+      notQuotedString ~ ("(" ~> expr <~ ")") ^^ { case name~y => FunctionExpr(name, y) }
       | path  
   )
   
@@ -112,7 +109,7 @@ trait WQueryParsers extends RegexParsers {
   def rel_expr: Parser[RelationalExpr]
     = chainl1(quant_rel_expr, "|" ^^ { x => ((l:RelationalExpr, r:RelationalExpr) => UnionRelationalExpr(l, r)) })
         
-  def quant_rel_expr = unary_rel_expr ~ quantifierLit ^^ { case iexpr~quant => QuantifiedRelationalExpr(iexpr, quant) }
+  def quant_rel_expr = unary_rel_expr ~ quantifier ^^ { case iexpr~quant => QuantifiedRelationalExpr(iexpr, quant) }
     
   def unary_rel_expr = (
       "(" ~> chainl1(rel_expr, "." ^^ { x => ((l:RelationalExpr, r:RelationalExpr) => ComposeRelationalExpr(l, r)) }) <~ ")"
@@ -120,13 +117,16 @@ trait WQueryParsers extends RegexParsers {
   )    
   
   def unaryRelLit = (
-      ("^" ~> idLit) ^^ { id => UnaryRelationalExpr(List(QuotedIdentifierLit("destination"), id, QuotedIdentifierLit("source"))) } // syntactic sugar
-      | rep1sep(idLit, "^") ^^ { UnaryRelationalExpr(_) }  
+      ("^" ~> notQuotedString) ^^ { id => UnaryRelationalExpr(List("destination", id, "source")) } // syntactic sugar
+      | rep1sep(notQuotedString, "^") ^^ { UnaryRelationalExpr(_) }  
   )
 
-  def quantifierLit = (
-      "!" ^^^ {QuantifierLit(1, None)}      
-      | success(QuantifierLit(1, Some(1)))      
+  def quantifier = (
+      ("!"|"+") ^^^ {Quantifier(1, None)}
+      | "*" ^^^ {Quantifier(0, None)}
+      | "?" ^^^ {Quantifier(0, Some(1))}     
+    //  | "{" ~> integerLit <~ "}" 
+      | success(Quantifier(1, Some(1)))      
   )
     
   def filter_trans = filter ^^ { FilterTransformationExpr(_) }
@@ -175,8 +175,8 @@ trait WQueryParsers extends RegexParsers {
   )
 
   def boolean_generator = (
-      "true" ^^ { _ => BooleanLit(true) }
-      | "false" ^^ { _ => BooleanLit(false) }
+      "true" ^^ { _ => BooleanByValueReq(true) }
+      | "false" ^^ { _ => BooleanByValueReq(false) }
   ) 
 
   def synset_generator = (
@@ -186,62 +186,52 @@ trait WQueryParsers extends RegexParsers {
   
   def sense_generator = (
       "::" ^^ { _ => SenseAllReq() }
-      | alphaLit ~ ":" ~ integerLit ~ ":" ~ alphaLit ^^ {
-        case StringLit(word)~_~IntegerLit(num)~_~StringLit(pos) => SenseByWordFormAndSenseNumberAndPosReq(word, num, pos) 
+      | alphaLit ~ ":" ~ integerNum ~ ":" ~ alphaLit ^^ {
+        case word~_~num~_~pos => SenseByWordFormAndSenseNumberAndPosReq(word, num, pos) 
       }   
-      | alphaLit ~ ":" ~ integerLit ^^ {
-        case StringLit(word)~_~IntegerLit(num) => SenseByWordFormAndSenseNumberReq(word, num)
+      | alphaLit ~ ":" ~ integerNum ^^ {
+        case word~_~num => SenseByWordFormAndSenseNumberReq(word, num)
       } 
   )
   
   def word_generator = (
-      stringLit
-      | doubleQuotedLit ^^ { case DoubleQuotedLit(x) => WordFormByRegexReq(x) }      
+      backQuotedString ^^ { StringByValueReq(_) }
+      | quotedString ^^ { WordFormByValueReq(_) }
+      | doubleQuotedString ^^ { WordFormByRegexReq(_) }      
       | rel_expr ^^ { ContextByRelationalExprReq(_) }        
   )  
 
-  def float_generator = floatLit  
-  def sequence_generator = integerLit ~ ".." ~ integerLit ^^ { case IntegerLit(l)~_~IntegerLit(r) => SequenceLit(l, r) }  
-  def integer_generator = integerLit  
+  def float_generator = floatNum ^^ { FloatByValueReq(_) }
+  def sequence_generator = integerNum ~ ".." ~ integerNum ^^ { case l~_~r => SequenceByBoundsReq(l, r) }  
+  def integer_generator = integerNum ^^ { IntegerByValueReq(_) }
   def back_generator = rep1("#") ^^ { x => ContextByReferenceReq(x.size) }
   def filter_generator = filter ^^ { BooleanByFilterReq(_) }
   def expr_generator = "(" ~> expr <~ ")"
   def variable_generator = var_decl ^^ { ContextByVariableReq(_) }
   def arc_generator = "\\" ~> unaryRelLit ^^ { ArcByUnaryRelationalExprReq(_) }
   
-  // path variables
+  // variables
   def var_decls = rep1(var_decl)  
   
   def var_decl = (
-      "$" ~> notQuotedId ^^ { StepVariableLit(_) }
-      | "@" ~> notQuotedId ^^ { PathVariableLit(_) }
+      "$" ~> notQuotedString ^^ { StepVariable(_) }
+      | "@" ~> notQuotedString ^^ { PathVariable(_) }
   ) 
   
   // literals
-  def alphaLit = stringLit|idLit ^^ { 
-      case NotQuotedIdentifierLit(x) => StringLit(x)
-      case QuotedIdentifierLit(x) => StringLit(x)
-  }
+  def alphaLit = (
+      backQuotedString
+      | quotedString
+      | notQuotedString
+  ) 
   
-  def floatLit: Parser[FloatLit] = "([0-9]+(([eE][+-]?[0-9]+)|\\.(([0-9]+[eE][+-]?[0-9]+)|([eE][+-]?[0-9]+)|([0-9]+))))|(\\.[0-9]+([eE][+-]?[0-9]+)?)".r ^^ { x => FloatLit(x.toDouble) }  
-  def integerLit: Parser[IntegerLit] = "[0-9]+".r ^^ { x => IntegerLit(x.toInt) }
+  def floatNum: Parser[Double] = "([0-9]+(([eE][+-]?[0-9]+)|\\.(([0-9]+[eE][+-]?[0-9]+)|([eE][+-]?[0-9]+)|([0-9]+))))|(\\.[0-9]+([eE][+-]?[0-9]+)?)".r ^^ { _.toDouble }  
+  def integerNum: Parser[Int] = "[0-9]+".r ^^ { _.toInt }
+  def doubleQuotedString: Parser[String] = "\"(\\\\\"|[^\"])*?\"".r ^^ { x => x.substring(1, x.length - 1).replaceAll("\\\"","\"") }  
+  def backQuotedString: Parser[String] = "`(\\\\`|[^`])*?`".r ^^ { x => x.substring(1, x.length - 1).replaceAll("\\`","`") }
+  def quotedString: Parser[String] = "'(\\\\'|[^'])*?'".r ^^ { x => x.substring(1, x.length - 1).replaceAll("\\'","'") }
   
-  def doubleQuotedLit: Parser[DoubleQuotedLit] = "\"(\\\\\"|[^\"])*?\"".r ^^ { x => 
-    DoubleQuotedLit(x.substring(1, x.length - 1).replaceAll("\\\"","\"")) 
-  }
-  
-  def stringLit: Parser[StringLit] = "`(\\\\`|[^`])*?`".r ^^ { x =>
-    StringLit(x.substring(1, x.length - 1).replaceAll("\\`","`"))
-  }  
-
-  def idLit = (
-      notQuotedId ^^ { NotQuotedIdentifierLit(_) }
-      | quotedId ^^ { QuotedIdentifierLit(_) }
-  )    
-  
-  def quotedId: Parser[String] = "'(\\\\'|[^'])*?'".r ^^ { x => x.substring(1, x.length - 1).replaceAll("\\'","'") }
-  
-  def notQuotedId: Parser[String] = new Parser[String] {
+  def notQuotedString: Parser[String] = new Parser[String] {
     def apply(in: Input) = {
       val source = in.source
       val offset = in.offset
