@@ -122,10 +122,15 @@ trait WQueryParsers extends RegexParsers {
   )
 
   def quantifier = (
-      ("!"|"+") ^^^ {Quantifier(1, None)}
-      | "*" ^^^ {Quantifier(0, None)}
-      | "?" ^^^ {Quantifier(0, Some(1))}     
-    //  | "{" ~> integerLit <~ "}" 
+      ("!"|"+") ^^^ { Quantifier(1, None) }
+      | "*" ^^^ { Quantifier(0, None) }
+      | "?" ^^^ { Quantifier(0, Some(1)) }     
+      | "{" ~> "," ~> integerNum <~ "}" ^^ { x => Quantifier(0, Some(x)) }
+      | "{" ~> integerNum ~ opt("," ~> opt(integerNum)) <~ "}" ^^ { 
+    	case x~None => Quantifier(x, Some(x))
+    	case x~Some(None) => Quantifier(x, None)
+    	case x~Some(Some(y)) => Quantifier(x, Some(y)) 
+      }
       | success(Quantifier(1, Some(1)))      
   )
     
@@ -175,8 +180,8 @@ trait WQueryParsers extends RegexParsers {
   )
 
   def boolean_generator = (
-      "true" ^^ { _ => BooleanByValueReq(true) }
-      | "false" ^^ { _ => BooleanByValueReq(false) }
+      "true" ^^^ { BooleanByValueReq(true) }
+      | "false" ^^^ { BooleanByValueReq(false) }
   ) 
 
   def synset_generator = (

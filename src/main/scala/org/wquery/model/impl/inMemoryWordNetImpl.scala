@@ -72,23 +72,23 @@ class InMemoryWordNetImpl (val synsets: Set[Synset], val senses: Set[Sense], val
 
     for (((obj, rel, src), destmaps) <- successors) {
       if (rel == relation && src == source) {
-        val tupleBuffer = new ListBuffer[Any]  
-        tupleBuffer.append(obj)
-        
         for (destmap <- destmaps) {
+          val tupleBuffer = new ListBuffer[Any]  
+          tupleBuffer.append(obj)
+        	
           for (dest <- dests) {
             if (destmap.contains(dest)) {
               tupleBuffer.append(Arc(relation, source, dest))
               tupleBuffer.append(destmap(dest))
             }              
           }
-        }
           
-        buffer.append(tupleBuffer.toList)   
+          buffer.append(tupleBuffer.toList)          
+        }
       }
     }
     
-    buffer.toList    
+    buffer.toList
   }
 }
 

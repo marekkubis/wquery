@@ -50,4 +50,28 @@ class TransformationsTestSuite extends WQueryTestSuite {
   
   @Test def testNAryRelationInvalidProjection() = result of ("car:1:n.destination^num") should equal ("ERROR: Relation 'num' with source type SenseType not found")
   
+  @Test def testRegularPathFrom2To2() = result of ("{car}.hypernym{2}") should equal ("{ cable car:1:n car:5:n } hypernym { compartment:2:n } hypernym { room:1:n }\n{ car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n } hypernym { motor vehicle:1:n automotive vehicle:1:n } hypernym { self-propelled vehicle:1:n }\n{ car:2:n railcar:1:n railway car:1:n railroad car:1:n } hypernym { wheeled vehicle:1:n } hypernym { container:1:n }\n{ car:2:n railcar:1:n railway car:1:n railroad car:1:n } hypernym { wheeled vehicle:1:n } hypernym { vehicle:1:n }\n{ car:4:n elevator car:1:n } hypernym { compartment:2:n } hypernym { room:1:n }\n{ car:3:n gondola:3:n } hypernym { compartment:2:n } hypernym { room:1:n }\n")
+  
+  @Test def testRegularPathFrom2To3() = result of ("{car:1}.hypernym{2, 3}") should equal ("{ car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n } hypernym { motor vehicle:1:n automotive vehicle:1:n } hypernym { self-propelled vehicle:1:n }\n{ car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n } hypernym { motor vehicle:1:n automotive vehicle:1:n } hypernym { self-propelled vehicle:1:n } hypernym { wheeled vehicle:1:n }\n")
+
+  @Test def testRegularPathFrom10ToEnd() = result of ("{car:1}.hypernym{10, }") should equal ("{ car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n } hypernym { motor vehicle:1:n automotive vehicle:1:n } hypernym { self-propelled vehicle:1:n } hypernym { wheeled vehicle:1:n } hypernym { container:1:n } hypernym { instrumentality:3:n instrumentation:1:n } hypernym { artifact:1:n artefact:1:n } hypernym { whole:2:n unit:6:n } hypernym { object:1:n physical object:1:n } hypernym { physical entity:1:n } hypernym { entity:1:n }\n{ car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n } hypernym { motor vehicle:1:n automotive vehicle:1:n } hypernym { self-propelled vehicle:1:n } hypernym { wheeled vehicle:1:n } hypernym { vehicle:1:n } hypernym { conveyance:3:n transport:1:n } hypernym { instrumentality:3:n instrumentation:1:n } hypernym { artifact:1:n artefact:1:n } hypernym { whole:2:n unit:6:n } hypernym { object:1:n physical object:1:n } hypernym { physical entity:1:n }\n{ car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n } hypernym { motor vehicle:1:n automotive vehicle:1:n } hypernym { self-propelled vehicle:1:n } hypernym { wheeled vehicle:1:n } hypernym { vehicle:1:n } hypernym { conveyance:3:n transport:1:n } hypernym { instrumentality:3:n instrumentation:1:n } hypernym { artifact:1:n artefact:1:n } hypernym { whole:2:n unit:6:n } hypernym { object:1:n physical object:1:n } hypernym { physical entity:1:n } hypernym { entity:1:n }\n")
+
+  @Test def testRegularPathFrom0To2() = result of ("{car:1}.hypernym{, 2}") should equal ("{ car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n }\n{ car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n } hypernym { motor vehicle:1:n automotive vehicle:1:n }\n{ car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n } hypernym { motor vehicle:1:n automotive vehicle:1:n } hypernym { self-propelled vehicle:1:n }\n")
+
+  @Test def testRegularPathZeroOrMore() = result of ("{object:1}.hypernym*") should equal ("{ object:1:n physical object:1:n }\n{ object:1:n physical object:1:n } hypernym { physical entity:1:n }\n{ object:1:n physical object:1:n } hypernym { physical entity:1:n } hypernym { entity:1:n }\n")
+  
+  @Test def testRegularPathOneOrMore() = result of ("{object:1}.hypernym+") should equal ("{ object:1:n physical object:1:n } hypernym { physical entity:1:n }\n{ object:1:n physical object:1:n } hypernym { physical entity:1:n } hypernym { entity:1:n }\n")
+    
+  @Test def testGenerateRegularPathFrom2To2() = result of ("size(hypernym{1})") should equal ("2\n")
+  
+  @Test def testGenerateRegularPathFrom2To3() = result of ("size(hypernym{2, 3})") should equal ("3\n4\n")
+
+  @Test def testGenerateRegularPathFrom10ToEnd() = result of ("size(hypernym{10, })") should equal ("11\n12\n13\n14\n")
+
+  @Test def testGenerateRegularPathFrom0To2() = result of ("size(hypernym{, 2})") should equal ("2\n3\n4\n")
+
+  @Test def testGenerateRegularPathZeroOrMore() = result of ("size(hypernym*)") should equal ("2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12\n13\n14\n")
+  
+  @Test def testGenerateRegularPathOneOrMore() = result of ("size(hypernym+)") should equal ("2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12\n13\n14\n")
+  
 }

@@ -590,34 +590,26 @@ case class UnaryRelationalExpr(ids: List[String]) extends RelationalExpr {
 
 case class QuantifiedRelationalExpr(expr: RelationalExpr, quantifier: Quantifier) extends RelationalExpr {
   def generate(wordNet: WordNet, bindings: Bindings) = {
-    quantifier match {
-	  case Quantifier(1, Some(1)) =>
-	    expr.generate(wordNet, bindings)
-	  case Quantifier(1, None) =>
-	    closureTransformation(wordNet, bindings, expr.generate(wordNet, bindings))
-	}
+	val dataSet = expr.generate(wordNet, bindings)   
+	val lowerResult = (2 to quantifier.lowerBound).foldLeft(dataSet)((x, _) => expr.transform(wordNet, bindings, x, 1))	
+	
+    closureTransformation(wordNet, bindings, lowerResult, quantifier.upperBound.map(_ - quantifier.lowerBound))
   }
   
   def canTransform(wordNet: WordNet, bindings: Bindings, dataSet: DataSet) = expr.canTransform(wordNet, bindings, dataSet)
   
   def transform(wordNet: WordNet, bindings: Bindings, dataSet: DataSet, pos: Int) = {
-    quantifier match {
-      case Quantifier(1, Some(1)) =>
-        expr.transform(wordNet, bindings, dataSet, pos)
-      case Quantifier(1, None) =>
-	    closureTransformation(wordNet, bindings, expr.transform(wordNet, bindings, dataSet, pos))
-      case _ =>
-        throw new IllegalArgumentException("Unsupported quantifier value " + quantifier)
-    }
+	val lowerResult = (1 to quantifier.lowerBound).foldLeft(dataSet)((x, _) => expr.transform(wordNet, bindings, x, pos))   
+    closureTransformation(wordNet, bindings, lowerResult, quantifier.upperBound.map(_ - quantifier.lowerBound))
   }
   
-  private def closureTransformation(wordNet: WordNet, bindings: Bindings, dataSet: DataSet) = {
+  private def closureTransformation(wordNet: WordNet, bindings: Bindings, dataSet: DataSet, limit: Option[Int]) = {
     val pathVarNames = dataSet.pathVars.keys.toSeq
     val stepVarNames = dataSet.stepVars.keys.toSeq
     val pathBuffer = DataSetBuffers.createPathBuffer
     val pathVarBuffers = DataSetBuffers.createPathVarBuffers(pathVarNames)
     val stepVarBuffers = DataSetBuffers.createStepVarBuffers(stepVarNames)        
-
+    
     for (i <- 0 until dataSet.pathCount) {
       val tuple = dataSet.paths(i)        	
       val prefix = tuple.slice(0, tuple.size - 1)
@@ -626,33 +618,38 @@ case class QuantifiedRelationalExpr(expr: RelationalExpr, quantifier: Quantifier
       pathVarNames.foreach(x => pathVarBuffers(x).append(dataSet.pathVars(x)(i)))
       stepVarNames.foreach(x => stepVarBuffers(x).append(dataSet.stepVars(x)(i)))          
 
-      for (cnode <- closure(wordNet, bindings, expr, List(tuple.last), Set(tuple.last))) {
+      for (cnode <- closure(wordNet, bindings, expr, List(tuple.last), Set(tuple.last), limit)) {
         pathBuffer.append(prefix ++ cnode)
         pathVarNames.foreach(x => pathVarBuffers(x).append(dataSet.pathVars(x)(i)))
         stepVarNames.foreach(x => stepVarBuffers(x).append(dataSet.stepVars(x)(i)))        
       }
     }
     
-    DataSet.fromBuffers(pathBuffer, pathVarBuffers, stepVarBuffers)	  
+    DataSet.fromBuffers(pathBuffer, pathVarBuffers, stepVarBuffers)
   }
   
-  private def closure(wordNet: WordNet, bindings: Bindings, expr: RelationalExpr, source: List[Any], forbidden: Set[Any]): List[List[Any]] = {
-    val transformed = expr.transform(wordNet, bindings, DataSet.fromTuple(source), 1)
-    val filtered = transformed.paths.filter { x => !forbidden.contains(x.last) }
+  private def closure(wordNet: WordNet, bindings: Bindings, expr: RelationalExpr, source: List[Any], forbidden: Set[Any], limit: Option[Int]): List[List[Any]] = {
+    if (limit.getOrElse(1) > 0) {	  
+	  val transformed = expr.transform(wordNet, bindings, DataSet.fromTuple(source), 1)
+      val filtered = transformed.paths.filter { x => !forbidden.contains(x.last) }
+	  val newLimit = limit.map(_ - 1).orElse(None)
 
-    if (filtered.isEmpty) {
-      filtered
-    } else {
-      val result = new ListBuffer[List[Any]]
-      val newForbidden: Set[Any] = forbidden.++[Any, Set[Any]](filtered.map(_.last)) // TODO ugly
+      if (filtered.isEmpty) {
+        filtered
+      } else {
+        val result = new ListBuffer[List[Any]]
+        val newForbidden: Set[Any] = forbidden.++[Any, Set[Any]](filtered.map(_.last)) // TODO ugly
 
-      result.appendAll(filtered)
+        result.appendAll(filtered)
 
-      filtered.foreach { x =>
-        result.appendAll(closure(wordNet, bindings, expr, x, newForbidden))
+        filtered.foreach { x =>
+          result.appendAll(closure(wordNet, bindings, expr, x, newForbidden, newLimit))
+        }
+
+        result.toList
       }
-
-      result.toList
+    } else {
+      Nil
     }
   }  
 }
@@ -941,4 +938,4 @@ case class PathVariable(override val value: String) extends Variable(value)
 /*
  * Quantifier
  */
-case class Quantifier(left: Int, right: Option[Int]) extends Expr
+case class Quantifier(val lowerBound: Int, val upperBound: Option[Int]) extends Expr
