@@ -8,7 +8,11 @@ class FunctionsTestSuite extends WQueryTestSuite {
 
   @Test def testMin() = result of ("min(1..10)") should equal ("1\n")  
     
-  @Test def testMax() = result of ("max(1..10)") should equal ("10\n")  
+  @Test def testMinEmpty() = result of ("min(zzzzzz)") should equal ("(no result)\n")  
+  
+  @Test def testMax() = result of ("max(1..10)") should equal ("10\n")
+  
+  @Test def testMaxEmpty() = result of ("max(zzzzzz)") should equal ("(no result)\n")  
 
   @Test def testSumInt() = result of ("sum(1..10)") should equal ("55\n")      
 

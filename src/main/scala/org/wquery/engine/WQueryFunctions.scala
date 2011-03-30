@@ -66,9 +66,9 @@ object WQueryFunctions {
   
   def last(dataSet: DataSet) = DataSet(dataSet.paths.map(x => List(x.last)))
 
-  def min(dataSet: DataSet) = DataSet(List(sort(dataSet).paths.head))
-  
-  def max(dataSet: DataSet) = DataSet(List(sort(dataSet).paths.last))
+  def min(dataSet: DataSet) = sort(dataSet).paths.headOption.map(x => DataSet(List(x))).getOrElse(DataSet.empty)
+    
+  def max(dataSet: DataSet) = sort(dataSet).paths.lastOption.map(x => DataSet(List(x))).getOrElse(DataSet.empty)
     
   def sumInt(dataSet: DataSet) = {
     var sum: Int = 0
