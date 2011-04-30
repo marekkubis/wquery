@@ -1,5 +1,5 @@
 package org.wquery.console
-import java.io.{FileReader, BufferedReader}
+import java.io.FileReader
 import org.wquery.{WQueryProperties, WQuery}
 import org.wquery.emitter.PlainWQueryEmitter
 import org.wquery.utils.Logging

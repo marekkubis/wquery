@@ -1,8 +1,7 @@
 package org.wquery.engine
 
-import org.wquery.model.BasicType
 import java.lang.reflect.Method
-import org.wquery.model.{Function, FunctionArgumentType, ScalarFunction, ValueType, SynsetType, Synset, SenseType, Sense, StringType, IntegerType, FloatType, BooleanType, ArcType, AggregateFunction, DataSet, Arc, TupleType}
+import org.wquery.model.{Function, FunctionArgumentType, ScalarFunction, ValueType, AggregateFunction, DataSet, TupleType}
 import scala.collection.mutable.Map
 
 class Bindings(parent: Option[Bindings]) {  

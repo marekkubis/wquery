@@ -3,7 +3,7 @@ package org.wquery.emitter
 import org.wquery.engine.Answer
 import org.wquery.engine.Error
 import org.wquery.engine.Result
-import org.wquery.model.{Sense, Synset, Arc, NodeType, SynsetType, SenseType, StringType, IntegerType, FloatType, BooleanType, DataSet}
+import org.wquery.model.{Sense, Synset, Arc, DataSet}
 
 class PlainWQueryEmitter extends WQueryEmitter {
   def emit(result: Result):String = {

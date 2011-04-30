@@ -14,6 +14,10 @@ class FunctionsTestSuite extends WQueryTestSuite {
   
   @Test def testMaxEmpty() = result of ("max(zzzzzz)") should equal ("(no result)\n")  
 
+  @Test def testShortest() = result of ("shortest({car}.hypernym+)") should equal ("{ cable car:1:n car:5:n } hypernym { compartment:2:n }\n{ car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n } hypernym { motor vehicle:1:n automotive vehicle:1:n }\n{ car:2:n railcar:1:n railway car:1:n railroad car:1:n } hypernym { wheeled vehicle:1:n }\n{ car:4:n elevator car:1:n } hypernym { compartment:2:n }\n{ car:3:n gondola:3:n } hypernym { compartment:2:n }\n")
+
+  @Test def testLongest() = result of ("longest({car}.hypernym+)") should equal ("{ car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n } hypernym { motor vehicle:1:n automotive vehicle:1:n } hypernym { self-propelled vehicle:1:n } hypernym { wheeled vehicle:1:n } hypernym { vehicle:1:n } hypernym { conveyance:3:n transport:1:n } hypernym { instrumentality:3:n instrumentation:1:n } hypernym { artifact:1:n artefact:1:n } hypernym { whole:2:n unit:6:n } hypernym { object:1:n physical object:1:n } hypernym { physical entity:1:n } hypernym { entity:1:n }\n")
+
   @Test def testSumInt() = result of ("sum(1..10)") should equal ("55\n")      
 
   @Test def testSumFloat() = result of ("sum(1..10*1.0)") should equal ("55.0\n")    

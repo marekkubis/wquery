@@ -1,6 +1,4 @@
 package org.wquery
-import org.testng.annotations.Test
-
 class SelectorsTestSuite extends WQueryTestSuite {
 // TODO Adapt to the new variable-oriented syntax
 //

@@ -1,7 +1,7 @@
 package org.wquery.loader
-import javax.xml.parsers.{SAXParserFactory, SAXParser}
+import javax.xml.parsers.SAXParserFactory
 import java.io.File
-import org.wquery.model.{WordNet, Synset, Sense, Relation, SynsetType, BooleanType, IntegerType, FloatType, StringType, SenseType, UnionType, NodeType}
+import org.wquery.model.{WordNet, Synset, Sense, Relation, SynsetType, BooleanType, IntegerType, FloatType, StringType, SenseType, NodeType}
 import org.wquery.model.impl.InMemoryWordNetImplBuilder
 import org.wquery.utils.Logging
 import org.xml.sax.{Locator, Attributes}

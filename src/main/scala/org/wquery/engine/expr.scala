@@ -1,6 +1,6 @@
 package org.wquery.engine
 import org.wquery.{WQueryEvaluationException, WQueryModelException}
-import org.wquery.model.{WordNet, IntegerType, Relation, DataType, StringType, SenseType, Sense, BasicType, UnionType, ValueType, TupleType, AggregateFunction, ScalarFunction, FloatType, FunctionArgumentType, Arc, DataSet, DataSetBuffer, DataSetBuffers}
+import org.wquery.model.{WordNet, IntegerType, Relation, StringType, SenseType, Sense, BasicType, UnionType, ValueType, TupleType, AggregateFunction, ScalarFunction, FloatType, FunctionArgumentType, Arc, DataSet, DataSetBuffer, DataSetBuffers}
 import scala.collection.mutable.ListBuffer
 
 sealed abstract class Expr

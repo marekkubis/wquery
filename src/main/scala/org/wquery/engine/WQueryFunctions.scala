@@ -1,9 +1,8 @@
 package org.wquery.engine
 
-import org.wquery.model.ScalarFunction
-import org.wquery.model.AggregateFunction
 import org.wquery.WQueryEvaluationException
-import org.wquery.model.{ValueType, TupleType, IntegerType, FloatType, StringType, Synset, Sense, Arc, DataSet}
+import collection.mutable.ListBuffer
+import org.wquery.model._
 
 /**
  * WQuery built-in functions
@@ -17,6 +16,8 @@ object WQueryFunctions {
   val Min = "min"  
   val Max = "max"    
   val Distinct = "distinct"
+  val Shortest = "shortest"
+  val Longest= "longest"
   val Size = "size"
   val Compare = "compare"
   val Abs = "abs"
@@ -42,6 +43,8 @@ object WQueryFunctions {
     (AggregateFunction(Avg, List(ValueType(FloatType)), ValueType(FloatType)), getClass, Avg),
     (AggregateFunction(Min, List(TupleType), TupleType), getClass, Min),
     (AggregateFunction(Max, List(TupleType), TupleType), getClass, Max),
+    (AggregateFunction(Shortest, List(TupleType), TupleType), getClass, Shortest),
+    (AggregateFunction(Longest, List(TupleType), TupleType), getClass, Longest),
     (AggregateFunction(Size, List(TupleType), TupleType), getClass, Size), 
     (AggregateFunction(Length, List(TupleType), TupleType), getClass, Length),    
     (ScalarFunction(Abs, List(ValueType(IntegerType)), ValueType(IntegerType)), classOf[Math], Abs),
@@ -69,7 +72,11 @@ object WQueryFunctions {
   def min(dataSet: DataSet) = sort(dataSet).paths.headOption.map(x => DataSet(List(x))).getOrElse(DataSet.empty)
     
   def max(dataSet: DataSet) = sort(dataSet).paths.lastOption.map(x => DataSet(List(x))).getOrElse(DataSet.empty)
-    
+
+  def shortest(dataSet: DataSet) = DataSet.fromBoundPaths(dataSet.toBoundPaths.filter(p => p._1.size == dataSet.minPathSize))
+
+  def longest(dataSet: DataSet) = DataSet.fromBoundPaths(dataSet.toBoundPaths.filter(p => p._1.size == dataSet.maxPathSize))
+
   def sumInt(dataSet: DataSet) = {
     var sum: Int = 0
     

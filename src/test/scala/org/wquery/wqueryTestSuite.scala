@@ -4,8 +4,8 @@ import org.scalatest.testng.TestNGSuite
 import org.testng.annotations.BeforeClass
 import org.wquery.emitter.{PlainWQueryEmitter, WQueryEmitter}
 
-object WQueryRuntime {    
-  val wquery = WQuery.getInstance(System.getProperty("wquery.test.wordnet"))
+object WQueryRuntime {
+  val wquery = WQuery.getInstance("src/main/assembly/template/samplenet.xml")
   val emitter = new PlainWQueryEmitter
 }
 
