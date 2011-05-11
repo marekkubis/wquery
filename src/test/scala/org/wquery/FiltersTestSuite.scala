@@ -131,5 +131,37 @@ class FiltersTestSuite extends WQueryTestSuite {
   @Test def testHashFreeBackReferenceDotHypernymsOrHyponymsWords() = result of ("{person}[organism in hypernym|^hypernym.words]") should equal ("{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n }\n")
   
   @Test def testArcFilter() = result of ("{}.partial_holonym|member_holonym$r$_[$r = \\member_holonym]") should equal ("$r=member_holonym { person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n } member_holonym { people:1:n }\n$r=member_holonym { cab:3:n hack:5:n taxi:1:n taxicab:1:n } member_holonym { fleet:2:n }\n")
-  
+
+  // generator filters
+
+  @Test def testSynsetsByWordGeneratorFilter()  = result of ("{bus}.hypernym.{car}") should equal ("{ bus:4:n jalopy:1:n heap:3:n } hypernym { car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n }\n")
+
+  @Test def testSynsetBySenseGeneratorFilter()  = result of ("{bus}.hypernym.{car:1:n}") should equal ("{ bus:4:n jalopy:1:n heap:3:n } hypernym { car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n }\n")
+
+  @Test def testQuotedWordGeneratorFilter()  = result of ("{bus}.hypernym.words.'car'") should equal ("{ bus:4:n jalopy:1:n heap:3:n } hypernym { car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n } words car\n")
+
+  @Test def testUnquotedWordGeneratorFilter()  = result of ("{bus}.hypernym.words.car") should startWith ("ERROR: Relation 'car' with source type StringType not found")
+
+  @Test def testQuotedSenseGeneratorFilter()  = result of ("{bus}.hypernym.senses.'car':1:n") should equal ("{ bus:4:n jalopy:1:n heap:3:n } hypernym { car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n } senses car:1:n\n")
+
+  @Test def testUnquotedSenseGeneratorFilter()  = result of ("{bus}.hypernym.senses.car:1:n") should startWith ("ERROR: string matching regex")
+
+  @Test def testParenthesedSenseGeneratorFilter()  = result of ("{bus}.hypernym.senses.(car:1:n)") should equal ("{ bus:4:n jalopy:1:n heap:3:n } hypernym { car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n } senses car:1:n\n")
+
+  @Test def testIntegerGeneratorFilter()  = result of ("{bus}.senses.sensenum.3") should equal ("{ bus:4:n jalopy:1:n heap:3:n } senses heap:3:n sensenum 3\n")
+
+  @Test def testSequenceGeneratorFilter()  = result of ("{bus}.senses.sensenum.3..8") should equal ("{ bus:4:n jalopy:1:n heap:3:n } senses bus:4:n sensenum 4\n{ bus:4:n jalopy:1:n heap:3:n } senses heap:3:n sensenum 3\n")
+
+    @Test def testFloatGeneratorFilter()  = result of ("{bus}.senses.sensenum.(3.0)") should equal ("{ bus:4:n jalopy:1:n heap:3:n } senses heap:3:n sensenum 3\n")
+
+   @Test def testSingleBackReferenceGeneratorFilter()  = result of ("{bus}.hypernym.#") should equal ("{ bus:4:n jalopy:1:n heap:3:n } hypernym { car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n }\n")
+
+  @Test def testMultiBackReferenceGeneratorFilter()  = result of ("{bus}.hypernym.###") should equal ("(no result)\n")
+
+  @Test def testFilterGeneratorFilter()  = result of ("{bus}.nl.[1!=1]") should equal ("{ bus:4:n jalopy:1:n heap:3:n } nl false\n")
+
+  @Test def testVariableGeneratorFilter()  = result of ("{bus}$a.hypernym.$a") should equal ("(no result)\n")
+
+  @Test def testArcGeneratorFilter()  = result of ("{bus}.hypernym$a$_<$a>.\\hypernym") should equal ("hypernym\n")
+
 }

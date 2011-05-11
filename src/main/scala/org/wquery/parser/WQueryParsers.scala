@@ -88,16 +88,18 @@ trait WQueryParsers extends RegexParsers {
   
   def func_expr = (
       notQuotedString ~ ("(" ~> expr <~ ")") ^^ { case name~y => FunctionExpr(name, y) }
-      | path  
+      | path
   )
-  
-  // paths
+
+
+// paths
   
   def path = chainl1(generator, step, success((l:EvaluableExpr, r:TransformationExpr) => StepExpr(l , r))) ^^ { x => PathExpr(x) }
     
   def step = (
       relation_trans
       | filter_trans
+      | generator_trans
       | projection_trans
       | bind_trans
   )
@@ -155,7 +157,9 @@ trait WQueryParsers extends RegexParsers {
   
   def comparison = expr ~ ("<="|"<"|">="|">"|"=~"|"="|"!="|"in"|"pin") ~ expr ^^ {
     case lexpr~op~rexpr => ComparisonExpr(op, lexpr, rexpr)
-  }  
+  }
+
+  def generator_trans = "." ~> generator ^^ { gen => FilterTransformationExpr(ComparisonExpr("in", ContextByReferenceReq(1), gen)) }
   
   def projection_trans = projection  ^^ { ProjectionTransformationExpr(_) }
   
