@@ -78,7 +78,7 @@ trait WQueryParsers extends RegexParsers {
     = chainl1(mul_expr, ("+"|"-") ^^ { x => ((l:EvaluableExpr, r:EvaluableExpr) => BinaryArithmExpr(x, l , r)) })
   
   def mul_expr
-    = chainl1(unary_expr, ("*"|"/"|"%") ^^ { x => ((l:EvaluableExpr, r:EvaluableExpr) => BinaryArithmExpr(x, l , r)) })
+    = chainl1(unary_expr, ("*"|"/"|"%"|"div") ^^ { x => ((l:EvaluableExpr, r:EvaluableExpr) => BinaryArithmExpr(x, l , r)) })
   
   def unary_expr = (
       "-" ~> func_expr ^^ { MinusExpr(_) }

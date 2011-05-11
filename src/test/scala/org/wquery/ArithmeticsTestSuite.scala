@@ -18,7 +18,9 @@ class ArithmeticsTestSuite extends WQueryTestSuite {
     
   @Test def testIntMulInt() = result of ("2 * 3") should equal ("6\n")
     
-  @Test def testIntDivInt() = result of ("7 / 3") should equal ("2\n")
+  @Test def testIntDivInt() = result of ("7 div 3") should equal ("2\n")
+
+  @Test def testIntDivisionInt() = result of ("7 / 3") should startWith ("2.33")
     
   @Test def testIntModInt() = result of ("7 % 3") should equal ("1\n")    
 

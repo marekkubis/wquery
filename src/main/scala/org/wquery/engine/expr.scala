@@ -185,7 +185,7 @@ case class BinaryArithmExpr(op: String, left: EvaluableExpr, right: EvaluableExp
     val rresult = right.evaluate(wordNet, bindings)
 
     if (lresult.minPathSize > 0 && rresult.minPathSize > 0 && lresult.isNumeric(0) && rresult.isNumeric(0)) {
-      if (lresult.getType(0) == IntegerType && rresult.getType(0) == IntegerType) {
+      if (lresult.getType(0) == IntegerType && rresult.getType(0) == IntegerType && op != "/") {
         combineUsingIntArithmOp(op, lresult.paths.map( _.last.asInstanceOf[Int]), rresult.paths.map( _.last.asInstanceOf[Int]))
       } else {
         combineUsingDoubleArithmOp(op, 
@@ -212,7 +212,7 @@ case class BinaryArithmExpr(op: String, left: EvaluableExpr, right: EvaluableExp
         (x, y) => x - y
       case "*" =>
         (x, y) => x * y
-      case "/" =>
+      case "div" =>
         (x, y) => x / y
       case "%" =>
         (x, y) => x % y
