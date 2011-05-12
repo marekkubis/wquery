@@ -286,6 +286,15 @@ Princeton University and LICENSEE agrees to preserve same.
 		</SYNONYM>
 		<ILR type="hypernym">102958343</ILR>
 	</SYNSET>
+    <SYNSET>
+        <ID>810000000</ID>
+        <POS>n</POS>
+        <DESC>an example of a non-lexicalised synset</DESC>
+        <SYNONYM>
+            <LITERAL sense="1">non lexicalised sense</LITERAL>
+        </SYNONYM>
+        <NL>true</NL>
+    </SYNSET>
 	<SYNSET>
 		<ID>103342961</ID>
 		<POS>n</POS>

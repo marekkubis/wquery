@@ -44,9 +44,9 @@ class TransformationsTestSuite extends WQueryTestSuite {
   
   @Test def testNAryRelationPartialDestinationMultiProjection() = result of ("car:1:n.literal^pos^num") should equal ("car:1:n source^literal^pos n source^literal^num 1\n")
 
-  @Test def testNAryRelationPartialSourceProjection() = result of ("count(`n`.pos^literal)") should equal ("175\n")
+  @Test def testNAryRelationPartialSourceProjection() = result of ("count(`n`.pos^literal)") should equal ("176\n")
   
-  @Test def testNAryRelationMultiProjection() = result of ("count(`n`.pos^literal^source^num)") should equal ("175\n")
+  @Test def testNAryRelationMultiProjection() = result of ("count(`n`.pos^literal^source^num)") should equal ("176\n")
   
   @Test def testNAryRelationInvalidProjection() = result of ("car:1:n.destination^num") should equal ("ERROR: Relation 'num' with source type SenseType not found")
   

@@ -775,6 +775,14 @@ case class ComparisonExpr(op: String, lexpr: EvaluableExpr, rexpr: EvaluableExpr
   }
 }
 
+case class PathConditionExpr(expr: PathExpr) extends ConditionalExpr {
+  def satisfied(wordNet: WordNet, bindings: Bindings) = {
+    val lastSteps = expr.evaluate(wordNet, bindings).paths.map(_.last)
+
+    !lastSteps.isEmpty && lastSteps.forall(x => x.isInstanceOf[Boolean] && x.asInstanceOf[Boolean])
+  }
+}
+
 /*
  * Generators
  */

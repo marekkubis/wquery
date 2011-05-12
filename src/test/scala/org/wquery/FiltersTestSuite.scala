@@ -101,11 +101,7 @@ class FiltersTestSuite extends WQueryTestSuite {
   @Test def testNotFalse() = result of ("[not 1 < 2]") should equal ("false\n")
     
   // test or and not () precedence    
-  
-  //
-  // in path checks NOW
-  //
-      
+
   // [# < 2]
   
   @Test def testSingleBackReference() = result of ("last({person:1}.senses[# != individual:1:n])") should equal ("person:1:n\nsomeone:1:n\nsomebody:1:n\nmortal:1:n\nsoul:2:n\n")
@@ -163,5 +159,11 @@ class FiltersTestSuite extends WQueryTestSuite {
   @Test def testVariableGeneratorFilter()  = result of ("{bus}$a.hypernym.$a") should equal ("(no result)\n")
 
   @Test def testArcGeneratorFilter()  = result of ("{bus}.hypernym$a$_<$a>.\\hypernym") should equal ("hypernym\n")
+
+  // boolean path filters
+
+  @Test def testBooleanPathFilterIsTrue()  = result of ("{}[nl]") should equal ("{ non lexicalised sense:1:n }\n")
+
+  @Test def testBooleanPathFilterIsFalse()  = result of ("{person}[not nl]") should equal ("{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n }\n{ person:2:n }\n{ person:3:n }\n")
 
 }

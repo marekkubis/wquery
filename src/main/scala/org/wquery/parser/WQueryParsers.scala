@@ -1,6 +1,6 @@
 package org.wquery.parser
 import org.wquery.{WQueryParsingErrorException, WQueryParsingFailureException}
-import org.wquery.engine.{EvaluableExpr, FunctionExpr, WQueryFunctions, ImperativeExpr, IteratorExpr, EmissionExpr, EvaluableAssignmentExpr, RelationalAssignmentExpr, IfElseExpr, BlockExpr, TransformationExpr, RelationalExpr, OrExpr, NotExpr, AndExpr, ComparisonExpr, SynsetAllReq, WordFormByRegexReq, ContextByRelationalExprReq, ContextByReferenceReq, ContextByVariableReq, BooleanByFilterReq, SynsetByExprReq, UnaryRelationalExpr, QuantifiedRelationalExpr, UnionRelationalExpr, WhileDoExpr, FilterTransformationExpr, ProjectionTransformationExpr, BindTransformationExpr, RelationTransformationExpr, ArcByUnaryRelationalExprReq, ComposeRelationalExpr, FloatByValueReq, IntegerByValueReq, BinaryArithmExpr, BinaryPathExpr, StepExpr, SenseAllReq, SenseByWordFormAndSenseNumberAndPosReq, SenseByWordFormAndSenseNumberReq, MinusExpr, PathExpr, StringByValueReq, SequenceByBoundsReq, BooleanByValueReq, Quantifier, WordFormByValueReq, StepVariable, PathVariable}
+import org.wquery.engine.{EvaluableExpr, FunctionExpr, WQueryFunctions, ImperativeExpr, IteratorExpr, EmissionExpr, EvaluableAssignmentExpr, RelationalAssignmentExpr, IfElseExpr, BlockExpr, TransformationExpr, RelationalExpr, OrExpr, NotExpr, AndExpr, ComparisonExpr, SynsetAllReq, WordFormByRegexReq, ContextByRelationalExprReq, ContextByReferenceReq, ContextByVariableReq, BooleanByFilterReq, SynsetByExprReq, UnaryRelationalExpr, QuantifiedRelationalExpr, UnionRelationalExpr, WhileDoExpr, FilterTransformationExpr, ProjectionTransformationExpr, BindTransformationExpr, RelationTransformationExpr, ArcByUnaryRelationalExprReq, ComposeRelationalExpr, FloatByValueReq, IntegerByValueReq, BinaryArithmExpr, BinaryPathExpr, StepExpr, SenseAllReq, SenseByWordFormAndSenseNumberAndPosReq, SenseByWordFormAndSenseNumberReq, MinusExpr, PathExpr, StringByValueReq, SequenceByBoundsReq, BooleanByValueReq, Quantifier, WordFormByValueReq, StepVariable, PathVariable, PathConditionExpr}
 import scala.util.parsing.combinator.RegexParsers
 
 trait WQueryParsers extends RegexParsers {
@@ -92,8 +92,6 @@ trait WQueryParsers extends RegexParsers {
   )
 
 
-// paths
-  
   def path = chainl1(generator, step, success((l:EvaluableExpr, r:TransformationExpr) => StepExpr(l , r))) ^^ { x => PathExpr(x) }
     
   def step = (
@@ -148,11 +146,11 @@ trait WQueryParsers extends RegexParsers {
       "not" ~> condition ^^ { NotExpr(_) }
       | condition
   )
-  
+
   def condition = (
       "(" ~> or_condition <~ ")"
       | comparison
-  // | boolean path
+      | path ^^ { PathConditionExpr(_) }
   )
   
   def comparison = expr ~ ("<="|"<"|">="|">"|"=~"|"="|"!="|"in"|"pin") ~ expr ^^ {

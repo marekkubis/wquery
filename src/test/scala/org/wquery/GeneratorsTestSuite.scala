@@ -58,13 +58,13 @@ class GeneratorsTestSuite extends WQueryTestSuite {
     
   @Test def testRsonEnding() = result of ("\"rson$\"") should equal ("person\n")
    
-  @Test def testAllWords() = result of ("count('')") should equal ("170\n")
+  @Test def testAllWords() = result of ("count('')") should equal ("171\n")
 
-  @Test def testAllSenses() = result of ("count(::)") should equal ("187\n")    
+  @Test def testAllSenses() = result of ("count(::)") should equal ("188\n")
       
-  @Test def testAllSynsets() = result of ("count({})") should equal ("91\n")    
+  @Test def testAllSynsets() = result of ("count({})") should equal ("92\n")
   
-  @Test def testRelationGenerator() = result of ("count(literal)") should equal ("187\n")
+  @Test def testRelationGenerator() = result of ("count(literal)") should equal ("188\n")
   
   @Test def testRelationGeneratorSingleQuoted() = result of ("count('literal')") should equal ("0\n")  
 
