@@ -8,7 +8,8 @@ class TransformationsTestSuite extends WQueryTestSuite {
 
   @Test def testSynsetsHypernymsHypernymCount() = result of ("count({}.hypernym.hypernym)") should equal ("69\n")  
 
-  @Test def testSynsetsHypernymsHypernymCountByComposition() = result of ("count({}.(hypernym.hypernym))") should equal ("69\n")  
+//  TODO syntax to be changed,
+//  @Test def testSynsetsHypernymsHypernymCountByComposition() = result of ("count({}(.hypernym.hypernym))") should equal ("69\n")
   
   @Test def testSynsetsHyponymsCount() = result of ("count({}.^hypernym)") should equal ("71\n")    
 

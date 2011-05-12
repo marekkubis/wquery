@@ -90,5 +90,7 @@ class GeneratorsTestSuite extends WQueryTestSuite {
   
   @Test def testSourceArcGenerator() = result of ("\\destination^hypernym") should equal ("destination^hypernym^destination\n")
 
-  @Test def testMultipleArcGenerator() = result of ("\\source^literal^num^pos") should equal ("source^literal^num\nsource^literal^pos\n")  
+  @Test def testMultipleArcGenerator() = result of ("\\source^literal^num^pos") should equal ("source^literal^num\nsource^literal^pos\n")
+
+  @Test def testFunctionGenerator() = result of ("max('').senses") should equal ("zymurgy senses zymurgy:1:n\n")
 }

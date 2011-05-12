@@ -654,20 +654,6 @@ case class QuantifiedRelationalExpr(expr: RelationalExpr, quantifier: Quantifier
   }  
 }
 
-case class ComposeRelationalExpr(lexpr: RelationalExpr, rexpr: RelationalExpr) extends RelationalExpr {
-  def generate(wordNet: WordNet, bindings: Bindings) = {
-    rexpr.transform(wordNet, bindings, lexpr.generate(wordNet, bindings), 1)
-  }
-  
-  def canTransform(wordNet: WordNet, bindings: Bindings, dataSet: DataSet) = {
-	lexpr.canTransform(wordNet, bindings, dataSet) && rexpr.canTransform(wordNet, bindings, lexpr.transform(wordNet, bindings, dataSet, 1))
-  }
-	
-  def transform(wordNet: WordNet, bindings: Bindings, dataSet: DataSet, pos: Int) = {
-    rexpr.transform(wordNet, bindings, lexpr.transform(wordNet, bindings, dataSet, pos), 1)
-  }
-}
-
 case class UnionRelationalExpr(lexpr: RelationalExpr, rexpr: RelationalExpr) extends RelationalExpr {
   def generate(wordNet: WordNet, bindings: Bindings) = {
     val leval = lexpr.generate(wordNet, bindings)

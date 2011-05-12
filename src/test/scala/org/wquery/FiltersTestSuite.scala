@@ -140,7 +140,7 @@ class FiltersTestSuite extends WQueryTestSuite {
 
   @Test def testQuotedSenseGeneratorFilter()  = result of ("{bus}.hypernym.senses.'car':1:n") should equal ("{ bus:4:n jalopy:1:n heap:3:n } hypernym { car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n } senses car:1:n\n")
 
-  @Test def testUnquotedSenseGeneratorFilter()  = result of ("{bus}.hypernym.senses.car:1:n") should startWith ("ERROR: string matching regex")
+  @Test def testUnquotedSenseGeneratorFilter()  = result of ("{bus}.hypernym.senses.car:1:n") should equal ("{ bus:4:n jalopy:1:n heap:3:n } hypernym { car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n } senses car:1:n\n")
 
   @Test def testParenthesedSenseGeneratorFilter()  = result of ("{bus}.hypernym.senses.(car:1:n)") should equal ("{ bus:4:n jalopy:1:n heap:3:n } hypernym { car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n } senses car:1:n\n")
 
@@ -159,6 +159,8 @@ class FiltersTestSuite extends WQueryTestSuite {
   @Test def testVariableGeneratorFilter()  = result of ("{bus}$a.hypernym.$a") should equal ("(no result)\n")
 
   @Test def testArcGeneratorFilter()  = result of ("{bus}.hypernym$a$_<$a>.\\hypernym") should equal ("hypernym\n")
+
+  @Test def testFunctionGeneratorFilter()  = result of ("{bus}.senses.sensenum.min(1..10)") should equal ("{ bus:4:n jalopy:1:n heap:3:n } senses jalopy:1:n sensenum 1\n")
 
   // boolean path filters
 
