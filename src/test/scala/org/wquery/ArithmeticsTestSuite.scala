@@ -32,5 +32,7 @@ class ArithmeticsTestSuite extends WQueryTestSuite {
     
   @Test def testFloatDivInt() = result of ("7.0 / 3") should startWith ("2.33")
     
-  @Test def testFloatModInt() = result of ("7.0 % 3") should equal ("1.0\n")    
+  @Test def testFloatModInt() = result of ("7.0 % 3") should equal ("1.0\n")
+
+  @Test def testEmptyDataSetArithmOperation() = result of ("zzzz.senses.sensenum/2") should equal ("(no result)\n")
 }

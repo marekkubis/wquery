@@ -3,7 +3,9 @@ import org.testng.annotations.Test
 
 class TransformationsTestSuite extends WQueryTestSuite {    
   @Test def testSynsetsPos() = result of ("last({}.pos)") should equal ("a\nn\ns\nv\n")
-    
+
+  @Test def testEmptyDataSetTransformation() = result of ("{aaaaaa}.hypernym") should equal ("(no result)\n")
+
   @Test def testSynsetsHypernymsCount() = result of ("count({}.hypernym)") should equal ("71\n")
 
   @Test def testSynsetsHypernymsHypernymCount() = result of ("count({}.hypernym.hypernym)") should equal ("69\n")  

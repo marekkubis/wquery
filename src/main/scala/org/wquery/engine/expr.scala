@@ -199,6 +199,8 @@ case class BinaryArithmExpr(op: String, left: EvaluableExpr, right: EvaluableExp
           }
         )
       }
+    } else if (lresult.isEmpty || rresult.isEmpty) {
+      DataSet.empty
     } else {
       throw new WQueryEvaluationException("Operator '" + op + "' requires paths that end with float or integer values") 
     }
@@ -645,25 +647,29 @@ case class UnaryRelationalExpr(ids: List[String]) extends RelationalExpr {
   }
 
   private def useIdentifiersAsTransformation(wordNet: WordNet, dataSet: DataSet, pos: Int) = {
-	if (ids == List("_")) {
-	  wordNet.followAny(dataSet, pos)	  
-	} else {
-      val sourceType = dataSet.getType(pos - 1)  
-      val (relation, source, dests) = ids match {
-        case List(relationName) =>
-          (wordNet.demandRelation(relationName, sourceType, Relation.Source), Relation.Source, List(Relation.Destination))
-        case List(left, right) =>
-          wordNet.getRelation(left, sourceType, Relation.Source) 
-            .map((_, Relation.Source, List(right)))
-            .getOrElse((wordNet.demandRelation(right, sourceType, left), left, List(Relation.Destination)))
-        case first::second::dests =>
-          wordNet.getRelation(first, sourceType, Relation.Source) 
-            .map((_, Relation.Source, second::dests))
-            .getOrElse((wordNet.demandRelation(second, sourceType, first), first, dests))
+    if (dataSet.isEmpty) {
+      dataSet
+    } else {
+      if (ids == List("_")) {
+        wordNet.followAny(dataSet, pos)
+      } else {
+        val sourceType = dataSet.getType(pos - 1)
+        val (relation, source, dests) = ids match {
+          case List(relationName) =>
+            (wordNet.demandRelation(relationName, sourceType, Relation.Source), Relation.Source, List(Relation.Destination))
+          case List(left, right) =>
+            wordNet.getRelation(left, sourceType, Relation.Source)
+              .map((_, Relation.Source, List(right)))
+              .getOrElse((wordNet.demandRelation(right, sourceType, left), left, List(Relation.Destination)))
+          case first :: second :: dests =>
+            wordNet.getRelation(first, sourceType, Relation.Source)
+              .map((_, Relation.Source, second :: dests))
+              .getOrElse((wordNet.demandRelation(second, sourceType, first), first, dests))
+        }
+
+        wordNet.followRelation(dataSet, pos, relation, source, dests)
       }
-    
-      wordNet.followRelation(dataSet, pos, relation, source, dests)		
-	}
+    }
   }
   
   private def useIdentifierAsRelationalExprAlias(wordNet: WordNet, bindings: Bindings, dataSet: DataSet, pos: Int) = {
