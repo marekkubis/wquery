@@ -30,7 +30,8 @@ object WQueryFunctions {
   val Lower = "lower"
   val Upper = "upper"
   val StringLength = "string_length"
-    
+  val Empty = "empty"
+
   val functions = List(
     (AggregateFunction(Sort, List(TupleType), TupleType), getClass, Sort),      
     (AggregateFunction(Distinct, List(TupleType), TupleType), getClass, Distinct),      
@@ -45,7 +46,8 @@ object WQueryFunctions {
     (AggregateFunction(Shortest, List(TupleType), TupleType), getClass, Shortest),
     (AggregateFunction(Longest, List(TupleType), TupleType), getClass, Longest),
     (AggregateFunction(Size, List(TupleType), TupleType), getClass, Size), 
-    (AggregateFunction(Length, List(TupleType), TupleType), getClass, Length),    
+    (AggregateFunction(Length, List(TupleType), TupleType), getClass, Length),
+    (AggregateFunction(Empty, List(TupleType), TupleType), getClass, Empty),
     (ScalarFunction(Abs, List(ValueType(IntegerType)), ValueType(IntegerType)), classOf[Math], Abs),
     (ScalarFunction(Abs, List(ValueType(FloatType)), ValueType(FloatType)), classOf[Math], Abs),
     (ScalarFunction(Ceil, List(ValueType(FloatType)), ValueType(FloatType)), classOf[Math], Ceil),      
@@ -119,7 +121,9 @@ object WQueryFunctions {
   def size(dataSet: DataSet) = DataSet(dataSet.paths.map(path => path.filter(step => !step.isInstanceOf[Arc])).map(path => List(path.size)))  
 
   def length(dataSet: DataSet) = DataSet(dataSet.paths.map{path => List(path.size)})  
-  
+
+  def empty(dataSet: DataSet) = DataSet.fromValue(dataSet.isEmpty)
+
   def string_length(word: String) = word.size  
   
   def substring(word: String, index: Int) = if (index < word.length) word.substring(index) else ""
