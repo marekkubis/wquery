@@ -8,9 +8,10 @@ class TransformationsTestSuite extends WQueryTestSuite {
 
   @Test def testSynsetsHypernymsHypernymCount() = result of ("count({}.hypernym.hypernym)") should equal ("69\n")  
 
-//  TODO syntax to be changed,
-//  @Test def testSynsetsHypernymsHypernymCountByComposition() = result of ("count({}(.hypernym.hypernym))") should equal ("69\n")
-  
+  @Test def testSynsetsHypernymsHypernymCountByComposition() = result of ("count({}(.hypernym.hypernym))") should equal ("69\n")
+
+  @Test def testMultiDotClosure() = result of (" {car:1:n}.hypernym(...hypernym)+") should equal ("{ car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n } hypernym { motor vehicle:1:n automotive vehicle:1:n } hypernym { motor vehicle:1:n automotive vehicle:1:n }\n{ car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n } hypernym { motor vehicle:1:n automotive vehicle:1:n } hypernym { motor vehicle:1:n automotive vehicle:1:n } hypernym { self-propelled vehicle:1:n }\n")
+
   @Test def testSynsetsHyponymsCount() = result of ("count({}.^hypernym)") should equal ("71\n")    
 
   @Test def testPerson1nSynsetDesc() = result of ("{person:1:n}.desc") should equal ("{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n } desc a human being; \"there was too much for one person to do\"\n")
@@ -74,5 +75,6 @@ class TransformationsTestSuite extends WQueryTestSuite {
   @Test def testGenerateRegularPathZeroOrMore() = result of ("size(hypernym*)") should equal ("2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12\n13\n14\n")
   
   @Test def testGenerateRegularPathOneOrMore() = result of ("size(hypernym+)") should equal ("2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12\n13\n14\n")
-  
+
+
 }

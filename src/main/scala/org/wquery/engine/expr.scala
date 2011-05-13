@@ -416,39 +416,118 @@ trait VariableBindings {
 }
 
 sealed abstract class TransformationExpr extends Expr { 
-  def transform(wordNet: WordNet, bindings: Bindings, dataSet: DataSet): DataSet	
+  def transform(wordNet: WordNet, bindings: Bindings, dataSet: DataSet): DataSet
 }
 
-case class RelationTransformationExpr(pos: Int, rexpr: RelationalExpr) extends TransformationExpr {
-  def transform(wordNet: WordNet, bindings: Bindings, dataSet: DataSet) = {	
-	rexpr.transform(wordNet, bindings, dataSet, pos)
-  }
+sealed abstract class GeneratingTransformationExpr extends TransformationExpr {
+  def generate(wordNet: WordNet, bindings: Bindings): DataSet
 }
 
-case class FilterTransformationExpr(cond: ConditionalExpr) extends TransformationExpr {
+case class QuantifiedTransformationExpr(expr: PositionedRelationChainTransformationExpr, quantifier: Quantifier) extends GeneratingTransformationExpr {
   def transform(wordNet: WordNet, bindings: Bindings, dataSet: DataSet) = {
+    val lowerResult = (1 to quantifier.lowerBound).foldLeft(dataSet)((x, _) => expr.transform(wordNet, bindings, x))
+
+    closureTransformation(wordNet, bindings, lowerResult, quantifier.upperBound.map(_ - quantifier.lowerBound))
+  }
+
+  def generate(wordNet: WordNet, bindings: Bindings) = {
+    val dataSet = expr.generate(wordNet, bindings)
+    val lowerResult = (2 to quantifier.lowerBound).foldLeft(dataSet)((x, _) => expr.transform(wordNet, bindings, x))
+
+    closureTransformation(wordNet, bindings, lowerResult, quantifier.upperBound.map(_ - quantifier.lowerBound))
+  }
+
+  private def closureTransformation(wordNet: WordNet, bindings: Bindings, dataSet: DataSet, limit: Option[Int]) = {
     val pathVarNames = dataSet.pathVars.keys.toSeq
-    val stepVarNames = dataSet.stepVars.keys.toSeq                
+    val stepVarNames = dataSet.stepVars.keys.toSeq
     val pathBuffer = DataSetBuffers.createPathBuffer
     val pathVarBuffers = DataSetBuffers.createPathVarBuffers(pathVarNames)
     val stepVarBuffers = DataSetBuffers.createStepVarBuffers(stepVarNames)
-    
+
     for (i <- 0 until dataSet.pathCount) {
       val tuple = dataSet.paths(i)
-      val binds = Bindings(bindings)        
-      
+   //   val prefix = tuple.slice(0, tuple.size - 1)
+
+      pathBuffer.append(tuple)
+      pathVarNames.foreach(x => pathVarBuffers(x).append(dataSet.pathVars(x)(i)))
+      stepVarNames.foreach(x => stepVarBuffers(x).append(dataSet.stepVars(x)(i)))
+
+      for (cnode <- closure(wordNet, bindings, tuple, Set(tuple.last), limit)) {
+        pathBuffer.append(cnode)
+        pathVarNames.foreach(x => pathVarBuffers(x).append(dataSet.pathVars(x)(i)))
+        stepVarNames.foreach(x => stepVarBuffers(x).append(dataSet.stepVars(x)(i)))
+      }
+    }
+
+    DataSet.fromBuffers(pathBuffer, pathVarBuffers, stepVarBuffers)
+  }
+
+  private def closure(wordNet: WordNet, bindings: Bindings, source: List[Any], forbidden: Set[Any], limit: Option[Int]): List[List[Any]] = {
+    if (limit.getOrElse(1) > 0) {
+	    val transformed = expr.transform(wordNet, bindings, DataSet.fromTuple(source))
+      val filtered = transformed.paths.filter { x => !forbidden.contains(x.last) }
+	    val newLimit = limit.map(_ - 1).orElse(None)
+
+      if (filtered.isEmpty) {
+        filtered
+      } else {
+        val result = new ListBuffer[List[Any]]
+        val newForbidden: Set[Any] = forbidden.++[Any, Set[Any]](filtered.map(_.last)) // TODO ugly
+
+        result.appendAll(filtered)
+
+        filtered.foreach { x =>
+          result.appendAll(closure(wordNet, bindings, x, newForbidden, newLimit))
+        }
+
+        result.toList
+      }
+    } else {
+      Nil
+    }
+  }
+}
+
+case class PositionedRelationTransformationExpr(pos: Int, rexpr: RelationalExpr) extends GeneratingTransformationExpr {
+  def transform(wordNet: WordNet, bindings: Bindings, dataSet: DataSet) = rexpr.transform(wordNet, bindings, dataSet, pos)
+
+  def generate(wordNet: WordNet, bindings: Bindings) = rexpr.generate(wordNet, bindings)
+}
+
+case class PositionedRelationChainTransformationExpr(exprs: List[PositionedRelationTransformationExpr]) extends GeneratingTransformationExpr {
+  def transform(wordNet: WordNet, bindings: Bindings, dataSet: DataSet) = {
+    exprs.foldLeft(dataSet)((x, expr) => expr.transform(wordNet, bindings, x))
+  }
+
+  def generate(wordNet: WordNet, bindings: Bindings) = {
+    exprs.tail.foldLeft(exprs.head.generate(wordNet, bindings))((x, expr) => expr.transform(wordNet, bindings, x))
+  }
+}
+
+case class FilterTransformationExpr(cond: ConditionalExpr) extends GeneratingTransformationExpr {
+  def transform(wordNet: WordNet, bindings: Bindings, dataSet: DataSet) = {
+    val pathVarNames = dataSet.pathVars.keys.toSeq
+    val stepVarNames = dataSet.stepVars.keys.toSeq
+    val pathBuffer = DataSetBuffers.createPathBuffer
+    val pathVarBuffers = DataSetBuffers.createPathVarBuffers(pathVarNames)
+    val stepVarBuffers = DataSetBuffers.createStepVarBuffers(stepVarNames)
+
+    for (i <- 0 until dataSet.pathCount) {
+      val tuple = dataSet.paths(i)
+      val binds = Bindings(bindings)
+
       for (pathVar <- pathVarNames) {
         val varPos = dataSet.pathVars(pathVar)(i)
-        binds.bindPathVariable(pathVar, tuple.slice(varPos._1, varPos._2))            
+        binds.bindPathVariable(pathVar, tuple.slice(varPos._1, varPos._2))
       }
-      
+
       for (stepVar <- stepVarNames) {
         val varPos = dataSet.stepVars(stepVar)(i)
-        binds.bindStepVariable(stepVar, tuple(varPos))            
-      }          
-      
+        binds.bindStepVariable(stepVar, tuple(varPos))
+      }
+
       binds.bindContextVariables(tuple)
-      
+
       if (cond.satisfied(wordNet, binds)) {
         pathBuffer.append(tuple)
         pathVarNames.foreach(x => pathVarBuffers(x).append(dataSet.pathVars(x)(i)))
@@ -456,8 +535,10 @@ case class FilterTransformationExpr(cond: ConditionalExpr) extends Transformatio
       }
     }
 
-    DataSet.fromBuffers(pathBuffer, pathVarBuffers, stepVarBuffers)   
-  }	
+    DataSet.fromBuffers(pathBuffer, pathVarBuffers, stepVarBuffers)
+  }
+
+  def generate(wordNet: WordNet, bindings: Bindings) = DataSet.fromValue(cond.satisfied(wordNet, bindings))
 }
 
 case class ProjectionTransformationExpr(expr: EvaluableExpr) extends TransformationExpr {
@@ -489,7 +570,9 @@ case class ProjectionTransformationExpr(expr: EvaluableExpr) extends Transformat
 }
 
 case class BindTransformationExpr(decls: List[Variable]) extends TransformationExpr with VariableBindings {
-  def transform(wordNet: WordNet, bindings: Bindings, dataSet: DataSet) = bind(dataSet, decls)	
+  def transform(wordNet: WordNet, bindings: Bindings, dataSet: DataSet) = {
+    bind(dataSet, decls)
+  }
 }
 
 case class PathExpr(expr: EvaluableExpr) extends EvaluableExpr {
@@ -586,72 +669,6 @@ case class UnaryRelationalExpr(ids: List[String]) extends RelationalExpr {
   private def useIdentifierAsRelationalExprAlias(wordNet: WordNet, bindings: Bindings, dataSet: DataSet, pos: Int) = {
     bindings.lookupRelationalExprAlias(ids.head).map(_.transform(wordNet, bindings, dataSet, pos))      
   }
-}
-
-case class QuantifiedRelationalExpr(expr: RelationalExpr, quantifier: Quantifier) extends RelationalExpr {
-  def generate(wordNet: WordNet, bindings: Bindings) = {
-	val dataSet = expr.generate(wordNet, bindings)   
-	val lowerResult = (2 to quantifier.lowerBound).foldLeft(dataSet)((x, _) => expr.transform(wordNet, bindings, x, 1))	
-	
-    closureTransformation(wordNet, bindings, lowerResult, quantifier.upperBound.map(_ - quantifier.lowerBound))
-  }
-  
-  def canTransform(wordNet: WordNet, bindings: Bindings, dataSet: DataSet) = expr.canTransform(wordNet, bindings, dataSet)
-  
-  def transform(wordNet: WordNet, bindings: Bindings, dataSet: DataSet, pos: Int) = {
-	val lowerResult = (1 to quantifier.lowerBound).foldLeft(dataSet)((x, _) => expr.transform(wordNet, bindings, x, pos))   
-    closureTransformation(wordNet, bindings, lowerResult, quantifier.upperBound.map(_ - quantifier.lowerBound))
-  }
-  
-  private def closureTransformation(wordNet: WordNet, bindings: Bindings, dataSet: DataSet, limit: Option[Int]) = {
-    val pathVarNames = dataSet.pathVars.keys.toSeq
-    val stepVarNames = dataSet.stepVars.keys.toSeq
-    val pathBuffer = DataSetBuffers.createPathBuffer
-    val pathVarBuffers = DataSetBuffers.createPathVarBuffers(pathVarNames)
-    val stepVarBuffers = DataSetBuffers.createStepVarBuffers(stepVarNames)        
-    
-    for (i <- 0 until dataSet.pathCount) {
-      val tuple = dataSet.paths(i)        	
-      val prefix = tuple.slice(0, tuple.size - 1)
-      
-      pathBuffer.append(tuple)
-      pathVarNames.foreach(x => pathVarBuffers(x).append(dataSet.pathVars(x)(i)))
-      stepVarNames.foreach(x => stepVarBuffers(x).append(dataSet.stepVars(x)(i)))          
-
-      for (cnode <- closure(wordNet, bindings, expr, List(tuple.last), Set(tuple.last), limit)) {
-        pathBuffer.append(prefix ++ cnode)
-        pathVarNames.foreach(x => pathVarBuffers(x).append(dataSet.pathVars(x)(i)))
-        stepVarNames.foreach(x => stepVarBuffers(x).append(dataSet.stepVars(x)(i)))        
-      }
-    }
-    
-    DataSet.fromBuffers(pathBuffer, pathVarBuffers, stepVarBuffers)
-  }
-  
-  private def closure(wordNet: WordNet, bindings: Bindings, expr: RelationalExpr, source: List[Any], forbidden: Set[Any], limit: Option[Int]): List[List[Any]] = {
-    if (limit.getOrElse(1) > 0) {	  
-	  val transformed = expr.transform(wordNet, bindings, DataSet.fromTuple(source), 1)
-      val filtered = transformed.paths.filter { x => !forbidden.contains(x.last) }
-	  val newLimit = limit.map(_ - 1).orElse(None)
-
-      if (filtered.isEmpty) {
-        filtered
-      } else {
-        val result = new ListBuffer[List[Any]]
-        val newForbidden: Set[Any] = forbidden.++[Any, Set[Any]](filtered.map(_.last)) // TODO ugly
-
-        result.appendAll(filtered)
-
-        filtered.foreach { x =>
-          result.appendAll(closure(wordNet, bindings, expr, x, newForbidden, newLimit))
-        }
-
-        result.toList
-      }
-    } else {
-      Nil
-    }
-  }  
 }
 
 case class UnionRelationalExpr(lexpr: RelationalExpr, rexpr: RelationalExpr) extends RelationalExpr {
@@ -812,18 +829,20 @@ case class SenseByWordFormAndSenseNumberReq(word: String, num: Int) extends Bind
   def evaluate(wordNet: WordNet) = DataSet.fromList(wordNet.getSensesByWordFormAndSenseNumber(word, num))
 }
 
-case class ContextByRelationalExprReq(expr: RelationalExpr) extends EvaluableExpr {
-  def evaluate(wordNet: WordNet, bindings: Bindings) = {			  
-	if (bindings.areContextVariablesBound) {
-	  val dataSet = DataSet(List(bindings.contextVariables))
+case class ContextByRelationalExprReq(expr: RelationalExpr, quantifier: Quantifier) extends EvaluableExpr {
+  def evaluate(wordNet: WordNet, bindings: Bindings) = {
+    val qte = QuantifiedTransformationExpr(PositionedRelationChainTransformationExpr(List(PositionedRelationTransformationExpr(1, expr))), quantifier)
 
-	  if (expr.canTransform(wordNet, bindings, dataSet))
-	    expr.transform(wordNet, bindings, dataSet, 1)
-	  else
-        expr.generate(wordNet, bindings)
+	  if (bindings.areContextVariablesBound) {
+	    val dataSet = DataSet(List(bindings.contextVariables))
+
+	    if (expr.canTransform(wordNet, bindings, dataSet))
+        qte.transform(wordNet, bindings, dataSet)
+  	  else
+        qte.generate(wordNet, bindings)
     } else {
-      expr.generate(wordNet, bindings)
-    }		
+      qte.generate(wordNet, bindings)
+    }
   }  
 }
 

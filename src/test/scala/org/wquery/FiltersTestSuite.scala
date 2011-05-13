@@ -162,6 +162,8 @@ class FiltersTestSuite extends WQueryTestSuite {
 
   @Test def testFunctionGeneratorFilter()  = result of ("{bus}.senses.sensenum.min(1..10)") should equal ("{ bus:4:n jalopy:1:n heap:3:n } senses jalopy:1:n sensenum 1\n")
 
+  @Test def testBooleanGeneratorFilter()  = result of ("{car}.nl.false") should equal ("{ car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n } nl false\n")
+
   // boolean path filters
 
   @Test def testBooleanPathFilterIsTrue()  = result of ("{}[nl]") should equal ("{ non lexicalised sense:1:n }\n")

@@ -1,7 +1,6 @@
 package org.wquery.engine
 
 import org.wquery.WQueryEvaluationException
-import collection.mutable.ListBuffer
 import org.wquery.model._
 
 /**

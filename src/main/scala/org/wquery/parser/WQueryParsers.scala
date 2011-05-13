@@ -1,7 +1,7 @@
 package org.wquery.parser
 import org.wquery.{WQueryParsingErrorException, WQueryParsingFailureException}
-import org.wquery.engine.{EvaluableExpr, FunctionExpr, WQueryFunctions, ImperativeExpr, IteratorExpr, EmissionExpr, EvaluableAssignmentExpr, RelationalAssignmentExpr, IfElseExpr, BlockExpr, TransformationExpr, RelationalExpr, OrExpr, NotExpr, AndExpr, ComparisonExpr, SynsetAllReq, WordFormByRegexReq, ContextByRelationalExprReq, ContextByReferenceReq, ContextByVariableReq, BooleanByFilterReq, SynsetByExprReq, UnaryRelationalExpr, QuantifiedRelationalExpr, UnionRelationalExpr, WhileDoExpr, FilterTransformationExpr, ProjectionTransformationExpr, BindTransformationExpr, RelationTransformationExpr, ArcByUnaryRelationalExprReq, FloatByValueReq, IntegerByValueReq, BinaryArithmExpr, BinaryPathExpr, StepExpr, SenseAllReq, SenseByWordFormAndSenseNumberAndPosReq, SenseByWordFormAndSenseNumberReq, MinusExpr, PathExpr, StringByValueReq, SequenceByBoundsReq, BooleanByValueReq, Quantifier, WordFormByValueReq, StepVariable, PathVariable, PathConditionExpr}
 import scala.util.parsing.combinator.RegexParsers
+import org.wquery.engine._
 
 trait WQueryParsers extends RegexParsers {
 
@@ -19,28 +19,28 @@ trait WQueryParsers extends RegexParsers {
   // parsers
 
   def query = (
-      imp_expr
-      | multipath_expr ^^ { x => FunctionExpr(WQueryFunctions.Sort, FunctionExpr(WQueryFunctions.Distinct, x)) }
+    imp_expr
+    | multipath_expr ^^ { x => FunctionExpr(WQueryFunctions.Sort, FunctionExpr(WQueryFunctions.Distinct, x)) }
   )
 
   def expr = (
-      imp_expr
-      | multipath_expr
+    imp_expr
+    | multipath_expr
   )
 
   // imperative exprs
 
   def imp_expr: Parser[ImperativeExpr] = (
-      "do" ~> rep(statement) <~ "end" ^^ { BlockExpr(_) }
-      | statement
+    "do" ~> rep(statement) <~ "end" ^^ { BlockExpr(_) }
+    | statement
   )
 
   def statement = (
-      iterator
-      | emission
-      | assignment
-      | ifelse
-      | whiledo
+    iterator
+    | emission
+    | assignment
+    | ifelse
+    | whiledo
   )
 
   def iterator = "from" ~> multipath_expr ~ imp_expr ^^ { case mexpr~iexpr => IteratorExpr(mexpr, iexpr) }
@@ -48,8 +48,8 @@ trait WQueryParsers extends RegexParsers {
   def emission = "emit" ~> multipath_expr ^^ { EmissionExpr(_) }
 
   def assignment = (
-      var_decls ~ ":=" ~ multipath_expr ^^ { case vdecls~_~mexpr => EvaluableAssignmentExpr(vdecls, mexpr) }
-      | notQuotedString ~ ":=" ~ rel_expr  ^^ { case name~_~rexpr => RelationalAssignmentExpr(name, rexpr) }
+     var_decls ~ ":=" ~ multipath_expr ^^ { case vdecls~_~mexpr => EvaluableAssignmentExpr(vdecls, mexpr) }
+     | notQuotedString ~ ":=" ~ rel_expr  ^^ { case name~_~rexpr => RelationalAssignmentExpr(name, rexpr) }
       // | expr ~ ("+="|"-="|":=") ~ expr ^^ { case lexpr~op~rexpr => UpdateExpr(lexpr, op, rexpr) }
   )
 
@@ -81,46 +81,51 @@ trait WQueryParsers extends RegexParsers {
     = chainl1(unary_expr, ("*"|"/"|"%"|"div") ^^ { x => ((l:EvaluableExpr, r:EvaluableExpr) => BinaryArithmExpr(x, l , r)) })
 
   def unary_expr = (
-      "-" ~> path ^^ { MinusExpr(_) }
-      | "+" ~> path
-      | path
+    "-" ~> path ^^ { MinusExpr(_) }
+    | "+" ~> path
+    | path
   )
 
   def path = chainl1(generator, step, success((l:EvaluableExpr, r:TransformationExpr) => StepExpr(l , r))) ^^ { x => PathExpr(x) }
 
   def step = (
-      generator_trans
-      | relation_trans
-      | filter_trans
-      | projection_trans
-      | bind_trans
+    node_trans
+    | relation_trans
+    | filter_trans
+    | projection_trans
+    | bind_trans
   )
 
-  def relation_trans = dots ~ rel_expr ^^ { case pos~expr => RelationTransformationExpr(pos, expr) }
+  def relation_trans = positioned_relation_chain_trans ~ quantifier ^^ { case trans~quant => QuantifiedTransformationExpr(trans, quant) }
+
+  def positioned_relation_chain_trans = (
+    "(" ~> rep1(positioned_relation_trans) <~ ")" ^^ { PositionedRelationChainTransformationExpr(_) }
+    | positioned_relation_trans ^^ { trans => PositionedRelationChainTransformationExpr(List(trans)) }
+  )
+
+  def positioned_relation_trans = dots ~ rel_expr ^^ { case pos~expr => PositionedRelationTransformationExpr(pos, expr) }
 
   def dots = rep1(".") ^^ { _.size }
 
   def rel_expr: Parser[RelationalExpr]
-    = chainl1(quant_rel_expr, "|" ^^ { x => ((l:RelationalExpr, r:RelationalExpr) => UnionRelationalExpr(l, r)) })
-
-  def quant_rel_expr = unary_rel_expr ~ quantifier ^^ { case iexpr~quant => QuantifiedRelationalExpr(iexpr, quant) }
+    = chainl1(unary_rel_expr, "|" ^^ { x => ((l:RelationalExpr, r:RelationalExpr) => UnionRelationalExpr(l, r)) })
 
   def unary_rel_expr = (
-      ("^" ~> notQuotedString) ^^ { id => UnaryRelationalExpr(List("destination", id, "source")) } // syntactic sugar
-      | rep1sep(notQuotedString, "^") ^^ { UnaryRelationalExpr(_) }
+    ("^" ~> notQuotedString) ^^ { id => UnaryRelationalExpr(List("destination", id, "source")) } // syntactic sugar
+    | rep1sep(notQuotedString, "^") ^^ { UnaryRelationalExpr(_) }
   )
 
   def quantifier = (
-      ("!"|"+") ^^^ { Quantifier(1, None) }
-      | "*" ^^^ { Quantifier(0, None) }
-      | "?" ^^^ { Quantifier(0, Some(1)) }
-      | "{" ~> "," ~> integerNum <~ "}" ^^ { x => Quantifier(0, Some(x)) }
-      | "{" ~> integerNum ~ opt("," ~> opt(integerNum)) <~ "}" ^^ {
-    	case x~None => Quantifier(x, Some(x))
-    	case x~Some(None) => Quantifier(x, None)
-    	case x~Some(Some(y)) => Quantifier(x, Some(y))
-      }
-      | success(Quantifier(1, Some(1)))
+    ("!"|"+") ^^^ { Quantifier(1, None) }
+    | "*" ^^^ { Quantifier(0, None) }
+    | "?" ^^^ { Quantifier(0, Some(1)) }
+    | "{" ~> "," ~> integerNum <~ "}" ^^ { x => Quantifier(0, Some(x)) }
+    | "{" ~> integerNum ~ opt("," ~> opt(integerNum)) <~ "}" ^^ {
+      case x~None => Quantifier(x, Some(x))
+      case x~Some(None) => Quantifier(x, None)
+      case x~Some(Some(y)) => Quantifier(x, Some(y))
+    }
+    | success(Quantifier(1, Some(1)))
   )
 
   def filter_trans = filter ^^ { FilterTransformationExpr(_) }
@@ -132,21 +137,21 @@ trait WQueryParsers extends RegexParsers {
   def and_condition = repsep(not_condition, "and") ^^ { AndExpr(_) }
 
   def not_condition = (
-      "not" ~> condition ^^ { NotExpr(_) }
-      | condition
+    "not" ~> condition ^^ { NotExpr(_) }
+    | condition
   )
 
   def condition = (
-      "(" ~> or_condition <~ ")"
-      | comparison
-      | path ^^ { PathConditionExpr(_) }
+    "(" ~> or_condition <~ ")"
+    | comparison
+    | path ^^ { PathConditionExpr(_) }
   )
 
   def comparison = expr ~ ("<="|"<"|">="|">"|"=~"|"="|"!="|"in"|"pin") ~ expr ^^ {
     case lexpr~op~rexpr => ComparisonExpr(op, lexpr, rexpr)
   }
 
-  def generator_trans = "." ~> non_rel_expr_generator ^^ { gen => FilterTransformationExpr(ComparisonExpr("in", ContextByReferenceReq(1), gen)) }
+  def node_trans = "." ~> non_rel_expr_generator ^^ { gen => FilterTransformationExpr(ComparisonExpr("in", ContextByReferenceReq(1), gen)) }
 
   def projection_trans = projection  ^^ { ProjectionTransformationExpr(_) }
 
@@ -156,54 +161,54 @@ trait WQueryParsers extends RegexParsers {
 
   // generators
   def generator = (
-      non_rel_expr_generator
-      | rel_expr_generator
+    non_rel_expr_generator
+    | rel_expr_generator
   )
 
   def non_rel_expr_generator = (
-      boolean_generator
-      | synset_generator
-      | sense_generator
-      | function_call_generator
-      | float_generator
-      | sequence_generator
-      | integer_generator
-      | back_generator
-      | filter_generator
-      | expr_generator
-      | variable_generator
-      | arc_generator
-      | quoted_word_generator
+    boolean_generator
+    | synset_generator
+    | sense_generator
+    | function_call_generator
+    | float_generator
+    | sequence_generator
+    | integer_generator
+    | back_generator
+    | filter_generator
+    | expr_generator
+    | variable_generator
+    | arc_generator
+    | quoted_word_generator
   )
 
-  def rel_expr_generator = rel_expr ^^ { ContextByRelationalExprReq(_) }
+  def rel_expr_generator = rel_expr ~ quantifier ^^ { case expr~quant => ContextByRelationalExprReq(expr, quant) }
 
   def boolean_generator = (
-      "true" ^^^ { BooleanByValueReq(true) }
-      | "false" ^^^ { BooleanByValueReq(false) }
+    "true" ^^^ { BooleanByValueReq(true) }
+    | "false" ^^^ { BooleanByValueReq(false) }
   )
 
   def synset_generator = (
-      "{}" ^^ { _ => SynsetAllReq() }
-      | "{" ~> expr <~ "}" ^^ { SynsetByExprReq(_) }
+    "{}" ^^ { _ => SynsetAllReq() }
+    | "{" ~> expr <~ "}" ^^ { SynsetByExprReq(_) }
   )
 
   def sense_generator = (
-      "::" ^^ { _ => SenseAllReq() }
-      | alphaLit ~ ":" ~ integerNum ~ ":" ~ alphaLit ^^ {
-        case word~_~num~_~pos => SenseByWordFormAndSenseNumberAndPosReq(word, num, pos)
-      }
-      | alphaLit ~ ":" ~ integerNum ^^ {
-        case word~_~num => SenseByWordFormAndSenseNumberReq(word, num)
-      }
+    "::" ^^ { _ => SenseAllReq() }
+    | alphaLit ~ ":" ~ integerNum ~ ":" ~ alphaLit ^^ {
+      case word~_~num~_~pos => SenseByWordFormAndSenseNumberAndPosReq(word, num, pos)
+    }
+    | alphaLit ~ ":" ~ integerNum ^^ {
+      case word~_~num => SenseByWordFormAndSenseNumberReq(word, num)
+    }
   )
 
   def function_call_generator = notQuotedString ~ ("(" ~> expr <~ ")") ^^ { case name~y => FunctionExpr(name, y) }
 
   def quoted_word_generator = (
-      backQuotedString ^^ { StringByValueReq(_) }
-      | quotedString ^^ { WordFormByValueReq(_) }
-      | doubleQuotedString ^^ { WordFormByRegexReq(_) }
+    backQuotedString ^^ { StringByValueReq(_) }
+    | quotedString ^^ { WordFormByValueReq(_) }
+    | doubleQuotedString ^^ { WordFormByRegexReq(_) }
   )
 
   def float_generator = floatNum ^^ { FloatByValueReq(_) }
@@ -219,15 +224,15 @@ trait WQueryParsers extends RegexParsers {
   def var_decls = rep1(var_decl)
 
   def var_decl = (
-      "$" ~> notQuotedString ^^ { StepVariable(_) }
-      | "@" ~> notQuotedString ^^ { PathVariable(_) }
+    "$" ~> notQuotedString ^^ { StepVariable(_) }
+    | "@" ~> notQuotedString ^^ { PathVariable(_) }
   )
 
   // literals
   def alphaLit = (
-      backQuotedString
-      | quotedString
-      | notQuotedString
+    backQuotedString
+    | quotedString
+    | notQuotedString
   )
 
   def floatNum: Parser[Double] = "([0-9]+(([eE][+-]?[0-9]+)|\\.(([0-9]+[eE][+-]?[0-9]+)|([eE][+-]?[0-9]+)|([0-9]+))))|(\\.[0-9]+([eE][+-]?[0-9]+)?)".r ^^ { _.toDouble }
