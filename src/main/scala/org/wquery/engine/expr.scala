@@ -2,6 +2,7 @@ package org.wquery.engine
 import org.wquery.{WQueryEvaluationException, WQueryModelException}
 import org.wquery.model.{WordNet, IntegerType, Relation, StringType, SenseType, Sense, BasicType, UnionType, ValueType, TupleType, AggregateFunction, ScalarFunction, FloatType, FunctionArgumentType, Arc, DataSet, DataSetBuffer, DataSetBuffers}
 import scala.collection.mutable.ListBuffer
+import org.classpath.icedtea.java.nio.file.Path
 
 sealed abstract class Expr
 
@@ -654,7 +655,7 @@ case class UnaryRelationalExpr(ids: List[String]) extends RelationalExpr {
         wordNet.followAny(dataSet, pos)
       } else {
         val sourceType = dataSet.getType(pos - 1)
-        val (relation, source, dests) = ids match {
+        val (relation, source, dests) = (ids: @unchecked) match {
           case List(relationName) =>
             (wordNet.demandRelation(relationName, sourceType, Relation.Source), Relation.Source, List(Relation.Destination))
           case List(left, right) =>
@@ -809,9 +810,9 @@ case class SynsetByExprReq(expr: EvaluableExpr) extends EvaluableExpr {
 
     if (eresult.pathCount == 1 && eresult.minPathSize == 1 && eresult.maxPathSize == 1) {
       if (eresult.getType(0) == SenseType) {
-        DataSet(eresult.paths.map { case List(sense: Sense) => List(wordNet.demandSynsetBySense(sense)) })
+        DataSet(eresult.paths.map(path => List(wordNet.demandSynsetBySense(path.head.asInstanceOf[Sense]))))
       } else if (eresult.getType(0) == StringType) {          
-        DataSet(eresult.paths.flatMap { case List(wordForm: String) => wordNet.getSynsetsByWordForm(wordForm) }.map(List(_)))  
+        DataSet(eresult.paths.flatMap(path => wordNet.getSynsetsByWordForm(path.head.asInstanceOf[String])).map(List(_)))
       } else {
         throw new WQueryEvaluationException("{...} requires an expression that generates either senses or word forms")  
       }           
