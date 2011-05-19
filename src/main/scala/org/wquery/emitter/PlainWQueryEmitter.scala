@@ -80,8 +80,7 @@ class PlainWQueryEmitter extends WQueryEmitter {
         builder append "}"             
       case element: Sense => 
         emitSense(element, builder)
-      case element: Arc => 
-        
+      case element: Arc =>
         if (element.isCanonical || element.isInverse) {
           if (element.isInverse)
             builder append "^"
@@ -93,6 +92,14 @@ class PlainWQueryEmitter extends WQueryEmitter {
           builder append element.relation.name          
           builder append "^"   
           builder append element.to
+        }
+      case element: String =>
+        if (element.indexOf(' ') != -1) {
+          builder append "'"
+          builder append element
+          builder append "'"
+        } else {
+          builder append element
         }
       case element => 
         builder append element      

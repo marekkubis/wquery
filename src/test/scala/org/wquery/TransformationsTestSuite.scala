@@ -16,9 +16,9 @@ class TransformationsTestSuite extends WQueryTestSuite {
 
   @Test def testSynsetsHyponymsCount() = result of ("count({}.^hypernym)") should equal ("71\n")    
 
-  @Test def testPerson1nSynsetDesc() = result of ("{person:1:n}.desc") should equal ("{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n } desc a human being; \"there was too much for one person to do\"\n")
+  @Test def testPerson1nSynsetDesc() = result of ("{person:1:n}.desc") should equal ("{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n } desc 'a human being; \"there was too much for one person to do\"'\n")
 
-  @Test def testPerson1nSynsetDescFullProjection() = result of ("{person:1:n}.source^desc^destination") should equal ("{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n } desc a human being; \"there was too much for one person to do\"\n")
+  @Test def testPerson1nSynsetDescFullProjection() = result of ("{person:1:n}.source^desc^destination") should equal ("{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n } desc 'a human being; \"there was too much for one person to do\"'\n")
 
   @Test def testCarHypernymsSourceChangedProjection() = result of ("{car}.destination^hypernym") should equal ("{ car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n } destination^hypernym^destination { car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n }\n")  
 

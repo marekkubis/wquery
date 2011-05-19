@@ -24,7 +24,7 @@ class GeneratorsTestSuite extends WQueryTestSuite {
     
   @Test def testA1b2c3d4Word() = result of ("a1b2c3d4") should equal ("(no result)\n")        
     
-  @Test def testHumanBodyWord() = result of ("'human body'") should equal ("human body\n")             
+  @Test def testHumanBodyWord() = result of ("'human body'") should equal ("'human body'\n")
 
   @Test def testA1b2c3d4QuotedWord() = result of ("'a1b2c3d4'") should equal ("(no result)\n")        
 
