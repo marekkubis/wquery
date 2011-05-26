@@ -175,6 +175,7 @@ trait WQueryParsers extends RegexParsers {
     | integer_generator
     | back_generator
     | filter_generator
+    | empty_set_generator
     | expr_generator
     | variable_generator
     | arc_generator
@@ -216,6 +217,7 @@ trait WQueryParsers extends RegexParsers {
   def integer_generator = integerNum ^^ { IntegerByValueReq(_) }
   def back_generator = rep1("#") ^^ { x => ContextByReferenceReq(x.size) }
   def filter_generator = filter ^^ { BooleanByFilterReq(_) }
+  def empty_set_generator = "<>" ^^ { _ => EmptySetReq() }
   def expr_generator = "(" ~> expr <~ ")"
   def variable_generator = var_decl ^^ { ContextByVariableReq(_) }
   def arc_generator = "\\" ~> unary_rel_expr ^^ { ArcByUnaryRelationalExprReq(_) }

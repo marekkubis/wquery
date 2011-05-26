@@ -947,6 +947,10 @@ case class BooleanByFilterReq(cond: ConditionalExpr) extends EvaluableExpr {
   def evaluate(wordNet: WordNet, bindings: Bindings) = DataSet.fromValue(cond.satisfied(wordNet, bindings))
 }
 
+case class EmptySetReq() extends SelfEvaluableExpr {
+  def evaluate = DataSet.empty
+}
+
 /*
  * Variables
  */
