@@ -101,12 +101,12 @@
 		<repository>
 			<id>wquery-repository</id>
 			<name>WQuery Repository</name>
-			<url>scp://shell.sourceforge.net/home/groups/w/wq/wquery/htdocs/repo</url>
+			<url>scp://shell.sourceforge.net/home/project-web/wquery/htdocs/repo</url>
 		</repository>
 		<site>
 			<id>wquery-site</id>
 			<name>WQuery Website</name>
-			<url>scp://shell.sourceforge.net/home/groups/w/wq/wquery/htdocs</url>
+			<url>scp://shell.sourceforge.net/home/project-web/wquery/htdocs</url>
 		</site>
 	</distributionManagement>	
 	
