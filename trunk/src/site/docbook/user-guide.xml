@@ -1,0 +1,1810 @@
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
+<book>
+	<bookinfo>
+		<title>WQuery <?eval ${project.version}?></title>
+		<subtitle>User Guide</subtitle>			
+		<author>
+			<firstname>Marek</firstname>
+			<surname>Kubis</surname>
+			<affiliation>
+				<address>
+					<email>marek.kubis@gmail.com</email>
+				</address>
+			</affiliation>
+		</author>
+		<copyright>
+			<year>2007-2010</year>
+			<holder>Marek Kubis</holder>
+		</copyright>
+	</bookinfo>
+	<preface>
+		<title>Preface</title>
+		<para><?eval ${project.description}?></para>
+		
+		<para>This document is a work in progress. Some parts are marked by the <emphasis>To Be Written</emphasis> label.
+		      The document refers to WQuery <?eval ${project.version}?>. The complete user guide will be distributed with WQuery 1.0.0.   
+		</para>
+	</preface>
+	<chapter id="chgettingstarted">
+		<title>Getting started</title>		
+		<sect1>
+			<title>Prerequisites</title>
+			<para>
+				WQuery requires Java Runtime Environment (JRE) version 1.5 or higher. The latest JRE can be found at
+				<ulink url="http://java.sun.com/javase/downloads/index.jsp" />
+				.
+			</para>
+		</sect1>
+		<sect1>
+			<title>Download</title>
+			<para>
+				The latest version of WQuery may be downloaded from <ulink url="http://www.wquery.org/download.html" />. 				
+			</para>
+		</sect1>
+		<sect1>
+			<title>Installation</title>
+			<para>
+				Unzip the downloaded package anywhere. WQuery is ready to use.
+			</para>
+		</sect1>
+		<sect1>
+			<title>Running the console</title>
+			<para>Change into the unzipped directory and run <filename>wguiconsole.bat</filename> (<filename>wguiconsole</filename> on Linux). 
+			      You will see the following screen.
+			</para>
+			<para>
+				<mediaobject>
+					<imageobject>
+						<imagedata fileref="images/wguiconsoleintro.png" align="center" width="60%" />
+					</imageobject>
+				</mediaobject>
+			</para>
+
+            <para>
+                 From the <emphasis><guimenu>File</guimenu></emphasis> menu pick the <emphasis><guimenuitem>Load Wordnet...</guimenuitem></emphasis>
+                 option and choose the file that contains a wordnet.
+            </para>			
+            
+            <para>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata fileref="images/wguiconsoleload.png" align="center" width="60%" />
+                    </imageobject>
+                </mediaobject>
+            </para>			
+			
+			<para>
+			     Type <code>count({})</code> into the text field in the upper part of the window in order to find
+			     how many synsets exist in the loaded wordnet. 			     
+			</para>
+            <para>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata fileref="images/wguiconsolequery.png" align="center" width="60%" />
+                    </imageobject>
+                </mediaobject>
+            </para>			
+            <para>
+                 Click the <emphasis>Execute</emphasis> button or hit <keycap>Alt+E</keycap>. 
+                 A result will appear in the text field in the lower part of the window.                 
+            </para>
+            <para>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata fileref="images/wguiconsoleexecuted.png" align="center" width="60%" />
+                    </imageobject>
+                </mediaobject>
+            </para>         			
+		</sect1>
+		
+        <sect1>
+            <title>WQuery basics</title>
+            
+            <para>
+                WQuery operates on wordnet related terms like synsets, word senses and words. 
+                For example to check whether an ontology<footnote><para>For the purpose of this section it is assumed that you have loaded
+                an ontology from the file <code>samplenet.xml</code> distributed with WQuery.
+                This ontology has been derived from Princeton WordNet by selecting synsets which are used by WQuery test suite
+                (see <code>samplenet.xml</code> for Princeton WordNet licensing conditions).</para></footnote> 
+                contains the word <emphasis>car</emphasis> one may simply write
+                
+                <programlisting><![CDATA[car]]></programlisting>
+                
+                The system answers
+            
+                <programlisting><![CDATA[car]]></programlisting>                
+            </para>
+            
+            <para>
+                If you type the string <emphasis>a1b1c1d1</emphasis> which is not a proper word form in SampleNet the system will answer 
+            
+                <programlisting><![CDATA[(no result)]]></programlisting>
+                
+                If you put <emphasis>a1b1c1d1</emphasis> in backquotes like in the query below
+                <programlisting><![CDATA[`a1b1c1d1`]]></programlisting>                
+                
+                The system will not treat <emphasis>a1b1c1d1</emphasis> as a word form but as an arbitrary character string and will return
+                it to the output.
+            </para>
+            
+            <para>
+                To check if SampleNet contains the second noun sense of <emphasis>person</emphasis> you may type
+                
+                <programlisting><![CDATA[person:2:n]]></programlisting>    
+            </para>
+            
+            <para>
+                In order to find all synsets that contain the word form <emphasis>person</emphasis> one may surround that word with curly brackets
+                
+                <programlisting><![CDATA[{person}]]></programlisting>    
+                
+                The system returns
+
+                <programlisting><![CDATA[{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n }
+{ person:2:n }
+{ person:3:n }]]></programlisting>                
+                 
+                 As you see synsets are represented in the output as lists of word senses surrounded with curly brackets.
+            </para>            
+            
+            <para>Beside wordnet-specific data types you may also use in queries:
+            
+            <itemizedlist>
+                <listitem>
+                    <para>integers                    
+                        <programlisting><![CDATA[1 -7]]></programlisting>                    
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>floating point numbers                    
+                        <programlisting><![CDATA[3.4 5e-2]]></programlisting>                    
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>boolean values                   
+                        <programlisting><![CDATA[true false]]></programlisting>                    
+                    </para>
+                </listitem>                      
+            </itemizedlist>
+            </para>
+            
+            <para>
+                Datasets<footnote><para>A dataset in WQuery is a bag (multiset) of objects that share the same type.</para></footnote> 
+                may be transformed using dot operator followed by a relation name.<footnote><para>Such expressions are called paths.
+                Parts of paths separetad by sequences of dots are called steps.</para></footnote>
+                 
+                To find all hypernyms of synsets that contain the word form <emphasis>person</emphasis> you may type
+                
+                <programlisting><![CDATA[{person}.hypernym]]></programlisting>
+                
+                and to find all glosses of those hypernyms you may submit the following query
+                
+                <programlisting><![CDATA[{person}.hypernym.desc]]></programlisting>
+                
+                If you want to retrieve hypernyms of <emphasis>person</emphasis> synsets together with their glosses you have to
+                surround chosen path steps with the selection signs <emphasis>&lt;</emphasis> and <emphasis>&gt;</emphasis>.
+                
+                <programlisting><![CDATA[{person}.<hypernym>.<desc>]]></programlisting>
+                                
+                By repeating dots you may apply a relation to the step that is located before the one that precedes the relation step.    
+                
+                For example to find <emphasis>person</emphasis> synsets together with their part of speech symbols and glosses you may write
+                                
+                <programlisting><![CDATA[<{person}>.<pos>..<desc>]]></programlisting>
+                
+                or
+
+                <programlisting><![CDATA[<{person}>.<desc>..<pos>]]></programlisting>                  
+                  
+				<!-- One may specify source and destination arguments of a transformation by using -->
+				<!-- the \textasciicircum operator.  For instance, the query -->
+				<!-- \verb|{car}.dest^hypernym^source| will extend the paths generated by -->
+				<!-- \verb|{car}| with hyponyms of the synsets containing the word -->
+				<!-- \emph{car}.\footnote{In case of inverting a binary relation one may also use an -->
+				<!-- abbreviated form e.g. \texttt{\{car\}.\textasciicircum hypernym}.} -->                  
+            </para>
+                        
+            <note id="noterelationnames">
+                <title>Note: Available relations</title>            
+	            <para>
+	                Relations are extracted from tags found in the wordnet file. 
+	                For every subtag <emphasis>T</emphasis> of every <emphasis>SYNSET</emphasis> tag found in the wordnet file the following rules
+	                are applied to extract relations:
+	                
+	                <orderedlist>
+	                    <listitem>
+	                        <para>If T equals <emphasis>ILR</emphasis> then the value of the <emphasis>type</emphasis> attribute becomes a relation name
+	                        and the content of T is interpreted as a synset identifier to which the relation points.</para>
+	                    </listitem>
+	                    <listitem>
+	                        <para>If T equals <emphasis>LITERAL</emphasis> or <emphasis>SYNONYM</emphasis> or <emphasis>WORD</emphasis> it is skipped.</para>
+	                    </listitem>
+	                    <listitem>
+	                        <para>Otherwise the lowercased name of T becomes a relation name and the content of T is interpreted as:
+	                        
+	                        <itemizedlist>
+	                            <listitem>
+	                                <para>a synset identifier</para>                            
+	                            </listitem>
+	                            <listitem>
+	                                <para>or as a number (if it is not a valid synset identifier)</para>                            
+	                            </listitem>
+	                            <listitem>
+	                                <para>or as a boolean value (if it is not a valid number)</para>                            
+	                            </listitem>
+	                            <listitem>
+	                                <para>or as a character string (if it is not a valid boolean value).</para>                            
+	                            </listitem>                        
+	                        </itemizedlist>	                        
+	                        </para>
+	                    </listitem>
+	                </orderedlist>
+	            </para>
+            </note>
+            
+            <para>
+                Additional relations may be infered using relational operators.
+                For example to find all hyponyms of synsets that contain the word form <emphasis>var</emphasis> you may precede
+                the <emphasis>hypernym</emphasis> relation with the inverse operator <emphasis>^</emphasis>. 
+                                        
+                <programlisting><![CDATA[{car}.^hypernym]]></programlisting>                    
+                
+                To find all transitive hypernyms of synsets that contain the word form <emphasis>car</emphasis> you may succeed
+                the <emphasis>hypernym</emphasis> relation with the transitive closure operator <emphasis>!</emphasis>. 
+                    
+                <programlisting><![CDATA[{car}.hypernym!]]></programlisting>                                        
+                    
+                To find all holonyms of synsets that contain the word form <emphasis>car</emphasis> regardless of the holonymy type
+                you may combine holonymy relations using the union operator <emphasis>|</emphasis>. 
+
+                <programlisting><![CDATA[{car}.partial_holonym|member_holonym]]></programlisting>
+            </para>
+            
+            <para>
+                More pleasant names may be assigned to relations by using the assignment operator <emphasis>=</emphasis>.
+
+                <programlisting><![CDATA[hypernyms=hypernym
+hyponyms=^hypernym
+holonyms=partial_holonym|member_holonym                
+gloss=def]]></programlisting>                                          
+            </para>                           
+            
+            <para>
+                Datasets may be filtered by providing a conditional expression between <emphasis>[</emphasis> and <emphasis>]</emphasis> signs.
+                To find all noun synsets that contain the word form <emphasis>car</emphasis> you shall type
+                
+                <programlisting><![CDATA[{car}[type = `n`]]]></programlisting>
+                
+                A filter is applied separately to every element of the predeceasing dataset. 
+                You may refer to the element which is passed to the filter by using the back reference operator <emphasis>#</emphasis>. 
+                The query below returns all hypernyms of synsets that contain the word form <emphasis>person</emphasis> except the one
+                that contains the second noun sense of the word form <emphasis>being</emphasis>.
+                     
+                <programlisting><![CDATA[{person}.hypernym[# != {being:2:n}]]]></programlisting>
+            </para>
+
+            <para>                
+				WQuery provides a set of built-in functions that operate on values of datasets.
+				For example to count synsets that contain the word form <emphasis>person</emphasis> 
+				you may use the function <emphasis>count</emphasis> as shown below.
+
+                <programlisting><![CDATA[count({person})]]></programlisting>
+				
+                The complete list of built-in functions may be found in <xref linkend="builtinfunctions"/>.
+            </para>
+
+            <para>
+                Paths may be combined together using dataset union, intersection and difference.
+                You may find all <emphasis>person</emphasis> synsets hypernyms together with all <emphasis>car</emphasis> synsets 
+                by using the <emphasis>union</emphasis> operator.
+                
+                <programlisting><![CDATA[{person}.hypernym union {car}]]></programlisting>                 
+                
+                The Cartesian product of datasets returned by two paths may be constructed using the comma operator.
+
+                <programlisting><![CDATA[{person}, {car}]]></programlisting>                               
+            </para>
+            
+            <para>
+                Beside the expressions presented above WQuery also has a set of imperative expressions 
+                like loops, if-statements and assignments.
+                The complete description of all WQuery expressions may be found in <xref linkend="chlanguagereference"/>.                
+            </para>                          
+		</sect1>
+		
+		<sect1>
+			<title>Next steps</title>
+			<para>Read <xref linkend="chlanguagereference"/> in order to master the WQuery language.
+			Read <xref linkend="chadvancedtopics"/> to learn how to customize WQuery and embed it into your own applications.
+			Consult <xref linkend="builtinfunctions"/> for a detailed list of functions available in WQuery.  
+			</para>			
+		</sect1>
+	</chapter>
+	<chapter id="chlanguagereference">
+		<title>Language reference</title>
+		<sect1>
+			<title>Data types</title>
+
+			<sect2>
+			<title>Basic data types</title>
+	            <para>
+	                There are six basic data types in WQuery: booleans, integers, floats, strings, word senses and synsets.  
+	            </para>
+						
+				<para>
+				Booleans have one of two logic values either <emphasis>true</emphasis> or <emphasis>false</emphasis>. 
+				They are represented in query results as two literals shown below.
+				
+				<programlisting><![CDATA[true false]]></programlisting>
+				
+				Integers are represented in query results as strings of decimal digits optionally prefixed with <code>-</code> sign.
+				
+	            <programlisting><![CDATA[123 -4 576 0]]></programlisting>
+							
+				Floats (floating point numbers) are represented as strings of decimal digits followed by dot and at least one
+				decimal digit. Floats may also be prefixed with <code>-</code> sign.
+				
+				<programlisting><![CDATA[3.0 -1.2 0.0 2.345]]></programlisting>
+				
+				Strings (character data) are passed to the output without any modifications.
+				
+	            <programlisting><![CDATA[apple person man-eating shark]]></programlisting>
+	            
+	            Word senses are represented as triples that consist of a word form, a sense number
+	            and a part of speech symbol joined together with colons.
+	            
+	            <!-- refere to table containing POSes -->
+	            <programlisting><![CDATA[apple:1:n cold:2:a entail:3:v]]></programlisting>
+	            
+	            Synsets are represented as lists of word senses joined together with whitespaces 
+	            and surrounded with <code>{</code> and <code>}</code> signs.
+	            
+                <programlisting><![CDATA[{ apple:2:n orchard apple tree:1:n Malus pumila:1:n }]]></programlisting>                
+				</para>
+            </sect2>
+
+			<sect2>
+				<title>Tuples</title>
+				<para>
+					Tuples are finite, ordered collections. Every element of a tuple has to be an instance of a basic data type.
+					It is not possible to create a tuple that contains another tuple as an element.
+		              
+		              </para>
+		
+				<para>
+					A tuple is represented in a query result as a single line that consists of representations of tuple elements joined together with spaces. 
+					For example a tuple that consists of the synset
+					<code>{apple:2:n}</code>
+					followed by
+					<code>{person:3:n}</code>
+					and the word form
+					<wordasword>car</wordasword>
+					is written as
+		
+					<programlisting><![CDATA[{ apple:1:n } { person:3:n } car]]></programlisting>
+				</para>
+			</sect2>
+			      
+			<sect2>
+				<title>Relations</title>
+			
+				<para>
+					Let X and Y mean sets of values of basic data types T and U. Every subset of Cartesian
+					product of X and Y is called a <emphasis>relation</emphasis> with <emphasis>predecessor type</emphasis>
+					T and <emphasis>successor type</emphasis> U. 
+				</para>
+
+                <para>
+                    WQuery refers to relations stored in a wordnet by their names.
+                    <xref linkend="tbobligatoryrelations" /> describes relations that are available in every wordnet loaded into WQuery.
+                    Additional relations are usualy retrieved as described in <emphasis><xref linkend="noterelationnames"/></emphasis> 
+                    in <xref linkend="chgettingstarted"/>. 
+                </para>
+			
+				<table id="tbobligatoryrelations" frame="all">
+					<title>Obligatory relations.</title>
+					<tgroup cols="4" colsep='1' rowsep='1'>
+						<colspec colnum="1" align="center" />
+						<colspec colnum="2" align="center" />
+						<colspec colnum="3" align="center" />
+						<colspec colnum="4" align="center" />
+			
+						<thead>
+							<row>
+								<entry>Relation</entry>
+								<entry>Predecessor type</entry>
+								<entry>Successor type</entry>
+								<entry align="center">Meaning</entry>
+							</row>
+						</thead>
+			
+						<tbody>
+							<row valign="middle">
+								<entry>
+									<emphasis>a</emphasis>
+									<code>id</code>
+									<emphasis>b</emphasis>
+								</entry>
+								<entry>word sense</entry>
+								<entry>string</entry>
+								<entry>
+									<emphasis>b</emphasis>
+									is an identifier of word sense
+									<emphasis>a</emphasis>
+								</entry>
+							</row>
+							<row valign="middle">
+								<entry>
+									<emphasis>a</emphasis>
+									<code>id</code>
+									<emphasis>b</emphasis>
+								</entry>
+								<entry>synset</entry>
+								<entry>string</entry>
+								<entry>
+									<emphasis>b</emphasis>
+									is an identifier of synset
+									<emphasis>a</emphasis>
+								</entry>
+							</row>
+							<row valign="middle">
+								<entry>
+									<emphasis>a</emphasis>
+									<code>sensenum</code>
+									<emphasis>b</emphasis>
+								</entry>
+								<entry>word sense</entry>
+								<entry>integer</entry>
+								<entry>
+									<emphasis>b</emphasis>
+									is a sense number of word sense
+									<emphasis>a</emphasis>
+								</entry>
+							</row>
+							<row valign="middle">
+								<entry>
+									<emphasis>a</emphasis>
+									<code>senses</code>
+									<emphasis>b</emphasis>
+								</entry>
+								<entry>string</entry>
+								<entry>word sense</entry>
+								<entry>
+									<emphasis>a</emphasis>
+									is a word form of word sense
+									<emphasis>b</emphasis>
+								</entry>
+							</row>
+							<row valign="middle">
+								<entry>
+									<emphasis>a</emphasis>
+									<code>senses</code>
+									<emphasis>b</emphasis>
+								</entry>
+								<entry>synset</entry>
+								<entry>word sense</entry>
+								<entry>
+									<emphasis>b</emphasis>
+									is a word sense of synset
+									<emphasis>a</emphasis>
+								</entry>
+							</row>
+							<row valign="middle">
+								<entry>
+									<emphasis>a</emphasis>
+									<code>synsets</code>
+									<emphasis>b</emphasis>
+								</entry>
+								<entry>string</entry>
+								<entry>synset</entry>
+								<entry>
+									<emphasis>a</emphasis>
+									is a word form of synset
+									<emphasis>b</emphasis>
+								</entry>
+							</row>
+							<row valign="middle">
+								<entry>
+									<emphasis>a</emphasis>
+									<code>synset</code>
+									<emphasis>b</emphasis>
+								</entry>
+								<entry>word sense</entry>
+								<entry>synset</entry>
+								<entry>
+									<emphasis>a</emphasis>
+									is a word sense of synset
+									<emphasis>b</emphasis>
+								</entry>
+							</row>
+							<row valign="middle">
+								<entry>
+									<emphasis>a</emphasis>
+									<code>words</code>
+									<emphasis>b</emphasis>
+								</entry>
+								<entry>synset</entry>
+								<entry>word sense</entry>
+								<entry>
+									<emphasis>b</emphasis>
+									is a word form of synset
+									<emphasis>a</emphasis>
+								</entry>
+							</row>
+							<row valign="middle">
+								<entry>
+									<emphasis>a</emphasis>
+									<code>word</code>
+									<emphasis>b</emphasis>
+								</entry>
+								<entry>word sense</entry>
+								<entry>string</entry>
+								<entry>
+									<emphasis>a</emphasis>
+									is a word form of word sense
+									<emphasis>b</emphasis>
+								</entry>
+							</row>
+						</tbody>
+					</tgroup>
+				</table>
+			</sect2>
+		</sect1>
+		
+		<sect1>
+			<title>Generators</title>
+			<para>A generator is an expression that represents a dataset of objects sharing the same basic data type.</para>
+			
+			<para>Literals <code>true</code> and <code>false</code> generate datasets that contain exactly one boolean value.
+            <example>
+            <title>Boolean generators</title>
+            <programlisting><![CDATA[wquery> true
+true
+wquery> false
+false]]></programlisting>    
+            </example>		
+			</para>
+			
+            <para>A string of decimal digits generates a dataset that contains exactly one integer value. 
+            Two strings of decimals joined together with <code>..</code> operator generate a dataset 
+            that contains a range of integers.
+            <example>
+            <title>Integer generators</title>
+            <programlisting><![CDATA[wquery> 123
+123
+wquery> 1..5
+1
+2
+3
+4
+5]]></programlisting>    
+            </example>      
+            </para>			
+             
+            <para>A string that represents a floating point number generates a dataset that contains exactly one float.
+ 
+            <example>
+            <title>Float generators</title>
+            <programlisting><![CDATA[wquery> 12.3
+12.3
+wquery> 12e3
+12000.0
+wquery> 12.3e3
+12300.0]]></programlisting>    
+            </example>      
+            </para>           
+            
+            <para>The content of the multiset generated by a character string depends on signs that surround the string.
+            <itemizedlist>
+                <listitem>
+                    <para>A dataset generated by a character string enclosed in single quotes contains that string if and only
+                    if it is a valid word form in the loaded wordnet. Otherwise the generated dataset is empty.</para>
+                </listitem>
+                <listitem>                    
+                    <para>A dataset generated by a character string enclosed in back quotes always contains the surrounded string.</para>
+                </listitem>
+                <listitem>
+                    <para>A dataset generated by a character string enclosed in double quotes contains every word form from the loaded wordnet
+                    that matches a regular expression defined by the surrounded string.</para>                                        
+                </listitem>     
+                <listitem>
+                    <para>A dataset generated by a character string that is not surrounded with any quotation marks has the same content as
+                    a dataset generated from that string enclosed in single quotes.</para>
+                </listitem>                                               
+            </itemizedlist>            
+
+            <example>
+            <title>String generators</title>
+            <programlisting><![CDATA[wquery> 'person'
+person
+wquery> `zzz333`
+zzz333
+wquery> zzz333
+(no result)
+wquery> "^zymol"
+zymology
+zymolysis
+zymolytic
+wquery> person
+person]]></programlisting>    
+            </example>  
+        </para>
+        
+            <note id="noteorder">
+                <title>Note: Ordering in the output</title>
+                <para>
+                    One may notice in the example above that word forms generated by the <code>"^zymol"</code> expression are sorted 
+                    in the output. Sorting is by default applied to all query results except those that are generated by 
+                    constructs descibed in <xref linkend="s1imperativeexpressions"/>. Also if there existed duplicated elements in the query result
+                    they would be removed before passing the result to the output.
+                </para>
+            </note>        
+            
+        <para>
+            One may generate all word forms stored in the loaded wordnet by submitting two single quote signs 
+            without any characters between then.
+
+            <example>
+            <title>Generating all word forms</title>
+            <programlisting><![CDATA[wquery> ''
+(...)
+]]></programlisting>        
+            </example>
+        
+        </para>                           
+        
+        <para>In order to generate a dataset that contains at most one word sense one may join a character string, a sense number 
+        and a part of speech symbol with colons. The generated multiset will be empty if the loaded wordnet does not contain requested word sense. 
+        
+            <example>
+            <title>An unique word sense generator</title>
+            <programlisting><![CDATA[wquery> 'person':1:n
+person
+wquery> 'zzzz':23:n
+(no result)]]></programlisting>    
+            </example>
+            
+        If we omit in the expression above the second colon and the part of speech symbol then all word senses with the given word form and sense number
+        will be generated.
+        
+            <example>
+            <title>A non-unique word sense generator</title>
+            <programlisting><![CDATA[wquery> set:2
+set:2:n
+set:2:v
+set:2:s]]></programlisting>    
+            </example>        
+        </para>    
+
+        <para>
+            All word senses stored in the loaded wordnet may be generated by submitting two colon signs.
+
+            <example>
+            <title>Generating all word senses</title>
+            <programlisting><![CDATA[wquery> ::
+(...)
+]]></programlisting>        
+            </example>
+        
+        </para>                           
+
+        <para>By surrounding an expression that returns a dataset of strings with <code>{</code> and <code>}</code> signs
+        one may obtain a dataset that consists of synsets that contain at least one word form represented by the enclosed expression. 
+            <example>
+            <title>A word forms to synsets generator</title>
+            <programlisting><![CDATA[wquery> {orange}
+{ orange:2:n orangeness:1:n }
+{ orange:1:n }
+{ orange:3:n orange tree:1:n }
+{ orange:4:n }
+{ orange:1:s orangish:1:s }
+wquery> {"^zymol"}
+{ zymology:1:n zymurgy:1:n }
+{ zymosis:1:n zymolysis:1:n fermentation:2:n fermenting:1:n ferment:3:n }
+{ zymotic:1:a zymolytic:1:a }]]></programlisting>    
+            </example>           
+            
+            The same holds for datasets of word senses.
+            
+            <example>
+            <title>A word senses to synsets generator</title>
+            <programlisting><![CDATA[wquery> 
+wquery> {apple:2:n}
+{ apple:2:n orchard apple tree:1:n Malus pumila:1:n }
+wquery> {apple:2}
+{ apple:2:n orchard apple tree:1:n Malus pumila:1:n }]]></programlisting>    
+            </example>               
+        </para>
+        
+        <para>
+            All synsets stored in the loaded wordnet may be generated by submitting <code>{</code> and <code>}</code> signs
+            without any expression between them.
+
+            <example>
+            <title>Generating all synsets</title>
+            <programlisting><![CDATA[wquery> {}
+(...)
+]]></programlisting>        
+            </example>
+        </para>                
+           
+        </sect1>
+		<sect1>
+			<title>Paths</title>
+			<para>A path consists of a generator followed by zero or more transitions. 
+			Each transition begins with one or more dots followed by a relation name.
+			The generator and the following transitions are called <emphasis>steps</emphasis>.
+						
+			The result of applying a transition that consits of <emphasis>k</emphasis> dots followed by the relation name <code>R</code> 			
+			to an <emphasis>n</emphasis>-th step (<emphasis>1 &lt;= k &lt;= n</emphasis>) expression on the left of the transition is a dataset <code>{b| a in D and R(a,b)}</code> 
+			where <code>D</code> is:
+			     <orderedlist>
+			         <listitem>
+			             <para>A dataset returned by the generator of the path 
+			                 if <emphasis>k</emphasis> = <emphasis>n</emphasis>.</para>
+			         </listitem>
+                     <listitem>
+                         <para>A result of applying from the left to the right <emphasis>n - k</emphasis> transitions to the generator of the path 
+                            if <emphasis>k</emphasis> &lt; <emphasis>n</emphasis>.</para>
+                     </listitem>			     
+			     </orderedlist>
+
+			</para>
+			
+			<para>
+			For example to find all hypernyms of a synset that contains the word form <wordasword>car</wordasword> 
+			in its first noun sense	one may write
+            <example>
+            <title>A simple path</title>
+            <programlisting><![CDATA[wquery> {car:1:n}.hypernym
+{ motor vehicle:1:n automotive vehicle:1:n }]]></programlisting>    
+            </example>  			
+			
+			and to find all senses of hypernyms of the synset above one may write
+            <example>
+            <title>Another simple path</title>
+            <programlisting><![CDATA[wquery> {car:1:n}.hypernym.senses
+motor vehicle:1:n
+automotive vehicle:1:n]]></programlisting>    
+            </example>             
+						
+			 </para>
+			 
+			 <para>
+                By surrounding chosen path steps with <code>&lt;</code> and <code>&gt;</code> signs one may retrieve results of intermediate transitions. 
+                The result of applying selectors to the chosen <emphasis>k</emphasis> steps consists of
+                <emphasis>k</emphasis>-element tuples such that the <emphasis>i</emphasis>-th element 
+                (<emphasis>1 &lt;= i &lt;= k</emphasis>) of a tuple belongs to the dataset generated by 
+                a subpath defined by all steps of the path that precede the i-th <code>&gt;</code> sign on the path.
+             
+	            For example to find all triples that consist of a synset that contains the word form <wordasword>car</wordasword>
+	            followed by its identifier and an identifier its hypernym one may write
+	            	            
+	            <example>
+	            <title>Selectors</title>
+	            <programlisting><![CDATA[wquery> <{car}>.<id>..hypernym.<id>
+{ cable car:1:n car:5:n } 102934451 103079741
+{ car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n } 102958343 103791235
+{ car:2:n railcar:1:n railway car:1:n railroad car:1:n } 102959942 104576211
+{ car:4:n elevator car:1:n } 102960352 103079741
+{ car:3:n gondola:3:n } 102960501 103079741]]></programlisting>    
+	            </example>    
+	            
+	            As shown in the example above consecutive tuple elements are separated in the output with single spaces.	            
+			 </para>			 
+		</sect1>
+		
+		<sect1>
+            <title>Relational expressions</title>
+            <para>A relational expression consists of one or more relations combined 
+                 together with operators shown in <xref linkend="relationaloperators"/>.
+                 The relational expression may be used in a transition instead of a single relation.                     
+            </para>
+            
+            <para>                      
+                 In order to find all transitive hypernyms of synsets that contain the word form <wordasword>person</wordasword>
+                 one may write
+                <example>
+                <title>A transitive closure</title>
+                <programlisting><![CDATA[wquery> {person}.hypernym!
+{ entity:1:n }
+{ physical entity:1:n }
+{ organism:1:n being:2:n }
+{ causal agent:1:n cause:4:n causal agency:1:n }
+{ human body:1:n physical body:1:n material body:1:n soma:3:n build:2:n 
+    figure:2:n physique:2:n anatomy:2:n shape:3:n bod:1:n chassis:1:n 
+    frame:3:n form:5:n flesh:2:n }
+{ grammatical category:1:n syntactic category:1:n }]]></programlisting>    
+                </example>               
+                        
+                <table id="relationaloperators" frame="all">
+                    <title>Relational operators.</title>
+                    <tgroup cols="3" colsep='1' rowsep='1'>
+                        <colspec colnum="1" align="center" colwidth="80"/>
+                        <colspec colnum="2" align="center" colwidth="90"/>
+                        <colspec colnum="3" align="left"/>                       
+                         
+                        <thead>
+                            <row>
+                              <entry>Operator</entry>
+                              <entry>Expression</entry>
+                              <entry align="center">Result</entry>
+                            </row>
+                        </thead>
+                         
+                        <tbody>  
+                            <row valign="middle">
+                                <entry>inversion</entry>
+                                <entry><code>^r</code></entry>
+                                <entry>
+                                    <emphasis>(b,a)</emphasis> such that <emphasis>(a,b)</emphasis> belongs to <code>r</code>  
+                                </entry>
+                            </row>       
+                            <row valign="middle">
+                                <entry>transitive closure</entry>
+                                <entry><code>r!</code></entry>
+                                <entry>
+                                    <emphasis>(a,b)</emphasis> such that <emphasis>(a,b)</emphasis> belongs to <code>r</code>
+                                    or there exist <emphasis>a<subscript>1</subscript></emphasis>, ..., 
+                                    <emphasis>a<subscript>k</subscript></emphasis> such that
+                                    <emphasis>(a,a<subscript>1</subscript>)</emphasis>, 
+                                    <emphasis>(a<subscript>1</subscript>,a<subscript>2</subscript>)</emphasis>, 
+                                    ...
+                                    <emphasis>(a<subscript>k</subscript>, b)</emphasis> 
+                                    belong to <code>r</code>
+                                </entry>
+                            </row>                            
+                            <row valign="middle">
+                                <entry>union</entry>
+                                <entry><code>r|q</code></entry>
+                                <entry>
+                                    <emphasis>t</emphasis> such that <emphasis>t</emphasis> belongs to <code>r</code> or <code>q</code>
+                                </entry>
+                            </row>             
+                            <row valign="middle">
+                                <entry>intersection</entry>
+                                <entry><code>r&amp;q</code></entry>
+                                <entry>
+                                    <emphasis>t</emphasis> such that <emphasis>t</emphasis> belongs to <code>r</code> and <code>q</code>
+                                </entry>
+                            </row>                                
+                        </tbody>
+                    </tgroup>                    
+                </table>            
+            </para>            
+
+            <para>
+                By using <code>=</code> operator one may assign a name to a relational expression and use it in the following queries.
+                For example one may define an alias for transitive hypernymy
+
+                <programlisting><![CDATA[thyper=hypernym!]]></programlisting>
+                
+                and use it as shown in the query below
+                
+                <example>
+                <title>A transitive closure alias</title>
+                <programlisting><![CDATA[wquery> {person}.thyper
+{ entity:1:n }
+{ physical entity:1:n }
+{ organism:1:n being:2:n }
+{ causal agent:1:n cause:4:n causal agency:1:n }
+{ human body:1:n physical body:1:n material body:1:n soma:3:n build:2:n 
+    figure:2:n physique:2:n anatomy:2:n shape:3:n bod:1:n chassis:1:n 
+    frame:3:n form:5:n flesh:2:n }
+{ grammatical category:1:n syntactic category:1:n }]]></programlisting>    
+                </example>               
+            </para>                                                   
+        </sect1>
+		
+		<sect1>
+			<title>Filters</title>
+			<para>A filter is an expression placed after a path step to select some elements from the generated dataset.
+			The filter consists of a conditional expression surrounded with <code>[</code> and <code>]</code> signs. 
+			Each element of the dataset being filtered is passed separately to the filter and may be referenced inside it by using <code>#</code> sign.
+			</para>
+			
+			<para>			
+			To find all synsets that contain the word form <wordasword>person</wordasword> except the one that contains that
+			word form in its thirdh noun sense one may write
+            <example>
+            <title>A simple filter</title>
+            <programlisting><![CDATA[wquery> {person}[# != {person:3:n}]
+{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n }
+{ person:2:n }]]></programlisting>    
+            </example>      					
+			</para>
+			
+			<para>Objects that precede on the path the element that is analyzed in the current pass may be referenced by 
+			repeating <code>#</code> sign. 
+			</para>
+			
+			<para>.....................................			
+			The following query returns all hyponyms of synsets that contain the word form <wordasword>person</wordasword>
+			having the same number of words as their hypernyms one may wrtie
+            <example>
+            <title>Backward reference</title>
+            <programlisting><![CDATA[wquery> {person}.hypernym[count(#.words)<count(##.words)]
+{ organism:1:n being:2:n }
+{ causal agent:1:n cause:4:n causal agency:1:n }]]></programlisting>    
+            </example> 					
+            
+            A reference may be omitted if it consists of exactly one <code>#</code> sign and is followed by at least one step.
+            The expression written above may be rephrased as follows
+            <example>
+            <title>Implicit reference</title>
+            <programlisting><![CDATA[wquery> {person}.hyponyms[count(words) = count(##.words)]
+{ organism:1:n being:2:n }
+{ causal agent:1:n cause:4:n causal agency:1:n }]]></programlisting>    
+            </example>                                	
+			</para>
+			
+			<para>A filter may also be used independently as a boolean generator.</para>
+            <example>
+            <title>Filter generator</title>
+            <programlisting><![CDATA[wquery> [1 < 2]
+true]]></programlisting>    
+            </example> 			
+			
+            <para>
+                The following subsections describe three types of operators that are allowed in filters.
+            </para>
+            
+            <sect2>
+                <title>Dataset-oriented conditional operators</title>
+                <para>
+                    The operators listed in <xref linkend="datasetconditionaloperators"/>  
+                    are binary operators that compare pairs of datasets. 
+                    
+		            <table id="datasetconditionaloperators" frame="all">
+		                <title>Dataset-oriented conditional operators.</title>
+		                <tgroup cols="3" colsep='1' rowsep='1'>
+		                    <colspec colnum="1" align="center" colwidth="80"/>
+		                    <colspec colnum="2" align="center" colwidth="90"/>
+		                    <colspec colnum="3" align="left"/>                       
+		                     
+		                    <thead>
+		                        <row>
+		                          <entry>Operator</entry>
+		                          <entry>Expression</entry>
+		                          <entry align="center">Result</entry>
+		                        </row>
+		                    </thead>
+		                     
+		                    <tbody>  
+		                        <row valign="middle">
+		                            <entry>dataset equality</entry>
+		                            <entry><code>x = y</code></entry>
+		                            <entry>true iff datasets generated by <code>x</code> and <code>y</code> are equal</entry>
+		                        </row>
+		                        <row valign="middle">
+		                            <entry>dataset inequality</entry>
+		                            <entry><code>x != y</code></entry>
+		                            <entry>true iff datasets generated by <code>x</code> and <code>y</code> are not equal</entry>
+		                        </row>
+		                        <row valign="middle">
+		                            <entry>dataset inclusion</entry>
+		                            <entry><code>x in y</code></entry>
+		                            <entry>true iff the dataset generated by <code>x</code> is a subset of the one generated by <code>y</code></entry>
+		                        </row>
+		                        <row valign="middle">
+		                            <entry>dataset proper inclusion</entry>
+		                            <entry><code>x pin y</code></entry>
+		                            <entry>true iff the dataset generated by <code>x</code> is a proper subset of the one generated by <code>y</code></entry>
+		                        </row>
+		                    </tbody>                    
+		                </tgroup>                    
+		            </table>                    
+                </para>
+                <para>
+                    <xref linkend="exampledatasetcomparisons"/> consists of queries that involve dataset-oriented conditional operators.
+		            <example id="exampledatasetcomparisons">
+		            <title>Dataset comparisons</title>
+		            <programlisting><![CDATA[wquery> [{person:1:n} = {person}]
+false
+wquery> [{person:1:n} in {person}]
+true
+wquery> [{person:1:n} pin {person}]
+true
+wquery> [{person} != {person}]
+false
+]]></programlisting>    
+		            </example>                                        
+                </para>
+            </sect2>
+            
+            <sect2>
+                <title>Value-oriented conditional operators</title>
+                <para>
+                    The operators listed in <xref linkend="valueconditionaloperators"/>  
+                    are binary operators that are able to compare only those datasets that contain at most one element.
+                    Compared elements have to belong to the same data type.
+                </para>
+                    
+                <para>
+                   The following rules hold while comparing two values:
+                   
+                   <itemizedlist>
+                        <listitem>
+                            <para>Numbers are compared using natural ordering.</para>
+                        </listitem>
+                        <listitem>
+                            <para>Strings are compared by assuming lexicographical order.</para>
+                        </listitem>
+                        <listitem>
+                            <para>
+                                The boolean value <code>false</code> is assumed to be lesser than <code>true</code>.
+                            </para>
+                        </listitem>
+                        <listitem>
+                            <para>
+                                The result of comparing synsets or word senses is undefined.<footnote>
+                                    <para>Present implementation of WQuery compares synset and word sense identifiers to determine ordering between synsets and wordsenses.</para>
+                                </footnote>
+                            </para>
+                        </listitem>
+                   </itemizedlist>
+                </para>
+            
+                <para>    
+		            <table id="valueconditionaloperators" frame="all">
+		                <title>Value-oriented conditional operators.</title>
+		                <tgroup cols="3" colsep='1' rowsep='1'>
+		                    <colspec colnum="1" align="center" colwidth="80"/>
+		                    <colspec colnum="2" align="center" colwidth="90"/>
+		                    <colspec colnum="3" align="left"/>                       
+		                     
+		                    <thead>
+		                        <row>
+		                          <entry>Operator</entry>
+		                          <entry>Expression</entry>
+		                          <entry align="center">Result</entry>
+		                        </row>
+		                    </thead>
+		                     
+		                    <tbody>  
+		                        <row valign="middle">
+		                            <entry>lesser than</entry>
+		                            <entry><code>x &lt; y</code></entry>
+		                            <entry>
+		                                true iff <code>x</code> and <code>y</code> contain exactly one element 
+		                                and the element in <code>x</code> is lesser than the one in <code>y</code>
+		                            </entry>
+		                        </row>
+		                        <row valign="middle">
+		                            <entry>lesser than or equal</entry>
+		                            <entry><code>x &lt;= y</code></entry>
+		                            <entry>
+		                                true iff <code>x</code> and <code>y</code> contain exactly one element 
+		                                and the element in <code>x</code> is lesser than or equal to the one in <code>y</code>
+		                            </entry>
+		                        </row>
+		                        <row valign="middle">
+		                            <entry>greater than</entry>
+		                            <entry><code>x &gt; y</code></entry>
+		                            <entry>
+		                                true iff <code>x</code> and <code>y</code> contain exactly one element 
+		                                and the element in <code>x</code> is greater than the one in <code>y</code>
+		                            </entry>
+		                        </row>
+		                        <row valign="middle">
+		                            <entry>greater than or equal</entry>
+		                            <entry><code>x &gt;= y</code></entry>
+		                            <entry>
+		                                true iff <code>x</code> and <code>y</code> contain exactly one element 
+		                                and the element in <code>x</code> is greater than or equal to the one in <code>y</code>
+		                            </entry>
+		                        </row>                                                
+		                    </tbody>                    
+		                </tgroup>                    
+		            </table>                        
+                </para>
+                
+                <para>
+                    <xref linkend="examplevaluecomparisons"/> consists of queries that involve some of value-oriented conditional operators.
+                    <example id="examplevaluecomparisons">
+			            <title>Value comparisons</title>
+			            <programlisting><![CDATA[wquery> [person < individual]
+false
+wquery> [1 <= 1]
+true
+wquery> [true > false]
+true]]></programlisting>    
+                    </example>                                         
+                </para>
+            </sect2>
+
+            <sect2>
+                <title>Logic operators</title>
+                
+                <para>
+                    The operators listed in <xref linkend="logicoperators"/> may be used to combine conditional expressions.
+                    
+                    <table id="logicoperators" frame="all">
+                        <title>Value-oriented conditional operators.</title>
+                        <tgroup cols="3" colsep='1' rowsep='1'>
+                            <colspec colnum="1" align="center" colwidth="80"/>
+                            <colspec colnum="2" align="center" colwidth="90"/>
+                            <colspec colnum="3" align="left"/>                       
+                             
+                            <thead>
+                                <row>
+                                  <entry>Operator</entry>
+                                  <entry>Expression</entry>
+                                  <entry align="center">Result</entry>
+                                </row>
+                            </thead>
+                             
+                            <tbody>  
+                                <row valign="middle">
+                                    <entry>conjunction</entry>
+                                    <entry><code>x and y</code></entry>
+                                    <entry>
+                                        true iff both <code>x</code> and <code>y</code> are true
+                                    </entry>
+                                </row>
+                                <row valign="middle">
+                                    <entry>disjunction</entry>
+                                    <entry><code>x or y</code></entry>
+                                    <entry>
+                                        true iff <code>x</code> or <code>y</code> is true
+                                    </entry>
+                                </row>
+                                <row valign="middle">
+                                    <entry>negation</entry>
+                                    <entry><code>not x</code></entry>
+                                    <entry>
+                                        true iff <code>x</code> is not true
+                                    </entry>
+                                </row>                                          
+                            </tbody>                    
+                        </tgroup>                    
+                    </table>                                                            
+                </para>
+                
+                <para>
+                    <xref linkend="examplelogicoperators" /> presents expressions that involve logic operators.
+		            <example id="examplelogicoperators">
+		            <title>Logic operations</title>
+		            <programlisting><![CDATA[wquery> {}[car in words and gondola in words]
+{ car:3:n gondola:3:n }
+wquery> {}[car in words or gondola in words]
+{ cable car:1:n car:5:n }
+{ car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n }
+{ car:2:n railcar:1:n railway car:1:n railroad car:1:n }
+{ car:4:n elevator car:1:n }
+{ car:3:n gondola:3:n }
+wquery> {}[car in words and not gondola in words]
+{ cable car:1:n car:5:n }
+{ auto:1:n automobile:1:n }
+{ car:2:n railcar:1:n railway car:1:n railroad car:1:n }
+{ car:4:n elevator car:1:n }]]></programlisting>    
+		            </example>                
+                </para>
+            </sect2>
+		</sect1>
+		
+		<sect1>
+			<title>Functions</title>
+			
+            <para>
+                A call to a function consists of a function name followed by an expression surrounded with parentheses. 
+                WQuery functions fall into two categories:
+                <variablelist>
+                    <varlistentry>
+                        <term>aggregate functions</term>
+                        <listitem>
+                            <para>
+                                These functions are invoked directly on a dataset returned by the expression between parentheses.
+                            </para>
+                        </listitem>                        
+                    </varlistentry>
+                    <varlistentry>
+                        <term>scalar functions</term>
+                        <listitem>
+                            <para>
+                                These functions are invoked separately for every tuple that belongs to a dataset returned by 
+                                the expression between parentheses and the result is a sum of results returned by all invocations.
+                            </para>
+                        </listitem>                        
+                    </varlistentry>                
+                </variablelist>
+			</para>
+			
+            <para>The list of all built-in functions may be found in <xref linkend="builtinfunctions"/>.</para>
+			
+			<example>
+            <title>Sample scalar functions</title>
+            <programlisting><![CDATA[wquery> upper({car:1}.words)
+AUTO
+AUTOMOBILE
+CAR
+MACHINE
+MOTORCAR
+wquery> length({car:1}.words)
+3
+4
+7
+8
+10]]></programlisting>    
+            </example>			
+			
+            <example>
+            <title>Sample aggregate functions</title>
+            <programlisting><![CDATA[wquery> count({car:1}.words)
+5
+wquery> max({car:1}.words)
+motorcar]]></programlisting>    
+            </example>      		
+
+<!---->
+<!--			<para>Although WQuery does not provide constructs to create user-defined functions it is possible to implement a-->
+<!--			function using Java and load it into the interpreter before start.<footnote><para>-->
+<!--			See details in <xref linkend="scwritingcustomfunctions" />.-->
+<!--			</para></footnote>-->
+<!--			</para>-->
+		</sect1>
+		<sect1>
+			<title>Arithmetics</title>
+			<para>
+			    Arithmetic expressions in WQuery utilize paths and functions that return integers and floats.
+			    
+	            <example>
+	            <title>Sample arithmetic operations</title>
+	            <programlisting><![CDATA[wquery> 2 + 3
+5
+wquery> count({car:1}.words) + count({car:3}.words)
+7
+wquery> max(length({car}.words)) - min(length({car}.words))
+9]]></programlisting>    
+	            </example> 			    
+			</para>
+			
+			<para> 
+	            Operators available in arithmetic expressions are shown in <xref linkend="arithmeticoperators" />.
+	            
+	            <table id="arithmeticoperators" frame="all">
+	                <title>Arithmetic operators.</title>
+	                <tgroup cols="3" colsep='1' rowsep='1'>
+	                    <colspec colnum="1" align="center"/>
+	                    <colspec colnum="2" align="center"/>
+	                    <colspec colnum="3" align="left"/>                       
+	                     
+	                    <thead>
+	                        <row>
+	                          <entry>Operator</entry>
+	                          <entry>Expression</entry>
+	                          <entry align="center">Result</entry>
+	                        </row>
+	                    </thead>
+	                     
+	                    <tbody>
+	                        <row valign="middle">
+	                            <entry>unary minus</entry>
+	                            <entry><code>-x</code></entry>
+	                            <entry>negation of <code>x</code></entry>
+	                        </row>                                
+	                        <row valign="middle">
+	                            <entry>unary plus</entry>
+	                            <entry><code>+x</code></entry>
+	                            <entry>unchanged value of <code>x</code></entry>
+	                        </row>        
+	                        <row valign="middle">
+	                            <entry>addition</entry>
+	                            <entry><code>x + y</code></entry>
+	                            <entry>sum of <code>x</code> and <code>y</code></entry>
+	                        </row>             
+	                        <row valign="middle">
+	                            <entry>subtraction</entry>
+	                            <entry><code>x - y</code></entry>
+	                            <entry>difference of <code>x</code> and <code>y</code></entry>
+	                        </row>               
+	                        <row valign="middle">
+	                            <entry>multiplication</entry>
+	                            <entry><code>x * y</code></entry>
+	                            <entry>product of <code>x</code> and <code>y</code></entry>
+	                        </row>         
+	                        <row valign="middle">
+	                            <entry>division</entry>
+	                            <entry><code>x / y</code></entry>
+	                            <entry>quotient of <code>x</code> and <code>y</code></entry>
+	                        </row>             
+	                        <row valign="middle">
+	                            <entry>modulo</entry>
+	                            <entry><code>x % y</code></entry>
+	                            <entry>remainder from division of <code>x</code> by <code>y</code></entry>
+	                        </row>
+	                    </tbody>
+	                </tgroup>                    
+	            </table>
+            </para>
+		</sect1>
+		
+		<sect1>
+			<title>Path expressions</title>
+			<para>A path expression consists of one or more paths combined 
+			     together using operators shown in <xref linkend="pathoperators"/>.
+						
+                <table id="pathoperators" frame="all">
+                    <title>Path operators</title>
+                    <tgroup cols="3" colsep='1' rowsep='1'>
+                        <colspec colnum="1" align="center" colwidth="80"/>
+                        <colspec colnum="2" align="center" colwidth="90"/>
+                        <colspec colnum="3" align="left"/>                       
+                         
+                        <thead>
+                            <row>
+                              <entry>Operator</entry>
+                              <entry>Expression</entry>
+                              <entry align="center">Result</entry>
+                            </row>
+                        </thead>
+                         
+                        <tbody>  
+                            <row valign="middle">
+                                <entry>path union</entry>
+                                <entry><code>x union y</code></entry>
+                                <entry>union of datasets generated by <code>x</code> and <code>y</code></entry>
+                            </row>             
+                            <row valign="middle">
+                                <entry>path intersection</entry>
+                                <entry><code>x intersect y</code></entry>
+                                <entry>intersection of datasets generated by <code>x</code> and <code>y</code></entry>
+                            </row>             
+                            <row valign="middle">
+                                <entry>path difference</entry>
+                                <entry><code>x except y</code></entry>
+                                <entry>difference of datasets generated by <code>x</code> and <code>y</code></entry>
+                            </row>             
+                            <row valign="middle">
+                                <entry>path product</entry>
+                                <entry><code>x, y</code></entry>
+                                <entry>
+                                    a dataset that consists of all tuples (a<subscript>1</subscript>, ..., a<subscript>
+	                                k</subscript>, b<subscript>1</subscript>, ..., b<subscript>n</subscript>) such that
+	                                (a<subscript>1</subscript>, ..., a<subscript>k</subscript>) 
+	                                belongs to a dataset generated by <code>x</code>
+	                                and (b<subscript>1</subscript>, ..., b<subscript>n</subscript>) 
+	                                belongs to a dataset generated by <code>y</code>
+                                </entry>
+                            </row>                                                 
+                        </tbody>
+                    </tgroup>                    
+                </table>			
+						
+	            <example>
+                <title>Path expressions</title>
+                <programlisting><![CDATA[wquery> {car:1:n} union {car:3:n}
+{ car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n }
+{ car:3:n gondola:3:n }
+wquery> {car} intersect {car:1:n}
+{ car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n }
+wquery> {car} except {car:2:n}
+{ cable car:1:n car:5:n }
+{ car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n }
+{ car:4:n elevator car:1:n }
+{ car:3:n gondola:3:n }
+wquery> {apple}, {set}
+{ apple:1:n } { set:2:n }
+{ apple:1:n } { determine:3:v set:2:v }
+{ apple:1:n } { fixed:2:s set:2:s rigid:5:s }
+{ apple:2:n orchard apple tree:1:n Malus pumila:1:n } { set:2:n }
+{ apple:2:n orchard apple tree:1:n Malus pumila:1:n } { determine:3:v 
+    set:2:v }
+{ apple:2:n orchard apple tree:1:n Malus pumila:1:n } { fixed:2:s 
+    set:2:s rigid:5:s }]]></programlisting>    
+                </example>  
+			</para>
+		</sect1>
+		<sect1 id="s1imperativeexpressions">
+			<title>Imperative expressions</title>
+			<para>
+			     Path expressions described in the previous section may be used to construct five types of imperative expressions: 
+				 <emphasis>emissions</emphasis>, <emphasis>iterators</emphasis>, <emphasis>conditionals</emphasis>, 
+				 <emphasis>blocks</emphasis> and <emphasis>assignments</emphasis>.
+            </para>
+            
+            <sect2>
+                <title>Emissions</title>
+
+                <para><code>emit path_expr</code></para>
+                                            
+                <para>An emission passes tuples generated by the path expression <code>path_expr</code> to the output.</para>
+                        
+                <example>
+                <title>An emission</title>
+                <programlisting><![CDATA[wquery> emit {person:1:n}.words
+soul
+individual
+somebody
+someone
+mortal
+person]]></programlisting>    
+                </example>              
+            </sect2>
+
+            <sect2>
+                <title>Iterators</title>
+                
+                <para>
+                    <code>from var_decls in path_expr imp_expr</code>
+                </para>
+                                            
+                <para>
+                    An iterator executes the imperative expression <code>imp_expr</code> 
+                    for every tuple generated by the path expression <code>path_expr</code>.
+                    Variables from the comma separated list <code>var_decls</code> are substituted with consecutive elements of
+                    a tuple processed in the current pass. Those variables may be used as generators in <code>imp_expr</code>.                     
+                    <footnote><para>Variable names are prefixed with <code>$</code> sign.</para></footnote>
+                </para>
+                        
+                <example>
+                <title>An iterator</title>
+                <programlisting><![CDATA[wquery> from $a in {person}.words emit $a
+person
+soul
+individual
+somebody
+someone
+mortal
+person
+person]]></programlisting>    
+                </example>  
+                
+                <para>
+                    In the example above the imperative expression built from an iterator and an emission returns a dataset that
+                    is not sorted and contains duplicated elements. 
+                    In order to sort a dataset one have to use the <code>sort</code> function.                    
+                </para>                               
+                    
+                <example>
+                <title>The <code>sort</code> function</title>
+                <programlisting><![CDATA[wquery> from $a in sort({person}.words) emit $a
+individual
+mortal
+person
+person
+person
+somebody
+someone
+soul]]></programlisting>    
+                </example>
+                
+                <para>Duplicates may be removed from a dataset by the <code>distinct</code> function.</para>
+                
+                <example>
+                <title>The <code>distinct</code> function</title>
+                <programlisting><![CDATA[wquery> from $a in distinct(sort({person}.words)) emit $a
+individual
+mortal
+person
+somebody
+someone
+soul]]></programlisting>    
+                </example>
+            </sect2>
+            
+            <sect2>
+                <title>Conditionals</title>
+                <para><code>if path_expr imp_expr</code></para>
+                
+                <para>A conditional executes the imperative expression <code>imp_expr</code> if the path expression <code>path_expr</code>
+                is <emphasis>true</emphasis>.</para>
+                <note>
+                    <title>Note: Truth in WQuery</title>
+                    <para>
+                        A path expression is considered to be false if it generates a dataset that is either empty 
+                        or includes exactly one tuple that consists entirely of boolean elements and at least one of 
+                        those elements is <emphasis>false</emphasis>.
+                        Otherwise the expression is considered to be <emphasis>true</emphasis>.
+                    </para>
+                </note>
+                
+                <example>
+                <title>A conditional</title>
+                <programlisting><![CDATA[wquery> if [2 + 2 = 4] emit `ufff...`
+ufff...]]></programlisting>    
+                </example>   
+                
+                <para>
+                    A conditional may have also an optional else block which is executed 
+                    if <code>path_expr</code> is not <emphasis>true</emphasis>.
+                    The resulting conditional looks as follows
+                </para>
+                
+                <para><code>if path_expr imp_expr else else_expr</code></para>
+                
+                <example>
+                <title>An else block</title>
+                <programlisting><![CDATA[wquery> 
+    if [bus in {car}.words] 
+        emit {bus} 
+    else 
+        emit `no "bus" word found in "{car}.words"`
+               
+no "bus" word found in "{car}.words"]]></programlisting>    
+                </example>                  
+            </sect2>
+            
+            <sect2>
+                <title>Blocks</title>
+                
+                <para>
+                    <code>do imp_expr_1 ... impr_expr_n end</code>
+                </para>
+
+                <para>A block executes sequentially imperative expressions <code>imp_expr_1</code> to <code>imp_expr_n</code>.</para>
+
+                <example>
+                <title>A block</title>
+                <programlisting><![CDATA[wquery> 
+do 
+    emit {person:3:n}  
+    emit car:2:n
+    emit apple
+end
+
+{ person:3:n }
+car:2:n
+apple]]></programlisting>    
+                </example> 
+            </sect2>
+            
+            <sect2>
+                <title>Assignments</title>
+                
+                <para>
+                    <code>var_decls = path_expr</code>
+                </para>
+                
+                <para>
+                    An assignment binds variables from the comma separated list <code>var_decls</code> to consecutive values of a tuple
+                    generated by the path expression <code>path_expr</code>.  The <code>path_expr</code> expression shall return exactly 
+                    one tuple.
+                </para>
+                
+                <example>
+                <title>An assignment</title>
+                <programlisting><![CDATA[wquery> 
+do
+    $a, $b = <{car:1:n}>.<desc>
+    if [$b =~ `engine`]
+            emit $a.words
+end
+
+machine
+motorcar
+automobile
+auto
+car]]></programlisting>    
+                </example>
+                
+                <para>
+                    Variable bindings are accessible in all expressions that follow the assignment and are placed in the scope of the block which surrounds it. 
+                    Bindings in the inner block hide the ones defined in the outer blocks.                
+                </para>                 
+                
+                <example>
+                <title>Hidden binding</title>
+                <programlisting><![CDATA[wquery> 
+do
+    $a, $b = 1, 2
+    
+    do
+        $b = 3
+        emit $a
+        emit $b
+    end
+     
+    emit $a
+    emit $b 
+end
+
+1
+3
+1
+2]]></programlisting>    
+                </example>                            
+            </sect2>
+		</sect1>
+	</chapter>
+	<chapter id="chadvancedtopics">
+		<title>Advanced topics</title>
+		<para>This chapter covers topics important only in specific WQuery use cases.</para>        		
+		<sect1>
+			<title>Embedding the interpreter</title>
+            <para>
+                WQuery may be easily embedded into your own application. The following libraries must be added 
+                to the application classpath if you want to use WQuery:
+	            <itemizedlist>
+	                <listitem>
+	                    <para><code>wquery-VERSION.jar</code></para>
+	                </listitem>            
+	                <listitem>
+	                    <para><code>scala-library-2.7.5.jar</code></para>
+	                </listitem>            
+	                <listitem>
+	                    <para><code>slf4j-api-1.5.8.jar</code></para>
+	                </listitem>
+                    <listitem>
+                        <para><code>slf4j-log4j12-1.5.8.jar</code> (or another logging framework facade)</para>
+                    </listitem>
+                    <listitem>
+                        <para><code>log4j-1.2.14.jar</code> (or another logging framework)</para>
+                    </listitem>
+	            </itemizedlist>
+            </para> 
+            
+            <para>
+                In order to access WQuery programmatically you have to instantiate an object of the class <classname>org.wquery.WQuery</classname>
+                by invoking its static method <methodname>getInstance</methodname>.
+                After obtaining <classname>WQuery</classname> instance you may execute queries by calling the <methodname>execute</methodname> method.
+             </para>   
+
+                <emphasis>Example: To be written</emphasis>            
+		</sect1>
+        <sect1 id="scregisteringcustomloaders">
+            <title>Registering custom wordnet loaders</title>
+            <para><emphasis>To be written...</emphasis></para>
+        </sect1>		
+        <sect1 id="scwrittingcustomfunctions">
+            <title>Registering custom functions</title>
+            <para><emphasis>To be written...</emphasis></para>
+        </sect1>		
+        <sect1 id="scusingcustomemitters">
+            <title>Using custom emitters</title>
+            <para><emphasis>To be written...</emphasis></para>
+        </sect1>        
+		
+		
+	</chapter>
+	<appendix id="aptoolsreference">
+	   <title>Tools reference</title>	  
+	   <sect1><title>WGUIConsole</title><para><emphasis>To be written...</emphasis></para></sect1>
+       <sect1><title>WConsole</title><para><emphasis>To be written...</emphasis></para></sect1>
+	</appendix>
+    <appendix id="builtinfunctions">
+       <title>Built-in functions</title>
+       <para>
+		<table id="scalarfunctions" frame="all">
+		     <title>Scalar functions.</title>
+		     <tgroup cols="3" colsep='1' rowsep='1'>
+		         <colspec colnum="1" align="center"/>
+		         <colspec colnum="2" align="left"/>
+		         <colspec colnum="3" align="left"/>                       
+		         
+		         <thead>
+		             <row>
+		               <entry>Function</entry>
+		               <entry>Argument</entry>
+		               <entry>Result</entry>
+		             </row>
+		         </thead>
+		         		         
+		         <tbody>
+		             <row valign="middle">
+		                 <entry><emphasis>abs(x)</emphasis></entry>
+		                 <entry><emphasis>x</emphasis> - float or integer</entry>
+		                 <entry>absolute value of <emphasis>x</emphasis> - float or integer</entry>
+		             </row>                                                                                  
+		             <row valign="middle">
+		                 <entry><emphasis>ceil(x)</emphasis></entry>
+		                 <entry><emphasis>x</emphasis> - float</entry>
+		                 <entry>the smallest integer that is greater than or equal to <emphasis>x</emphasis> - float</entry>
+		             </row>    
+		             <row valign="middle">
+		                 <entry><emphasis>floor(x)</emphasis></entry>
+		                 <entry><emphasis>x</emphasis> - float</entry>
+		                 <entry>the largest integer that is lower than or equal to <emphasis>x</emphasis> - float</entry>
+		             </row>    
+		             <row valign="middle">
+		                 <entry><emphasis>length(x)</emphasis></entry>
+		                 <entry><emphasis>x</emphasis> - string</entry>
+		                 <entry>length of <emphasis>x</emphasis> - integer</entry>
+		             </row>           
+		             <row valign="middle">
+		                 <entry><emphasis>log(x)</emphasis></entry>
+		                 <entry><emphasis>x</emphasis> - float</entry>
+		                 <entry>the natural logarithm of <emphasis>x</emphasis> - float</entry>
+		             </row>                                                                                       
+		             <row valign="middle">
+		                 <entry><emphasis>lower(x)</emphasis></entry>
+		                 <entry><emphasis>x</emphasis> - string</entry>
+		                 <entry>lowercased <emphasis>x</emphasis> - string</entry>
+		             </row>                                                                                                                                                
+		             <row valign="middle">
+		                 <entry><emphasis>power(x,y)</emphasis></entry>
+		                 <entry><emphasis>x</emphasis> - float or integer, <emphasis>y</emphasis> - float or integer</entry>
+		                 <entry><emphasis>x</emphasis> raised to the power of <emphasis>y</emphasis> - float or integer</entry>
+		             </row>             
+		             <row valign="middle">
+		                 <entry><emphasis>replace(x, y, z)</emphasis></entry>
+		                 <entry>
+		                     <emphasis>x</emphasis> - string, 
+		                     <emphasis>y</emphasis> - string, 
+		                     <emphasis>z</emphasis> - string
+		                 </entry>
+		                 <entry>replace substring of <emphasis>x</emphasis> matching regular expression <emphasis>y</emphasis>
+		                 with <emphasis>z</emphasis> - string</entry>
+		             </row>                                                                          
+		             <row valign="middle">
+		                 <entry><emphasis>substring(x, y, z)</emphasis></entry>
+		                 <entry>
+		                     <emphasis>x</emphasis> - string, 
+		                     <emphasis>y</emphasis> - integer, 
+		                     <emphasis>z</emphasis> - integer
+		                 </entry>
+		                 <entry>substring of <emphasis>x</emphasis> from <emphasis>y</emphasis>
+		                 to <emphasis>z</emphasis> - string</entry>
+		             </row>        
+		             <row valign="middle">
+		                 <entry><emphasis>upper(x)</emphasis></entry>
+		                 <entry><emphasis>x</emphasis> - string</entry>
+		                 <entry>upercased <emphasis>x</emphasis> - string</entry>
+		             </row>                                                 
+		         </tbody>
+		     </tgroup>                    
+		 </table>            
+		         
+		
+		<table id="agregatefunctions" frame="all">
+		     <title>Aggregate functions.</title>
+		     <tgroup cols="3" colsep='1' rowsep='1'>
+		         <colspec colnum="1" align="center"/>
+		         <colspec colnum="2" align="left"/>
+		         <colspec colnum="3" align="left"/>                       
+		         
+		         <thead>
+		             <row>
+		               <entry>Function</entry>
+		               <entry>Argument</entry>
+		               <entry>Result</entry>
+		             </row>
+		         </thead>
+		         
+		         <tbody>
+		             <row valign="middle">
+		                 <entry><emphasis>avg(x)</emphasis></entry>
+		                 <entry><emphasis>x</emphasis> - string or float</entry>
+		                 <entry>average value of <emphasis>x</emphasis> - float</entry>
+		             </row>                            
+		             <row valign="middle">
+		                 <entry><emphasis>count(x)</emphasis></entry>
+		                 <entry><emphasis>x</emphasis> - any</entry>
+		                 <entry><emphasis>x</emphasis> count - integer</entry>
+		             </row>
+                     <row valign="middle">
+                         <entry><emphasis>distinct(x)</emphasis></entry>
+                         <entry><emphasis>x</emphasis> - any</entry>
+                         <entry>set built from values of <emphasis>x</emphasis></entry>
+                     </row>     		                                         
+		             <row valign="middle">
+		                 <entry><emphasis>max(x)</emphasis></entry>
+		                 <entry><emphasis>x</emphasis> - string, float or integer</entry>
+		                 <entry>maximal value of <emphasis>x</emphasis> - string, float or integer</entry>
+		             </row>
+		             <row valign="middle">
+		                 <entry><emphasis>min(x)</emphasis></entry>
+		                 <entry><emphasis>x</emphasis> - string, float or integer</entry>
+		                 <entry>minimal value of <emphasis>x</emphasis> - string, float or integer</entry>
+		             </row>
+                     <row valign="middle">
+                         <entry><emphasis>size(x)</emphasis></entry>
+                         <entry><emphasis>x</emphasis> - any</entry>
+                         <entry><emphasis>x</emphasis> tuples sizes</entry>
+                     </row>		             
+                     <row valign="middle">
+                         <entry><emphasis>sort(x)</emphasis></entry>
+                         <entry><emphasis>x</emphasis> - any</entry>
+                         <entry>sorted <emphasis>x</emphasis></entry>
+                     </row>  		             
+		             <row valign="middle">
+		                 <entry><emphasis>sum(x)</emphasis></entry>
+		                 <entry><emphasis>x</emphasis> - float or integer</entry>
+		                 <entry>sum of <emphasis>x</emphasis> - float or integer</entry>
+		             </row>                                               
+		         </tbody>
+		     </tgroup>                    
+		 </table>           
+       </para>     
+    </appendix>	
+</book>

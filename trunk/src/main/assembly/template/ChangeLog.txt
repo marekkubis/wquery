@@ -1,0 +1,93 @@
+=====================
+0.4.0 (27 May 2011)
+=====================
+        * regular path expressions with variables
+
+        * new generators
+
+        * changes in imperative constructs
+
+=====================
+0.3.0 (10 Jul 2010)
+=====================
+        * reimplementation in Scala
+
+=====================
+0.2.5 (20 Sep 2009)
+=====================
+        * WQuery web service
+
+=====================
+0.2.4 (14 May 2009)
+=====================
+        * distinct operator bug fix
+                
+        * setting jython emitter as default
+        
+        * python modules repackaging
+        
+        * DotEmitter.py
+        
+        * switch to H2 1.112
+        
+        * quiet mode in WConsole
+        
+        * User Guide attached to assembly
+
+=====================
+0.2.3 (6 Apr 2009)
+=====================
+        * bug 0001 fixed
+        
+        * minor GUI console changes
+        
+        * ChangeLog attached to release
+
+=====================
+0.2.2 (1 Apr 2009)
+=====================
+        * better session handling machinery
+
+        * GUI Console added
+
+        * jython emitters
+
+=====================
+0.2.1 (5 Mar 2009)
+=====================
+        * Transitive closure computing in WUpdate tool
+
+=====================
+0.2.0 (13 Feb 2009)
+=====================
+        * complete reimplementation in Java
+
+=====================
+0.1.3 (27 Jun 2008)
+=====================
+        * renamed incorrect syntax to incorrect query error message
+
+=====================
+0.1.2 (11 Jun 2008)
+=====================
+        * PolNet based unit tests
+
+        * import: compute_closure command in mappings file
+
+        * no_results handling
+
+        * meta_fields column relation_name renamed to table_name
+
+=====================
+0.1.1 (5 May 2008)
+=====================
+        * handling of uppercase characters without citation marks
+
+        * proper handling of polish uppercase characters
+
+        * multiple columns with the same name realiasing fixed
+
+=====================
+0.1.0 (30 April 2008)
+=====================
+        * initial release

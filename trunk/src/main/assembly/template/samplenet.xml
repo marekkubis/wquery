@@ -1,0 +1,1043 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+This file contains a simple lexical ontology distributed with WQuery for testing purposes.
+It has been derived from Princeton WordNet by choosing ca. 90 synsets.
+Princeton WordNet is distributed under the following license.
+
+WordNet Release 3.0
+
+This software and database is being provided to you, the LICENSEE, by  
+Princeton University under the following license.  By obtaining, using  
+and/or copying this software and database, you agree that you have  
+read, understood, and will comply with these terms and conditions.:  
+  
+Permission to use, copy, modify and distribute this software and  
+database and its documentation for any purpose and without fee or  
+royalty is hereby granted, provided that you agree to comply with  
+the following copyright notice and statements, including the disclaimer,  
+and that the same appear on ALL copies of the software, database and  
+documentation, including modifications that you make for internal  
+use or for distribution.  
+  
+WordNet 3.0 Copyright 2006 by Princeton University.  All rights reserved.  
+  
+THIS SOFTWARE AND DATABASE IS PROVIDED "AS IS" AND PRINCETON  
+UNIVERSITY MAKES NO REPRESENTATIONS OR WARRANTIES, EXPRESS OR  
+IMPLIED.  BY WAY OF EXAMPLE, BUT NOT LIMITATION, PRINCETON  
+UNIVERSITY MAKES NO REPRESENTATIONS OR WARRANTIES OF MERCHANT-  
+ABILITY OR FITNESS FOR ANY PARTICULAR PURPOSE OR THAT THE USE  
+OF THE LICENSED SOFTWARE, DATABASE OR DOCUMENTATION WILL NOT  
+INFRINGE ANY THIRD PARTY PATENTS, COPYRIGHTS, TRADEMARKS OR  
+OTHER RIGHTS.  
+  
+The name of Princeton University or Princeton may not be used in  
+advertising or publicity pertaining to distribution of the software  
+and/or database.  Title to copyright in this software, database and  
+any associated documentation shall at all times remain with  
+Princeton University and LICENSEE agrees to preserve same.  
+ -->
+<SYNSETS>
+	<SYNSET>
+		<ID>102958343</ID>
+		<POS>n</POS>
+		<DESC>a motor vehicle with four wheels; usually propelled by an internal combustion engine; "he needs a car to get to work"</DESC>
+		<SYNONYM>
+			<LITERAL sense="1">car</LITERAL>
+			<LITERAL sense="1">auto</LITERAL>
+			<LITERAL sense="1">automobile</LITERAL>
+			<LITERAL sense="6">machine</LITERAL>
+			<LITERAL sense="1">motorcar</LITERAL>
+		</SYNONYM>
+		<ILR type="hypernym">103791235</ILR>
+        <NL>false</NL>
+	</SYNSET>
+	<SYNSET>
+		<ID>100007846</ID>
+		<POS>n</POS>
+		<DESC>a human being; "there was too much for one person to do"</DESC>
+		<SYNONYM>
+			<LITERAL sense="1">person</LITERAL>
+			<LITERAL sense="1">individual</LITERAL>
+			<LITERAL sense="1">someone</LITERAL>
+			<LITERAL sense="1">somebody</LITERAL>
+			<LITERAL sense="1">mortal</LITERAL>
+			<LITERAL sense="2">soul</LITERAL>
+		</SYNONYM>
+		<ILR type="member_holonym">107942152</ILR>
+		<ILR type="hypernym">100004475</ILR>
+		<ILR type="hypernym">100007347</ILR>
+        <NL>false</NL>
+	</SYNSET>
+	<SYNSET>
+		<ID>105217688</ID>
+		<POS>n</POS>
+		<DESC>a human body (usually including the clothing); "a weapon was hidden on his person"</DESC>
+		<SYNONYM>
+			<LITERAL sense="2">person</LITERAL>
+		</SYNONYM>
+		<ILR type="hypernym">105217168</ILR>
+         <NL>false</NL>
+	</SYNSET>
+	<SYNSET>
+		<ID>106326797</ID>
+		<POS>n</POS>
+		<DESC>a grammatical category used in the classification of pronouns, possessive determiners, and verb forms according to whether they indicate the speaker, the addressee, or a third party; "stop talking about yourself in the third person"</DESC>
+		<SYNONYM>
+			<LITERAL sense="3">person</LITERAL>
+		</SYNONYM>
+		<ILR type="hypernym">106309383</ILR>
+        <NL>false</NL>
+	</SYNSET>
+	<SYNSET>
+		<ID>201072949</ID>
+		<POS>v</POS>
+		<DESC>participate in games or sport; "We played hockey all afternoon"; "play cards"; "Pele played for the Brazilian teams in many important matches"</DESC>
+		<SYNONYM>
+			<LITERAL sense="1">play</LITERAL>
+		</SYNONYM>
+		<ILR type="hypernym">201072262</ILR>
+        <NL>false</NL>
+	</SYNSET>
+	<SYNSET>
+		<ID>100004475</ID>
+		<POS>n</POS>
+		<DESC>a living thing that has (or can develop) the ability to act or function independently</DESC>
+		<SYNONYM>
+			<LITERAL sense="1">organism</LITERAL>
+			<LITERAL sense="2">being</LITERAL>
+		</SYNONYM>
+		<ILR type="hypernym">100004258</ILR>
+        <NL>false</NL>
+	</SYNSET>
+	<SYNSET>
+		<ID>100007347</ID>
+		<POS>n</POS>
+		<DESC>any entity that produces an effect or is responsible for events or results</DESC>
+		<SYNONYM>
+			<LITERAL sense="1">causal agent</LITERAL>
+			<LITERAL sense="4">cause</LITERAL>
+			<LITERAL sense="1">causal agency</LITERAL>
+		</SYNONYM>
+		<ILR type="hypernym">100001930</ILR>
+        <NL>false</NL>
+	</SYNSET>
+	<SYNSET>
+		<ID>105217168</ID>
+		<POS>n</POS>
+		<DESC>alternative names for the body of a human being; "Leonardo studied the human body"; "he has a strong physique"; "the spirit is willing but the flesh is weak"</DESC>
+		<SYNONYM>
+			<LITERAL sense="1">human body</LITERAL>
+			<LITERAL sense="1">physical body</LITERAL>
+			<LITERAL sense="1">material body</LITERAL>
+			<LITERAL sense="3">soma</LITERAL>
+			<LITERAL sense="2">build</LITERAL>
+			<LITERAL sense="2">figure</LITERAL>
+			<LITERAL sense="2">physique</LITERAL>
+			<LITERAL sense="2">anatomy</LITERAL>
+			<LITERAL sense="3">shape</LITERAL>
+			<LITERAL sense="1">bod</LITERAL>
+			<LITERAL sense="1">chassis</LITERAL>
+			<LITERAL sense="3">frame</LITERAL>
+			<LITERAL sense="5">form</LITERAL>
+			<LITERAL sense="2">flesh</LITERAL>
+		</SYNONYM>
+		<ILR type="partial_holonym">100007846</ILR>
+		<ILR type="partial_holonym">102472293</ILR>
+		<ILR type="hypernym">105216365</ILR>
+        <NL>false</NL>
+	</SYNSET>
+	<SYNSET>
+		<ID>106309383</ID>
+		<POS>n</POS>
+		<DESC>(grammar) a category of words having the same grammatical properties</DESC>
+		<SYNONYM>
+			<LITERAL sense="1">grammatical category</LITERAL>
+			<LITERAL sense="1">syntactic category</LITERAL>
+		</SYNONYM>
+		<ILR type="hypernym">107997703</ILR>
+		<ILR type="topical_class">106174404</ILR>
+        <NL>false</NL>
+	</SYNSET>
+	<SYNSET>
+		<ID>102701002</ID>
+		<POS>n</POS>
+		<DESC>a vehicle that takes people to and from hospitals</DESC>
+		<SYNONYM>
+			<LITERAL sense="1">ambulance</LITERAL>
+		</SYNONYM>
+		<ILR type="hypernym">102958343</ILR>
+        <NL>false</NL>
+	</SYNSET>
+	<SYNSET>
+		<ID>102814533</ID>
+		<POS>n</POS>
+		<DESC>a car that has a long body and rear door with space behind rear seat</DESC>
+		<SYNONYM>
+			<LITERAL sense="1">beach wagon</LITERAL>
+			<LITERAL sense="1">station wagon</LITERAL>
+			<LITERAL sense="5">wagon</LITERAL>
+			<LITERAL sense="1">estate car</LITERAL>
+			<LITERAL sense="1">beach waggon</LITERAL>
+			<LITERAL sense="1">station waggon</LITERAL>
+			<LITERAL sense="2">waggon</LITERAL>
+		</SYNONYM>
+		<ILR type="hypernym">102958343</ILR>
+        <NL>false</NL>
+	</SYNSET>
+	<SYNSET>
+		<ID>102831335</ID>
+		<POS>n</POS>
+		<DESC>a limousine with a glass partition between the front and back seats</DESC>
+		<SYNONYM>
+			<LITERAL sense="3">berlin</LITERAL>
+		</SYNONYM>
+		<ILR type="hypernym">103670208</ILR>
+        <NL>false</NL>
+	</SYNSET>
+	<SYNSET>
+		<ID>102907194</ID>
+		<POS>n</POS>
+		<DESC>a sedan that has no roof over the driver''s seat</DESC>
+		<SYNONYM>
+			<LITERAL sense="2">brougham</LITERAL>
+		</SYNONYM>
+		<ILR type="hypernym">104166281</ILR>
+        <NL>false</NL>
+	</SYNSET>
+	<SYNSET>
+		<ID>102924554</ID>
+		<POS>n</POS>
+		<DESC>a car that is old and unreliable; "the fenders had fallen off that old bus"</DESC>
+		<SYNONYM>
+			<LITERAL sense="4">bus</LITERAL>
+			<LITERAL sense="1">jalopy</LITERAL>
+			<LITERAL sense="3">heap</LITERAL>
+		</SYNONYM>
+		<ILR type="hypernym">102958343</ILR>
+		<ILR type="hypernym">106605396</ILR>
+        <NL>false</NL>
+	</SYNSET>
+	<SYNSET>
+		<ID>102930766</ID>
+		<POS>n</POS>
+		<DESC>a car driven by a person whose job is to take passengers where they want to go in exchange for money</DESC>
+		<SYNONYM>
+			<LITERAL sense="3">cab</LITERAL>
+			<LITERAL sense="5">hack</LITERAL>
+			<LITERAL sense="1">taxi</LITERAL>
+			<LITERAL sense="1">taxicab</LITERAL>
+		</SYNONYM>
+		<ILR type="member_holonym">108293490</ILR>
+		<ILR type="hypernym">102958343</ILR>
+        <NL>false</NL>
+	</SYNSET>
+	<SYNSET>
+		<ID>103079136</ID>
+		<POS>n</POS>
+		<DESC>a small and economical car</DESC>
+		<SYNONYM>
+			<LITERAL sense="3">compact</LITERAL>
+			<LITERAL sense="1">compact car</LITERAL>
+		</SYNONYM>
+		<ILR type="hypernym">102958343</ILR>
+        <NL>false</NL>
+	</SYNSET>
+	<SYNSET>
+		<ID>103100240</ID>
+		<POS>n</POS>
+		<DESC>a car that has top that can be folded or removed</DESC>
+		<SYNONYM>
+			<LITERAL sense="1">convertible</LITERAL>
+		</SYNONYM>
+		<ILR type="hypernym">102958343</ILR>
+        <NL>false</NL>
+	</SYNSET>
+	<SYNSET>
+		<ID>103119396</ID>
+		<POS>n</POS>
+		<DESC>a car with two doors and front seats and a luggage compartment</DESC>
+		<SYNONYM>
+			<LITERAL sense="1">coupe</LITERAL>
+		</SYNONYM>
+		<ILR type="hypernym">102958343</ILR>
+	</SYNSET>
+	<SYNSET>
+		<ID>103141065</ID>
+		<POS>n</POS>
+		<DESC>a car in which policemen cruise the streets; equipped with radiotelephonic communications to headquarters</DESC>
+		<SYNONYM>
+			<LITERAL sense="1">cruiser</LITERAL>
+			<LITERAL sense="1">police cruiser</LITERAL>
+			<LITERAL sense="1">patrol car</LITERAL>
+			<LITERAL sense="1">police car</LITERAL>
+			<LITERAL sense="1">prowl car</LITERAL>
+			<LITERAL sense="1">squad car</LITERAL>
+		</SYNONYM>
+		<ILR type="hypernym">102958343</ILR>
+	</SYNSET>
+	<SYNSET>
+		<ID>103268790</ID>
+		<POS>n</POS>
+		<DESC>a car that is powered by electricity</DESC>
+		<SYNONYM>
+			<LITERAL sense="1">electric</LITERAL>
+			<LITERAL sense="1">electric automobile</LITERAL>
+			<LITERAL sense="1">electric car</LITERAL>
+		</SYNONYM>
+		<ILR type="hypernym">102958343</ILR>
+	</SYNSET>
+    <SYNSET>
+        <ID>810000000</ID>
+        <POS>n</POS>
+        <DESC>an example of a non-lexicalised synset</DESC>
+        <SYNONYM>
+            <LITERAL sense="1">non lexicalised sense</LITERAL>
+        </SYNONYM>
+        <NL>true</NL>
+    </SYNSET>
+	<SYNSET>
+		<ID>103342961</ID>
+		<POS>n</POS>
+		<DESC>a race car that finishes a race</DESC>
+		<SYNONYM>
+			<LITERAL sense="5">finisher</LITERAL>
+		</SYNONYM>
+		<ILR type="hypernym">104037443</ILR>
+	</SYNSET>
+	<SYNSET>
+		<ID>103404012</ID>
+		<POS>n</POS>
+		<DESC>an ambulance used to transport patients to a mental hospital</DESC>
+		<SYNONYM>
+			<LITERAL sense="1">funny wagon</LITERAL>
+		</SYNONYM>
+		<ILR type="hypernym">102701002</ILR>
+		<ILR type="usage_class">107075172</ILR>
+	</SYNSET>
+	<SYNSET>
+		<ID>103421669</ID>
+		<POS>n</POS>
+		<DESC>a car with relatively low fuel efficiency</DESC>
+		<SYNONYM>
+			<LITERAL sense="1">gas guzzler</LITERAL>
+		</SYNONYM>
+		<ILR type="hypernym">102958343</ILR>
+	</SYNSET>
+	<SYNSET>
+		<ID>103472937</ID>
+		<POS>n</POS>
+		<DESC>a taxicab that cruises for customers although it is licensed only to respond to calls</DESC>
+		<SYNONYM>
+			<LITERAL sense="1">gypsy cab</LITERAL>
+		</SYNONYM>
+		<ILR type="hypernym">102930766</ILR>
+	</SYNSET>
+	<SYNSET>
+		<ID>103493219</ID>
+		<POS>n</POS>
+		<DESC>a car that resembles a convertible but has a fixed rigid top</DESC>
+		<SYNONYM>
+			<LITERAL sense="1">hardtop</LITERAL>
+		</SYNONYM>
+		<ILR type="hypernym">102958343</ILR>
+	</SYNSET>
+	<SYNSET>
+		<ID>103498781</ID>
+		<POS>n</POS>
+		<DESC>a car having a hatchback door</DESC>
+		<SYNONYM>
+			<LITERAL sense="1">hatchback</LITERAL>
+		</SYNONYM>
+		<ILR type="hypernym">102958343</ILR>
+	</SYNSET>
+	<SYNSET>
+		<ID>103539103</ID>
+		<POS>n</POS>
+		<DESC>an early term for an automobile; "when automobiles first replaced horse-drawn carriages they were called horseless carriages"</DESC>
+		<SYNONYM>
+			<LITERAL sense="1">horseless carriage</LITERAL>
+		</SYNONYM>
+		<ILR type="hypernym">102958343</ILR>
+	</SYNSET>
+	<SYNSET>
+		<ID>103543394</ID>
+		<POS>n</POS>
+		<DESC>a car modified to increase its speed and acceleration</DESC>
+		<SYNONYM>
+			<LITERAL sense="1">hot rod</LITERAL>
+			<LITERAL sense="1">hot-rod</LITERAL>
+		</SYNONYM>
+		<ILR type="hypernym">102958343</ILR>
+	</SYNSET>
+	<SYNSET>
+		<ID>103594945</ID>
+		<POS>n</POS>
+		<DESC>a car suitable for traveling over rough terrain</DESC>
+		<SYNONYM>
+			<LITERAL sense="1">jeep</LITERAL>
+			<LITERAL sense="1">landrover</LITERAL>
+		</SYNONYM>
+		<ILR type="hypernym">102958343</ILR>
+	</SYNSET>
+	<SYNSET>
+		<ID>103670208</ID>
+		<POS>n</POS>
+		<DESC>large luxurious car; usually driven by a chauffeur</DESC>
+		<SYNONYM>
+			<LITERAL sense="1">limousine</LITERAL>
+			<LITERAL sense="1">limo</LITERAL>
+		</SYNONYM>
+		<ILR type="hypernym">102958343</ILR>
+	</SYNSET>
+	<SYNSET>
+		<ID>103680512</ID>
+		<POS>n</POS>
+		<DESC>a car that is lent as a replacement for one that is under repair</DESC>
+		<SYNONYM>
+			<LITERAL sense="2">loaner</LITERAL>
+		</SYNONYM>
+		<ILR type="hypernym">102958343</ILR>
+	</SYNSET>
+	<SYNSET>
+		<ID>103769967</ID>
+		<POS>n</POS>
+		<DESC>a minicar used as a taxicab</DESC>
+		<SYNONYM>
+			<LITERAL sense="1">minicab</LITERAL>
+		</SYNONYM>
+		<ILR type="regional_class">108860123</ILR>
+		<ILR type="hypernym">102930766</ILR>
+		<ILR type="hypernym">103770085</ILR>
+	</SYNSET>
+	<SYNSET>
+		<ID>103770085</ID>
+		<POS>n</POS>
+		<DESC>a car that is even smaller than a subcompact car</DESC>
+		<SYNONYM>
+			<LITERAL sense="1">minicar</LITERAL>
+		</SYNONYM>
+		<ILR type="regional_class">108860123</ILR>
+		<ILR type="hypernym">102958343</ILR>
+	</SYNSET>
+	<SYNSET>
+		<ID>103770679</ID>
+		<POS>n</POS>
+		<DESC>a small box-shaped passenger van; usually has removable seats; used as a family car</DESC>
+		<SYNONYM>
+			<LITERAL sense="1">minivan</LITERAL>
+		</SYNONYM>
+		<ILR type="hypernym">103896419</ILR>
+		<ILR type="hypernym">102958343</ILR>
+	</SYNSET>
+	<SYNSET>
+		<ID>103777568</ID>
+		<POS>n</POS>
+		<DESC>the first widely available automobile powered by a gasoline engine; mass-produced by Henry Ford from 1908 to 1927</DESC>
+		<SYNONYM>
+			<LITERAL sense="1">Model T</LITERAL>
+		</SYNONYM>
+		<ILR type="hypernym">102958343</ILR>
+		<ILR type="usage_class">106851742</ILR>
+	</SYNSET>
+	<SYNSET>
+		<ID>103870105</ID>
+		<POS>n</POS>
+		<DESC>a high-performance car that leads a parade of competing cars through the pace lap and then pulls off the course</DESC>
+		<SYNONYM>
+			<LITERAL sense="1">pace car</LITERAL>
+		</SYNONYM>
+		<ILR type="hypernym">102958343</ILR>
+		<ILR type="topical_class">100449517</ILR>
+	</SYNSET>
+	<SYNSET>
+		<ID>103881534</ID>
+		<POS>n</POS>
+		<DESC>a police cruiser</DESC>
+		<SYNONYM>
+			<LITERAL sense="1">panda car</LITERAL>
+		</SYNONYM>
+		<ILR type="regional_class">108860123</ILR>
+		<ILR type="hypernym">103141065</ILR>
+	</SYNSET>
+	<SYNSET>
+		<ID>104037443</ID>
+		<POS>n</POS>
+		<DESC>a fast car that competes in races</DESC>
+		<SYNONYM>
+			<LITERAL sense="2">racer</LITERAL>
+			<LITERAL sense="1">race car</LITERAL>
+			<LITERAL sense="1">racing car</LITERAL>
+		</SYNONYM>
+		<ILR type="hypernym">102958343</ILR>
+	</SYNSET>
+	<SYNSET>
+		<ID>104097373</ID>
+		<POS>n</POS>
+		<DESC>an open automobile having a front seat and a rumble seat</DESC>
+		<SYNONYM>
+			<LITERAL sense="1">roadster</LITERAL>
+			<LITERAL sense="1">runabout</LITERAL>
+			<LITERAL sense="1">two-seater</LITERAL>
+		</SYNONYM>
+		<ILR type="hypernym">102958343</ILR>
+	</SYNSET>
+	<SYNSET>
+		<ID>104166281</ID>
+		<POS>n</POS>
+		<DESC>a car that is closed and that has front and rear seats and two or four doors</DESC>
+		<SYNONYM>
+			<LITERAL sense="1">sedan</LITERAL>
+			<LITERAL sense="3">saloon</LITERAL>
+		</SYNONYM>
+		<ILR type="hypernym">102958343</ILR>
+	</SYNSET>
+	<SYNSET>
+		<ID>104201733</ID>
+		<POS>n</POS>
+		<DESC>another name for a station wagon</DESC>
+		<SYNONYM>
+			<LITERAL sense="1">shooting brake</LITERAL>
+		</SYNONYM>
+		<ILR type="regional_class">108860123</ILR>
+		<ILR type="hypernym">102814533</ILR>
+	</SYNSET>
+	<SYNSET>
+		<ID>104285008</ID>
+		<POS>n</POS>
+		<DESC>a small low car with a high-powered engine; usually seats two persons</DESC>
+		<SYNONYM>
+			<LITERAL sense="1">sports car</LITERAL>
+			<LITERAL sense="1">sport car</LITERAL>
+		</SYNONYM>
+		<ILR type="hypernym">102958343</ILR>
+	</SYNSET>
+	<SYNSET>
+		<ID>104285965</ID>
+		<POS>n</POS>
+		<DESC>a high-performance four-wheel drive car built on a truck chassis</DESC>
+		<SYNONYM>
+			<LITERAL sense="1">sport utility</LITERAL>
+			<LITERAL sense="1">sport utility vehicle</LITERAL>
+			<LITERAL sense="1">S.U.V.</LITERAL>
+			<LITERAL sense="1">SUV</LITERAL>
+		</SYNONYM>
+		<ILR type="hypernym">102958343</ILR>
+	</SYNSET>
+	<SYNSET>
+		<ID>104302988</ID>
+		<POS>n</POS>
+		<DESC>a steam-powered automobile</DESC>
+		<SYNONYM>
+			<LITERAL sense="1">Stanley Steamer</LITERAL>
+		</SYNONYM>
+		<ILR type="hypernym">102958343</ILR>
+		<ILR type="usage_class">106851742</ILR>
+	</SYNSET>
+	<SYNSET>
+		<ID>104322801</ID>
+		<POS>n</POS>
+		<DESC>a racing car with the basic chassis of a commercially available car</DESC>
+		<SYNONYM>
+			<LITERAL sense="2">stock car</LITERAL>
+		</SYNONYM>
+		<ILR type="hypernym">104037443</ILR>
+	</SYNSET>
+	<SYNSET>
+		<ID>104322924</ID>
+		<POS>n</POS>
+		<DESC>a car kept in dealers'' stock for regular sales</DESC>
+		<SYNONYM>
+			<LITERAL sense="1">stock car</LITERAL>
+		</SYNONYM>
+		<ILR type="hypernym">102958343</ILR>
+	</SYNSET>
+	<SYNSET>
+		<ID>104347119</ID>
+		<POS>n</POS>
+		<DESC>a car smaller than a compact car</DESC>
+		<SYNONYM>
+			<LITERAL sense="1">subcompact</LITERAL>
+			<LITERAL sense="1">subcompact car</LITERAL>
+		</SYNONYM>
+		<ILR type="hypernym">102958343</ILR>
+	</SYNSET>
+	<SYNSET>
+		<ID>104459122</ID>
+		<POS>n</POS>
+		<DESC>large open car seating four with folding top</DESC>
+		<SYNONYM>
+			<LITERAL sense="1">touring car</LITERAL>
+			<LITERAL sense="1">phaeton</LITERAL>
+			<LITERAL sense="2">tourer</LITERAL>
+		</SYNONYM>
+		<ILR type="hypernym">102958343</ILR>
+	</SYNSET>
+	<SYNSET>
+		<ID>104516354</ID>
+		<POS>n</POS>
+		<DESC>a car that has been previously owned; not a new car</DESC>
+		<SYNONYM>
+			<LITERAL sense="1">used-car</LITERAL>
+			<LITERAL sense="1">secondhand car</LITERAL>
+		</SYNONYM>
+		<ILR type="hypernym">102958343</ILR>
+	</SYNSET>
+	<SYNSET>
+		<ID>100001740</ID>
+		<POS>n</POS>
+		<DESC>that which is perceived or known or inferred to have its own distinct existence (living or nonliving)</DESC>
+		<SYNONYM>
+			<LITERAL sense="1">entity</LITERAL>
+		</SYNONYM>
+	</SYNSET>
+	<SYNSET>
+		<ID>100001930</ID>
+		<POS>n</POS>
+		<DESC>an entity that has physical existence</DESC>
+		<SYNONYM>
+			<LITERAL sense="1">physical entity</LITERAL>
+		</SYNONYM>
+		<ILR type="hypernym">100001740</ILR>
+	</SYNSET>
+	<SYNSET>
+		<ID>100002684</ID>
+		<POS>n</POS>
+		<DESC>a tangible and visible entity; an entity that can cast a shadow; "it was full of rackets, balls and other objects"</DESC>
+		<SYNONYM>
+			<LITERAL sense="1">object</LITERAL>
+			<LITERAL sense="1">physical object</LITERAL>
+		</SYNONYM>
+		<ILR type="hypernym">100001930</ILR>
+	</SYNSET>
+	<SYNSET>
+		<ID>100003553</ID>
+		<POS>n</POS>
+		<DESC>an assemblage of parts that is regarded as a single entity; "how big is that part compared to the whole?"; "the team is a unit"</DESC>
+		<SYNONYM>
+			<LITERAL sense="2">whole</LITERAL>
+			<LITERAL sense="6">unit</LITERAL>
+		</SYNONYM>
+		<ILR type="hypernym">100002684</ILR>
+	</SYNSET>
+	<SYNSET>
+		<ID>100021939</ID>
+		<POS>n</POS>
+		<DESC>a man-made object taken as a whole</DESC>
+		<SYNONYM>
+			<LITERAL sense="1">artifact</LITERAL>
+			<LITERAL sense="1">artefact</LITERAL>
+		</SYNONYM>
+		<ILR type="hypernym">100003553</ILR>
+	</SYNSET>
+	<SYNSET>
+		<ID>102735688</ID>
+		<POS>n</POS>
+		<DESC>a part of a structure having some specific characteristic or function; "the spacious cooking area provided plenty of room for servants"</DESC>
+		<SYNONYM>
+			<LITERAL sense="5">area</LITERAL>
+		</SYNONYM>
+		<ILR type="hypernym">104341686</ILR>
+	</SYNSET>
+	<SYNSET>
+		<ID>103079741</ID>
+		<POS>n</POS>
+		<DESC>a partitioned section, chamber, or separate room within a larger enclosed area</DESC>
+		<SYNONYM>
+			<LITERAL sense="2">compartment</LITERAL>
+		</SYNONYM>
+		<ILR type="hypernym">104105893</ILR>
+	</SYNSET>
+	<SYNSET>
+		<ID>103094503</ID>
+		<POS>n</POS>
+		<DESC>any object that can be used to hold things (especially a large metal boxlike object of standardized dimensions that can be loaded from one form of transport to another)</DESC>
+		<SYNONYM>
+			<LITERAL sense="1">container</LITERAL>
+		</SYNONYM>
+		<ILR type="hypernym">103575240</ILR>
+	</SYNSET>
+	<SYNSET>
+		<ID>103100490</ID>
+		<POS>n</POS>
+		<DESC>something that serves as a means of transportation</DESC>
+		<SYNONYM>
+			<LITERAL sense="3">conveyance</LITERAL>
+			<LITERAL sense="1">transport</LITERAL>
+		</SYNONYM>
+		<ILR type="hypernym">103575240</ILR>
+	</SYNSET>
+	<SYNSET>
+		<ID>103575240</ID>
+		<POS>n</POS>
+		<DESC>an artifact (or system of artifacts) that is instrumental in accomplishing some end</DESC>
+		<SYNONYM>
+			<LITERAL sense="3">instrumentality</LITERAL>
+			<LITERAL sense="1">instrumentation</LITERAL>
+		</SYNONYM>
+		<ILR type="hypernym">100021939</ILR>
+	</SYNSET>
+	<SYNSET>
+		<ID>103791235</ID>
+		<POS>n</POS>
+		<DESC>a self-propelled wheeled vehicle that does not run on rails</DESC>
+		<SYNONYM>
+			<LITERAL sense="1">motor vehicle</LITERAL>
+			<LITERAL sense="1">automotive vehicle</LITERAL>
+		</SYNONYM>
+		<ILR type="hypernym">104170037</ILR>
+	</SYNSET>
+	<SYNSET>
+		<ID>104105893</ID>
+		<POS>n</POS>
+		<DESC>an area within a building enclosed by walls and floor and ceiling; "the rooms were very small but they had a nice view"</DESC>
+		<SYNONYM>
+			<LITERAL sense="1">room</LITERAL>
+		</SYNONYM>
+		<ILR type="partial_holonym">102913152</ILR>
+		<ILR type="hypernym">102735688</ILR>
+	</SYNSET>
+	<SYNSET>
+		<ID>104170037</ID>
+		<POS>n</POS>
+		<DESC>a wheeled vehicle that carries in itself a means of propulsion</DESC>
+		<SYNONYM>
+			<LITERAL sense="1">self-propelled vehicle</LITERAL>
+		</SYNONYM>
+		<ILR type="hypernym">104576211</ILR>
+	</SYNSET>
+	<SYNSET>
+		<ID>104341686</ID>
+		<POS>n</POS>
+		<DESC>a thing constructed; a complex entity constructed of many parts; "the structure consisted of a series of arches"; "she wore her hair in an amazing construction of whirls and ribbons"</DESC>
+		<SYNONYM>
+			<LITERAL sense="1">structure</LITERAL>
+			<LITERAL sense="4">construction</LITERAL>
+		</SYNONYM>
+		<ILR type="hypernym">100021939</ILR>
+	</SYNSET>
+	<SYNSET>
+		<ID>104524313</ID>
+		<POS>n</POS>
+		<DESC>a conveyance that transports people or objects</DESC>
+		<SYNONYM>
+			<LITERAL sense="1">vehicle</LITERAL>
+		</SYNONYM>
+		<ILR type="hypernym">103100490</ILR>
+	</SYNSET>
+	<SYNSET>
+		<ID>104576211</ID>
+		<POS>n</POS>
+		<DESC>a vehicle that moves on wheels and usually has a container for transporting things or people; "the oldest known wheeled vehicles were found in Sumer and Syria and date from around 3500 BC"</DESC>
+		<SYNONYM>
+			<LITERAL sense="1">wheeled vehicle</LITERAL>
+		</SYNONYM>
+		<ILR type="hypernym">104524313</ILR>
+		<ILR type="hypernym">103094503</ILR>
+	</SYNSET>
+	<SYNSET>
+		<ID>107942152</ID>
+		<POS>n</POS>
+		<DESC>(plural) any group of human beings (men or women or children) collectively; "old people"; "there were at least
+			200 people in the audience"</DESC>
+		<SYNONYM>
+			<LITERAL sense="1">people</LITERAL>
+		</SYNONYM>
+		<ILR type="member_holonym">102472987</ILR>
+		<ILR type="hypernym">100031264</ILR>
+		<ILR type="usage_class">106295235</ILR>
+	</SYNSET>
+	<SYNSET>
+		<ID>108293490</ID>
+		<POS>n</POS>
+		<DESC>group of motor vehicles operating together under the same ownership</DESC>
+		<SYNONYM>
+			<LITERAL sense="2">fleet</LITERAL>
+		</SYNONYM>
+		<ILR type="partial_holonym">102925901</ILR>
+		<ILR type="hypernym">107951464</ILR>
+	</SYNSET>
+	<SYNSET>
+		<ID>102472293</ID>
+		<POS>n</POS>
+		<DESC>any living or extinct member of the family Hominidae characterized by superior intelligence, articulate speech,
+			and erect carriage</DESC>
+		<SYNONYM>
+			<LITERAL sense="2">homo</LITERAL>
+			<LITERAL sense="4">man</LITERAL>
+			<LITERAL sense="1">human being</LITERAL>
+			<LITERAL sense="1">human</LITERAL>
+		</SYNONYM>
+		<ILR type="member_holonym">102472012</ILR>
+		<ILR type="hypernym">102471762</ILR>
+	</SYNSET>
+	<SYNSET>
+		<ID>102913152</ID>
+		<POS>n</POS>
+		<DESC>a structure that has a roof and walls and stands more or less permanently in one place; "there was a three-story
+			building on the corner"; "it was an imposing edifice"</DESC>
+		<SYNONYM>
+			<LITERAL sense="1">building</LITERAL>
+			<LITERAL sense="1">edifice</LITERAL>
+		</SYNONYM>
+		<ILR type="hypernym">104341686</ILR>
+	</SYNSET>		
+	<SYNSET>
+		<ID>107739125</ID>
+		<POS>n</POS>
+		<DESC>fruit with red or yellow or green skin and sweet to tart crisp whitish flesh</DESC>
+		<SYNONYM>
+			<LITERAL sense="1">apple</LITERAL>
+		</SYNONYM>
+		<ILR type="partial_holonym">112633994</ILR>
+		<ILR type="hypernym">107705931</ILR>
+		<ILR type="hypernym">113138842</ILR>
+	</SYNSET>
+	<SYNSET>
+		<ID>112633994</ID>
+		<POS>n</POS>
+		<DESC>native Eurasian tree widely cultivated in many varieties for its firm rounded edible fruits</DESC>
+		<SYNONYM>
+			<LITERAL sense="2">apple</LITERAL>
+			<LITERAL sense="1">orchard apple tree</LITERAL>
+			<LITERAL sense="1">Malus pumila</LITERAL>
+		</SYNONYM>
+		<ILR type="member_holonym">112633386</ILR>
+		<ILR type="hypernym">112633638</ILR>
+	</SYNSET>
+	<SYNSET>
+		<ID>101484850</ID>
+		<POS>n</POS>
+		<DESC>large aggressive shark widespread in warm seas; known to attack humans</DESC>
+		<SYNONYM>
+			<LITERAL sense="1">great white shark</LITERAL>
+			<LITERAL sense="1">white shark</LITERAL>
+			<LITERAL sense="2">man-eater</LITERAL>
+			<LITERAL sense="1">man-eating shark</LITERAL>
+			<LITERAL sense="1">Carcharodon carcharias</LITERAL>
+		</SYNONYM>
+		<ILR type="member_holonym">101484717</ILR>
+		<ILR type="hypernym">101483522</ILR>
+	</SYNSET>
+	<SYNSET>
+		<ID>301251128</ID>
+		<POS>a</POS>
+		<DESC>having a low or inadequate temperature or feeling a sensation of coldness or having been made cold by e.g. ice or
+			refrigeration; "a cold climate"; "a cold room"; "dinner has gotten cold"; "cold fingers"; "if you are cold, turn up
+			the heat"; "a cold beer"</DESC>
+		<SYNONYM>
+			<LITERAL sense="1">cold</LITERAL>
+		</SYNONYM>
+		<ILR type="attribute">105011790</ILR>
+		<ILR type="similar">301251830</ILR>
+		<ILR type="similar">301251958</ILR>
+		<ILR type="similar">301252151</ILR>
+		<ILR type="similar">301252399</ILR>
+		<ILR type="similar">301252566</ILR>
+		<ILR type="similar">301252714</ILR>
+		<ILR type="similar">301253022</ILR>
+		<ILR type="similar">301253112</ILR>
+		<ILR type="similar">301253254</ILR>
+		<ILR type="similar">301253469</ILR>
+		<ILR type="similar">301253592</ILR>
+		<ILR type="similar">301253661</ILR>
+		<ILR type="similar">301253879</ILR>
+		<ILR type="similar">301254026</ILR>
+		<ILR type="similar">301254165</ILR>
+		<ILR type="similar">301254296</ILR>
+	</SYNSET>
+	<SYNSET>
+		<ID>301257612</ID>
+		<POS>a</POS>
+		<DESC>extended meanings; especially of psychological coldness; without human warmth or emotion; "a cold unfriendly
+			nod"; "a cold and unaffectionate person"; "a cold impersonal manner"; "cold logic"; "the concert left me cold"</DESC>
+		<SYNONYM>
+			<LITERAL sense="2">cold</LITERAL>
+		</SYNONYM>
+		<ILR type="attribute">104626280</ILR>
+		<ILR type="similar">301257990</ILR>
+		<ILR type="similar">301258264</ILR>
+	</SYNSET>
+	<SYNSET>
+		<ID>106080361</ID>
+		<POS>n</POS>
+		<DESC>the branch of chemistry concerned with fermentation (as in making wine or brewing or distilling)</DESC>
+		<SYNONYM>
+			<LITERAL sense="1">zymology</LITERAL>
+			<LITERAL sense="1">zymurgy</LITERAL>
+		</SYNONYM>
+		<ILR type="hypernym">106079620</ILR>
+	</SYNSET>
+	<SYNSET>
+		<ID>113575433</ID>
+		<POS>n</POS>
+		<DESC>a process in which an agent causes an organic substance to break down into simpler substances; especially, the
+			anaerobic breakdown of sugar into alcohol</DESC>
+		<SYNONYM>
+			<LITERAL sense="1">zymosis</LITERAL>
+			<LITERAL sense="1">zymolysis</LITERAL>
+			<LITERAL sense="2">fermentation</LITERAL>
+			<LITERAL sense="1">fermenting</LITERAL>
+			<LITERAL sense="3">ferment</LITERAL>
+		</SYNONYM>
+		<ILR type="hypernym">113446390</ILR>
+	</SYNSET>
+	<SYNSET>
+		<ID>303000447</ID>
+		<POS>a</POS>
+		<DESC>of or relating to or causing fermentation</DESC>
+		<SYNONYM>
+			<LITERAL sense="1">zymotic</LITERAL>
+			<LITERAL sense="1">zymolytic</LITERAL>
+		</SYNONYM>
+	</SYNSET>
+	<SYNSET>
+		<ID>107999699</ID>
+		<POS>n</POS>
+		<DESC>(mathematics) an abstract collection of numbers or symbols; "the set of prime numbers is infinite"</DESC>
+		<SYNONYM>
+			<LITERAL sense="2">set</LITERAL>
+		</SYNONYM>
+		<ILR type="hypernym">100002137</ILR>
+		<ILR type="topical_class">106000644</ILR>
+	</SYNSET>
+	<SYNSET>
+		<ID>200699815</ID>
+		<POS>v</POS>
+		<DESC>fix conclusively or authoritatively; "set the rules"</DESC>
+		<SYNONYM>
+			<LITERAL sense="3">determine</LITERAL>
+			<LITERAL sense="2">set</LITERAL>
+		</SYNONYM>
+	</SYNSET>
+	<SYNSET>
+		<ID>301564603</ID>
+		<POS>s</POS>
+		<DESC>fixed and unmoving; "with eyes set in a fixed glassy stare"; "his bearded face already has a set hollow look"-
+			Connor Cruise O''Brien; "a face rigid with pain"</DESC>
+		<SYNONYM>
+			<LITERAL sense="2">fixed</LITERAL>
+			<LITERAL sense="2">set</LITERAL>
+			<LITERAL sense="5">rigid</LITERAL>
+		</SYNONYM>
+		<ILR type="similar">301564073</ILR>
+	</SYNSET>
+	<SYNSET>
+		<ID>104965179</ID>
+		<POS>n</POS>
+		<DESC>orange color or pigment; any of a range of colors between red and yellow</DESC>
+		<SYNONYM>
+			<LITERAL sense="2">orange</LITERAL>
+			<LITERAL sense="1">orangeness</LITERAL>
+		</SYNONYM>
+		<ILR type="hypernym">104959672</ILR>
+	</SYNSET>
+	<SYNSET>
+		<ID>107747607</ID>
+		<POS>n</POS>
+		<DESC>round yellow to orange fruit of any of several citrus trees</DESC>
+		<SYNONYM>
+			<LITERAL sense="1">orange</LITERAL>
+		</SYNONYM>
+		<ILR type="partial_holonym">112708293</ILR>
+		<ILR type="hypernym">107747055</ILR>
+	</SYNSET>
+	<SYNSET>
+		<ID>112708293</ID>
+		<POS>n</POS>
+		<DESC>any citrus tree bearing oranges</DESC>
+		<SYNONYM>
+			<LITERAL sense="3">orange</LITERAL>
+			<LITERAL sense="1">orange tree</LITERAL>
+		</SYNONYM>
+		<ILR type="member_holonym">112707432</ILR>
+		<ILR type="hypernym">112707781</ILR>
+	</SYNSET>
+	<SYNSET>
+		<ID>114991210</ID>
+		<POS>n</POS>
+		<DESC>any pigment producing the orange color</DESC>
+		<SYNONYM>
+			<LITERAL sense="4">orange</LITERAL>
+		</SYNONYM>
+		<ILR type="hypernym">114989820</ILR>
+	</SYNSET>
+	<SYNSET>
+		<ID>300378892</ID>
+		<POS>s</POS>
+		<DESC>of the color between red and yellow; similar to the color of a ripe orange</DESC>
+		<SYNONYM>
+			<LITERAL sense="1">orange</LITERAL>
+			<LITERAL sense="1">orangish</LITERAL>
+		</SYNONYM>
+		<ILR type="similar">300366691</ILR>
+	</SYNSET>
+	<SYNSET>
+		<ID>102959942</ID>
+		<POS>n</POS>
+		<DESC>a wheeled vehicle adapted to the rails of railroad; "three cars had jumped the rails"</DESC>
+		<SYNONYM>
+			<LITERAL sense="2">car</LITERAL>
+			<LITERAL sense="1">railcar</LITERAL>
+			<LITERAL sense="1">railway car</LITERAL>
+			<LITERAL sense="1">railroad car</LITERAL>
+		</SYNONYM>
+		<ILR type="member_holonym">104468005</ILR>
+		<ILR type="hypernym">104576211</ILR>
+	</SYNSET>
+	<SYNSET>
+		<ID>104576211</ID>
+		<POS>n</POS>
+		<DESC>a vehicle that moves on wheels and usually has a container for transporting things or people; "the oldest known
+			wheeled vehicles were found in Sumer and Syria and date from around 3500 BC"</DESC>
+		<SYNONYM>
+			<LITERAL sense="1">wheeled vehicle</LITERAL>
+		</SYNONYM>
+		<ILR type="hypernym">104524313</ILR>
+		<ILR type="hypernym">103094503</ILR>
+	</SYNSET>
+	<SYNSET>
+		<ID>102960501</ID>
+		<POS>n</POS>
+		<DESC>the compartment that is suspended from an airship and that carries personnel and the cargo and the power plant
+		</DESC>
+		<SYNONYM>
+			<LITERAL sense="3">car</LITERAL>
+			<LITERAL sense="3">gondola</LITERAL>
+		</SYNONYM>
+		<ILR type="partial_holonym">102692877</ILR>
+		<ILR type="hypernym">103079741</ILR>
+	</SYNSET>
+	<SYNSET>
+		<ID>103079741</ID>
+		<POS>n</POS>
+		<DESC>a partitioned section, chamber, or separate room within a larger enclosed area</DESC>
+		<SYNONYM>
+			<LITERAL sense="2">compartment</LITERAL>
+		</SYNONYM>
+		<ILR type="hypernym">104105893</ILR>
+	</SYNSET>
+	<SYNSET>
+		<ID>102960352</ID>
+		<POS>n</POS>
+		<DESC>where passengers ride up and down; "the car was on the top floor"</DESC>
+		<SYNONYM>
+			<LITERAL sense="4">car</LITERAL>
+			<LITERAL sense="1">elevator car</LITERAL>
+		</SYNONYM>
+		<ILR type="partial_holonym">103281145</ILR>
+		<ILR type="hypernym">103079741</ILR>
+	</SYNSET>
+	<SYNSET>
+		<ID>102934451</ID>
+		<POS>n</POS>
+		<DESC>a conveyance for passengers or freight on a cable railway; "they took a cable car to the top of the mountain"
+		</DESC>
+		<SYNONYM>
+			<LITERAL sense="1">cable car</LITERAL>
+			<LITERAL sense="5">car</LITERAL>
+		</SYNONYM>
+		<ILR type="partial_holonym">102934641</ILR>
+		<ILR type="hypernym">103079741</ILR>
+	</SYNSET>
+	
+</SYNSETS>
