@@ -3,7 +3,9 @@
     <words>
       <w>parenthesed</w>
       <w>synset</w>
+      <w>synsets</w>
       <w>tuple</w>
+      <w>wordnet</w>
       <w>wquery</w>
     </words>
   </dictionary>

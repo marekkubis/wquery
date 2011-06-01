@@ -629,7 +629,7 @@ case class UnaryRelationalExpr(ids: List[String]) extends RelationalExpr {
       case "true" =>
         DataSet.fromValue(true)
       case id =>
-        DataSet.fromOptionalValue(wordNet.getWordForm(id))                    
+        wordNet.getWordForm(id)
     }
   }  
   
@@ -800,14 +800,14 @@ case class BooleanByValueReq(value: Boolean) extends SelfEvaluableExpr {
 }
 
 case class SynsetAllReq() extends BindingsFreeExpr {
-  def evaluate(wordNet: WordNet) = DataSet.fromList(wordNet.synsets.toList)
+  def evaluate(wordNet: WordNet) = wordNet.synsets
 }
 
 case class SynsetByExprReq(expr: EvaluableExpr) extends EvaluableExpr {
   def evaluate(wordNet: WordNet, bindings: Bindings) = {
     val eresult = expr.evaluate(wordNet, bindings)
 
-    if (eresult.pathCount == 1 && eresult.minPathSize == 1 && eresult.maxPathSize == 1) {
+    if (eresult.minPathSize == 1 && eresult.maxPathSize == 1) {
       if (eresult.getType(0) == SenseType) {
         DataSet(eresult.paths.map(path => List(wordNet.demandSynsetBySense(path.head.asInstanceOf[Sense]))))
       } else if (eresult.getType(0) == StringType) {          
@@ -824,7 +824,7 @@ case class SynsetByExprReq(expr: EvaluableExpr) extends EvaluableExpr {
 }
 
 case class SenseAllReq() extends BindingsFreeExpr {
-  def evaluate(wordNet: WordNet) = DataSet.fromList(wordNet.senses.toList)
+  def evaluate(wordNet: WordNet) = wordNet.senses
 }
 
 case class SenseByWordFormAndSenseNumberAndPosReq(word: String, num: Int, pos: String) extends BindingsFreeExpr {
@@ -859,7 +859,7 @@ case class StringByValueReq(value: String) extends SelfEvaluableExpr {
 case class WordFormByRegexReq(v: String) extends BindingsFreeExpr {
   def evaluate(wordNet: WordNet) = {
     val regex = v.r
-    val result = wordNet.words.filter(x => regex.findFirstIn(x).map(_ => true).getOrElse(false))
+    val result = wordNet.words.paths.map(_.head).filter(x => regex.findFirstIn(x.asInstanceOf[String]).map(_ => true).getOrElse(false))
 
     DataSet.fromList(result.toList)
   }
@@ -868,9 +868,9 @@ case class WordFormByRegexReq(v: String) extends BindingsFreeExpr {
 case class WordFormByValueReq(value: String) extends BindingsFreeExpr {
   def evaluate(wordNet: WordNet) = {
     if (value == "")
-      DataSet.fromList(wordNet.words.toList)
+      wordNet.words
     else
-      DataSet.fromOptionalValue(wordNet.getWordForm(value))
+      wordNet.getWordForm(value)
   }
 }
 

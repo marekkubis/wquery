@@ -2,33 +2,32 @@ package org.wquery.loader
 import javax.xml.parsers.SAXParserFactory
 import java.io.File
 import org.wquery.model.{WordNet, Synset, Sense, Relation, SynsetType, BooleanType, IntegerType, FloatType, StringType, SenseType, NodeType}
-import org.wquery.model.impl.InMemoryWordNetImplBuilder
 import org.wquery.utils.Logging
 import org.xml.sax.{Locator, Attributes}
 import org.xml.sax.helpers.DefaultHandler
 import scala.collection.mutable.{Set, Map, ListBuffer}
+import org.wquery.model.impl.InMemoryWordNetStore
 
 class GridLoader extends WordNetLoader with Logging {
   override def canLoad(url: String): Boolean = url.endsWith(".xml") // provide a better check
   
   override def load(url: String): WordNet = {
-    val builder = new InMemoryWordNetImplBuilder
+    val wordnet = new WordNet(new InMemoryWordNetStore)
     val factory = SAXParserFactory.newInstance
-    val parser = factory.newSAXParser
-    
-    parser.parse(new File(url), new GridHandler(builder))    
-    val wordNet = builder.build
+
+    factory.newSAXParser.parse(new File(url), new GridHandler(wordnet))
     info("WordNet loaded")
-    wordNet    
+    wordnet
   }
   
 }
 
-class GridHandler(builder: InMemoryWordNetImplBuilder) extends DefaultHandler with Logging {
+class GridHandler(wordnet: WordNet) extends DefaultHandler with Logging {
   // parser attributes
   private var locator: Locator = null
   
   // global attributes
+  private val synsetsById = Map[String, Synset]()
   private val ilrRelationsTuples = new ListBuffer[(Synset, String, String)]()    
   private val genericRelationsTuples = new ListBuffer[(Synset, String, String)]()
   
@@ -140,7 +139,8 @@ class GridHandler(builder: InMemoryWordNetImplBuilder) extends DefaultHandler wi
       }
       
       val synset = new Synset(synsetId, senses.toList)
-      builder.addSynset(synset)      
+      wordnet.addSynset(synset)
+      synsetsById(synset.id) = synset
       
       for ((ilrType, content) <- synsetIlrRelationsTuples) {
         if (ilrType == null || ilrType.trim.isEmpty) {
@@ -182,20 +182,22 @@ class GridHandler(builder: InMemoryWordNetImplBuilder) extends DefaultHandler wi
     }
     
     // create semantic relations
-    ilrRelationsNames.map {name => builder.addRelation(Relation(name, SynsetType, SynsetType))}    
+    ilrRelationsNames.map {name => wordnet.addRelation(Relation(name, SynsetType, SynsetType))}
 
     // create semantic relations successors       
     for ((synset, relname, reldest) <- ilrRelationsTuples) {      
-      builder.getRelation(relname, SynsetType, Relation.Source) 
-        .map { relation =>
-          relation.destinationType match {
-            case SynsetType =>
-              builder.getSynsetById(reldest).map(builder.addSuccessor(synset, relation, _))
-                .getOrElse(warn("ILR tag with type '" + relname + "' found in synset '" + synset.id + "' points to unknown synset '" + reldest + "'"))
-            case dtype =>
-              throw new RuntimeException("ILR tag points to relation " + relation + " that has incorrect destination type " + dtype)
-          }        
-        }.getOrElse(throw new RuntimeException("Relation '" + relname + "' not found"))
+      val relation = wordnet.demandRelation(relname, SynsetType, Relation.Source)
+
+      relation.destinationType.map { dt =>
+        dt match {
+          case SynsetType =>
+            synsetsById.get(reldest).map(wordnet.addSuccessor(synset, relation, _))
+              .getOrElse(warn("ILR tag with type '" + relname + "' found in synset '" + synset.id + "' points to unknown synset '" + reldest + "'"))
+          case dtype =>
+            throw new RuntimeException("ILR tag points to relation " + relation + " that has incorrect destination type " + dtype)
+        }
+      }.getOrElse(throw new RuntimeException("Relation '" + relname + "' has no destination type"))
+
     }
     
     info("ILR relations loaded")    
@@ -206,7 +208,7 @@ class GridHandler(builder: InMemoryWordNetImplBuilder) extends DefaultHandler wi
     val genericRelationsDestTypes = Map[String, NodeType]()    
     
     for ((synset, relname, reldest) <- genericRelationsTuples) {
-      val dtype = getType(builder, reldest)
+      val dtype = getType(reldest)
       
       if (!genericRelationsDestTypes.contains(relname) || 
             rankType(genericRelationsDestTypes(relname)) < rankType(dtype)) {
@@ -216,35 +218,36 @@ class GridHandler(builder: InMemoryWordNetImplBuilder) extends DefaultHandler wi
 
     // create relations
     for ((relname, dtype) <- genericRelationsDestTypes) {
-      builder.addRelation(Relation(relname, SynsetType, dtype))
+      wordnet.addRelation(Relation(relname, SynsetType, dtype))
     }
     
     // create successors
-    for ((synset, relname, reldest) <- genericRelationsTuples) {      
-      builder.getRelation(relname, SynsetType, Relation.Source) 
-        .map { relation =>
-          relation.destinationType match {
-            case SynsetType =>
-              builder.addSuccessor(synset, relation, builder.getSynsetById(reldest).get)
-            case BooleanType =>
-              builder.addSuccessor(synset, relation, reldest.toBoolean)
-            case IntegerType =>
-              builder.addSuccessor(synset, relation, reldest.toInt)
-            case FloatType =>
-              builder.addSuccessor(synset, relation, reldest.toFloat)
-            case StringType =>
-              builder.addSuccessor(synset, relation, reldest)
-            case dtype =>
-              throw new RuntimeException("Incorrect destination type " + dtype + " as a successor of relation '" + relation + "'")
-          }          
-      }.getOrElse(throw new RuntimeException("Relation '" + relname + "' not found"))     
+    for ((synset, relname, reldest) <- genericRelationsTuples) {
+      val relation = wordnet.demandRelation(relname, SynsetType, Relation.Source)
+
+      relation.destinationType.map { dt =>
+        dt match {
+          case SynsetType =>
+            wordnet.addSuccessor(synset, relation, synsetsById(reldest))
+          case BooleanType =>
+            wordnet.addSuccessor(synset, relation, reldest.toBoolean)
+          case IntegerType =>
+            wordnet.addSuccessor(synset, relation, reldest.toInt)
+          case FloatType =>
+            wordnet.addSuccessor(synset, relation, reldest.toFloat)
+          case StringType =>
+            wordnet.addSuccessor(synset, relation, reldest)
+          case dtype =>
+            throw new RuntimeException("Incorrect destination type " + dtype + " as a successor of relation '" + relation + "'")
+        }
+      }.getOrElse(throw new RuntimeException("Relation '" + relname + "' has no destination type"))
     }
-    
+
     info("non-ILR relations loaded")    
   }
     
-  private def getType(builder: InMemoryWordNetImplBuilder, destination: String) = {
-    builder.getSynsetById(destination).map(_ => SynsetType).getOrElse(
+  private def getType(destination: String) = {
+    synsetsById.get(destination).map(_ => SynsetType).getOrElse(
       try {
         destination.toBoolean
         BooleanType
@@ -265,7 +268,7 @@ class GridHandler(builder: InMemoryWordNetImplBuilder) extends DefaultHandler wi
       }
     )
   }
-  
+
   private def rankType(dtype: NodeType) = dtype match {
     case SynsetType => 0
     case SenseType => 1

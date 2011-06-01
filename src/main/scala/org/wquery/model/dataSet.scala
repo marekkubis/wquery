@@ -1,5 +1,6 @@
 package org.wquery.model
 import scala.collection.mutable.ListBuffer
+import java.lang.IllegalArgumentException
 
 class DataSet(val paths: List[List[Any]], val pathVars: Map[String, List[(Int, Int)]], val stepVars: Map[String, List[Int]]) {
   val minPathSize = {// TODO optimize these two
@@ -113,19 +114,37 @@ object DataSet {
 object DataSetBuffers {
   def createPathBuffer = new ListBuffer[List[Any]]  
     
-  def createPathVarBuffers(pathVarNames: Seq[String]) = Map[String, ListBuffer[(Int, Int)]](pathVarNames.map(x => (x, new ListBuffer[(Int, Int)])): _*)
-  
-  def createStepVarBuffers(stepVarNames: Seq[String]) = Map[String, ListBuffer[Int]](stepVarNames.map(x => (x, new ListBuffer[Int])): _*)
-}
-
-class DataSetBuffer { 
-  val buffer = new ListBuffer[List[Any]]
-  var types = List[DataType]()  
-  
-  def append(result: DataSet) {    
-    buffer.appendAll(result.paths)
+  def createPathVarBuffers(pathVarNames: Seq[String]) = {
+    Map[String, ListBuffer[(Int, Int)]](pathVarNames.map(x => (x, new ListBuffer[(Int, Int)])): _*)
   }
   
-  def toDataSet = DataSet(buffer.toList)    
+  def createStepVarBuffers(stepVarNames: Seq[String]) = {
+    Map[String, ListBuffer[Int]](stepVarNames.map(x => (x, new ListBuffer[Int])): _*)
+  }
+}
+
+class DataSetBuffer {
+  val pathBuffer = DataSetBuffers.createPathBuffer
+  var pathVarBuffers = Map[String, ListBuffer[(Int, Int)]]()
+  var stepVarBuffers = Map[String, ListBuffer[Int]]()
+  
+  def append(result: DataSet) {
+    if (pathBuffer.isEmpty) {
+      pathVarBuffers = DataSetBuffers.createPathVarBuffers(result.pathVars.keys.toSeq)
+      stepVarBuffers = DataSetBuffers.createStepVarBuffers(result.stepVars.keys.toSeq)
+    }
+
+    if (result.pathVars.keySet != pathVarBuffers.keySet)
+      throw new IllegalArgumentException("pathVars.keySet != pathVarBuffers.keySet")
+
+    if (result.stepVars.keySet != stepVarBuffers.keySet)
+      throw new IllegalArgumentException("stephVars.keySet != stepVarBuffers.keySet")
+
+    pathBuffer.appendAll(result.paths)
+    pathVarBuffers.keys.foreach(key => pathVarBuffers(key).appendAll(result.pathVars(key)))
+    stepVarBuffers.keys.foreach(key => stepVarBuffers(key).appendAll(result.stepVars(key)))
+  }
+  
+  def toDataSet = DataSet.fromBuffers(pathBuffer, pathVarBuffers, stepVarBuffers)
 }
 
