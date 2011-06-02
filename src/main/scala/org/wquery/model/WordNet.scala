@@ -6,11 +6,13 @@ class WordNet(store: WordNetStore) {
     if (!store.relations.contains(relation))
       store.add(relation)
 
-  def synsets: DataSet = store.generate(WordNet.SynsetSet, List[(String, List[Any])]((Relation.Source, Nil)))
+  def generateAllTuples(relation: Relation, args: List[String]) = store.generate(relation, args.map(x => (x, List[Any]())))
+
+  def synsets: DataSet = generateAllTuples(WordNet.SynsetSet, List(Relation.Source))
   
-  def senses: DataSet = store.generate(WordNet.SenseSet, List[(String, List[Any])]((Relation.Source, Nil)))
+  def senses: DataSet = generateAllTuples(WordNet.SenseSet, List(Relation.Source))
   
-  def words: DataSet = store.generate(WordNet.WordSet, List[(String, List[Any])]((Relation.Source, Nil)))
+  def words: DataSet = generateAllTuples(WordNet.WordSet, List(Relation.Source))
 
   def followRelation(dataSet: DataSet, pos: Int, relation: Relation, source: String, dests: List[String]) = {
     store.extend(dataSet, relation, List((pos, source)), dests)
@@ -28,8 +30,7 @@ class WordNet(store: WordNetStore) {
 
     buffer.toDataSet
   }
-  
-  def getPaths(relation: Relation, args: List[String]) = store.generate(relation, args.map(x => (x, List[Any]())))
+
   
   private def getSuccessors(obj: Any, relation: Relation): List[Any] = {
     followRelation(DataSet.fromValue(obj), 1, relation, Relation.Source, List(Relation.Destination)).paths.map(_.last) // TO BE rewritten after implementing WordNetStore    

@@ -595,11 +595,11 @@ sealed abstract class RelationalExpr extends Expr {
 case class UnaryRelationalExpr(ids: List[String]) extends RelationalExpr {
   def generate(wordNet: WordNet, bindings: Bindings) = {	
     if (ids.size > 1) {
-        useIdentifiersAsRelationPathsGenerator(wordNet)
+        useIdentifiersAsRelationTuplesGenerator(wordNet)
           .getOrElse(throw new WQueryEvaluationException("Relation '" + ids.head + "' not found"))
     } else {
       if (!bindings.areContextVariablesBound) {
-        useIdentifiersAsRelationPathsGenerator(wordNet)
+        useIdentifiersAsRelationTuplesGenerator(wordNet)
           .getOrElse(useIdentifierAsBasicTypeGenerator(wordNet))
       } else {             
         useIdentifierAsBasicTypeGenerator(wordNet)	                
@@ -607,16 +607,16 @@ case class UnaryRelationalExpr(ids: List[String]) extends RelationalExpr {
     }				  
   }
   
-  private def useIdentifiersAsRelationPathsGenerator(wordNet: WordNet) = {
+  private def useIdentifiersAsRelationTuplesGenerator(wordNet: WordNet) = {
     ids match {
       case first::second::dests =>
         wordNet.findFirstRelationByNameAndSource(second, first)
-          .map(r => wordNet.getPaths(r, first::dests))
+          .map(r => wordNet.generateAllTuples(r, first::dests))
           .orElse(wordNet.findFirstRelationByNameAndSource(first, Relation.Source)
-            .map(r => wordNet.getPaths(r, Relation.Source::second::dests)))
+            .map(r => wordNet.generateAllTuples(r, Relation.Source::second::dests)))
       case List(head) =>
         wordNet.findFirstRelationByNameAndSource(head, Relation.Source) 
-          .map(r => wordNet.getPaths(r, Relation.Source::r.argumentNames.filter(_ != Relation.Source)))
+          .map(r => wordNet.generateAllTuples(r, Relation.Source::r.argumentNames.filter(_ != Relation.Source)))
       case Nil =>
           None        
     }
