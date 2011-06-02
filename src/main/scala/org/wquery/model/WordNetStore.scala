@@ -11,7 +11,7 @@ trait WordNetStore {
 
   def remove(relation: Relation, tuple: List[(String, Any)])
 
-  def generate(relation: Relation, args: List[(String, List[Any])]): DataSet
+  def generate(relation: Relation, from: List[(String, List[Any])], to: List[String]): DataSet
 
   def extend(dataSet: DataSet, relation: Relation, from: List[(Int, String)], to: List[String]): DataSet
 

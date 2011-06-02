@@ -809,9 +809,9 @@ case class SynsetByExprReq(expr: EvaluableExpr) extends EvaluableExpr {
 
     if (eresult.minPathSize == 1 && eresult.maxPathSize == 1) {
       if (eresult.getType(0) == SenseType) {
-        DataSet(eresult.paths.map(path => List(wordNet.demandSynsetBySense(path.head.asInstanceOf[Sense]))))
-      } else if (eresult.getType(0) == StringType) {          
-        DataSet(eresult.paths.flatMap(path => wordNet.getSynsetsByWordForm(path.head.asInstanceOf[String])).map(List(_)))
+        wordNet.getSynsetsBySenses(eresult.paths.map(_.head.asInstanceOf[Sense]))
+      } else if (eresult.getType(0) == StringType) {
+        wordNet.getSynsetsByWordForms(eresult.paths.map(_.head.asInstanceOf[String]))
       } else {
         throw new WQueryEvaluationException("{...} requires an expression that generates either senses or word forms")  
       }           
@@ -828,11 +828,11 @@ case class SenseAllReq() extends BindingsFreeExpr {
 }
 
 case class SenseByWordFormAndSenseNumberAndPosReq(word: String, num: Int, pos: String) extends BindingsFreeExpr {
-  def evaluate(wordNet: WordNet) = DataSet.fromOptionalValue(wordNet.getSenseByWordFormAndSenseNumberAndPos(word, num, pos))
+  def evaluate(wordNet: WordNet) = wordNet.getSenseByWordFormAndSenseNumberAndPos(word, num, pos)
 }
 
 case class SenseByWordFormAndSenseNumberReq(word: String, num: Int) extends BindingsFreeExpr {
-  def evaluate(wordNet: WordNet) = DataSet.fromList(wordNet.getSensesByWordFormAndSenseNumber(word, num))
+  def evaluate(wordNet: WordNet) = wordNet.getSensesByWordFormAndSenseNumber(word, num)
 }
 
 case class ContextByRelationalExprReq(expr: RelationalExpr, quantifier: Quantifier) extends EvaluableExpr {

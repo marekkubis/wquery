@@ -9,25 +9,26 @@ class InMemoryWordNetStore extends WordNetStore {
 
   def relations = relationsSet.toList
 
-  def generate(relation: Relation, args: List[(String, List[Any])]) = {
+  def generate(relation: Relation, from: List[(String, List[Any])], to: List[String]) = {
     val buffer = DataSetBuffers.createPathBuffer
-    val (sourceName, sourceValues) = args.head
-    val dests = args.tail
+    val (sourceName, sourceValues) = from.head
+    val dests = from.tail
 
     for (((obj, rel, src), destMaps) <- successors) {
       if (rel == relation && src == sourceName && (sourceValues.isEmpty || sourceValues.contains(obj))) {
         for (destMap <- destMaps) {
-          val tupleBuffer = new ListBuffer[Any]
-          tupleBuffer.append(obj)
+          if (dests.forall(dest => destMap.contains(dest._1) && (dest._2.isEmpty || dest._2.contains(destMap(dest._1))))) {
+            val tupleBuffer = new ListBuffer[Any]
 
-          for ((destName, destValues) <- dests) {
-            if (destMap.contains(destName) && (destValues.isEmpty || destValues.contains(destMap(destName)))) {
-              tupleBuffer.append(Arc(relation, sourceName, destName))
+            tupleBuffer.append(destMap(to.head))
+
+            for (destName <- to.tail) {
+              tupleBuffer.append(Arc(relation, to.head, destName))
               tupleBuffer.append(destMap(destName))
             }
-          }
 
-          buffer.append(tupleBuffer.toList)
+            buffer.append(tupleBuffer.toList)
+          }
         }
       }
     }

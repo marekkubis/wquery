@@ -6,7 +6,7 @@ class WordNet(store: WordNetStore) {
     if (!store.relations.contains(relation))
       store.add(relation)
 
-  def generateAllTuples(relation: Relation, args: List[String]) = store.generate(relation, args.map(x => (x, List[Any]())))
+  def generateAllTuples(relation: Relation, args: List[String]) = store.generate(relation, args.map(x => (x, List[Any]())), args)
 
   def synsets: DataSet = generateAllTuples(WordNet.SynsetSet, List(Relation.Source))
   
@@ -31,26 +31,25 @@ class WordNet(store: WordNetStore) {
     buffer.toDataSet
   }
 
-  
-  private def getSuccessors(obj: Any, relation: Relation): List[Any] = {
-    followRelation(DataSet.fromValue(obj), 1, relation, Relation.Source, List(Relation.Destination)).paths.map(_.last) // TO BE rewritten after implementing WordNetStore    
+  def getSynsetsBySenses(senses: List[Sense]) = {
+    store.generate(WordNet.SenseToSynset,  List((Relation.Source, senses)), List(Relation.Destination))
   }
-  
-  def getSynsetsByWordForm(word: String) = getSuccessors(word, WordNet.WordFormToSynsets)  
 
-  def demandSynsetBySense(sense: Sense) = {
-    val succs = getSuccessors(sense, WordNet.SenseToSynset)
-    if (!succs.isEmpty) succs.head else throw new WQueryModelException("No synset found for sense " + sense)    
+  def getSynsetsByWordForms(wordForms: List[String]) = {
+    store.generate(WordNet.WordFormToSynsets,  List((Relation.Source, wordForms)), List(Relation.Destination))
   }
-  
+
   def getSenseByWordFormAndSenseNumberAndPos(word: String, num: Int, pos: String) = {
-    val succs = getSuccessors(word + ":" + num + ":" + pos, WordNet.WordFormAndSenseNumberAndPosToSense)
-    if (succs.isEmpty) None else Some(succs.head)
+    store.generate(WordNet.SenseToWordFormSenseNumberAndPos,
+      List((Relation.Destination, List(word)), ("num", List(num)), ("pos", List(pos))), List(Relation.Source))
   }
   
-  def getSensesByWordFormAndSenseNumber(word: String, num: Int) = getSuccessors(word + ":" + num, WordNet.WordFormAndSenseNumberToSenses) 
-  
-  def getWordForm(word: String) = store.generate(WordNet.WordSet, List(("source", List(word))))
+  def getSensesByWordFormAndSenseNumber(word: String, num: Int) = {
+    store.generate(WordNet.SenseToWordFormSenseNumberAndPos,
+      List((Relation.Destination, List(word)), ("num", List(num))), List(Relation.Source))
+  }
+
+  def getWordForm(word: String) = store.generate(WordNet.WordSet, List((Relation.Source, List(word))), List(Relation.Source))
   
   def getRelation(name: String, sourceType: DataType, sourceName: String) = store.relations.find(r => r.name == name && r.arguments.get(sourceName) == Some(sourceType))
 
