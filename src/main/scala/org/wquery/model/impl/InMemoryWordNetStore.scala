@@ -36,8 +36,8 @@ class InMemoryWordNetStore extends WordNetStore {
     DataSet(buffer.toList)
   }
 
-  def extend(dataSet: DataSet, relation: Relation, from: List[(Int, String)], to: List[String]) = {
-    from.map(_._2).foreach(relation.demandArgument)
+  def extend(dataSet: DataSet, relation: Relation, from: Int, through: String, to: List[String]) = {
+    relation.demandArgument(through)
     to.foreach(relation.demandArgument)
 
     val pathBuffer = DataSetBuffers.createPathBuffer
@@ -46,19 +46,16 @@ class InMemoryWordNetStore extends WordNetStore {
     val pathVarNames = dataSet.pathVars.keys
     val stepVarNames = dataSet.stepVars.keys
 
-    // TODO for now the method demands exactly one source
-    val (pos, source) = from.head
-
     for (i <- 0 until dataSet.pathCount) {
       val tuple = dataSet.paths(i)
 
-      if (successors.contains((tuple(tuple.size - pos), relation, source))) {
-        for (succs <- successors(tuple(tuple.size - pos), relation, source)) {
+      if (successors.contains((tuple(tuple.size - from), relation, through))) {
+        for (succs <- successors(tuple(tuple.size - from), relation, through)) {
           val tupleBuffer = new ListBuffer[Any]
           tupleBuffer.appendAll(tuple)
           to.foreach { dest =>
             if (succs.contains(dest)) {
-              tupleBuffer.append(Arc(relation, source, dest))
+              tupleBuffer.append(Arc(relation, through, dest))
               tupleBuffer.append(succs(dest))
             }
           }

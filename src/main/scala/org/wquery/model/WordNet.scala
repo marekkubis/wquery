@@ -15,7 +15,7 @@ class WordNet(store: WordNetStore) {
   def words: DataSet = generateAllTuples(WordNet.WordSet, List(Relation.Source))
 
   def followRelation(dataSet: DataSet, pos: Int, relation: Relation, source: String, dests: List[String]) = {
-    store.extend(dataSet, relation, List((pos, source)), dests)
+    store.extend(dataSet, relation, pos, source, dests)
   }
 
   def followAny(dataSet: DataSet, pos: Int) = {
@@ -25,7 +25,7 @@ class WordNet(store: WordNetStore) {
       for (source <- relation.argumentNames)
         for (dest <- relation.argumentNames)
           if (source != dest)
-            buffer.append(store.extend(dataSet, relation, List((pos, source)), List(dest)))
+            buffer.append(store.extend(dataSet, relation, pos, source, List(dest)))
     }
 
     buffer.toDataSet

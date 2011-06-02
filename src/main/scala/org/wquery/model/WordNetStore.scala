@@ -13,6 +13,6 @@ trait WordNetStore {
 
   def generate(relation: Relation, from: List[(String, List[Any])], to: List[String]): DataSet
 
-  def extend(dataSet: DataSet, relation: Relation, from: List[(Int, String)], to: List[String]): DataSet
+  def extend(dataSet: DataSet, relation: Relation, from: Int, through: String, to: List[String]): DataSet
 
 }
