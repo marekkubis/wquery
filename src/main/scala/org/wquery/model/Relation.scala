@@ -1,8 +1,7 @@
 package org.wquery.model
 import org.wquery.WQueryModelException
 
-class Relation(val name: String, val arguments: Map[String, NodeType]) {
-
+case class Relation(val name: String, val arguments: Map[String, NodeType]) {
   val sourceType = arguments(Relation.Source) 
   
   val destinationType = arguments.get(Relation.Destination)

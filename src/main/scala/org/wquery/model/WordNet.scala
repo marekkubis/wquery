@@ -94,8 +94,6 @@ class WordNet(store: WordNetStore) {
       addSuccessor(sense.wordForm, WordNet.WordFormToSenses, sense)
       addSuccessor(sense,WordNet. SenseToSynset, synset)
       addSuccessor(sense.wordForm, WordNet.WordFormToSynsets, synset)
-      addSuccessor(sense.wordForm + ":" + sense.senseNumber + ":" + sense.pos, WordNet.WordFormAndSenseNumberAndPosToSense, sense)
-      addSuccessor(sense.wordForm + ":" + sense.senseNumber, WordNet.WordFormAndSenseNumberToSenses, sense)
       addTuple(WordNet.SenseToWordFormSenseNumberAndPos, List((Relation.Source, sense), (Relation.Destination, sense.wordForm), ("num", sense.senseNumber), ("pos", sense.pos)))
     }
   }
@@ -120,8 +118,6 @@ object WordNet {
   val SynsetToId = Relation("id", SynsetType, StringType)
   val IdToSense = Relation("id_sense", StringType, SenseType)
   val SenseToId = Relation("id", SenseType, StringType)  
-  val WordFormAndSenseNumberAndPosToSense = Relation("word_num_pos_sense", StringType, SenseType)
-  val WordFormAndSenseNumberToSenses = Relation("word_num_sense", StringType, SenseType)
   val SenseToWordFormSenseNumberAndPos = Relation("literal", SenseType, StringType, Map(("num", IntegerType), ("pos", StringType)))
   val SenseToWordForm = Relation("word", SenseType, StringType)
   val SenseToSenseNumber = Relation("sensenum", SenseType, IntegerType)
@@ -132,7 +128,7 @@ object WordNet {
   val SenseToSynset = Relation("synset", SenseType, SynsetType)
   val WordFormToSynsets = Relation("synsets", StringType, SynsetType)
   
-  val relations = List(IdToSynset, SynsetToId, IdToSense, SenseToId, WordFormAndSenseNumberAndPosToSense,
-    WordFormAndSenseNumberToSenses, SenseToWordForm, SenseToSenseNumber, SenseToPos, SynsetToWordForms,
-    SynsetToSenses, WordFormToSenses, SenseToSynset, WordFormToSynsets, SenseToWordFormSenseNumberAndPos)
+  val relations = List(IdToSynset, SynsetToId, IdToSense, SenseToId, SenseToWordForm, SenseToSenseNumber,
+    SenseToPos, SynsetToWordForms, SynsetToSenses, WordFormToSenses, SenseToSynset, WordFormToSynsets,
+    SenseToWordFormSenseNumberAndPos)
 }
