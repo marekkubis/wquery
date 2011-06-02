@@ -611,12 +611,12 @@ case class UnaryRelationalExpr(ids: List[String]) extends RelationalExpr {
     ids match {
       case first::second::dests =>
         wordNet.findFirstRelationByNameAndSource(second, first)
-          .map(r => DataSet(wordNet.getPaths(r, first, dests)))
+          .map(r => wordNet.getPaths(r, first::dests))
           .orElse(wordNet.findFirstRelationByNameAndSource(first, Relation.Source)
-            .map(r => DataSet(wordNet.getPaths(r, Relation.Source, second::dests))))
+            .map(r => wordNet.getPaths(r, Relation.Source::second::dests)))
       case List(head) =>
         wordNet.findFirstRelationByNameAndSource(head, Relation.Source) 
-          .map(r => DataSet(wordNet.getPaths(r, Relation.Source, r.argumentNames.filter(_ != Relation.Source))))        
+          .map(r => wordNet.getPaths(r, Relation.Source::r.argumentNames.filter(_ != Relation.Source)))
       case Nil =>
           None        
     }

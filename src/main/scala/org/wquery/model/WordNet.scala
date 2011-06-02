@@ -29,7 +29,7 @@ class WordNet(store: WordNetStore) {
     buffer.toDataSet
   }
   
-  def getPaths(relation: Relation, source: String, dests: List[String]): List[List[Any]] = store.generate(relation, (source::dests).map(x => (x, Nil.asInstanceOf[List[Any]])).toMap).paths
+  def getPaths(relation: Relation, args: List[String]) = store.generate(relation, args.map(x => (x, List[Any]())).toMap)
   
   private def getSuccessors(obj: Any, relation: Relation): List[Any] = {
     followRelation(DataSet.fromValue(obj), 1, relation, Relation.Source, List(Relation.Destination)).paths.map(_.last) // TO BE rewritten after implementing WordNetStore    
