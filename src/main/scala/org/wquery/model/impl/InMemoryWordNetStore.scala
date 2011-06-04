@@ -12,28 +12,36 @@ class InMemoryWordNetStore extends WordNetStore {
   def generate(relation: Relation, from: List[(String, List[Any])], to: List[String]) = {
     val buffer = DataSetBuffers.createPathBuffer
     val (sourceName, sourceValues) = from.head
-    val dests = from.tail
+    val destinations = from.tail
 
-    for (((obj, rel, src), destMaps) <- successors) {
-      if (rel == relation && src == sourceName && (sourceValues.isEmpty || sourceValues.contains(obj))) {
-        for (destMap <- destMaps) {
-          if (dests.forall(dest => destMap.contains(dest._1) && (dest._2.isEmpty || dest._2.contains(destMap(dest._1))))) {
-            val tupleBuffer = new ListBuffer[Any]
-
-            tupleBuffer.append(destMap(to.head))
-
-            for (destName <- to.tail) {
-              tupleBuffer.append(Arc(relation, to.head, destName))
-              tupleBuffer.append(destMap(destName))
-            }
-
-            buffer.append(tupleBuffer.toList)
-          }
-        }
-      }
+    if (sourceValues.isEmpty) {
+      for (((obj, rel, src), destinationMaps) <- successors)
+        if (rel == relation && src == sourceName)
+          appendDestinationTuples(destinationMaps, destinations, to, relation, buffer)
+    } else {
+      for (sourceValue <- sourceValues)
+        successors.get((sourceValue, relation, sourceName))
+          .map(appendDestinationTuples(_, destinations, to, relation, buffer))
     }
 
     DataSet(buffer.toList)
+  }
+
+  private def appendDestinationTuples(destinationMaps: List[Map[String, Any]], destinations: List[(String, List[Any])], to: List[String], relation: Relation, buffer: ListBuffer[List[Any]]) {
+    for (destinationMap <- destinationMaps) {
+      if (destinations.forall(dest => destinationMap.contains(dest._1) && (dest._2.isEmpty || dest._2.contains(destinationMap(dest._1))))) {
+        val tupleBuffer = new ListBuffer[Any]
+
+        tupleBuffer.append(destinationMap(to.head))
+
+        for (destinationName <- to.tail) {
+          tupleBuffer.append(Arc(relation, to.head, destinationName))
+          tupleBuffer.append(destinationMap(destinationName))
+        }
+
+        buffer.append(tupleBuffer.toList)
+      }
+    }
   }
 
   def extend(dataSet: DataSet, relation: Relation, from: Int, through: String, to: List[String]) = {
