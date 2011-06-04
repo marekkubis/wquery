@@ -1,6 +1,7 @@
 package org.wquery
+
+import loader.{LmfLoader, GridLoader, WordNetLoader}
 import org.wquery.engine.{WQueryFunctions, Result, Error, Answer, Bindings}
-import org.wquery.loader.{GridLoader, WordNetLoader}
 import org.wquery.model.WordNet
 import org.wquery.parser.WQueryParsers
 import org.wquery.utils.Logging
@@ -26,7 +27,8 @@ class WQuery(val wordNet: WordNet) extends Logging {
 
 object WQuery {
   val loaders = LinkedHashSet[WordNetLoader]()
-  
+
+  registerLoader(new LmfLoader)
   registerLoader(new GridLoader)
   
   def registerLoader(loader: WordNetLoader) { loaders += loader }

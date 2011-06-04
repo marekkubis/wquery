@@ -9,17 +9,17 @@ import scala.collection.mutable.{Set, Map, ListBuffer}
 import org.wquery.model.impl.InMemoryWordNetStore
 
 class GridLoader extends WordNetLoader with Logging {
-  override def canLoad(url: String): Boolean = url.endsWith(".xml") // provide a better check
-  
+  override def canLoad(url: String): Boolean = url.endsWith(".xml") // TODO provide a better check
+
   override def load(url: String): WordNet = {
     val wordnet = new WordNet(new InMemoryWordNetStore)
     val factory = SAXParserFactory.newInstance
 
     factory.newSAXParser.parse(new File(url), new GridHandler(wordnet))
-    info("WordNet loaded")
+    info("WordNet loaded via GridLoader")
     wordnet
   }
-  
+
 }
 
 class GridHandler(wordnet: WordNet) extends DefaultHandler with Logging {

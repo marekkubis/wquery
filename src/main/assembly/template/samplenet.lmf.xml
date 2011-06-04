@@ -1,0 +1,1368 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LexicalResource>
+    <Lexicon>
+        <!--
+       This file contains a simple lexical ontology distributed with WQuery for testing purposes.
+       It has been derived from Princeton WordNet by choosing ca. 90 synsets.
+       Princeton WordNet is distributed under the following license.
+
+       WordNet Release 3.0
+
+       This software and database is being provided to you, the LICENSEE, by
+       Princeton University under the following license.  By obtaining, using
+       and/or copying this software and database, you agree that you have
+       read, understood, and will comply with these terms and conditions._
+
+       Permission to use, copy, modify and distribute this software and
+       database and its documentation for any purpose and without fee or
+       royalty is hereby granted, provided that you agree to comply with
+       the following copyright notice and statements, including the disclaimer,
+       and that the same appear on ALL copies of the software, database and
+       documentation, including modifications that you make for internal
+       use or for distribution.
+
+       WordNet 3.0 Copyright 2006 by Princeton University.  All rights reserved.
+
+       THIS SOFTWARE AND DATABASE IS PROVIDED "AS IS" AND PRINCETON
+       UNIVERSITY MAKES NO REPRESENTATIONS OR WARRANTIES, EXPRESS OR
+       IMPLIED.  BY WAY OF EXAMPLE, BUT NOT LIMITATION, PRINCETON
+       UNIVERSITY MAKES NO REPRESENTATIONS OR WARRANTIES OF MERCHANT-
+       ABILITY OR FITNESS FOR ANY PARTICULAR PURPOSE OR THAT THE USE
+       OF THE LICENSED SOFTWARE, DATABASE OR DOCUMENTATION WILL NOT
+       INFRINGE ANY THIRD PARTY PATENTS, COPYRIGHTS, TRADEMARKS OR
+       OTHER RIGHTS.
+
+       The name of Princeton University or Princeton may not be used in
+       advertising or publicity pertaining to distribution of the software
+       and/or database.  Title to copyright in this software, database and
+       any associated documentation shall at all times remain with
+       Princeton University and LICENSEE agrees to preserve same.
+        -->
+        <LexicalEntry>
+            <Lemma writtenForm="roadster" partOfSpeech="n"/>
+            <Sense id="roadster:1:n" synset="104097373"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="runabout" partOfSpeech="n"/>
+            <Sense id="runabout:1:n" synset="104097373"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="someone" partOfSpeech="n"/>
+            <Sense id="someone:1:n" synset="100007846"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="saloon" partOfSpeech="n"/>
+            <Sense id="saloon:1:n"/>
+            <Sense id="saloon:2:n"/>
+            <Sense id="saloon:3:n" synset="104166281"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="'racing car'" partOfSpeech="n"/>
+            <Sense id="racing car:1:n" synset="104037443"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="motorcar" partOfSpeech="n"/>
+            <Sense id="motorcar:1:n" synset="102958343"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="car" partOfSpeech="n"/>
+            <Sense id="car:1:n" synset="102958343"/>
+            <Sense id="car:2:n" synset="102959942"/>
+            <Sense id="car:3:n" synset="102960501"/>
+            <Sense id="car:4:n" synset="102960352"/>
+            <Sense id="car:5:n" synset="102934451"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="wagon" partOfSpeech="n"/>
+            <Sense id="wagon:1:n" />
+            <Sense id="wagon:2:n" />
+            <Sense id="wagon:3:n" />
+            <Sense id="wagon:4:n" />
+            <Sense id="wagon:5:n" synset="102814533"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="'sport utility vehicle'" partOfSpeech="n"/>
+            <Sense id="sport utility vehicle:1:n" synset="104285965"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="'syntactic category'" partOfSpeech="n"/>
+            <Sense id="syntactic category:1:n" synset="106309383"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="'sport utility'" partOfSpeech="n"/>
+            <Sense id="sport utility:1:n" synset="104285965"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="'human body'" partOfSpeech="n"/>
+            <Sense id="human body:1:n" synset="105217168"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="homo" partOfSpeech="n"/>
+            <Sense id="homo:1:n"/>
+            <Sense id="homo:2:n" synset="102472293"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="'secondhand car'" partOfSpeech="n"/>
+            <Sense id="secondhand car:1:n" synset="104516354"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="somebody" partOfSpeech="n"/>
+            <Sense id="somebody:1:n" synset="100007846"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="'gypsy cab'" partOfSpeech="n"/>
+            <Sense id="gypsy cab:1:n" synset="103472937"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="'panda car'" partOfSpeech="n"/>
+            <Sense id="panda car:1:n" synset="103881534"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="'beach waggon'" partOfSpeech="n"/>
+            <Sense id="beach waggon:1:n" synset="102814533"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="'shooting brake'" partOfSpeech="n"/>
+            <Sense id="shooting brake:1:n" synset="104201733"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="instrumentation" partOfSpeech="n"/>
+            <Sense id="instrumentation:1:n" synset="103575240"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="'patrol car'" partOfSpeech="n"/>
+            <Sense id="patrol car:1:n" synset="103141065"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="zymolysis" partOfSpeech="n"/>
+            <Sense id="zymolysis:1:n" synset="113575433"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="conveyance" partOfSpeech="n"/>
+            <Sense id="conveyance:1:n" />
+            <Sense id="conveyance:2:n" />
+            <Sense id="conveyance:3:n" synset="103100490"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="'railroad car'" partOfSpeech="n"/>
+            <Sense id="railroad car:1:n" synset="102959942"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="anatomy" partOfSpeech="n"/>
+            <Sense id="anatomy:1:n" />
+            <Sense id="anatomy:2:n" synset="105217168"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="'electric automobile'" partOfSpeech="n"/>
+            <Sense id="electric automobile:1:n" synset="103268790"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="taxicab" partOfSpeech="n"/>
+            <Sense id="taxicab:1:n" synset="102930766"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="form" partOfSpeech="n"/>
+            <Sense id="form:1:n" />
+            <Sense id="form:2:n" />
+            <Sense id="form:3:n" />
+            <Sense id="form:4:n" />
+            <Sense id="form:5:n" synset="105217168"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="hardtop" partOfSpeech="n"/>
+            <Sense id="hardtop:1:n" synset="103493219"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="instrumentality" partOfSpeech="n"/>
+            <Sense id="instrumentality:1:n" />
+            <Sense id="instrumentality:2:n" />
+            <Sense id="instrumentality:3:n" synset="103575240"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="minicar" partOfSpeech="n"/>
+            <Sense id="minicar:1:n" synset="103770085"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="orange" partOfSpeech="n"/>
+            <Sense id="orange:1:n" synset="107747607"/>
+            <Sense id="orange:2:n" synset="104965179"/>
+            <Sense id="orange:3:n" synset="112708293"/>
+            <Sense id="orange:4:n" synset="114991210"/>
+            <Sense id="orange:1:s" synset="300378892"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="'self-propelled vehicle'" partOfSpeech="n"/>
+            <Sense id="self-propelled vehicle:1:n" synset="104170037"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="transport" partOfSpeech="n"/>
+            <Sense id="transport:1:n" synset="103100490"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="'pace car'" partOfSpeech="n"/>
+            <Sense id="pace car:1:n" synset="103870105"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="being" partOfSpeech="n"/>
+            <Sense id="being:1:n"/>
+            <Sense id="being:2:n" synset="100004475"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="soma" partOfSpeech="n"/>
+            <Sense id="soma:1:n" />
+            <Sense id="soma:2:n" />
+            <Sense id="soma:3:n" synset="105217168"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="'Malus pumila'" partOfSpeech="n"/>
+            <Sense id="Malus pumila:1:n" synset="112633994"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="fermenting" partOfSpeech="n"/>
+            <Sense id="fermenting:1:n" synset="113575433"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="'police cruiser'" partOfSpeech="n"/>
+            <Sense id="police cruiser:1:n" synset="103141065"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="zymosis" partOfSpeech="n"/>
+            <Sense id="zymosis:1:n" synset="113575433"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="organism" partOfSpeech="n"/>
+            <Sense id="organism:1:n" synset="100004475"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="'Model T'" partOfSpeech="n"/>
+            <Sense id="Model T:1:n" synset="103777568"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="fermentation" partOfSpeech="n"/>
+            <Sense id="fermentation:1:n"/>
+            <Sense id="fermentation:2:n" synset="113575433"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="limo" partOfSpeech="n"/>
+            <Sense id="limo:1:n" synset="103670208"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="subcompact" partOfSpeech="n"/>
+            <Sense id="subcompact:1:n" synset="104347119"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="phaeton" partOfSpeech="n"/>
+            <Sense id="phaeton:1:n" synset="104459122"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="entity" partOfSpeech="n"/>
+            <Sense id="entity:1:n" synset="100001740"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="human" partOfSpeech="n"/>
+            <Sense id="human:1:n" synset="102472293"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="'elevator car'" partOfSpeech="n"/>
+            <Sense id="elevator car:1:n" synset="102960352"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="'causal agent'" partOfSpeech="n"/>
+            <Sense id="causal agent:1:n" synset="100007347"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="racer" partOfSpeech="n"/>
+            <Sense id="racer:1:n"/>
+            <Sense id="racer:2:n" synset="104037443"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="'automotive vehicle'" partOfSpeech="n"/>
+            <Sense id="automotive vehicle:1:n" synset="103791235"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="structure" partOfSpeech="n"/>
+            <Sense id="structure:1:n" synset="104341686"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="'subcompact car'" partOfSpeech="n"/>
+            <Sense id="subcompact car:1:n" synset="104347119"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="gondola" partOfSpeech="n"/>
+            <Sense id="gondola:1:n"/>
+            <Sense id="gondola:2:n"/>
+            <Sense id="gondola:3:n" synset="102960501"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="build" partOfSpeech="n"/>
+            <Sense id="build:1:n"/>
+            <Sense id="build:2:n" synset="105217168"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="physique" partOfSpeech="n"/>
+            <Sense id="physique:1:n"/>
+            <Sense id="physique:2:n" synset="105217168"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="'police car'" partOfSpeech="n"/>
+            <Sense id="police car:1:n" synset="103141065"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="edifice" partOfSpeech="n"/>
+            <Sense id="edifice:1:n" synset="102913152"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="heap" partOfSpeech="n"/>
+            <Sense id="heap:1:n"/>
+            <Sense id="heap:2:n"/>
+            <Sense id="heap:3:n" synset="102924554"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="hack" partOfSpeech="n"/>
+            <Sense id="hack:1:n"/>
+            <Sense id="hack:2:n"/>
+            <Sense id="hack:3:n"/>
+            <Sense id="hack:4:n"/>
+            <Sense id="hack:5:n" synset="102930766"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="'human being'" partOfSpeech="n"/>
+            <Sense id="human being:1:n" synset="102472293"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="area" partOfSpeech="n"/>
+            <Sense id="area:1:n"/>
+            <Sense id="area:2:n"/>
+            <Sense id="area:3:n"/>
+            <Sense id="area:4:n"/>
+            <Sense id="area:5:n" synset="102735688"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="'sports car'" partOfSpeech="n"/>
+            <Sense id="sports car:1:n" synset="104285008"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="cab" partOfSpeech="n"/>
+            <Sense id="cab:1:n"/>
+            <Sense id="cab:2:n"/>
+            <Sense id="cab:3:n" synset="102930766"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="two-seater" partOfSpeech="n"/>
+            <Sense id="two-seater:1:n" synset="104097373"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="minivan" partOfSpeech="n"/>
+            <Sense id="minivan:1:n" synset="103770679"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="set" partOfSpeech="s"/>
+            <Sense id="set:2:s" synset="301564603"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="set" partOfSpeech="v"/>
+            <Sense id="set:2:v" synset="200699815"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="set" partOfSpeech="n"/>
+            <Sense id="set:2:n" synset="107999699"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="construction" partOfSpeech="n"/>
+            <Sense id="construction:1:n"/>
+            <Sense id="construction:2:n"/>
+            <Sense id="construction:3:n"/>
+            <Sense id="construction:4:n" synset="104341686"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="'gas guzzler'" partOfSpeech="n"/>
+            <Sense id="gas guzzler:1:n" synset="103421669"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="used-car" partOfSpeech="n"/>
+            <Sense id="used-car:1:n" synset="104516354"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="'station wagon'" partOfSpeech="n"/>
+            <Sense id="station wagon:1:n" synset="102814533"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="'wheeled vehicle'" partOfSpeech="n"/>
+            <Sense id="wheeled vehicle:1:n" synset="104576211"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="jalopy" partOfSpeech="n"/>
+            <Sense id="jalopy:1:n" synset="102924554"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="'Carcharodon carcharias'" partOfSpeech="n"/>
+            <Sense id="Carcharodon carcharias:1:n" synset="101484850"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="sedan" partOfSpeech="n"/>
+            <Sense id="sedan:1:n" synset="104166281"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="artifact" partOfSpeech="n"/>
+            <Sense id="artifact:1:n" synset="100021939"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="orangeness" partOfSpeech="n"/>
+            <Sense id="orangeness:1:n" synset="104965179"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="'funny wagon'" partOfSpeech="n"/>
+            <Sense id="funny wagon:1:n" synset="103404012"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="S.U.V." partOfSpeech="n"/>
+            <Sense id="S.U.V.:1:n" synset="104285965"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="brougham" partOfSpeech="n"/>
+            <Sense id="brougham:1:n"/>
+            <Sense id="brougham:2:n" synset="102907194"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="automobile" partOfSpeech="n"/>
+            <Sense id="automobile:1:n" synset="102958343"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="'motor vehicle'" partOfSpeech="n"/>
+            <Sense id="motor vehicle:1:n" synset="103791235"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="'compact car'" partOfSpeech="n"/>
+            <Sense id="compact car:1:n" synset="103079136"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="building" partOfSpeech="n"/>
+            <Sense id="building:1:n" synset="102913152"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="'man-eating shark'" partOfSpeech="n"/>
+            <Sense id="man-eating shark:1:n" synset="101484850"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="tourer" partOfSpeech="n"/>
+            <Sense id="tourer:1:n" />
+            <Sense id="tourer:2:n" synset="104459122"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="room" partOfSpeech="n"/>
+            <Sense id="room:1:n" synset="104105893"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="compact" partOfSpeech="n"/>
+            <Sense id="compact:1:n"/>
+            <Sense id="compact:2:n"/>
+            <Sense id="compact:3:n" synset="103079136"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="zymology" partOfSpeech="n"/>
+            <Sense id="zymology:1:n" synset="106080361"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="'white shark'" partOfSpeech="n"/>
+            <Sense id="white shark:1:n" synset="101484850"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="electric" partOfSpeech="n"/>
+            <Sense id="electric:1:n" synset="103268790"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="'electric car'" partOfSpeech="n"/>
+            <Sense id="electric car:1:n" synset="103268790"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="people" partOfSpeech="n"/>
+            <Sense id="people:1:n" synset="107942152"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="'estate car'" partOfSpeech="n"/>
+            <Sense id="estate car:1:n" synset="102814533"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="container" partOfSpeech="n"/>
+            <Sense id="container:1:n" synset="103094503"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="finisher" partOfSpeech="n"/>
+            <Sense id="finisher:1:n"/>
+            <Sense id="finisher:2:n"/>
+            <Sense id="finisher:3:n"/>
+            <Sense id="finisher:4:n"/>
+            <Sense id="finisher:5:n" synset="103342961"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="chassis" partOfSpeech="n"/>
+            <Sense id="chassis:1:n" synset="105217168"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="man-eater" partOfSpeech="n"/>
+            <Sense id="man-eater:1:n"/>
+            <Sense id="man-eater:2:n" synset="101484850"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="artefact" partOfSpeech="n"/>
+            <Sense id="artefact:1:n" synset="100021939"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="compartment" partOfSpeech="n"/>
+            <Sense id="compartment:1:n"/>
+            <Sense id="compartment:2:n" synset="103079741"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="auto" partOfSpeech="n"/>
+            <Sense id="auto:1:n" synset="102958343"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="'orchard apple tree'" partOfSpeech="n"/>
+            <Sense id="orchard apple tree:1:n" synset="112633994"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="'sport car'" partOfSpeech="n"/>
+            <Sense id="sport car:1:n" synset="104285008"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="'squad car'" partOfSpeech="n"/>
+            <Sense id="squad car:1:n" synset="103141065"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="cause" partOfSpeech="n"/>
+            <Sense id="cause:1:n"/>
+            <Sense id="cause:2:n"/>
+            <Sense id="cause:3:n"/>
+            <Sense id="cause:4:n" synset="100007347"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="shape" partOfSpeech="n"/>
+            <Sense id="shape:3:n" synset="105217168"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="object" partOfSpeech="n"/>
+            <Sense id="object:1:n" synset="100002684"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="loaner" partOfSpeech="n"/>
+            <Sense id="loaner:1:n"/>
+            <Sense id="loaner:2:n" synset="103680512"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="'great white shark'" partOfSpeech="n"/>
+            <Sense id="great white shark:1:n" synset="101484850"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="'orange tree'" partOfSpeech="n"/>
+            <Sense id="orange tree:1:n" synset="112708293"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="'physical object'" partOfSpeech="n"/>
+            <Sense id="physical object:1:n" synset="100002684"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="person" partOfSpeech="n"/>
+            <Sense id="person:1:n" synset="100007846"/>
+            <Sense id="person:2:n" synset="105217688"/>
+            <Sense id="person:3:n" synset="106326797"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="bus" partOfSpeech="n"/>
+            <Sense id="bus:1:n"/>
+            <Sense id="bus:2:n"/>
+            <Sense id="bus:3:n"/>
+            <Sense id="bus:4:n" synset="102924554"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="'hot rod'" partOfSpeech="n"/>
+            <Sense id="hot rod:1:n" synset="103543394"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="'Stanley Steamer'" partOfSpeech="n"/>
+            <Sense id="Stanley Steamer:1:n" synset="104302988"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="'causal agency'" partOfSpeech="n"/>
+            <Sense id="causal agency:1:n" synset="100007347"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="ambulance" partOfSpeech="n"/>
+            <Sense id="ambulance:1:n" synset="102701002"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="'prowl car'" partOfSpeech="n"/>
+            <Sense id="prowl car:1:n" synset="103141065"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="soul" partOfSpeech="n"/>
+            <Sense id="soul:1:n"/>
+            <Sense id="soul:2:n" synset="100007846"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="cruiser" partOfSpeech="n"/>
+            <Sense id="cruiser:1:n" synset="103141065"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="convertible" partOfSpeech="n"/>
+            <Sense id="convertible:1:n" synset="103100240"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="SUV" partOfSpeech="n"/>
+            <Sense id="SUV:1:n" synset="104285965"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="taxi" partOfSpeech="n"/>
+            <Sense id="taxi:1:n" synset="102930766"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="'race car'" partOfSpeech="n"/>
+            <Sense id="race car:1:n" synset="104037443"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="bod" partOfSpeech="n"/>
+            <Sense id="bod:1:n" synset="105217168"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="frame" partOfSpeech="n"/>
+            <Sense id="frame:1:n"/>
+            <Sense id="frame:2:n"/>
+            <Sense id="frame:3:n" synset="105217168"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="'physical body'" partOfSpeech="n"/>
+            <Sense id="physical body:1:n" synset="105217168"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="fleet" partOfSpeech="n"/>
+            <Sense id="fleet:1:n"/>
+            <Sense id="fleet:2:n" synset="108293490"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="railcar" partOfSpeech="n"/>
+            <Sense id="railcar:1:n" synset="102959942"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="'touring car'" partOfSpeech="n"/>
+            <Sense id="touring car:1:n" synset="104459122"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="ferment" partOfSpeech="n"/>
+            <Sense id="ferment:1:n"/>
+            <Sense id="ferment:2:n"/>
+            <Sense id="ferment:3:n" synset="113575433"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="hatchback" partOfSpeech="n"/>
+            <Sense id="hatchback:1:n" synset="103498781"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="jeep" partOfSpeech="n"/>
+            <Sense id="jeep:1:n" synset="103594945"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="hot-rod" partOfSpeech="n"/>
+            <Sense id="hot-rod:1:n" synset="103543394"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="unit" partOfSpeech="n"/>
+            <Sense id="unit:1:n"/>
+            <Sense id="unit:2:n"/>
+            <Sense id="unit:3:n"/>
+            <Sense id="unit:4:n"/>
+            <Sense id="unit:5:n"/>
+            <Sense id="unit:6:n" synset="100003553"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="vehicle" partOfSpeech="n"/>
+            <Sense id="vehicle:1:n" synset="104524313"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="man" partOfSpeech="n"/>
+            <Sense id="man:1:n"/>
+            <Sense id="man:2:n"/>
+            <Sense id="man:3:n"/>
+            <Sense id="man:4:n" synset="102472293"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="'cable car'" partOfSpeech="n"/>
+            <Sense id="cable car:1:n" synset="102934451"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="whole" partOfSpeech="n"/>
+            <Sense id="whole:1:n"/>
+            <Sense id="whole:2:n" synset="100003553"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="'physical entity'" partOfSpeech="n"/>
+            <Sense id="physical entity:1:n" synset="100001930"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="apple" partOfSpeech="n"/>
+            <Sense id="apple:1:n" synset="107739125"/>
+            <Sense id="apple:2:n" synset="112633994"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="individual" partOfSpeech="n"/>
+            <Sense id="individual:1:n" synset="100007846"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="'stock car'" partOfSpeech="n"/>
+            <Sense id="stock car:1:n" synset="104322924"/>
+            <Sense id="stock car:2:n" synset="104322801"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="'beach wagon'" partOfSpeech="n"/>
+            <Sense id="beach wagon:1:n" synset="102814533"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="'station waggon'" partOfSpeech="n"/>
+            <Sense id="station waggon:1:n" synset="102814533"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="'horseless carriage'" partOfSpeech="n"/>
+            <Sense id="horseless carriage:1:n" synset="103539103"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="berlin" partOfSpeech="n"/>
+            <Sense id="berlin:1:n"/>
+            <Sense id="berlin:2:n"/>
+            <Sense id="berlin:3:n" synset="102831335"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="mortal" partOfSpeech="n"/>
+            <Sense id="mortal:1:n" synset="100007846"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="'railway car'" partOfSpeech="n"/>
+            <Sense id="railway car:1:n" synset="102959942"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="coupe" partOfSpeech="n"/>
+            <Sense id="coupe:1:n" synset="103119396"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="landrover" partOfSpeech="n"/>
+            <Sense id="landrover:1:n" synset="103594945"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="limousine" partOfSpeech="n"/>
+            <Sense id="limousine:1:n" synset="103670208"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="'non lexicalised sense'" partOfSpeech="n"/>
+            <Sense id="non lexicalised sense:1:n" synset="810000000"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="waggon" partOfSpeech="n"/>
+            <Sense id="waggon:1:n"/>
+            <Sense id="waggon:2:n" synset="102814533"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="figure" partOfSpeech="n"/>
+            <Sense id="figure:1:n"/>
+            <Sense id="figure:2:n" synset="105217168"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="minicab" partOfSpeech="n"/>
+            <Sense id="minicab:1:n" synset="103769967"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="zymurgy" partOfSpeech="n"/>
+            <Sense id="zymurgy:1:n" synset="106080361"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="'material body'" partOfSpeech="n"/>
+            <Sense id="material body:1:n" synset="105217168"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="'grammatical category'" partOfSpeech="n"/>
+            <Sense id="grammatical category:1:n" synset="106309383"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="flesh" partOfSpeech="n"/>
+            <Sense id="flesh:1:n"/>
+            <Sense id="flesh:2:n" synset="105217168"/>
+        </LexicalEntry>
+        <LexicalEntry>
+            <Lemma writtenForm="machine" partOfSpeech="n"/>
+            <Sense id="machine:1:n"/>
+            <Sense id="machine:2:n"/>
+            <Sense id="machine:3:n"/>
+            <Sense id="machine:4:n"/>
+            <Sense id="machine:5:n"/>
+            <Sense id="machine:6:n" synset="102958343"/>
+        </LexicalEntry>
+        <Synset id="104170037">
+            <Definition gloss="a wheeled vehicle that carries in itself a means of propulsion"/>
+            <SynsetRelations>
+                <SynsetRelation target="104576211" relType="hypernym"/>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="102831335">
+            <Definition gloss="a limousine with a glass partition between the front and back seats"/>
+            <SynsetRelations>
+                <SynsetRelation target="103670208" relType="hypernym"/>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="104105893">
+            <Definition
+                    gloss="an area within a building enclosed by walls and floor and ceiling; &quot;the rooms were very small but they had a nice view&quot;"/>
+            <SynsetRelations>
+                <SynsetRelation target="102735688" relType="hypernym"/>
+                <SynsetRelation target="102913152" relType="partial_holonym"/>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="102472293">
+            <Definition gloss="any living or extinct member of the family Hominidae characterized by superior intelligence, articulate speech,
+			and erect carriage"/>
+            <SynsetRelations>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="104576211">
+            <Definition
+                    gloss="a vehicle that moves on wheels and usually has a container for transporting things or people; &quot;the oldest known wheeled vehicles were found in Sumer and Syria and date from around 3500 BC&quot;"/>
+            <SynsetRelations>
+                <SynsetRelation target="103094503" relType="hypernym"/>
+                <SynsetRelation target="104524313" relType="hypernym"/>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="103141065">
+            <Definition
+                    gloss="a car in which policemen cruise the streets; equipped with radiotelephonic communications to headquarters"/>
+            <SynsetRelations>
+                <SynsetRelation target="102958343" relType="hypernym"/>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="100001740">
+            <Definition
+                    gloss="that which is perceived or known or inferred to have its own distinct existence (living or nonliving)"/>
+            <SynsetRelations>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="103770085">
+            <Definition gloss="a car that is even smaller than a subcompact car"/>
+            <SynsetRelations>
+                <SynsetRelation target="102958343" relType="hypernym"/>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="301251128">
+            <Definition
+                    gloss="having a low or inadequate temperature or feeling a sensation of coldness or having been made cold by e.g. ice or refrigeration; &quot;a cold climate&quot;; &quot;a cold room&quot;; &quot;dinner has gotten cold&quot;; &quot;cold fingers&quot;; &quot;if you are cold, turn up the heat&quot;; &quot;a cold beer&quot;"/>
+            <SynsetRelations>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="103575240">
+            <Definition gloss="an artifact (or system of artifacts) that is instrumental in accomplishing some end"/>
+            <SynsetRelations>
+                <SynsetRelation target="100021939" relType="hypernym"/>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="107999699">
+            <Definition
+                    gloss="(mathematics) an abstract collection of numbers or symbols; &quot;the set of prime numbers is infinite&quot;"/>
+            <SynsetRelations>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="102924554">
+            <Definition gloss="a car that is old and unreliable; &quot;the fenders had fallen off that old bus&quot;"/>
+            <SynsetRelations>
+                <SynsetRelation target="102958343" relType="hypernym"/>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="108293490">
+            <Definition gloss="group of motor vehicles operating together under the same ownership"/>
+            <SynsetRelations>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="105217688">
+            <Definition
+                    gloss="a human body (usually including the clothing); &quot;a weapon was hidden on his person&quot;"/>
+            <SynsetRelations>
+                <SynsetRelation target="105217168" relType="hypernym"/>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="103770679">
+            <Definition gloss="a small box-shaped passenger van; usually has removable seats; used as a family car"/>
+            <SynsetRelations>
+                <SynsetRelation target="102958343" relType="hypernym"/>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="103777568">
+            <Definition
+                    gloss="the first widely available automobile powered by a gasoline engine; mass-produced by Henry Ford from 1908 to 1927"/>
+            <SynsetRelations>
+                <SynsetRelation target="102958343" relType="hypernym"/>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="100004475">
+            <Definition
+                    gloss="a living thing that has (or can develop) the ability to act or function independently"/>
+            <SynsetRelations>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="104302988">
+            <Definition gloss="a steam-powered automobile"/>
+            <SynsetRelations>
+                <SynsetRelation target="102958343" relType="hypernym"/>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="810000000">
+            <Definition gloss="an example of a non-lexicalised synset"/>
+            <SynsetRelations>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="201072949">
+            <Definition
+                    gloss="participate in games or sport; &quot;We played hockey all afternoon&quot;; &quot;play cards&quot;; &quot;Pele played for the Brazilian teams in many important matches&quot;"/>
+            <SynsetRelations>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="104516354">
+            <Definition gloss="a car that has been previously owned; not a new car"/>
+            <SynsetRelations>
+                <SynsetRelation target="102958343" relType="hypernym"/>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="104965179">
+            <Definition gloss="orange color or pigment; any of a range of colors between red and yellow"/>
+            <SynsetRelations>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="102701002">
+            <Definition gloss="a vehicle that takes people to and from hospitals"/>
+            <SynsetRelations>
+                <SynsetRelation target="102958343" relType="hypernym"/>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="103079741">
+            <Definition gloss="a partitioned section, chamber, or separate room within a larger enclosed area"/>
+            <SynsetRelations>
+                <SynsetRelation target="104105893" relType="hypernym"/>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="113575433">
+            <Definition gloss="a process in which an agent causes an organic substance to break down into simpler substances; especially, the
+			anaerobic breakdown of sugar into alcohol"/>
+            <SynsetRelations>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="100007347">
+            <Definition gloss="any entity that produces an effect or is responsible for events or results"/>
+            <SynsetRelations>
+                <SynsetRelation target="100001930" relType="hypernym"/>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="104576211">
+            <Definition
+                    gloss="a vehicle that moves on wheels and usually has a container for transporting things or people; &quot;the oldest known wheeled vehicles were found in Sumer and Syria and date from around 3500 BC&quot;"/>
+            <SynsetRelations>
+                <SynsetRelation target="103094503" relType="hypernym"/>
+                <SynsetRelation target="104524313" relType="hypernym"/>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="102934451">
+            <Definition
+                    gloss="a conveyance for passengers or freight on a cable railway; &quot;they took a cable car to the top of the mountain&quot;"/>
+            <SynsetRelations>
+                <SynsetRelation target="103079741" relType="hypernym"/>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="102960352">
+            <Definition gloss="where passengers ride up and down; &quot;the car was on the top floor&quot;"/>
+            <SynsetRelations>
+                <SynsetRelation target="103079741" relType="hypernym"/>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="104037443">
+            <Definition gloss="a fast car that competes in races"/>
+            <SynsetRelations>
+                <SynsetRelation target="102958343" relType="hypernym"/>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="102735688">
+            <Definition
+                    gloss="a part of a structure having some specific characteristic or function; &quot;the spacious cooking area provided plenty of room for servants&quot;"/>
+            <SynsetRelations>
+                <SynsetRelation target="104341686" relType="hypernym"/>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="104166281">
+            <Definition gloss="a car that is closed and that has front and rear seats and two or four doors"/>
+            <SynsetRelations>
+                <SynsetRelation target="102958343" relType="hypernym"/>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="300378892">
+            <Definition gloss="of the color between red and yellow; similar to the color of a ripe orange"/>
+            <SynsetRelations>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="106080361">
+            <Definition
+                    gloss="the branch of chemistry concerned with fermentation (as in making wine or brewing or distilling)"/>
+            <SynsetRelations>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="301564603">
+            <Definition
+                    gloss="fixed and unmoving; &quot;with eyes set in a fixed glassy stare&quot;; &quot;his bearded face already has a set hollow look&quot;- Connor Cruise O''Brien; &quot;a face rigid with pain&quot;"/>
+            <SynsetRelations>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="114991210">
+            <Definition gloss="any pigment producing the orange color"/>
+            <SynsetRelations>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="100003553">
+            <Definition
+                    gloss="an assemblage of parts that is regarded as a single entity; &quot;how big is that part compared to the whole?&quot;; &quot;the team is a unit&quot;"/>
+            <SynsetRelations>
+                <SynsetRelation target="100002684" relType="hypernym"/>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="103543394">
+            <Definition gloss="a car modified to increase its speed and acceleration"/>
+            <SynsetRelations>
+                <SynsetRelation target="102958343" relType="hypernym"/>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="104285965">
+            <Definition gloss="a high-performance four-wheel drive car built on a truck chassis"/>
+            <SynsetRelations>
+                <SynsetRelation target="102958343" relType="hypernym"/>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="103670208">
+            <Definition gloss="large luxurious car; usually driven by a chauffeur"/>
+            <SynsetRelations>
+                <SynsetRelation target="102958343" relType="hypernym"/>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="102930766">
+            <Definition
+                    gloss="a car driven by a person whose job is to take passengers where they want to go in exchange for money"/>
+            <SynsetRelations>
+                <SynsetRelation target="102958343" relType="hypernym"/>
+                <SynsetRelation target="108293490" relType="member_holonym"/>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="102907194">
+            <Definition gloss="a sedan that has no roof over the driver''s seat"/>
+            <SynsetRelations>
+                <SynsetRelation target="104166281" relType="hypernym"/>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="112708293">
+            <Definition gloss="any citrus tree bearing oranges"/>
+            <SynsetRelations>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="103493219">
+            <Definition gloss="a car that resembles a convertible but has a fixed rigid top"/>
+            <SynsetRelations>
+                <SynsetRelation target="102958343" relType="hypernym"/>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="105217168">
+            <Definition
+                    gloss="alternative names for the body of a human being; &quot;Leonardo studied the human body&quot;; &quot;he has a strong physique&quot;; &quot;the spirit is willing but the flesh is weak&quot;"/>
+            <SynsetRelations>
+                <SynsetRelation target="102472293" relType="partial_holonym"/>
+                <SynsetRelation target="100007846" relType="partial_holonym"/>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="104524313">
+            <Definition gloss="a conveyance that transports people or objects"/>
+            <SynsetRelations>
+                <SynsetRelation target="103100490" relType="hypernym"/>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="103881534">
+            <Definition gloss="a police cruiser"/>
+            <SynsetRelations>
+                <SynsetRelation target="103141065" relType="hypernym"/>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="102814533">
+            <Definition gloss="a car that has a long body and rear door with space behind rear seat"/>
+            <SynsetRelations>
+                <SynsetRelation target="102958343" relType="hypernym"/>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="103791235">
+            <Definition gloss="a self-propelled wheeled vehicle that does not run on rails"/>
+            <SynsetRelations>
+                <SynsetRelation target="104170037" relType="hypernym"/>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="103594945">
+            <Definition gloss="a car suitable for traveling over rough terrain"/>
+            <SynsetRelations>
+                <SynsetRelation target="102958343" relType="hypernym"/>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="103079741">
+            <Definition gloss="a partitioned section, chamber, or separate room within a larger enclosed area"/>
+            <SynsetRelations>
+                <SynsetRelation target="104105893" relType="hypernym"/>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="102959942">
+            <Definition
+                    gloss="a wheeled vehicle adapted to the rails of railroad; &quot;three cars had jumped the rails&quot;"/>
+            <SynsetRelations>
+                <SynsetRelation target="104576211" relType="hypernym"/>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="100021939">
+            <Definition gloss="a man-made object taken as a whole"/>
+            <SynsetRelations>
+                <SynsetRelation target="100003553" relType="hypernym"/>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="104459122">
+            <Definition gloss="large open car seating four with folding top"/>
+            <SynsetRelations>
+                <SynsetRelation target="102958343" relType="hypernym"/>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="303000447">
+            <Definition gloss="of or relating to or causing fermentation"/>
+            <SynsetRelations>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="103539103">
+            <Definition
+                    gloss="an early term for an automobile; &quot;when automobiles first replaced horse-drawn carriages they were called horseless carriages&quot;"/>
+            <SynsetRelations>
+                <SynsetRelation target="102958343" relType="hypernym"/>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="103870105">
+            <Definition
+                    gloss="a high-performance car that leads a parade of competing cars through the pace lap and then pulls off the course"/>
+            <SynsetRelations>
+                <SynsetRelation target="102958343" relType="hypernym"/>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="103769967">
+            <Definition gloss="a minicar used as a taxicab"/>
+            <SynsetRelations>
+                <SynsetRelation target="103770085" relType="hypernym"/>
+                <SynsetRelation target="102930766" relType="hypernym"/>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="103100490">
+            <Definition gloss="something that serves as a means of transportation"/>
+            <SynsetRelations>
+                <SynsetRelation target="103575240" relType="hypernym"/>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="104322801">
+            <Definition gloss="a racing car with the basic chassis of a commercially available car"/>
+            <SynsetRelations>
+                <SynsetRelation target="104037443" relType="hypernym"/>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="107739125">
+            <Definition gloss="fruit with red or yellow or green skin and sweet to tart crisp whitish flesh"/>
+            <SynsetRelations>
+                <SynsetRelation target="112633994" relType="partial_holonym"/>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="107942152">
+            <Definition
+                    gloss="(plural) any group of human beings (men or women or children) collectively; &quot;old people&quot;; &quot;there were at least 200 people in the audience&quot;"/>
+            <SynsetRelations>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="103680512">
+            <Definition gloss="a car that is lent as a replacement for one that is under repair"/>
+            <SynsetRelations>
+                <SynsetRelation target="102958343" relType="hypernym"/>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="104322924">
+            <Definition gloss="a car kept in dealers'stock for regular sales"/>
+            <SynsetRelations>
+                <SynsetRelation target="102958343" relType="hypernym"/>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="104285008">
+            <Definition gloss="a small low car with a high-powered engine; usually seats two persons"/>
+            <SynsetRelations>
+                <SynsetRelation target="102958343" relType="hypernym"/>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="102958343">
+            <Definition
+                    gloss="a motor vehicle with four wheels; usually propelled by an internal combustion engine; &quot;he needs a car to get to work&quot;"/>
+            <SynsetRelations>
+                <SynsetRelation target="103791235" relType="hypernym"/>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="100007846">
+            <Definition gloss="a human being; &quot;there was too much for one person to do&quot;"/>
+            <SynsetRelations>
+                <SynsetRelation target="100007347" relType="hypernym"/>
+                <SynsetRelation target="100004475" relType="hypernym"/>
+                <SynsetRelation target="107942152" relType="member_holonym"/>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="100001930">
+            <Definition gloss="an entity that has physical existence"/>
+            <SynsetRelations>
+                <SynsetRelation target="100001740" relType="hypernym"/>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="103100240">
+            <Definition gloss="a car that has top that can be folded or removed"/>
+            <SynsetRelations>
+                <SynsetRelation target="102958343" relType="hypernym"/>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="301257612">
+            <Definition
+                    gloss="extended meanings; especially of psychological coldness; without human warmth or emotion; &quot;a cold unfriendly nod&quot;; &quot;a cold and unaffectionate person&quot;; &quot;a cold impersonal manner&quot;; &quot;cold logic&quot;; &quot;the concert left me cold&quot;"/>
+            <SynsetRelations>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="106309383">
+            <Definition gloss="(grammar) a category of words having the same grammatical properties"/>
+            <SynsetRelations>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="103268790">
+            <Definition gloss="a car that is powered by electricity"/>
+            <SynsetRelations>
+                <SynsetRelation target="102958343" relType="hypernym"/>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="101484850">
+            <Definition gloss="large aggressive shark widespread in warm seas; known to attack humans"/>
+            <SynsetRelations>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="103404012">
+            <Definition gloss="an ambulance used to transport patients to a mental hospital"/>
+            <SynsetRelations>
+                <SynsetRelation target="102701002" relType="hypernym"/>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="103079136">
+            <Definition gloss="a small and economical car"/>
+            <SynsetRelations>
+                <SynsetRelation target="102958343" relType="hypernym"/>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="104097373">
+            <Definition gloss="an open automobile having a front seat and a rumble seat"/>
+            <SynsetRelations>
+                <SynsetRelation target="102958343" relType="hypernym"/>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="103421669">
+            <Definition gloss="a car with relatively low fuel efficiency"/>
+            <SynsetRelations>
+                <SynsetRelation target="102958343" relType="hypernym"/>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="103094503">
+            <Definition
+                    gloss="any object that can be used to hold things (especially a large metal boxlike object of standardized dimensions that can be loaded from one form of transport to another)"/>
+            <SynsetRelations>
+                <SynsetRelation target="103575240" relType="hypernym"/>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="104201733">
+            <Definition gloss="another name for a station wagon"/>
+            <SynsetRelations>
+                <SynsetRelation target="102814533" relType="hypernym"/>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="104347119">
+            <Definition gloss="a car smaller than a compact car"/>
+            <SynsetRelations>
+                <SynsetRelation target="102958343" relType="hypernym"/>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="107747607">
+            <Definition gloss="round yellow to orange fruit of any of several citrus trees"/>
+            <SynsetRelations>
+                <SynsetRelation target="112708293" relType="partial_holonym"/>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="102913152">
+            <Definition
+                    gloss="a structure that has a roof and walls and stands more or less permanently in one place; &quot;there was a three-story building on the corner&quot;; &quot;it was an imposing edifice&quot;"/>
+            <SynsetRelations>
+                <SynsetRelation target="104341686" relType="hypernym"/>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="103119396">
+            <Definition gloss="a car with two doors and front seats and a luggage compartment"/>
+            <SynsetRelations>
+                <SynsetRelation target="102958343" relType="hypernym"/>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="103342961">
+            <Definition gloss="a race car that finishes a race"/>
+            <SynsetRelations>
+                <SynsetRelation target="104037443" relType="hypernym"/>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="106326797">
+            <Definition
+                    gloss="a grammatical category used in the classification of pronouns, possessive determiners, and verb forms according to whether they indicate the speaker, the addressee, or a third party; &quot;stop talking about yourself in the third person&quot;"/>
+            <SynsetRelations>
+                <SynsetRelation target="106309383" relType="hypernym"/>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="100002684">
+            <Definition
+                    gloss="a tangible and visible entity; an entity that can cast a shadow; &quot;it was full of rackets, balls and other objects&quot;"/>
+            <SynsetRelations>
+                <SynsetRelation target="100001930" relType="hypernym"/>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="112633994">
+            <Definition
+                    gloss="native Eurasian tree widely cultivated in many varieties for its firm rounded edible fruits"/>
+            <SynsetRelations>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="103472937">
+            <Definition
+                    gloss="a taxicab that cruises for customers although it is licensed only to respond to calls"/>
+            <SynsetRelations>
+                <SynsetRelation target="102930766" relType="hypernym"/>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="103498781">
+            <Definition gloss="a car having a hatchback door"/>
+            <SynsetRelations>
+                <SynsetRelation target="102958343" relType="hypernym"/>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="200699815">
+            <Definition gloss="fix conclusively or authoritatively; &quot;set the rules&quot;"/>
+            <SynsetRelations>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="104341686">
+            <Definition
+                    gloss="a thing constructed; a complex entity constructed of many parts; &quot;the structure consisted of a series of arches&quot;; &quot;she wore her hair in an amazing construction of whirls and ribbons&quot;"/>
+            <SynsetRelations>
+                <SynsetRelation target="100021939" relType="hypernym"/>
+            </SynsetRelations>
+        </Synset>
+        <Synset id="102960501">
+            <Definition
+                    gloss="the compartment that is suspended from an airship and that carries personnel and the cargo and the power plant"/>
+            <SynsetRelations>
+                <SynsetRelation target="103079741" relType="hypernym"/>
+            </SynsetRelations>
+        </Synset>
+    </Lexicon>
+</LexicalResource>

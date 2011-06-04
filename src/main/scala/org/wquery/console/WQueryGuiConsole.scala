@@ -59,9 +59,7 @@ object WQueryGuiConsole extends SimpleSwingApplication {
         
         contents += new MenuItem("Load Queries...") {
           reactions += dialogApproved(this, queriesChooser, "Load", { file =>
-            for (line <- Source.fromFile(file).getLines) {
-              queryArea.text += line
-            }            
+            Source.fromFile(file).getLines.foreach(queryArea.text += _ + '\n')
           })          
         }
         
