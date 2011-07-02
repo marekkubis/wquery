@@ -24,8 +24,8 @@
     <orderEntry type="library" name="Maven: org.scala-lang:scala-library:2.9.0-1" level="project" />
     <orderEntry type="library" name="Maven: org.scala-lang:scala-swing:2.9.0-1" level="project" />
     <orderEntry type="library" name="Maven: org.slf4j:slf4j-api:1.6.1" level="project" />
-    <orderEntry type="library" name="Maven: org.slf4j:slf4j-log4j12:1.6.1" level="project" />
-    <orderEntry type="library" name="Maven: log4j:log4j:1.2.16" level="project" />
+    <orderEntry type="library" name="Maven: ch.qos.logback:logback-classic:0.9.29" level="project" />
+    <orderEntry type="library" name="Maven: ch.qos.logback:logback-core:0.9.29" level="project" />
     <orderEntry type="library" name="Maven: org.mortbay.jetty:jetty:6.1.24" level="project" />
     <orderEntry type="library" name="Maven: org.mortbay.jetty:jetty-util:6.1.24" level="project" />
     <orderEntry type="library" name="Maven: org.mortbay.jetty:servlet-api:2.5-20081211" level="project" />
