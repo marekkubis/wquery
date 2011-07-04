@@ -107,8 +107,7 @@ trait WQueryParsers extends RegexParsers {
 
   def dots = rep1(".") ^^ { _.size }
 
-  def rel_expr: Parser[RelationalExpr]
-    = chainl1(unary_rel_expr, "|" ^^ { x => ((l:RelationalExpr, r:RelationalExpr) => UnionRelationalExpr(l, r)) })
+  def rel_expr = rep1sep(unary_rel_expr, "|")  ^^ { UnionRelationalExpr(_) }
 
   def unary_rel_expr = (
     ("^" ~> notQuotedString) ^^ { id => UnaryRelationalExpr(List("destination", id, "source")) } // syntactic sugar

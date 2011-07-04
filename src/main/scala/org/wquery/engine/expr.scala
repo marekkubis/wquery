@@ -575,6 +575,7 @@ case class BindTransformationExpr(decls: List[Variable]) extends TransformationE
 
 case class PathExpr(generator: EvaluableExpr, steps: List[TransformationExpr]) extends EvaluableExpr {
   def evaluate(wordNet: WordNet, bindings: Bindings) = {
+    // separate projections
     steps.foldLeft(generator.evaluate(wordNet, bindings))((step, trans) => trans.transform(wordNet, bindings, step))
   }
 }
@@ -673,25 +674,22 @@ case class UnaryRelationalExpr(ids: List[String]) extends RelationalExpr {
   }
 }
 
-case class UnionRelationalExpr(lexpr: RelationalExpr, rexpr: RelationalExpr) extends RelationalExpr {
+case class UnionRelationalExpr(exprs: List[RelationalExpr]) extends RelationalExpr {
   def generate(wordNet: WordNet, bindings: Bindings) = {
-    val leval = lexpr.generate(wordNet, bindings)
-    val reval = rexpr.generate(wordNet, bindings)
-
-    DataSet(leval.paths  union reval.paths) 	  
+    DataSet(exprs.flatMap(_.generate(wordNet, bindings).paths))
   }
   
   def canTransform(wordNet: WordNet, bindings: Bindings, dataSet: DataSet) = {
-	lexpr.canTransform(wordNet, bindings, dataSet) && rexpr.canTransform(wordNet, bindings, dataSet) 	  
+	  exprs.forall(_.canTransform(wordNet, bindings, dataSet))
   }
 	
   def transform(wordNet: WordNet, bindings: Bindings, dataSet: DataSet, pos: Int) = {
-    val lresult = lexpr.transform(wordNet, bindings, dataSet, pos)
-    val rresult = rexpr.transform(wordNet, bindings, dataSet, pos)
+    val results = exprs.map(_.transform(wordNet, bindings, dataSet, pos))
 
-    DataSet(lresult.paths union rresult.paths,
-      lresult.pathVars.map(x => (x._1, x._2 ++ rresult.pathVars(x._1))),
-      lresult.stepVars.map(x => (x._1, x._2 ++ rresult.stepVars(x._1)))
+    DataSet(
+      results.flatMap(_.paths),
+      results.head.pathVars.map(pathVar => (pathVar._1, results.flatMap(_.pathVars(pathVar._1)))),
+      results.head.stepVars.map(stepVar => (stepVar._1, results.flatMap(_.stepVars(stepVar._1))))
     )
   }
 }
