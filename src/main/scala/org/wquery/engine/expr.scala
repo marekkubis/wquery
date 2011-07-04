@@ -338,10 +338,6 @@ case class FunctionExpr(name: String, args: EvaluableExpr) extends EvaluableExpr
 /*
  * Path related expressions
  */
-case class StepExpr(lexpr: EvaluableExpr, rexpr: TransformationExpr) extends EvaluableExpr {
-  def evaluate(wordNet: WordNet, bindings: Bindings) = rexpr.transform(wordNet, bindings, lexpr.evaluate(wordNet, bindings))
-}
-
 trait VariableBindings {
   def bind(dataSet: DataSet, decls: List[Variable]) = {
     if (decls != Nil) {          
@@ -577,9 +573,9 @@ case class BindTransformationExpr(decls: List[Variable]) extends TransformationE
   }
 }
 
-case class PathExpr(expr: EvaluableExpr) extends EvaluableExpr {
-  def evaluate(wordNet: WordNet, bindings: Bindings) = { //TODO extend this method or remove this class
-    expr.evaluate(wordNet, bindings)
+case class PathExpr(generator: EvaluableExpr, steps: List[TransformationExpr]) extends EvaluableExpr {
+  def evaluate(wordNet: WordNet, bindings: Bindings) = {
+    steps.foldLeft(generator.evaluate(wordNet, bindings))((step, trans) => trans.transform(wordNet, bindings, step))
   }
 }
 

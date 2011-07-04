@@ -86,7 +86,7 @@ trait WQueryParsers extends RegexParsers {
     | path
   )
 
-  def path = chainl1(generator, step, success((l:EvaluableExpr, r:TransformationExpr) => StepExpr(l , r))) ^^ { x => PathExpr(x) }
+  def path = generator ~ rep(step) ^^ { case gen~steps => PathExpr(gen, steps) }
 
   def step = (
     node_trans
