@@ -9,7 +9,7 @@ class InMemoryWordNetStore extends WordNetStore {
 
   def relations = relationsSet.toList
 
-  def generate(relation: Relation, from: List[(String, List[Any])], to: List[String]) = {
+  def fetch(relation: Relation, from: List[(String, List[Any])], to: List[String]) = {
     val buffer = DataSetBuffers.createPathBuffer
     val (sourceName, sourceValues) = from.head
     val destinations = from.tail

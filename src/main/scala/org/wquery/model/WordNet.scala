@@ -1,12 +1,12 @@
 package org.wquery.model
 import org.wquery.WQueryModelException
 
-class WordNet(store: WordNetStore) {
+class WordNet(val store: WordNetStore) {
   for (relation <- WordNet.relations)
     if (!store.relations.contains(relation))
       store.add(relation)
 
-  def generateAllTuples(relation: Relation, args: List[String]) = store.generate(relation, args.map(x => (x, List[Any]())), args)
+  def generateAllTuples(relation: Relation, args: List[String]) = store.fetch(relation, args.map(x => (x, List[Any]())), args)
 
   def synsets: DataSet = generateAllTuples(WordNet.SynsetSet, List(Relation.Source))
   
@@ -32,24 +32,24 @@ class WordNet(store: WordNetStore) {
   }
 
   def getSynsetsBySenses(senses: List[Sense]) = {
-    store.generate(WordNet.SenseToSynset,  List((Relation.Source, senses)), List(Relation.Destination))
+    store.fetch(WordNet.SenseToSynset,  List((Relation.Source, senses)), List(Relation.Destination))
   }
 
   def getSynsetsByWordForms(wordForms: List[String]) = {
-    store.generate(WordNet.WordFormToSynsets,  List((Relation.Source, wordForms)), List(Relation.Destination))
+    store.fetch(WordNet.WordFormToSynsets,  List((Relation.Source, wordForms)), List(Relation.Destination))
   }
 
   def getSenseByWordFormAndSenseNumberAndPos(word: String, num: Int, pos: String) = {
-    store.generate(WordNet.SenseToWordFormSenseNumberAndPos,
+    store.fetch(WordNet.SenseToWordFormSenseNumberAndPos,
       List((Relation.Destination, List(word)), ("num", List(num)), ("pos", List(pos))), List(Relation.Source))
   }
   
   def getSensesByWordFormAndSenseNumber(word: String, num: Int) = {
-    store.generate(WordNet.SenseToWordFormSenseNumberAndPos,
+    store.fetch(WordNet.SenseToWordFormSenseNumberAndPos,
       List((Relation.Destination, List(word)), ("num", List(num))), List(Relation.Source))
   }
 
-  def getWordForm(word: String) = store.generate(WordNet.WordSet, List((Relation.Source, List(word))), List(Relation.Source))
+  def getWordForm(word: String) = store.fetch(WordNet.WordSet, List((Relation.Source, List(word))), List(Relation.Source))
   
   def getRelation(name: String, sourceType: DataType, sourceName: String) = store.relations.find(r => r.name == name && r.arguments.get(sourceName) == Some(sourceType))
 

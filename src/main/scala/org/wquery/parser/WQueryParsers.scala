@@ -1,6 +1,7 @@
 package org.wquery.parser
 import org.wquery.{WQueryParsingErrorException, WQueryParsingFailureException}
 import scala.util.parsing.combinator.RegexParsers
+import org.wquery.model.DataSet
 import org.wquery.engine._
 
 trait WQueryParsers extends RegexParsers {
@@ -184,39 +185,39 @@ trait WQueryParsers extends RegexParsers {
   def rel_expr_generator = rel_expr ~ quantifier ^^ { case expr~quant => ContextByRelationalExprReq(expr, quant) }
 
   def boolean_generator = (
-    "true" ^^^ { BooleanByValueReq(true) }
-    | "false" ^^^ { BooleanByValueReq(false) }
+    "true" ^^^ { ConstantExpr(DataSet.fromValue(true)) }
+    | "false" ^^^ { ConstantExpr(DataSet.fromValue(false)) }
   )
 
   def synset_generator = (
-    "{}" ^^ { _ => SynsetAllReq() }
+    "{}" ^^ { _ => FetchExprs.synsets }
     | "{" ~> expr <~ "}" ^^ { SynsetByExprReq(_) }
   )
 
   def sense_generator = (
-    "::" ^^ { _ => SenseAllReq() }
+    "::" ^^ { _ => FetchExprs.senses }
     | alphaLit ~ ":" ~ integerNum ~ ":" ~ alphaLit ^^ {
-      case word~_~num~_~pos => SenseByWordFormAndSenseNumberAndPosReq(word, num, pos)
+      case word~_~num~_~pos => FetchExprs.senseByWordFormAndSenseNumberAndPos(word, num, pos)
     }
     | alphaLit ~ ":" ~ integerNum ^^ {
-      case word~_~num => SenseByWordFormAndSenseNumberReq(word, num)
+      case word~_~num => FetchExprs.sensesByWordFormAndSenseNumber(word, num)
     }
   )
 
   def function_call_generator = notQuotedString ~ ("(" ~> expr <~ ")") ^^ { case name~y => FunctionExpr(name, y) }
 
   def quoted_word_generator = (
-    backQuotedString ^^ { StringByValueReq(_) }
-    | quotedString ^^ { WordFormByValueReq(_) }
+    backQuotedString ^^ { value => ConstantExpr(DataSet.fromValue(value)) }
+    | quotedString ^^ { value => if (value == "") FetchExprs.words else FetchExprs.wordByValue(value) }
     | doubleQuotedString ^^ { WordFormByRegexReq(_) }
   )
 
-  def float_generator = floatNum ^^ { FloatByValueReq(_) }
-  def sequence_generator = integerNum ~ ".." ~ integerNum ^^ { case l~_~r => SequenceByBoundsReq(l, r) }
-  def integer_generator = integerNum ^^ { IntegerByValueReq(_) }
+  def float_generator = floatNum ^^ { value => ConstantExpr(DataSet.fromValue(value)) }
+  def sequence_generator = integerNum ~ ".." ~ integerNum ^^ { case left~_~right => ConstantExpr(DataSet.fromList((left to right).toList)) }
+  def integer_generator = integerNum ^^ { value => ConstantExpr(DataSet.fromValue(value)) }
   def back_generator = rep1("#") ^^ { x => ContextByReferenceReq(x.size) }
   def filter_generator = filter ^^ { BooleanByFilterReq(_) }
-  def empty_set_generator = "<>" ^^ { _ => EmptySetReq() }
+  def empty_set_generator = "<>" ^^ { _ => ConstantExpr(DataSet.empty) }
   def expr_generator = "(" ~> expr <~ ")"
   def variable_generator = var_decl ^^ { ContextByVariableReq(_) }
   def arc_generator = "\\" ~> unary_rel_expr ^^ { ArcByUnaryRelationalExprReq(_) }

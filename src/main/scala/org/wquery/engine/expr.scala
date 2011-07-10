@@ -1,7 +1,7 @@
 package org.wquery.engine
 import org.wquery.{WQueryEvaluationException, WQueryModelException}
-import org.wquery.model.{WordNet, IntegerType, Relation, StringType, SenseType, Sense, BasicType, UnionType, ValueType, TupleType, AggregateFunction, ScalarFunction, FloatType, FunctionArgumentType, Arc, DataSet, DataSetBuffer, DataSetBuffers}
 import scala.collection.mutable.ListBuffer
+import org.wquery.model._
 
 sealed abstract class Expr
 
@@ -788,12 +788,36 @@ case class PathConditionExpr(expr: PathExpr) extends ConditionalExpr {
 /*
  * Generators
  */
-case class BooleanByValueReq(value: Boolean) extends SelfEvaluableExpr {
-  def evaluate = DataSet.fromValue(value)
+case class FetchExpr(relation: Relation, from: List[(String, List[Any])], to: List[String]) extends BindingsFreeExpr {
+  def evaluate(wordNet: WordNet) = wordNet.store.fetch(relation, from, to)
 }
 
-case class SynsetAllReq() extends BindingsFreeExpr {
-  def evaluate(wordNet: WordNet) = wordNet.synsets
+object FetchExprs {
+  def words = FetchExpr(WordNet.WordSet, List((Relation.Source, Nil)), List(Relation.Source))
+
+  def senses = FetchExpr(WordNet.SenseSet, List((Relation.Source, Nil)), List(Relation.Source))
+
+  def synsets = FetchExpr(WordNet.SynsetSet, List((Relation.Source, Nil)), List(Relation.Source))
+
+  def wordByValue(value: String)
+    = FetchExpr(WordNet.WordSet, List((Relation.Source, List(value))), List(Relation.Source))
+
+  def senseByWordFormAndSenseNumberAndPos(word: String, num: Int, pos: String) = {
+    FetchExpr(WordNet.SenseToWordFormSenseNumberAndPos,
+      List((Relation.Destination, List(word)), ("num", List(num)), ("pos", List(pos))), List(Relation.Source))
+  }
+
+  def sensesByWordFormAndSenseNumber(word: String, num: Int) = {
+    FetchExpr(WordNet.SenseToWordFormSenseNumberAndPos,
+      List((Relation.Destination, List(word)), ("num", List(num))), List(Relation.Source))
+  }
+
+  def relationTuplesByArgumentNames(relation: Relation, argumentNames: List[String])
+    = FetchExpr(relation, argumentNames.map(x => (x, List[Any]())), argumentNames)
+}
+
+case class ConstantExpr(dataSet: DataSet) extends SelfEvaluableExpr {
+  def evaluate = dataSet
 }
 
 case class SynsetByExprReq(expr: EvaluableExpr) extends EvaluableExpr {
@@ -816,18 +840,6 @@ case class SynsetByExprReq(expr: EvaluableExpr) extends EvaluableExpr {
   }
 }
 
-case class SenseAllReq() extends BindingsFreeExpr {
-  def evaluate(wordNet: WordNet) = wordNet.senses
-}
-
-case class SenseByWordFormAndSenseNumberAndPosReq(word: String, num: Int, pos: String) extends BindingsFreeExpr {
-  def evaluate(wordNet: WordNet) = wordNet.getSenseByWordFormAndSenseNumberAndPos(word, num, pos)
-}
-
-case class SenseByWordFormAndSenseNumberReq(word: String, num: Int) extends BindingsFreeExpr {
-  def evaluate(wordNet: WordNet) = wordNet.getSensesByWordFormAndSenseNumber(word, num)
-}
-
 case class ContextByRelationalExprReq(expr: RelationalExpr, quantifier: Quantifier) extends EvaluableExpr {
   def evaluate(wordNet: WordNet, bindings: Bindings) = {
     val qte = QuantifiedTransformationExpr(PositionedRelationChainTransformationExpr(List(PositionedRelationTransformationExpr(1, expr))), quantifier)
@@ -845,10 +857,6 @@ case class ContextByRelationalExprReq(expr: RelationalExpr, quantifier: Quantifi
   }  
 }
 
-case class StringByValueReq(value: String) extends SelfEvaluableExpr {
-  def evaluate = DataSet.fromValue(value)
-}
-
 case class WordFormByRegexReq(v: String) extends BindingsFreeExpr {
   def evaluate(wordNet: WordNet) = {
     val regex = v.r
@@ -858,32 +866,15 @@ case class WordFormByRegexReq(v: String) extends BindingsFreeExpr {
   }
 }
 
-case class WordFormByValueReq(value: String) extends BindingsFreeExpr {
-  def evaluate(wordNet: WordNet) = {
-    if (value == "")
-      wordNet.words
-    else
-      wordNet.getWordForm(value)
-  }
-}
-
-case class FloatByValueReq(value: Double) extends SelfEvaluableExpr {
-  def evaluate = DataSet.fromValue(value)
-}
-
-case class SequenceByBoundsReq(left: Int, right: Int) extends SelfEvaluableExpr {
-  def evaluate = DataSet.fromList((left to right).toList)
-}
-
-case class IntegerByValueReq(value: Int) extends SelfEvaluableExpr {
-  def evaluate = DataSet.fromValue(value)
-}
-
 case class ContextByReferenceReq(ref: Int) extends EvaluableExpr {
   def evaluate(wordNet: WordNet, bindings: Bindings) = {
     bindings.lookupContextVariable(ref).map(DataSet.fromValue(_))
       .getOrElse(throw new WQueryEvaluationException("Backward reference '" + List.fill(ref)("#").mkString + "' too far"))
   }
+}
+
+case class BooleanByFilterReq(cond: ConditionalExpr) extends EvaluableExpr {
+  def evaluate(wordNet: WordNet, bindings: Bindings) = DataSet.fromValue(cond.satisfied(wordNet, bindings))
 }
 
 case class ContextByVariableReq(variable: Variable) extends EvaluableExpr {
@@ -933,14 +924,6 @@ case class ArcByUnaryRelationalExprReq(rexpr: UnaryRelationalExpr) extends Evalu
         throw new RuntimeException("ids is empty in ArcByUnaryRelationalExprReq")
     }    
   }  
-}
-
-case class BooleanByFilterReq(cond: ConditionalExpr) extends EvaluableExpr {
-  def evaluate(wordNet: WordNet, bindings: Bindings) = DataSet.fromValue(cond.satisfied(wordNet, bindings))
-}
-
-case class EmptySetReq() extends SelfEvaluableExpr {
-  def evaluate = DataSet.empty
 }
 
 /*
