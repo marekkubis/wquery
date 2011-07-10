@@ -548,7 +548,6 @@ case class ProjectionTransformationExpr(expr: EvaluableExpr) extends Transformat
     
     for (i <- 0 until dataSet.pathCount) {
       val tuple = dataSet.paths(i)
-      val tupleBuffer = new ListBuffer[Any]
       
       for (pathVar <- pathVarNames) {
         val varPos = dataSet.pathVars(pathVar)(i)
