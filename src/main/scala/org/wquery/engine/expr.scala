@@ -772,16 +772,18 @@ case class BooleanByFilterReq(cond: ConditionalExpr) extends SelfPlannedExpr {
   def evaluate(wordNet: WordNet, bindings: Bindings) = DataSet.fromValue(cond.satisfied(wordNet, bindings))
 }
 
-case class ContextByVariableReq(variable: Variable) extends SelfPlannedExpr {
-  def evaluate(wordNet: WordNet, bindings: Bindings) = {
-    variable match {
-      case PathVariable(name) =>
-        bindings.lookupPathVariable(name).map(DataSet.fromTuple(_))
-          .getOrElse(throw new WQueryEvaluationException("A reference to unknown variable @'" + name + "' found"))
-      case StepVariable(name) =>
-        bindings.lookupStepVariable(name).map(DataSet.fromValue(_))
-          .getOrElse(throw new WQueryEvaluationException("A reference to unknown variable $'" + name + "' found"))
-    }
+case class ContextByVariableReq(variable: Variable) extends EvaluableExpr {
+  def evaluationPlan(wordNet: WordNet, bindings: Bindings) = variable match {
+    case PathVariable(name) =>
+      if (bindings.isPathVariableBound(name))
+        PathVariableRefOp(name)
+      else
+        throw new WQueryEvaluationException("A reference to unknown variable @'" + name + "' found")
+    case StepVariable(name) =>
+      if (bindings.isStepVariableBound(name))
+        StepVariableRefOp(name)
+      else
+        throw new WQueryEvaluationException("A reference to unknown variable $'" + name + "' found")
   }
 }
 

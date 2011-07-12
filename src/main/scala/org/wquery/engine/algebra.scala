@@ -127,12 +127,27 @@ case class ConstantOp(dataSet: DataSet) extends AlgebraOp {
   def evaluate(wordNet: WordNet, bindings: Bindings) = dataSet
 }
 
+/*
+ *  Reference operations
+ */
 case class ContextRefOp(ref: Int) extends AlgebraOp {
   def evaluate(wordNet: WordNet, bindings: Bindings) = {
     bindings.lookupContextVariable(ref).map(DataSet.fromValue(_))
       .getOrElse(throw new WQueryEvaluationException("Backward reference (" + ref + ") too far"))
   }
 }
+
+case class PathVariableRefOp(name: String) extends AlgebraOp {
+  def evaluate(wordNet: WordNet, bindings: Bindings) = bindings.lookupPathVariable(name).map(DataSet.fromTuple(_)).get
+}
+
+case class StepVariableRefOp(name: String) extends AlgebraOp {
+  def evaluate(wordNet: WordNet, bindings: Bindings) = bindings.lookupStepVariable(name).map(DataSet.fromValue(_)).get
+}
+
+/*
+ * Evaluate operation
+ */
 
 case class EvaluateOp(expr: SelfPlannedExpr) extends AlgebraOp {
   def evaluate(wordNet: WordNet, bindings: Bindings) = expr.evaluate(wordNet, bindings)

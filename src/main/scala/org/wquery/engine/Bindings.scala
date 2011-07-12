@@ -64,9 +64,13 @@ class Bindings(parent: Option[Bindings]) {
   
   def lookupContextVariable(pos: Int): Option[Any] = if (contextVars.size - pos >= 0) Some(contextVars(contextVars.size - pos)) else parent.flatMap(_.lookupContextVariable(pos))  
   
-  def areContextVariablesBound = contextVars != Nil
-  
   def contextVariables = contextVars
+
+  def areContextVariablesBound = contextVars != Nil
+
+  def isPathVariableBound(name: String) = lookupPathVariable(name).isDefined
+  
+  def isStepVariableBound(name: String) = lookupStepVariable(name).isDefined
 }
 
 object Bindings {
