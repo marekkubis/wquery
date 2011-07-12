@@ -51,62 +51,25 @@ case class RelationalAliasExpr(name: String, relationalExpr: RelationalExpr) ext
     DataSet.empty
   }
 }
+
 /*
- * Multipath expressions
+ * Path expressions
  */
-case class BinaryPathExpr(op: String, left: EvaluableExpr, right: EvaluableExpr) extends SelfPlannedExpr {
-  def evaluate(wordNet: WordNet, bindings: Bindings) = {
-    val leval = left.evaluationPlan(wordNet, bindings).evaluate(wordNet, bindings)
-    val reval = right.evaluationPlan(wordNet, bindings).evaluate(wordNet, bindings)
+case class BinaryExpr(op: String, left: EvaluableExpr, right: EvaluableExpr) extends EvaluableExpr {
+  def evaluationPlan(wordNet: WordNet, bindings: Bindings) = {
+    val leftPlan = left.evaluationPlan(wordNet, bindings)
+    val rightPlan = right.evaluationPlan(wordNet, bindings)
 
     op match {
+      case "union" =>
+        UnionOp(leftPlan, rightPlan)
+      case "except" =>
+        ExceptOp(leftPlan, rightPlan)
+      case "intersect" =>
+        IntersectOp(leftPlan, rightPlan)
       case "," =>
-        join(leval, reval)
-      case op =>
-        DataSet(
-          op match {
-            case "union" =>
-              leval.paths union reval.paths
-            case "except" =>
-              leval.paths.filterNot(reval.paths.contains)
-            case "intersect" =>
-              leval.paths intersect reval.paths
-            case _ =>
-              throw new IllegalArgumentException("Unknown binary path operator '" + op + "'")
-          })
+        JoinOp(leftPlan, rightPlan)
     }
-  }
-
-  def join(left: DataSet, right: DataSet) = {
-    val leftPathVarNames = left.pathVars.keys.toSeq
-    val leftStepVarNames = left.stepVars.keys.toSeq
-    val rightPathVarNames = right.pathVars.keys.toSeq
-    val rightStepVarNames = right.stepVars.keys.toSeq
-    val pathBuffer = DataSetBuffers.createPathBuffer
-    val pathVarBuffers = DataSetBuffers.createPathVarBuffers(leftPathVarNames ++ rightPathVarNames)
-    val stepVarBuffers = DataSetBuffers.createStepVarBuffers(leftStepVarNames ++ rightStepVarNames)
-    
-    for (i <- 0 until left.pathCount) {
-      for (j <- 0 until right.pathCount ) {
-        val leftTuple = left.paths(i)
-        val rightTuple = right.paths(j)        
-          
-        pathBuffer.append(leftTuple ++ rightTuple)
-        leftPathVarNames.foreach(x => pathVarBuffers(x).append(left.pathVars(x)(i)))
-        leftStepVarNames.foreach(x => stepVarBuffers(x).append(left.stepVars(x)(i)))
-        
-        val offset = leftTuple.size
-        
-        rightPathVarNames.foreach { x => 
-          val pos = right.pathVars(x)(j)          
-          pathVarBuffers(x).append((pos._1 + offset, pos._2 + offset))
-        }
-        
-        rightStepVarNames.foreach(x => stepVarBuffers(x).append(right.stepVars(x)(j) + offset))
-      }
-    }
-
-    DataSet.fromBuffers(pathBuffer, pathVarBuffers, stepVarBuffers)
   }
 }
 
@@ -270,7 +233,7 @@ case class FunctionExpr(name: String, args: EvaluableExpr) extends SelfPlannedEx
 }
 
 /*
- * Path related expressions
+ * Step related expressions
  */
 trait VariableBindings {
   def bind(dataSet: DataSet, decls: List[Variable]) = {
@@ -671,13 +634,13 @@ case class ComparisonExpr(op: String, lexpr: EvaluableExpr, rexpr: EvaluableExpr
                 regex.findFirstIn(elem).map(_ => true).getOrElse(false)
             }
           } else {
-            throw new WQueryEvaluationException("The right side of '" + op +
+            throw new WQueryEvaluationException("The rightSet side of '" + op +
               "' should return exactly one character string value")
           }
         } else if (rresult.isEmpty) {
-          throw new WQueryEvaluationException("The right side of '" + op + "' returns no values")
+          throw new WQueryEvaluationException("The rightSet side of '" + op + "' returns no values")
         } else { // rresult.pathCount > 0
-          throw new WQueryEvaluationException("The right side of '" + op + "' returns more than one values")
+          throw new WQueryEvaluationException("The rightSet side of '" + op + "' returns more than one values")
         }
       case _ =>
         if (lresult.size == 1 && rresult.size == 1) {
@@ -696,13 +659,13 @@ case class ComparisonExpr(op: String, lexpr: EvaluableExpr, rexpr: EvaluableExpr
           }
         } else {
           if (lresult.isEmpty)
-            throw new WQueryEvaluationException("The left side of '" + op + "' returns no values")
+            throw new WQueryEvaluationException("The leftSet side of '" + op + "' returns no values")
           if (lresult.size > 1)
-            throw new WQueryEvaluationException("The left side of '" + op + "' returns more than one value")
+            throw new WQueryEvaluationException("The leftSet side of '" + op + "' returns more than one value")
           if (rresult.isEmpty)
-            throw new WQueryEvaluationException("The right side of '" + op + "' returns no values")
+            throw new WQueryEvaluationException("The rightSet side of '" + op + "' returns no values")
           if (rresult.size > 1)
-            throw new WQueryEvaluationException("The right side of '" + op + "' returns more than one values")
+            throw new WQueryEvaluationException("The rightSet side of '" + op + "' returns more than one values")
 
           // the following shall not happen
           throw new WQueryEvaluationException("Both sides of '" + op + "' should return exactly one value")

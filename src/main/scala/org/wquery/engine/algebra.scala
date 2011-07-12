@@ -92,6 +92,63 @@ case class WhileDoOp(conditionOp: AlgebraOp, iteratedOp: AlgebraOp) extends Alge
   }
 }
 
+case class UnionOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends AlgebraOp {
+  def evaluate(wordNet: WordNet, bindings: Bindings) = {
+    DataSet(leftOp.evaluate(wordNet, bindings).paths union rightOp.evaluate(wordNet, bindings).paths)
+  }
+}
+
+case class ExceptOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends AlgebraOp {
+  def evaluate(wordNet: WordNet, bindings: Bindings) = {
+    val leftSet = leftOp.evaluate(wordNet, bindings)
+    val rightSet = rightOp.evaluate(wordNet, bindings)
+
+    DataSet(leftSet.paths.filterNot(rightSet.paths.contains))
+  }
+}
+
+case class IntersectOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends AlgebraOp {
+  def evaluate(wordNet: WordNet, bindings: Bindings) = {
+    DataSet(leftOp.evaluate(wordNet, bindings).paths intersect rightOp.evaluate(wordNet, bindings).paths)
+  }
+}
+
+case class JoinOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends AlgebraOp {
+  def evaluate(wordNet: WordNet, bindings: Bindings) = {
+    val leftSet = leftOp.evaluate(wordNet, bindings)
+    val rightSet = rightOp.evaluate(wordNet, bindings)
+    val leftPathVarNames = leftSet.pathVars.keys.toSeq
+    val leftStepVarNames = leftSet.stepVars.keys.toSeq
+    val rightPathVarNames = rightSet.pathVars.keys.toSeq
+    val rightStepVarNames = rightSet.stepVars.keys.toSeq
+    val pathBuffer = DataSetBuffers.createPathBuffer
+    val pathVarBuffers = DataSetBuffers.createPathVarBuffers(leftPathVarNames ++ rightPathVarNames)
+    val stepVarBuffers = DataSetBuffers.createStepVarBuffers(leftStepVarNames ++ rightStepVarNames)
+
+    for (i <- 0 until leftSet.pathCount) {
+      for (j <- 0 until rightSet.pathCount ) {
+        val leftTuple = leftSet.paths(i)
+        val rightTuple = rightSet.paths(j)
+
+        pathBuffer.append(leftTuple ++ rightTuple)
+        leftPathVarNames.foreach(x => pathVarBuffers(x).append(leftSet.pathVars(x)(i)))
+        leftStepVarNames.foreach(x => stepVarBuffers(x).append(leftSet.stepVars(x)(i)))
+
+        val offset = leftTuple.size
+
+        rightPathVarNames.foreach { x =>
+          val pos = rightSet.pathVars(x)(j)
+          pathVarBuffers(x).append((pos._1 + offset, pos._2 + offset))
+        }
+
+        rightStepVarNames.foreach(x => stepVarBuffers(x).append(rightSet.stepVars(x)(j) + offset))
+      }
+    }
+
+    DataSet.fromBuffers(pathBuffer, pathVarBuffers, stepVarBuffers)
+  }
+}
+
 /*
  * Declarative operations
  */
@@ -128,7 +185,7 @@ case class ConstantOp(dataSet: DataSet) extends AlgebraOp {
 }
 
 /*
- *  Reference operations
+ * Reference operations
  */
 case class ContextRefOp(ref: Int) extends AlgebraOp {
   def evaluate(wordNet: WordNet, bindings: Bindings) = {
