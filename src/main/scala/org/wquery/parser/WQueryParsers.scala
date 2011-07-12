@@ -31,7 +31,7 @@ trait WQueryParsers extends RegexParsers {
 
   // imperative exprs
 
-  def imp_expr: Parser[ImperativeExpr] = (
+  def imp_expr: Parser[EvaluableExpr] = (
     "do" ~> rep(statement) <~ "end" ^^ { BlockExpr(_) }
     | statement
   )
@@ -49,8 +49,8 @@ trait WQueryParsers extends RegexParsers {
   def emission = "emit" ~> multipath_expr ^^ { EmissionExpr(_) }
 
   def assignment = (
-     var_decls ~ ":=" ~ multipath_expr ^^ { case vdecls~_~mexpr => EvaluableAssignmentExpr(vdecls, mexpr) }
-     | notQuotedString ~ ":=" ~ rel_expr  ^^ { case name~_~rexpr => RelationalAssignmentExpr(name, rexpr) }
+     var_decls ~ ":=" ~ multipath_expr ^^ { case vdecls~_~mexpr => AssignmentExpr(vdecls, mexpr) }
+     | notQuotedString ~ ":=" ~ rel_expr  ^^ { case name~_~rexpr => RelationalAliasExpr(name, rexpr) }
       // | expr ~ ("+="|"-="|":=") ~ expr ^^ { case lexpr~op~rexpr => UpdateExpr(lexpr, op, rexpr) }
   )
 
@@ -151,7 +151,7 @@ trait WQueryParsers extends RegexParsers {
     case lexpr~op~rexpr => ComparisonExpr(op, lexpr, rexpr)
   }
 
-  def node_trans = "." ~> non_rel_expr_generator ^^ { gen => FilterTransformationExpr(ComparisonExpr("in", ContextByReferenceReq(1), gen)) }
+  def node_trans = "." ~> non_rel_expr_generator ^^ { gen => FilterTransformationExpr(ComparisonExpr("in", AlgebraExpr(ContextRefOp(1)), gen)) }
 
   def projection_trans = projection  ^^ { ProjectionTransformationExpr(_) }
 
@@ -185,39 +185,39 @@ trait WQueryParsers extends RegexParsers {
   def rel_expr_generator = rel_expr ~ quantifier ^^ { case expr~quant => ContextByRelationalExprReq(expr, quant) }
 
   def boolean_generator = (
-    "true" ^^^ { ConstantExpr(DataSet.fromValue(true)) }
-    | "false" ^^^ { ConstantExpr(DataSet.fromValue(false)) }
+    "true" ^^^ { AlgebraExpr(ConstantOp(DataSet.fromValue(true))) }
+    | "false" ^^^ { AlgebraExpr(ConstantOp(DataSet.fromValue(false))) }
   )
 
   def synset_generator = (
-    "{}" ^^ { _ => FetchExprs.synsets }
+    "{}" ^^ { _ => AlgebraExpr(FetchOp.synsets) }
     | "{" ~> expr <~ "}" ^^ { SynsetByExprReq(_) }
   )
 
   def sense_generator = (
-    "::" ^^ { _ => FetchExprs.senses }
+    "::" ^^ { _ => AlgebraExpr(FetchOp.senses) }
     | alphaLit ~ ":" ~ integerNum ~ ":" ~ alphaLit ^^ {
-      case word~_~num~_~pos => FetchExprs.senseByWordFormAndSenseNumberAndPos(word, num, pos)
+      case word~_~num~_~pos => AlgebraExpr(FetchOp.senseByWordFormAndSenseNumberAndPos(word, num, pos))
     }
     | alphaLit ~ ":" ~ integerNum ^^ {
-      case word~_~num => FetchExprs.sensesByWordFormAndSenseNumber(word, num)
+      case word~_~num => AlgebraExpr(FetchOp.sensesByWordFormAndSenseNumber(word, num))
     }
   )
 
   def function_call_generator = notQuotedString ~ ("(" ~> expr <~ ")") ^^ { case name~y => FunctionExpr(name, y) }
 
   def quoted_word_generator = (
-    backQuotedString ^^ { value => ConstantExpr(DataSet.fromValue(value)) }
-    | quotedString ^^ { value => if (value == "") FetchExprs.words else FetchExprs.wordByValue(value) }
+    backQuotedString ^^ { value => AlgebraExpr(ConstantOp(DataSet.fromValue(value))) }
+    | quotedString ^^ { value => AlgebraExpr(if (value == "") FetchOp.words else FetchOp.wordByValue(value)) }
     | doubleQuotedString ^^ { WordFormByRegexReq(_) }
   )
 
-  def float_generator = floatNum ^^ { value => ConstantExpr(DataSet.fromValue(value)) }
-  def sequence_generator = integerNum ~ ".." ~ integerNum ^^ { case left~_~right => ConstantExpr(DataSet.fromList((left to right).toList)) }
-  def integer_generator = integerNum ^^ { value => ConstantExpr(DataSet.fromValue(value)) }
-  def back_generator = rep1("#") ^^ { x => ContextByReferenceReq(x.size) }
+  def float_generator = floatNum ^^ { value => AlgebraExpr(ConstantOp(DataSet.fromValue(value))) }
+  def sequence_generator = integerNum ~ ".." ~ integerNum ^^ { case left~_~right => AlgebraExpr(ConstantOp(DataSet.fromList((left to right).toList))) }
+  def integer_generator = integerNum ^^ { value => AlgebraExpr(ConstantOp(DataSet.fromValue(value))) }
+  def back_generator = rep1("#") ^^ { x => AlgebraExpr(ContextRefOp(x.size)) }
   def filter_generator = filter ^^ { BooleanByFilterReq(_) }
-  def empty_set_generator = "<>" ^^ { _ => ConstantExpr(DataSet.empty) }
+  def empty_set_generator = "<>" ^^ { _ => AlgebraExpr(ConstantOp(DataSet.empty)) }
   def expr_generator = "(" ~> expr <~ ")"
   def variable_generator = var_decl ^^ { ContextByVariableReq(_) }
   def arc_generator = "\\" ~> unary_rel_expr ^^ { ArcByUnaryRelationalExprReq(_) }

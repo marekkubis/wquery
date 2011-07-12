@@ -6,124 +6,58 @@ import org.wquery.model._
 sealed abstract class Expr
 
 sealed abstract class EvaluableExpr extends Expr {
+  def evaluationPlan(wordNet: WordNet, bindings: Bindings): AlgebraOp
+
+}
+
+sealed abstract class SelfPlannedExpr extends EvaluableExpr {
   def evaluate(wordNet: WordNet, bindings: Bindings): DataSet
+
+  def evaluationPlan(wordNet: WordNet, bindings: Bindings) = EvaluateOp(this)
 }
-
-sealed abstract class BindingsFreeExpr extends EvaluableExpr {
-  def evaluate(wordNet: WordNet): DataSet
-
-  def evaluate(wordNet: WordNet, bindings: Bindings): DataSet = evaluate(wordNet)
-}
-
-sealed abstract class SelfEvaluableExpr extends BindingsFreeExpr {
-  def evaluate(): DataSet
-
-  def evaluate(wordNet: WordNet): DataSet = evaluate
-}
-
 /*
  * Imperative expressions
  */
-
-sealed abstract class ImperativeExpr extends EvaluableExpr
-
-case class EmissionExpr(expr: EvaluableExpr) extends ImperativeExpr {
-  def evaluate(wordNet: WordNet, bindings: Bindings) = {
-    expr.evaluate(wordNet, bindings)
-  }
+case class EmissionExpr(expr: EvaluableExpr) extends EvaluableExpr {
+  def evaluationPlan(wordNet: WordNet, bindings: Bindings) = EmitOp(expr.evaluationPlan(wordNet, bindings))
 }
 
-case class IteratorExpr(pexpr: EvaluableExpr, iexpr: ImperativeExpr) extends ImperativeExpr {
-  def evaluate(wordNet: WordNet, bindings: Bindings) = {
-    val presult = pexpr.evaluate(wordNet, bindings)
-    val tupleBindings = Bindings(bindings)
-    val buffer = new DataSetBuffer
-    val pathVarNames = presult.pathVars.keys.toSeq
-    val stepVarNames = presult.stepVars.keys.toSeq
-
-    for (i <- 0 until presult.pathCount) {
-      val tuple = presult.paths(i)
-        
-      pathVarNames.foreach { pathVar =>
-        val varPos = presult.pathVars(pathVar)(i)
-        tupleBindings.bindPathVariable(pathVar, tuple.slice(varPos._1, varPos._2))
-      }
-
-      stepVarNames.foreach(stepVar => tupleBindings.bindStepVariable(stepVar, tuple(presult.stepVars(stepVar)(i))))
-      buffer.append(iexpr.evaluate(wordNet, tupleBindings))
-    }
-
-    buffer.toDataSet
-  }
+case class IteratorExpr(bindingExpr: EvaluableExpr, iteratedExpr: EvaluableExpr) extends EvaluableExpr {
+  def evaluationPlan(wordNet: WordNet, bindings: Bindings)
+    = IterateOp(bindingExpr.evaluationPlan(wordNet, bindings), iteratedExpr.evaluationPlan(wordNet, bindings))
 }
 
-case class IfElseExpr(cexpr: EvaluableExpr, iexpr: ImperativeExpr, eexpr: Option[ImperativeExpr]) extends ImperativeExpr {
-  def evaluate(wordNet: WordNet, bindings: Bindings) = {
-    if (cexpr.evaluate(wordNet, bindings).isTrue)
-      iexpr.evaluate(wordNet, bindings)
-    else
-      eexpr.map(_.evaluate(wordNet, bindings)).getOrElse(DataSet.empty)        
-  }
+case class IfElseExpr(conditionExpr: EvaluableExpr, ifExpr: EvaluableExpr, elseExpr: Option[EvaluableExpr]) extends EvaluableExpr {
+  def evaluationPlan(wordNet: WordNet, bindings: Bindings) = IfElseOp(conditionExpr.evaluationPlan(wordNet, bindings),
+    ifExpr.evaluationPlan(wordNet, bindings), elseExpr.map(_.evaluationPlan(wordNet, bindings)))
 }
 
-case class BlockExpr(exprs: List[ImperativeExpr]) extends ImperativeExpr {
-  def evaluate(wordNet: WordNet, bindings: Bindings) = {
-    val blockBindings = Bindings(bindings)
-    val buffer = new DataSetBuffer
-
-    for (expr <- exprs) {
-      buffer.append(expr.evaluate(wordNet, blockBindings))
-    }
-
-    buffer.toDataSet
-  }
+case class BlockExpr(exprs: List[EvaluableExpr]) extends EvaluableExpr {
+  def evaluationPlan(wordNet: WordNet, bindings: Bindings) = BlockOp(exprs.map(_.evaluationPlan(wordNet, bindings)))
 }
 
-case class EvaluableAssignmentExpr(decls: List[Variable], expr: EvaluableExpr) extends ImperativeExpr with VariableBindings {
-  def evaluate(wordNet: WordNet, bindings: Bindings) = {
-    val eresult = expr.evaluate(wordNet, bindings)
-
-    if (eresult.pathCount == 1) { // TODO remove this constraint
-      val tuple = eresult.paths.head
-      val dataSet = bind(DataSet.fromTuple(tuple), decls)
-      
-      dataSet.pathVars.keys.foreach { pathVar => 
-        val varPos = dataSet.pathVars(pathVar)(0)
-        bindings.bindPathVariable(pathVar, tuple.slice(varPos._1, varPos._2))
-      }
-      
-      dataSet.stepVars.keys.foreach(stepVar => bindings.bindStepVariable(stepVar, tuple(dataSet.stepVars(stepVar)(0))))
-      DataSet.empty
-    } else {
-      throw new WQueryEvaluationException("A multipath expression in an assignment should contain exactly one tuple")
-    }
-  }
+case class AssignmentExpr(variables: List[Variable], expr: EvaluableExpr) extends EvaluableExpr {
+  def evaluationPlan(wordNet: WordNet, bindings: Bindings) = AssignmentOp(variables, expr.evaluationPlan(wordNet, bindings))
 }
 
-case class RelationalAssignmentExpr(name: String, rexpr: RelationalExpr) extends ImperativeExpr {
+case class WhileDoExpr(conditionExpr: EvaluableExpr, iteratedExpr: EvaluableExpr) extends EvaluableExpr {
+  def evaluationPlan(wordNet: WordNet, bindings: Bindings)
+    = WhileDoOp(conditionExpr.evaluationPlan(wordNet, bindings), iteratedExpr.evaluationPlan(wordNet, bindings))
+}
+
+case class RelationalAliasExpr(name: String, relationalExpr: RelationalExpr) extends SelfPlannedExpr {
   def evaluate(wordNet: WordNet, bindings: Bindings) = {
-    bindings.bindRelationalExprAlias(name, rexpr)
+    bindings.bindRelationalExprAlias(name, relationalExpr)
     DataSet.empty
-  }
-}
-
-case class WhileDoExpr(cexpr: EvaluableExpr, iexpr: ImperativeExpr) extends ImperativeExpr {
-  def evaluate(wordNet: WordNet, bindings: Bindings) = {
-    val buffer = new DataSetBuffer      
-      
-    while (cexpr.evaluate(wordNet, bindings).isTrue)
-      buffer.append(iexpr.evaluate(wordNet, bindings))
-      
-    buffer.toDataSet  
   }
 }
 /*
  * Multipath expressions
  */
-case class BinaryPathExpr(op: String, left: EvaluableExpr, right: EvaluableExpr) extends EvaluableExpr {
+case class BinaryPathExpr(op: String, left: EvaluableExpr, right: EvaluableExpr) extends SelfPlannedExpr {
   def evaluate(wordNet: WordNet, bindings: Bindings) = {
-    val leval = left.evaluate(wordNet, bindings)
-    val reval = right.evaluate(wordNet, bindings)
+    val leval = left.evaluationPlan(wordNet, bindings).evaluate(wordNet, bindings)
+    val reval = right.evaluationPlan(wordNet, bindings).evaluate(wordNet, bindings)
 
     op match {
       case "," =>
@@ -179,10 +113,10 @@ case class BinaryPathExpr(op: String, left: EvaluableExpr, right: EvaluableExpr)
 /*
  * Arithmetic expressions
  */
-case class BinaryArithmExpr(op: String, left: EvaluableExpr, right: EvaluableExpr) extends EvaluableExpr {
+case class BinaryArithmExpr(op: String, left: EvaluableExpr, right: EvaluableExpr) extends SelfPlannedExpr {
   def evaluate(wordNet: WordNet, bindings: Bindings) = {
-    val lresult = left.evaluate(wordNet, bindings)
-    val rresult = right.evaluate(wordNet, bindings)
+    val lresult = left.evaluationPlan(wordNet, bindings).evaluate(wordNet, bindings)
+    val rresult = right.evaluationPlan(wordNet, bindings).evaluate(wordNet, bindings)
 
     if (lresult.minPathSize > 0 && rresult.minPathSize > 0 && lresult.isNumeric(0) && rresult.isNumeric(0)) {
       if (lresult.getType(0) == IntegerType && rresult.getType(0) == IntegerType && op != "/") {
@@ -258,9 +192,9 @@ case class BinaryArithmExpr(op: String, left: EvaluableExpr, right: EvaluableExp
 
 }
 
-case class MinusExpr(expr: EvaluableExpr) extends EvaluableExpr {
+case class MinusExpr(expr: EvaluableExpr) extends SelfPlannedExpr {
   def evaluate(wordNet: WordNet, bindings: Bindings) = {
-    val eresult = expr.evaluate(wordNet, bindings)
+    val eresult = expr.evaluationPlan(wordNet, bindings).evaluate(wordNet, bindings)
 
     if (eresult.isNumeric(0)) {
         DataSet(eresult.paths.map(_.last).map {
@@ -276,9 +210,9 @@ case class MinusExpr(expr: EvaluableExpr) extends EvaluableExpr {
 /* 
  * Function call expressions
  */
-case class FunctionExpr(name: String, args: EvaluableExpr) extends EvaluableExpr {
+case class FunctionExpr(name: String, args: EvaluableExpr) extends SelfPlannedExpr {
   def evaluate(wordNet: WordNet, bindings: Bindings) = {
-    val avalues = args.evaluate(wordNet, bindings)
+    val avalues = args.evaluationPlan(wordNet, bindings).evaluate(wordNet, bindings)
     
     val atypes: List[FunctionArgumentType] = if (avalues.minPathSize  != avalues.maxPathSize ) {
       List(TupleType)
@@ -559,7 +493,7 @@ case class ProjectionTransformationExpr(expr: EvaluableExpr) extends Transformat
         binds.bindStepVariable(stepVar, tuple(varPos))
       }
      
-      buffer.append(expr.evaluate(wordNet, binds))
+      buffer.append(expr.evaluationPlan(wordNet, bindings).evaluate(wordNet, binds))
     }
     
     buffer.toDataSet
@@ -572,10 +506,10 @@ case class BindTransformationExpr(decls: List[Variable]) extends TransformationE
   }
 }
 
-case class PathExpr(generator: EvaluableExpr, steps: List[TransformationExpr]) extends EvaluableExpr {
+case class PathExpr(generator: EvaluableExpr, steps: List[TransformationExpr]) extends SelfPlannedExpr {
   def evaluate(wordNet: WordNet, bindings: Bindings) = {
     // separate projections
-    steps.foldLeft(generator.evaluate(wordNet, bindings))((step, trans) => trans.transform(wordNet, bindings, step))
+    steps.foldLeft(generator.evaluationPlan(wordNet, bindings).evaluate(wordNet, bindings))((step, trans) => trans.transform(wordNet, bindings, step))
   }
 }
 
@@ -714,8 +648,8 @@ case class NotExpr(expr: ConditionalExpr) extends ConditionalExpr {
 
 case class ComparisonExpr(op: String, lexpr: EvaluableExpr, rexpr: EvaluableExpr) extends ConditionalExpr {
   def satisfied(wordNet: WordNet, bindings: Bindings) = {
-    val lresult = lexpr.evaluate(wordNet, bindings).paths.map(_.last)
-    val rresult = rexpr.evaluate(wordNet, bindings).paths.map(_.last)
+    val lresult = lexpr.evaluationPlan(wordNet, bindings).evaluate(wordNet, bindings).paths.map(_.last)
+    val rresult = rexpr.evaluationPlan(wordNet, bindings).evaluate(wordNet, bindings).paths.map(_.last)
 
     op match {
       case "=" =>
@@ -788,41 +722,9 @@ case class PathConditionExpr(expr: PathExpr) extends ConditionalExpr {
 /*
  * Generators
  */
-case class FetchExpr(relation: Relation, from: List[(String, List[Any])], to: List[String]) extends BindingsFreeExpr {
-  def evaluate(wordNet: WordNet) = wordNet.store.fetch(relation, from, to)
-}
-
-object FetchExprs {
-  def words = FetchExpr(WordNet.WordSet, List((Relation.Source, Nil)), List(Relation.Source))
-
-  def senses = FetchExpr(WordNet.SenseSet, List((Relation.Source, Nil)), List(Relation.Source))
-
-  def synsets = FetchExpr(WordNet.SynsetSet, List((Relation.Source, Nil)), List(Relation.Source))
-
-  def wordByValue(value: String)
-    = FetchExpr(WordNet.WordSet, List((Relation.Source, List(value))), List(Relation.Source))
-
-  def senseByWordFormAndSenseNumberAndPos(word: String, num: Int, pos: String) = {
-    FetchExpr(WordNet.SenseToWordFormSenseNumberAndPos,
-      List((Relation.Destination, List(word)), ("num", List(num)), ("pos", List(pos))), List(Relation.Source))
-  }
-
-  def sensesByWordFormAndSenseNumber(word: String, num: Int) = {
-    FetchExpr(WordNet.SenseToWordFormSenseNumberAndPos,
-      List((Relation.Destination, List(word)), ("num", List(num))), List(Relation.Source))
-  }
-
-  def relationTuplesByArgumentNames(relation: Relation, argumentNames: List[String])
-    = FetchExpr(relation, argumentNames.map(x => (x, List[Any]())), argumentNames)
-}
-
-case class ConstantExpr(dataSet: DataSet) extends SelfEvaluableExpr {
-  def evaluate = dataSet
-}
-
-case class SynsetByExprReq(expr: EvaluableExpr) extends EvaluableExpr {
+case class SynsetByExprReq(expr: EvaluableExpr) extends SelfPlannedExpr {
   def evaluate(wordNet: WordNet, bindings: Bindings) = {
-    val eresult = expr.evaluate(wordNet, bindings)
+    val eresult = expr.evaluationPlan(wordNet, bindings).evaluate(wordNet, bindings)
 
     if (eresult.minPathSize == 1 && eresult.maxPathSize == 1) {
       if (eresult.getType(0) == SenseType) {
@@ -840,7 +742,7 @@ case class SynsetByExprReq(expr: EvaluableExpr) extends EvaluableExpr {
   }
 }
 
-case class ContextByRelationalExprReq(expr: RelationalExpr, quantifier: Quantifier) extends EvaluableExpr {
+case class ContextByRelationalExprReq(expr: RelationalExpr, quantifier: Quantifier) extends SelfPlannedExpr {
   def evaluate(wordNet: WordNet, bindings: Bindings) = {
     val qte = QuantifiedTransformationExpr(PositionedRelationChainTransformationExpr(List(PositionedRelationTransformationExpr(1, expr))), quantifier)
 
@@ -857,8 +759,8 @@ case class ContextByRelationalExprReq(expr: RelationalExpr, quantifier: Quantifi
   }  
 }
 
-case class WordFormByRegexReq(v: String) extends BindingsFreeExpr {
-  def evaluate(wordNet: WordNet) = {
+case class WordFormByRegexReq(v: String) extends SelfPlannedExpr {
+  def evaluate(wordNet: WordNet, bindings: Bindings) = {
     val regex = v.r
     val result = wordNet.words.paths.map(_.head).filter(x => regex.findFirstIn(x.asInstanceOf[String]).map(_ => true).getOrElse(false))
 
@@ -866,18 +768,11 @@ case class WordFormByRegexReq(v: String) extends BindingsFreeExpr {
   }
 }
 
-case class ContextByReferenceReq(ref: Int) extends EvaluableExpr {
-  def evaluate(wordNet: WordNet, bindings: Bindings) = {
-    bindings.lookupContextVariable(ref).map(DataSet.fromValue(_))
-      .getOrElse(throw new WQueryEvaluationException("Backward reference '" + List.fill(ref)("#").mkString + "' too far"))
-  }
-}
-
-case class BooleanByFilterReq(cond: ConditionalExpr) extends EvaluableExpr {
+case class BooleanByFilterReq(cond: ConditionalExpr) extends SelfPlannedExpr {
   def evaluate(wordNet: WordNet, bindings: Bindings) = DataSet.fromValue(cond.satisfied(wordNet, bindings))
 }
 
-case class ContextByVariableReq(variable: Variable) extends EvaluableExpr {
+case class ContextByVariableReq(variable: Variable) extends SelfPlannedExpr {
   def evaluate(wordNet: WordNet, bindings: Bindings) = {
     variable match {
       case PathVariable(name) =>
@@ -890,7 +785,7 @@ case class ContextByVariableReq(variable: Variable) extends EvaluableExpr {
   }
 }
 
-case class ArcByUnaryRelationalExprReq(rexpr: UnaryRelationalExpr) extends EvaluableExpr {
+case class ArcByUnaryRelationalExprReq(rexpr: UnaryRelationalExpr) extends SelfPlannedExpr {
   def evaluate(wordNet: WordNet, bindings: Bindings) = {
     val ids = rexpr match {case UnaryRelationalExpr(x) => x}
 
@@ -924,6 +819,10 @@ case class ArcByUnaryRelationalExprReq(rexpr: UnaryRelationalExpr) extends Evalu
         throw new RuntimeException("ids is empty in ArcByUnaryRelationalExprReq")
     }    
   }  
+}
+
+case class AlgebraExpr(op: AlgebraOp) extends EvaluableExpr {
+  def evaluationPlan(wordNet: WordNet, bindings: Bindings) = op
 }
 
 /*

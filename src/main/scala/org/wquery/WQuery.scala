@@ -17,8 +17,12 @@ class WQuery(val wordNet: WordNet) extends Logging {
   def execute(input:String): Result = {    
     try {
       val expr = parser parse input    
-      debug(expr.toString)           
-      Answer(expr.evaluate(wordNet, bindings))
+      debug("Expr: " + expr)
+
+      val plan = expr.evaluationPlan(wordNet, bindings)
+      debug("Plan: " + plan)
+
+      Answer(plan.evaluate(wordNet, bindings))
     } catch {
       case e: WQueryException => Error(e)
     }
