@@ -55,7 +55,7 @@ case class RelationalAliasExpr(name: String, relationalExpr: RelationalExpr) ext
 /*
  * Path expressions
  */
-case class BinaryExpr(op: String, left: EvaluableExpr, right: EvaluableExpr) extends EvaluableExpr {
+case class BinarySetExpr(op: String, left: EvaluableExpr, right: EvaluableExpr) extends EvaluableExpr {
   def evaluationPlan(wordNet: WordNet, bindings: Bindings) = {
     val leftPlan = left.evaluationPlan(wordNet, bindings)
     val rightPlan = right.evaluationPlan(wordNet, bindings)

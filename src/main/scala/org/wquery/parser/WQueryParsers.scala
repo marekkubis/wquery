@@ -64,14 +64,14 @@ trait WQueryParsers extends RegexParsers {
 
   def multipath_expr: Parser[EvaluableExpr]
     = chainl1(intersect_expr,
-              ("union"|"except") ^^ { x => ((l:EvaluableExpr, r:EvaluableExpr) => BinaryExpr(x, l , r)) })
+              ("union"|"except") ^^ { x => ((l:EvaluableExpr, r:EvaluableExpr) => BinarySetExpr(x, l , r)) })
 
   def intersect_expr
     = chainl1(with_expr,
-              "intersect" ^^ { x => ((l:EvaluableExpr, r:EvaluableExpr) => BinaryExpr(x, l , r)) })
+              "intersect" ^^ { x => ((l:EvaluableExpr, r:EvaluableExpr) => BinarySetExpr(x, l , r)) })
 
   def with_expr
-    = chainl1(add_expr, "," ^^ { x => ((l:EvaluableExpr, r:EvaluableExpr) => BinaryExpr(x, l , r)) })
+    = chainl1(add_expr, "," ^^ { x => ((l:EvaluableExpr, r:EvaluableExpr) => BinarySetExpr(x, l , r)) })
 
   // arithmetics
 
