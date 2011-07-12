@@ -214,7 +214,7 @@ case class FunctionExpr(name: String, args: EvaluableExpr) extends SelfPlannedEx
   def evaluate(wordNet: WordNet, bindings: Bindings) = {
     val avalues = args.evaluationPlan(wordNet, bindings).evaluate(wordNet, bindings)
     
-    val atypes: List[FunctionArgumentType] = if (avalues.minPathSize  != avalues.maxPathSize ) {
+    val atypes: List[FunctionArgumentType] = if (avalues.minPathSize != avalues.maxPathSize) {
       List(TupleType)
     } else {
       ((avalues.maxPathSize - 1) to 0 by -1).map(avalues.getType(_)).toList.map {
@@ -735,7 +735,7 @@ case class SynsetByExprReq(expr: EvaluableExpr) extends SelfPlannedExpr {
         throw new WQueryEvaluationException("{...} requires an expression that generates either senses or word forms")  
       }           
     } else if (eresult.pathCount == 0) {
-        DataSet.empty
+      DataSet.empty
     } else {
       throw new WQueryEvaluationException("{...} requires an expression that generates single element paths")        
     }

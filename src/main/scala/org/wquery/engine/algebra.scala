@@ -148,7 +148,6 @@ case class StepVariableRefOp(name: String) extends AlgebraOp {
 /*
  * Evaluate operation
  */
-
 case class EvaluateOp(expr: SelfPlannedExpr) extends AlgebraOp {
   def evaluate(wordNet: WordNet, bindings: Bindings) = expr.evaluate(wordNet, bindings)
 }
