@@ -76,10 +76,10 @@ trait WQueryParsers extends RegexParsers {
   // arithmetics
 
   def add_expr
-    = chainl1(mul_expr, ("+"|"-") ^^ { x => ((l:EvaluableExpr, r:EvaluableExpr) => BinaryArithmExpr(x, l , r)) })
+    = chainl1(mul_expr, ("+"|"-") ^^ { x => ((l:EvaluableExpr, r:EvaluableExpr) => BinaryArithmeticExpr(x, l , r)) })
 
   def mul_expr
-    = chainl1(unary_expr, ("*"|"/"|"%"|"div") ^^ { x => ((l:EvaluableExpr, r:EvaluableExpr) => BinaryArithmExpr(x, l , r)) })
+    = chainl1(unary_expr, ("*"|"/"|"%"|"div") ^^ { x => ((l:EvaluableExpr, r:EvaluableExpr) => BinaryArithmeticExpr(x, l , r)) })
 
   def unary_expr = (
     "-" ~> path ^^ { MinusExpr(_) }

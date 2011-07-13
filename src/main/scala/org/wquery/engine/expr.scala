@@ -76,83 +76,28 @@ case class BinarySetExpr(op: String, left: EvaluableExpr, right: EvaluableExpr) 
 /*
  * Arithmetic expressions
  */
-case class BinaryArithmExpr(op: String, left: EvaluableExpr, right: EvaluableExpr) extends SelfPlannedExpr {
-  def evaluate(wordNet: WordNet, bindings: Bindings) = {
-    val lresult = left.evaluationPlan(wordNet, bindings).evaluate(wordNet, bindings)
-    val rresult = right.evaluationPlan(wordNet, bindings).evaluate(wordNet, bindings)
+case class BinaryArithmeticExpr(op: String, left: EvaluableExpr, right: EvaluableExpr) extends EvaluableExpr {
+  def evaluationPlan(wordNet: WordNet, bindings: Bindings) = {
+    val leftOp = left.evaluationPlan(wordNet, bindings)
+    val rightOp = right.evaluationPlan(wordNet, bindings)
 
-    if (lresult.minPathSize > 0 && rresult.minPathSize > 0 && lresult.isNumeric(0) && rresult.isNumeric(0)) {
-      if (lresult.getType(0) == IntegerType && rresult.getType(0) == IntegerType && op != "/") {
-        combineUsingIntArithmOp(op, lresult.paths.map( _.last.asInstanceOf[Int]), rresult.paths.map( _.last.asInstanceOf[Int]))
-      } else {
-        combineUsingDoubleArithmOp(op, 
-          lresult.paths.map(_.last).map {
-            case x: Double => x            
-            case x: Int => x.doubleValue
-          },
-          rresult.paths.map(_.last).map {
-            case x: Double => x              
-            case x: Int => x.doubleValue
-          }
-        )
-      }
-    } else if (lresult.isEmpty || rresult.isEmpty) {
-      DataSet.empty
-    } else {
-      throw new WQueryEvaluationException("Operator '" + op + "' requires paths that end with float or integer values") 
-    }
-  }
+    // TODO implement static type check
 
-  def combineUsingIntArithmOp(op: String, leval: List[Int], reval: List[Int]) = {
-    val func: (Int, Int) => Int = op match {
+    op match {
       case "+" =>
-        (x, y) => x + y
+        AddOp(leftOp, rightOp)
       case "-" =>
-        (x, y) => x - y
+        SubOp(leftOp, rightOp)
       case "*" =>
-        (x, y) => x * y
-      case "div" =>
-        (x, y) => x / y
-      case "%" =>
-        (x, y) => x % y
-      case _ =>
-        throw new IllegalArgumentException("Unknown binary arithmetic operator '" + op + "'")
-    }
-    
-    combine[Int](func, leval, reval)
-  }    
-  
-  def combineUsingDoubleArithmOp(op: String, leval: List[Double], reval: List[Double]) = {
-    val func: (Double, Double) => Double = op match {
-      case "+" =>
-        (x, y) => x + y
-      case "-" =>
-        (x, y) => x - y
-      case "*" =>
-        (x, y) => x * y
+        MulOp(leftOp, rightOp)
       case "/" =>
-        (x, y) => x / y
+        DivOp(leftOp, rightOp)
+      case "div" =>
+        IntDivOp(leftOp, rightOp)
       case "%" =>
-        (x, y) => x % y
-      case _ =>
-        throw new IllegalArgumentException("Unknown binary arithmetic operator '" + op + "'")
+        ModOp(leftOp, rightOp)
     }
-    
-    combine[Double](func, leval, reval)
-  }  
-
-  def combine[A](func: (A, A) => A, leval: List[A], reval: List[A]) = {
-    val buffer = new ListBuffer[List[Any]]
-
-    for (lval <- leval) {
-      for (rval <- reval) {
-        buffer append List(func(lval, rval))
-      }
-    }
-
-    DataSet(buffer.toList)
   }
-
 }
 
 case class MinusExpr(expr: EvaluableExpr) extends SelfPlannedExpr {

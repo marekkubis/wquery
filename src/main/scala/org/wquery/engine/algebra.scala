@@ -92,6 +92,9 @@ case class WhileDoOp(conditionOp: AlgebraOp, iteratedOp: AlgebraOp) extends Alge
   }
 }
 
+/*
+ * Set operations
+ */
 case class UnionOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends AlgebraOp {
   def evaluate(wordNet: WordNet, bindings: Bindings) = {
     DataSet(leftOp.evaluate(wordNet, bindings).paths union rightOp.evaluate(wordNet, bindings).paths)
@@ -146,6 +149,92 @@ case class JoinOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends AlgebraOp {
     }
 
     DataSet.fromBuffers(pathBuffer, pathVarBuffers, stepVarBuffers)
+  }
+}
+
+/*
+ * Arithmetic operations
+ */
+abstract class ArithmeticOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends AlgebraOp {
+  def evaluate(wordNet: WordNet, bindings: Bindings) = {
+    val leftSet = leftOp.evaluate(wordNet, bindings).paths.map(_.last)
+    val rightSet = rightOp.evaluate(wordNet, bindings).paths.map(_.last)
+
+    DataSet(for (leftVal <- leftSet; rightVal <- rightSet) yield List(combine(leftVal, rightVal)))
+  }
+
+  def combine(left: Any, right: Any): Any
+}
+
+case class AddOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends ArithmeticOp(leftOp, rightOp) {
+  def combine(leftVal: Any, rightVal: Any) = (leftVal, rightVal) match {
+    case (leftVal: Double, rightVal: Double) =>
+      leftVal + rightVal
+    case (leftVal: Double, rightVal: Int) =>
+      leftVal + rightVal
+    case (leftVal: Int, rightVal: Double) =>
+      leftVal + rightVal
+    case (leftVal: Int, rightVal: Int) =>
+      leftVal + rightVal
+  }
+}
+
+case class SubOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends ArithmeticOp(leftOp, rightOp) {
+  def combine(leftVal: Any, rightVal: Any) = (leftVal, rightVal) match {
+    case (leftVal: Double, rightVal: Double) =>
+      leftVal - rightVal
+    case (leftVal: Double, rightVal: Int) =>
+      leftVal - rightVal
+    case (leftVal: Int, rightVal: Double) =>
+      leftVal - rightVal
+    case (leftVal: Int, rightVal: Int) =>
+      leftVal - rightVal
+  }
+}
+
+case class MulOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends ArithmeticOp(leftOp, rightOp) {
+  def combine(leftVal: Any, rightVal: Any) = (leftVal, rightVal) match {
+    case (leftVal: Double, rightVal: Double) =>
+      leftVal * rightVal
+    case (leftVal: Double, rightVal: Int) =>
+      leftVal * rightVal
+    case (leftVal: Int, rightVal: Double) =>
+      leftVal * rightVal
+    case (leftVal: Int, rightVal: Int) =>
+      leftVal * rightVal
+  }
+}
+
+case class DivOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends ArithmeticOp(leftOp, rightOp) {
+  def combine(leftVal: Any, rightVal: Any) = (leftVal, rightVal) match {
+    case (leftVal: Double, rightVal: Double) =>
+      leftVal / rightVal
+    case (leftVal: Double, rightVal: Int) =>
+      leftVal / rightVal
+    case (leftVal: Int, rightVal: Double) =>
+      leftVal / rightVal
+    case (leftVal: Int, rightVal: Int) =>
+      leftVal.toDouble / rightVal.toDouble
+  }
+}
+
+case class IntDivOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends ArithmeticOp(leftOp, rightOp) {
+  def combine(leftVal: Any, rightVal: Any) = (leftVal, rightVal) match {
+    case (leftVal: Int, rightVal: Int) =>
+      leftVal / rightVal
+  }
+}
+
+case class ModOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends ArithmeticOp(leftOp, rightOp) {
+  def combine(leftVal: Any, rightVal: Any) = (leftVal, rightVal) match {
+    case (leftVal: Double, rightVal: Double) =>
+      leftVal % rightVal
+    case (leftVal: Double, rightVal: Int) =>
+      leftVal % rightVal
+    case (leftVal: Int, rightVal: Double) =>
+      leftVal % rightVal
+    case (leftVal: Int, rightVal: Int) =>
+      leftVal % rightVal
   }
 }
 
