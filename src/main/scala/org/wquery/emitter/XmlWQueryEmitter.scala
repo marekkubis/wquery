@@ -21,7 +21,7 @@ class XmlWQueryEmitter extends WQueryEmitter {
     
     builder append "<RESULTS>\n"
             
-    for (i <- 0 until dataSet.pathCount ) {
+    for (i <- 0 until dataSet.pathCount) {
       builder append "<RESULT>\n"        
         
       val tuple = dataSet.paths(i)      

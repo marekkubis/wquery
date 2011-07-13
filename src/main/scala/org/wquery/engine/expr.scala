@@ -158,7 +158,6 @@ case class FunctionExpr(name: String, args: EvaluableExpr) extends SelfPlannedEx
       case (func: ScalarFunction, method) =>
         val buffer = new ListBuffer[List[Any]]()
         val margs = new Array[AnyRef](atypes.size)
-        var stop = false
 
         for (tuple <- avalues.paths) {
           for (i <- 0 until margs.size)

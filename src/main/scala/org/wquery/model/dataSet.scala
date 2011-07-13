@@ -48,19 +48,19 @@ class DataSet(val paths: List[List[Any]], val pathVars: Map[String, List[(Int, I
   }
   
   def toBoundPaths: List[(List[Any], Map[String, (Int, Int)], Map[String, Int])] = {
-      val buffer = new ListBuffer[(List[Any], Map[String, (Int, Int)], Map[String, Int])]
-      val pathVarNames = pathVars.keys
-      val stepVarNames = stepVars.keys
-      
-      for (i <- 0 until paths.size) {
-        val path = paths(i)
-        val pathVarsMap = Map(pathVarNames.map(v => (v, pathVars(v)(i))).toSeq: _*)
-        val stepVarsMap = Map(stepVarNames.map(v => (v, stepVars(v)(i))).toSeq: _*)
-        
-        buffer.append((path, pathVarsMap, stepVarsMap))
-      }
-      
-      buffer.toList
+    val buffer = new ListBuffer[(List[Any], Map[String, (Int, Int)], Map[String, Int])]
+    val pathVarNames = pathVars.keys
+    val stepVarNames = stepVars.keys
+
+    for (i <- 0 until paths.size) {
+      val path = paths(i)
+      val pathVarsMap = Map(pathVarNames.map(v => (v, pathVars(v)(i))).toSeq: _*)
+      val stepVarsMap = Map(stepVarNames.map(v => (v, stepVars(v)(i))).toSeq: _*)
+
+      buffer.append((path, pathVarsMap, stepVarsMap))
+    }
+
+    buffer.toList
   }
 
   def isNumeric(pos: Int) = {

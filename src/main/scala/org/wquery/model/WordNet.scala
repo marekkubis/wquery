@@ -21,12 +21,8 @@ class WordNet(val store: WordNetStore) {
   def followAny(dataSet: DataSet, pos: Int) = {
     val buffer = new DataSetBuffer
 
-    for (relation <- store.relations) {
-      for (source <- relation.argumentNames)
-        for (dest <- relation.argumentNames)
-          if (source != dest)
-            buffer.append(store.extend(dataSet, relation, pos, source, List(dest)))
-    }
+    for (relation <- store.relations; source <- relation.argumentNames; dest <- relation.argumentNames if (source != dest))
+      buffer.append(store.extend(dataSet, relation, pos, source, List(dest)))
 
     buffer.toDataSet
   }

@@ -128,24 +128,22 @@ case class JoinOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends AlgebraOp {
     val pathVarBuffers = DataSetBuffers.createPathVarBuffers(leftPathVarNames ++ rightPathVarNames)
     val stepVarBuffers = DataSetBuffers.createStepVarBuffers(leftStepVarNames ++ rightStepVarNames)
 
-    for (i <- 0 until leftSet.pathCount) {
-      for (j <- 0 until rightSet.pathCount ) {
-        val leftTuple = leftSet.paths(i)
-        val rightTuple = rightSet.paths(j)
+    for (i <- 0 until leftSet.pathCount; j <- 0 until rightSet.pathCount) {
+      val leftTuple = leftSet.paths(i)
+      val rightTuple = rightSet.paths(j)
 
-        pathBuffer.append(leftTuple ++ rightTuple)
-        leftPathVarNames.foreach(x => pathVarBuffers(x).append(leftSet.pathVars(x)(i)))
-        leftStepVarNames.foreach(x => stepVarBuffers(x).append(leftSet.stepVars(x)(i)))
+      pathBuffer.append(leftTuple ++ rightTuple)
+      leftPathVarNames.foreach(x => pathVarBuffers(x).append(leftSet.pathVars(x)(i)))
+      leftStepVarNames.foreach(x => stepVarBuffers(x).append(leftSet.stepVars(x)(i)))
 
-        val offset = leftTuple.size
+      val offset = leftTuple.size
 
-        rightPathVarNames.foreach { x =>
-          val pos = rightSet.pathVars(x)(j)
-          pathVarBuffers(x).append((pos._1 + offset, pos._2 + offset))
-        }
-
-        rightStepVarNames.foreach(x => stepVarBuffers(x).append(rightSet.stepVars(x)(j) + offset))
+      rightPathVarNames.foreach { x =>
+        val pos = rightSet.pathVars(x)(j)
+        pathVarBuffers(x).append((pos._1 + offset, pos._2 + offset))
       }
+
+      rightStepVarNames.foreach(x => stepVarBuffers(x).append(rightSet.stepVars(x)(j) + offset))
     }
 
     DataSet.fromBuffers(pathBuffer, pathVarBuffers, stepVarBuffers)

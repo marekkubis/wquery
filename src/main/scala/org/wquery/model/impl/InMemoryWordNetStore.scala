@@ -15,9 +15,8 @@ class InMemoryWordNetStore extends WordNetStore {
     val destinations = from.tail
 
     if (sourceValues.isEmpty) {
-      for (((obj, rel, src), destinationMaps) <- successors)
-        if (rel == relation && src == sourceName)
-          appendDestinationTuples(destinationMaps, destinations, to, relation, buffer)
+      for (((obj, rel, src), destinationMaps) <- successors if (rel == relation && src == sourceName))
+        appendDestinationTuples(destinationMaps, destinations, to, relation, buffer)
     } else {
       for (sourceValue <- sourceValues)
         successors.get((sourceValue, relation, sourceName))
