@@ -333,41 +333,13 @@ case class PositionedRelationChainTransformationExpr(exprs: List[PositionedRelat
   }
 }
 
-case class FilterTransformationExpr(cond: ConditionalExpr) extends GeneratingTransformationExpr {
+case class FilterTransformationExpr(condition: ConditionalExpr) extends GeneratingTransformationExpr {
   def transform(wordNet: WordNet, bindings: Bindings, dataSet: DataSet) = {
-    val pathVarNames = dataSet.pathVars.keys.toSeq
-    val stepVarNames = dataSet.stepVars.keys.toSeq
-    val pathBuffer = DataSetBuffers.createPathBuffer
-    val pathVarBuffers = DataSetBuffers.createPathVarBuffers(pathVarNames)
-    val stepVarBuffers = DataSetBuffers.createStepVarBuffers(stepVarNames)
-
-    for (i <- 0 until dataSet.pathCount) {
-      val tuple = dataSet.paths(i)
-      val binds = Bindings(bindings)
-
-      for (pathVar <- pathVarNames) {
-        val varPos = dataSet.pathVars(pathVar)(i)
-        binds.bindPathVariable(pathVar, tuple.slice(varPos._1, varPos._2))
-      }
-
-      for (stepVar <- stepVarNames) {
-        val varPos = dataSet.stepVars(stepVar)(i)
-        binds.bindStepVariable(stepVar, tuple(varPos))
-      }
-
-      binds.bindContextVariables(tuple)
-
-      if (cond.satisfied(wordNet, binds)) {
-        pathBuffer.append(tuple)
-        pathVarNames.foreach(x => pathVarBuffers(x).append(dataSet.pathVars(x)(i)))
-        stepVarNames.foreach(x => stepVarBuffers(x).append(dataSet.stepVars(x)(i)))
-      }
-    }
-
-    DataSet.fromBuffers(pathBuffer, pathVarBuffers, stepVarBuffers)
+    // TODO remove the eager evaluation below
+    SelectOp(ConstantOp(dataSet), condition).evaluate(wordNet, bindings)
   }
 
-  def generate(wordNet: WordNet, bindings: Bindings) = DataSet.fromValue(cond.satisfied(wordNet, bindings))
+  def generate(wordNet: WordNet, bindings: Bindings) = DataSet.fromValue(condition.satisfied(wordNet, bindings))
 }
 
 case class ProjectionTransformationExpr(expr: EvaluableExpr) extends TransformationExpr {
