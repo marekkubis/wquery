@@ -8,12 +8,6 @@ class WordNet(val store: WordNetStore) {
 
   def generateAllTuples(relation: Relation, args: List[String]) = store.fetch(relation, args.map(x => (x, List[Any]())), args)
 
-  def synsets: DataSet = generateAllTuples(WordNet.SynsetSet, List(Relation.Source))
-  
-  def senses: DataSet = generateAllTuples(WordNet.SenseSet, List(Relation.Source))
-  
-  def words: DataSet = generateAllTuples(WordNet.WordSet, List(Relation.Source))
-
   def followRelation(dataSet: DataSet, pos: Int, relation: Relation, source: String, dests: List[String]) = {
     store.extend(dataSet, relation, pos, source, dests)
   }
@@ -33,16 +27,6 @@ class WordNet(val store: WordNetStore) {
 
   def getSynsetsByWordForms(wordForms: List[String]) = {
     store.fetch(WordNet.WordFormToSynsets,  List((Relation.Source, wordForms)), List(Relation.Destination))
-  }
-
-  def getSenseByWordFormAndSenseNumberAndPos(word: String, num: Int, pos: String) = {
-    store.fetch(WordNet.SenseToWordFormSenseNumberAndPos,
-      List((Relation.Destination, List(word)), ("num", List(num)), ("pos", List(pos))), List(Relation.Source))
-  }
-  
-  def getSensesByWordFormAndSenseNumber(word: String, num: Int) = {
-    store.fetch(WordNet.SenseToWordFormSenseNumberAndPos,
-      List((Relation.Destination, List(word)), ("num", List(num))), List(Relation.Source))
   }
 
   def getWordForm(word: String) = store.fetch(WordNet.WordSet, List((Relation.Source, List(word))), List(Relation.Source))
