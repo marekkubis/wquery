@@ -344,34 +344,15 @@ case class FilterTransformationExpr(condition: ConditionalExpr) extends Generati
 
 case class ProjectionTransformationExpr(expr: EvaluableExpr) extends TransformationExpr {
   def transform(wordNet: WordNet, bindings: Bindings, dataSet: DataSet) = {
-    val buffer = new DataSetBuffer
-    val pathVarNames = dataSet.pathVars.keys
-    val stepVarNames = dataSet.stepVars.keys    
-    val binds = Bindings(bindings)	    	
-    
-    for (i <- 0 until dataSet.pathCount) {
-      val tuple = dataSet.paths(i)
-      
-      for (pathVar <- pathVarNames) {
-        val varPos = dataSet.pathVars(pathVar)(i)
-        binds.bindPathVariable(pathVar, tuple.slice(varPos._1, varPos._2))
-      }
-      
-      for (stepVar <- stepVarNames) {
-        val varPos = dataSet.stepVars(stepVar)(i)
-        binds.bindStepVariable(stepVar, tuple(varPos))
-      }
-     
-      buffer.append(expr.evaluationPlan(wordNet, bindings).evaluate(wordNet, binds))
-    }
-    
-    buffer.toDataSet
+    // TODO remove the eager evaluation below
+    ProjectOp(ConstantOp(dataSet), expr.evaluationPlan(wordNet, bindings)).evaluate(wordNet, bindings)
   }  	
 }
 
-case class BindTransformationExpr(decls: List[Variable]) extends TransformationExpr with VariableBindings {
+case class BindTransformationExpr(variables: List[Variable]) extends TransformationExpr with VariableBindings {
   def transform(wordNet: WordNet, bindings: Bindings, dataSet: DataSet) = {
-    bind(dataSet, decls)
+    // TODO remove the eager evaluation below
+    BindOp(ConstantOp(dataSet), variables).evaluate(wordNet, bindings)
   }
 }
 
@@ -391,7 +372,24 @@ sealed abstract class RelationalExpr extends Expr {
   def transform(wordNet: WordNet, bindings: Bindings, dataSet: DataSet, pos: Int): DataSet
 }
 
-case class UnaryRelationalExpr(ids: List[String]) extends RelationalExpr {
+case class ArcExpr(ids: List[String]) extends RelationalExpr {
+  def getExtensionPattern(wordNet: WordNet, sourceType: Option[DataType]) = {
+    val func = sourceType.map(dataType => wordNet.getRelation(_:String, dataType, _:String))
+      .getOrElse(wordNet.findFirstRelationByNameAndSource(_, _))
+
+    (ids: @unchecked) match {
+      case List(relationName) =>
+        func(relationName, Relation.Source).map(ExtensionPattern(_, Relation.Source, List(Relation.Destination)))
+      case List(left, right) =>
+        func(left, Relation.Source).map(ExtensionPattern(_, Relation.Source, List(right)))
+          .orElse(func(right, left).map(ExtensionPattern(_, left, List(Relation.Destination))))
+      case first :: second :: dests =>
+        func(first, Relation.Source)
+          .map(ExtensionPattern(_, Relation.Source, second :: dests))
+          .orElse((func(second, first).map(ExtensionPattern(_, first, dests))))
+    }
+  }
+
   def generate(wordNet: WordNet, bindings: Bindings) = {	
     if (ids.size > 1) {
         useIdentifiersAsRelationTuplesGenerator(wordNet)
@@ -476,17 +474,23 @@ case class UnaryRelationalExpr(ids: List[String]) extends RelationalExpr {
   }
 }
 
-case class UnionRelationalExpr(exprs: List[RelationalExpr]) extends RelationalExpr {
+case class ArcExprUnion(arcExprs: List[ArcExpr]) extends RelationalExpr {
+  def getExtensionPatterns(wordNet: WordNet, sourceType: Option[DataType]) = {
+    val patterns = arcExprs.map(_.getExtensionPattern(wordNet, sourceType))
+
+    if (patterns.filter(_.isDefined).size == arcExprs.size) Some(patterns.map(_.get)) else None
+  }
+
   def generate(wordNet: WordNet, bindings: Bindings) = {
-    DataSet(exprs.flatMap(_.generate(wordNet, bindings).paths))
+    DataSet(arcExprs.flatMap(_.generate(wordNet, bindings).paths))
   }
   
   def canTransform(wordNet: WordNet, bindings: Bindings, dataSet: DataSet) = {
-	  exprs.forall(_.canTransform(wordNet, bindings, dataSet))
+	  arcExprs.forall(_.canTransform(wordNet, bindings, dataSet))
   }
 	
   def transform(wordNet: WordNet, bindings: Bindings, dataSet: DataSet, pos: Int) = {
-    val results = exprs.map(_.transform(wordNet, bindings, dataSet, pos))
+    val results = arcExprs.map(_.transform(wordNet, bindings, dataSet, pos))
 
     DataSet(
       results.flatMap(_.paths),
@@ -653,40 +657,12 @@ case class ContextByVariableReq(variable: Variable) extends EvaluableExpr {
   }
 }
 
-case class ArcByUnaryRelationalExprReq(rexpr: UnaryRelationalExpr) extends SelfPlannedExpr {
-  def evaluate(wordNet: WordNet, bindings: Bindings) = {
-    val ids = rexpr match {case UnaryRelationalExpr(x) => x}
-
-    ids match {
-      case first::second::dests =>
-        wordNet.findFirstRelationByNameAndSource(second, first)
-          .map { r => 
-            r.demandArgument(first)
-            
-            if (dests.isEmpty) {
-              DataSet.fromValue(Arc(r, first, Relation.Destination))	
-            } else {
-              DataSet.fromList(dests.map { dest => 
-                r.demandArgument(dest)
-                Arc(r, first, dest)
-              })            	
-            }
-          }
-          .orElse(wordNet.findFirstRelationByNameAndSource(first, Relation.Source)
-            .map { r => 
-              DataSet.fromList((second::dests).map { dest =>
-                r.demandArgument(dest)
-                Arc(r, Relation.Source, dest)		
-            })})
-            .getOrElse(throw new WQueryEvaluationException("Arc generator references an unknown relation"))
-      case List(head) =>
-        wordNet.findFirstRelationByNameAndSource(head, Relation.Source) 
-          .map(r => DataSet.fromValue(Arc(r, Relation.Source, Relation.Destination )))
-          .getOrElse(throw new WQueryEvaluationException("Arc generator references unknown relation '" + head + "'"))
-      case Nil =>
-        throw new RuntimeException("ids is empty in ArcByUnaryRelationalExprReq")
-    }    
-  }  
+case class ArcByArcExprReq(arcExpr: ArcExpr) extends EvaluableExpr {
+  def evaluationPlan(wordNet: WordNet, bindings: Bindings) = {
+    arcExpr.getExtensionPattern(wordNet, None)
+      .map(pattern => ConstantOp(DataSet(pattern.to.map(to => List(Arc(pattern.relation, pattern.from, to))))))
+      .getOrElse(throw new WQueryEvaluationException("Arc generator references an unknown relation or argument"))
+  }
 }
 
 case class AlgebraExpr(op: AlgebraOp) extends EvaluableExpr {

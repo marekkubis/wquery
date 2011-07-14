@@ -50,7 +50,7 @@ trait WQueryParsers extends RegexParsers {
 
   def assignment = (
      var_decls ~ ":=" ~ multipath_expr ^^ { case vdecls~_~mexpr => AssignmentExpr(vdecls, mexpr) }
-     | notQuotedString ~ ":=" ~ rel_expr  ^^ { case name~_~rexpr => RelationalAliasExpr(name, rexpr) }
+     | notQuotedString ~ ":=" ~ arc_expr_union  ^^ { case name~_~rexpr => RelationalAliasExpr(name, rexpr) }
       // | expr ~ ("+="|"-="|":=") ~ expr ^^ { case lexpr~op~rexpr => UpdateExpr(lexpr, op, rexpr) }
   )
 
@@ -104,15 +104,15 @@ trait WQueryParsers extends RegexParsers {
     | positioned_relation_trans ^^ { trans => PositionedRelationChainTransformationExpr(List(trans)) }
   )
 
-  def positioned_relation_trans = dots ~ rel_expr ^^ { case pos~expr => PositionedRelationTransformationExpr(pos, expr) }
+  def positioned_relation_trans = dots ~ arc_expr_union ^^ { case pos~expr => PositionedRelationTransformationExpr(pos, expr) }
 
   def dots = rep1(".") ^^ { _.size }
 
-  def rel_expr = rep1sep(unary_rel_expr, "|")  ^^ { UnionRelationalExpr(_) }
+  def arc_expr_union = rep1sep(arc_expr, "|")  ^^ { ArcExprUnion(_) }
 
-  def unary_rel_expr = (
-    ("^" ~> notQuotedString) ^^ { id => UnaryRelationalExpr(List("destination", id, "source")) } // syntactic sugar
-    | rep1sep(notQuotedString, "^") ^^ { UnaryRelationalExpr(_) }
+  def arc_expr = (
+    ("^" ~> notQuotedString) ^^ { id => ArcExpr(List("destination", id, "source")) } // syntactic sugar
+    | rep1sep(notQuotedString, "^") ^^ { ArcExpr(_) }
   )
 
   def quantifier = (
@@ -182,7 +182,7 @@ trait WQueryParsers extends RegexParsers {
     | quoted_word_generator
   )
 
-  def rel_expr_generator = rel_expr ~ quantifier ^^ { case expr~quant => ContextByRelationalExprReq(expr, quant) }
+  def rel_expr_generator = arc_expr_union ~ quantifier ^^ { case expr~quant => ContextByRelationalExprReq(expr, quant) }
 
   def boolean_generator = (
     "true" ^^^ { AlgebraExpr(ConstantOp.fromValue(true)) }
@@ -220,7 +220,7 @@ trait WQueryParsers extends RegexParsers {
   def empty_set_generator = "<>" ^^ { _ => AlgebraExpr(ConstantOp.empty) }
   def expr_generator = "(" ~> expr <~ ")"
   def variable_generator = var_decl ^^ { ContextByVariableReq(_) }
-  def arc_generator = "\\" ~> unary_rel_expr ^^ { ArcByUnaryRelationalExprReq(_) }
+  def arc_generator = "\\" ~> arc_expr ^^ { ArcByArcExprReq(_) }
 
   // variables
   def var_decls = rep1(var_decl)

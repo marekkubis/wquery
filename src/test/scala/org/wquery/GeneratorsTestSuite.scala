@@ -80,7 +80,7 @@ class GeneratorsTestSuite extends WQueryTestSuite {
   
   @Test def testSimpleArcGenerator() = result of ("\\hypernym") should equal ("hypernym\n")
 
-  @Test def testUnknownArcGenerator() = result of ("\\lll") should startWith ("ERROR: Arc generator references unknown relation 'lll'")
+  @Test def testUnknownArcGenerator() = result of ("\\lll") should startWith ("ERROR: Arc generator references an unknown relation or argument")
   
   @Test def testInvertedArcGenerator() = result of ("\\^hypernym") should equal ("^hypernym\n")
   

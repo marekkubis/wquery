@@ -2,6 +2,7 @@ package org.wquery.engine
 
 import org.wquery.WQueryEvaluationException
 import org.wquery.model._
+import collection.mutable.ListBuffer
 
 sealed abstract class AlgebraOp {
   def evaluate(wordNet: WordNet, bindings: Bindings): DataSet
@@ -283,6 +284,57 @@ case class SelectOp(op: AlgebraOp, condition: ConditionalExpr) extends AlgebraOp
     }
 
     DataSet.fromBuffers(pathBuffer, pathVarBuffers, stepVarBuffers)
+  }
+}
+
+case class ProjectOp(op: AlgebraOp, projectOp: AlgebraOp) extends AlgebraOp {
+  def evaluate(wordNet: WordNet, bindings: Bindings) = {
+    val dataSet = op.evaluate(wordNet, bindings)
+    val buffer = new DataSetBuffer
+    val pathVarNames = dataSet.pathVars.keys
+    val stepVarNames = dataSet.stepVars.keys
+    val binds = Bindings(bindings)
+
+    // TODO OPT here determine which variables are to be used by projection
+
+    for (i <- 0 until dataSet.pathCount) {
+      val tuple = dataSet.paths(i)
+      val tupleBuffer = new ListBuffer[Any]
+
+      for (pathVar <- pathVarNames) {
+        val varPos = dataSet.pathVars(pathVar)(i)
+        binds.bindPathVariable(pathVar, tuple.slice(varPos._1, varPos._2))
+      }
+
+      for (stepVar <- stepVarNames) {
+        val varPos = dataSet.stepVars(stepVar)(i)
+        binds.bindStepVariable(stepVar, tuple(varPos))
+      }
+
+      buffer.append(projectOp.evaluate(wordNet, binds))
+    }
+
+    buffer.toDataSet
+  }
+}
+
+case class ExtendOp(op: AlgebraOp, pos: Int, patterns: List[ExtensionPattern]) extends AlgebraOp {
+  def evaluate(wordNet: WordNet, bindings: Bindings) = {
+    // TODO consider moving this to the store
+    val store = wordNet.store
+    val dataSet = op.evaluate(wordNet, bindings)
+    val buffer = new DataSetBuffer
+
+    patterns.foreach(pattern => buffer.append(store.extend(dataSet, pattern.relation, pos, pattern.from, pattern.to)))
+    buffer.toDataSet
+  }
+}
+
+case class ExtensionPattern(val relation: Relation, val from: String, val to: List[String])
+
+case class BindOp(op: AlgebraOp, declarations: List[Variable]) extends AlgebraOp with VariableBindings {
+  def evaluate(wordNet: WordNet, bindings: Bindings) = {
+    bind(op.evaluate(wordNet, bindings), declarations)
   }
 }
 
