@@ -45,10 +45,10 @@ case class WhileDoExpr(conditionExpr: EvaluableExpr, iteratedExpr: EvaluableExpr
     = WhileDoOp(conditionExpr.evaluationPlan(wordNet, bindings), iteratedExpr.evaluationPlan(wordNet, bindings))
 }
 
-case class RelationalAliasExpr(name: String, relationalExpr: RelationalExpr) extends SelfPlannedExpr {
-  def evaluate(wordNet: WordNet, bindings: Bindings) = {
-    bindings.bindRelationalExprAlias(name, relationalExpr)
-    DataSet.empty
+case class RelationalAliasExpr(name: String, relationalExpr: RelationalExpr) extends EvaluableExpr {
+  def evaluationPlan(wordNet: WordNet, bindings: Bindings) = {
+    bindings.bindRelationalExprAlias(name, relationalExpr) // TODO a side-effect to be removed after the introduction of updates
+    ConstantOp.empty
   }
 }
 
