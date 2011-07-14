@@ -248,6 +248,47 @@ case class MinusOp(op: AlgebraOp) extends AlgebraOp {
 /*
  * Declarative operations
  */
+case class SelectOp(op: AlgebraOp, condition: ConditionalExpr) extends AlgebraOp {
+  def evaluate(wordNet: WordNet, bindings: Bindings) = {
+    val dataSet = op.evaluate(wordNet, bindings)
+    val pathVarNames = dataSet.pathVars.keys.toSeq
+    val stepVarNames = dataSet.stepVars.keys.toSeq
+    val pathBuffer = DataSetBuffers.createPathBuffer
+    val pathVarBuffers = DataSetBuffers.createPathVarBuffers(pathVarNames)
+    val stepVarBuffers = DataSetBuffers.createStepVarBuffers(stepVarNames)
+
+    // TODO OPT here determine which variables are to be used by filter
+
+    for (i <- 0 until dataSet.pathCount) {
+      val tuple = dataSet.paths(i)
+      val binds = Bindings(bindings)
+
+      for (pathVar <- pathVarNames) {
+        val varPos = dataSet.pathVars(pathVar)(i)
+        binds.bindPathVariable(pathVar, tuple.slice(varPos._1, varPos._2))
+      }
+
+      for (stepVar <- stepVarNames) {
+        val varPos = dataSet.stepVars(stepVar)(i)
+        binds.bindStepVariable(stepVar, tuple(varPos))
+      }
+
+      binds.bindContextVariables(tuple)
+
+      if (condition.satisfied(wordNet, binds)) {
+        pathBuffer.append(tuple)
+        pathVarNames.foreach(x => pathVarBuffers(x).append(dataSet.pathVars(x)(i)))
+        stepVarNames.foreach(x => stepVarBuffers(x).append(dataSet.stepVars(x)(i)))
+      }
+    }
+
+    DataSet.fromBuffers(pathBuffer, pathVarBuffers, stepVarBuffers)
+  }
+}
+
+/*
+ * Elementary operations
+ */
 case class FetchOp(relation: Relation, from: List[(String, List[Any])], to: List[String]) extends AlgebraOp {
   def evaluate(wordNet: WordNet, bindings: Bindings) = wordNet.store.fetch(relation, from, to)
 }

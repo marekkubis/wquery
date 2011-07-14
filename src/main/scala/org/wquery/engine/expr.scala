@@ -655,13 +655,9 @@ case class ContextByRelationalExprReq(expr: RelationalExpr, quantifier: Quantifi
   }  
 }
 
-case class WordFormByRegexReq(v: String) extends SelfPlannedExpr {
-  def evaluate(wordNet: WordNet, bindings: Bindings) = {
-    val regex = v.r
-    val result = wordNet.words.paths.map(_.head).filter(x => regex.findFirstIn(x.asInstanceOf[String]).map(_ => true).getOrElse(false))
-
-    DataSet.fromList(result.toList)
-  }
+case class WordFormByRegexReq(regex: String) extends EvaluableExpr {
+  def evaluationPlan(wordNet: WordNet, bindings: Bindings)
+    = SelectOp(FetchOp.words, ComparisonExpr("=~", AlgebraExpr(ContextRefOp(1)), AlgebraExpr(ConstantOp(DataSet.fromValue(regex)))))
 }
 
 case class BooleanByFilterReq(cond: ConditionalExpr) extends SelfPlannedExpr {
