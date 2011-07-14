@@ -658,11 +658,12 @@ case class ContextByRelationalExprReq(expr: RelationalExpr, quantifier: Quantifi
 
 case class WordFormByRegexReq(regex: String) extends EvaluableExpr {
   def evaluationPlan(wordNet: WordNet, bindings: Bindings)
-    = SelectOp(FetchOp.words, ComparisonExpr("=~", AlgebraExpr(ContextRefOp(1)), AlgebraExpr(ConstantOp(DataSet.fromValue(regex)))))
+    = SelectOp(FetchOp.words, ComparisonExpr("=~", AlgebraExpr(ContextRefOp(1)), AlgebraExpr(ConstantOp.fromValue(regex))))
 }
 
-case class BooleanByFilterReq(cond: ConditionalExpr) extends SelfPlannedExpr {
-  def evaluate(wordNet: WordNet, bindings: Bindings) = DataSet.fromValue(cond.satisfied(wordNet, bindings))
+case class BooleanByFilterReq(condition: ConditionalExpr) extends EvaluableExpr {
+  def evaluationPlan(wordNet: WordNet, bindings: Bindings) = IfElseOp(SelectOp(ConstantOp.fromValue(true), condition),
+    ConstantOp.fromValue(true), Some(ConstantOp.fromValue(false)))
 }
 
 case class ContextByVariableReq(variable: Variable) extends EvaluableExpr {

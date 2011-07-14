@@ -185,8 +185,8 @@ trait WQueryParsers extends RegexParsers {
   def rel_expr_generator = rel_expr ~ quantifier ^^ { case expr~quant => ContextByRelationalExprReq(expr, quant) }
 
   def boolean_generator = (
-    "true" ^^^ { AlgebraExpr(ConstantOp(DataSet.fromValue(true))) }
-    | "false" ^^^ { AlgebraExpr(ConstantOp(DataSet.fromValue(false))) }
+    "true" ^^^ { AlgebraExpr(ConstantOp.fromValue(true)) }
+    | "false" ^^^ { AlgebraExpr(ConstantOp.fromValue(false)) }
   )
 
   def synset_generator = (
@@ -207,17 +207,17 @@ trait WQueryParsers extends RegexParsers {
   def function_call_generator = notQuotedString ~ ("(" ~> expr <~ ")") ^^ { case name~y => FunctionExpr(name, y) }
 
   def quoted_word_generator = (
-    backQuotedString ^^ { value => AlgebraExpr(ConstantOp(DataSet.fromValue(value))) }
+    backQuotedString ^^ { value => AlgebraExpr(ConstantOp.fromValue(value)) }
     | quotedString ^^ { value => AlgebraExpr(if (value == "") FetchOp.words else FetchOp.wordByValue(value)) }
     | doubleQuotedString ^^ { WordFormByRegexReq(_) }
   )
 
-  def float_generator = floatNum ^^ { value => AlgebraExpr(ConstantOp(DataSet.fromValue(value))) }
+  def float_generator = floatNum ^^ { value => AlgebraExpr(ConstantOp.fromValue(value)) }
   def sequence_generator = integerNum ~ ".." ~ integerNum ^^ { case left~_~right => AlgebraExpr(ConstantOp(DataSet.fromList((left to right).toList))) }
-  def integer_generator = integerNum ^^ { value => AlgebraExpr(ConstantOp(DataSet.fromValue(value))) }
+  def integer_generator = integerNum ^^ { value => AlgebraExpr(ConstantOp.fromValue(value)) }
   def back_generator = rep1("#") ^^ { x => AlgebraExpr(ContextRefOp(x.size)) }
   def filter_generator = filter ^^ { BooleanByFilterReq(_) }
-  def empty_set_generator = "<>" ^^ { _ => AlgebraExpr(ConstantOp(DataSet.empty)) }
+  def empty_set_generator = "<>" ^^ { _ => AlgebraExpr(ConstantOp.empty) }
   def expr_generator = "(" ~> expr <~ ")"
   def variable_generator = var_decl ^^ { ContextByVariableReq(_) }
   def arc_generator = "\\" ~> unary_rel_expr ^^ { ArcByUnaryRelationalExprReq(_) }

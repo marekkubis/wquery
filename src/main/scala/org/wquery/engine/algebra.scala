@@ -321,6 +321,12 @@ case class ConstantOp(dataSet: DataSet) extends AlgebraOp {
   def evaluate(wordNet: WordNet, bindings: Bindings) = dataSet
 }
 
+object ConstantOp {
+  def fromValue(value: Any) = ConstantOp(DataSet.fromValue(value))
+
+  val empty = ConstantOp(DataSet.empty)
+}
+
 /*
  * Reference operations
  */
