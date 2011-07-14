@@ -100,19 +100,8 @@ case class BinaryArithmeticExpr(op: String, left: EvaluableExpr, right: Evaluabl
   }
 }
 
-case class MinusExpr(expr: EvaluableExpr) extends SelfPlannedExpr {
-  def evaluate(wordNet: WordNet, bindings: Bindings) = {
-    val eresult = expr.evaluationPlan(wordNet, bindings).evaluate(wordNet, bindings)
-
-    if (eresult.isNumeric(0)) {
-        DataSet(eresult.paths.map(_.last).map {
-            case x: Int => List(-x)
-            case x: Double => List(-x)
-        })
-    } else {
-      throw new WQueryEvaluationException("Unary '-' requires a context that consist of integer or float singletons")       
-    }
-  }
+case class MinusExpr(expr: EvaluableExpr) extends EvaluableExpr {
+  def evaluationPlan(wordNet: WordNet, bindings: Bindings) = MinusOp(expr.evaluationPlan(wordNet, bindings))
 }
 
 /* 

@@ -153,7 +153,7 @@ case class JoinOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends AlgebraOp {
 /*
  * Arithmetic operations
  */
-abstract class ArithmeticOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends AlgebraOp {
+abstract class BinaryArithmeticOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends AlgebraOp {
   def evaluate(wordNet: WordNet, bindings: Bindings) = {
     val leftSet = leftOp.evaluate(wordNet, bindings).paths.map(_.last)
     val rightSet = rightOp.evaluate(wordNet, bindings).paths.map(_.last)
@@ -164,7 +164,7 @@ abstract class ArithmeticOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends Algeb
   def combine(left: Any, right: Any): Any
 }
 
-case class AddOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends ArithmeticOp(leftOp, rightOp) {
+case class AddOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends BinaryArithmeticOp(leftOp, rightOp) {
   def combine(leftVal: Any, rightVal: Any) = (leftVal, rightVal) match {
     case (leftVal: Double, rightVal: Double) =>
       leftVal + rightVal
@@ -177,7 +177,7 @@ case class AddOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends ArithmeticOp(lef
   }
 }
 
-case class SubOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends ArithmeticOp(leftOp, rightOp) {
+case class SubOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends BinaryArithmeticOp(leftOp, rightOp) {
   def combine(leftVal: Any, rightVal: Any) = (leftVal, rightVal) match {
     case (leftVal: Double, rightVal: Double) =>
       leftVal - rightVal
@@ -190,7 +190,7 @@ case class SubOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends ArithmeticOp(lef
   }
 }
 
-case class MulOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends ArithmeticOp(leftOp, rightOp) {
+case class MulOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends BinaryArithmeticOp(leftOp, rightOp) {
   def combine(leftVal: Any, rightVal: Any) = (leftVal, rightVal) match {
     case (leftVal: Double, rightVal: Double) =>
       leftVal * rightVal
@@ -203,7 +203,7 @@ case class MulOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends ArithmeticOp(lef
   }
 }
 
-case class DivOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends ArithmeticOp(leftOp, rightOp) {
+case class DivOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends BinaryArithmeticOp(leftOp, rightOp) {
   def combine(leftVal: Any, rightVal: Any) = (leftVal, rightVal) match {
     case (leftVal: Double, rightVal: Double) =>
       leftVal / rightVal
@@ -216,14 +216,14 @@ case class DivOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends ArithmeticOp(lef
   }
 }
 
-case class IntDivOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends ArithmeticOp(leftOp, rightOp) {
+case class IntDivOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends BinaryArithmeticOp(leftOp, rightOp) {
   def combine(leftVal: Any, rightVal: Any) = (leftVal, rightVal) match {
     case (leftVal: Int, rightVal: Int) =>
       leftVal / rightVal
   }
 }
 
-case class ModOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends ArithmeticOp(leftOp, rightOp) {
+case class ModOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends BinaryArithmeticOp(leftOp, rightOp) {
   def combine(leftVal: Any, rightVal: Any) = (leftVal, rightVal) match {
     case (leftVal: Double, rightVal: Double) =>
       leftVal % rightVal
@@ -233,6 +233,15 @@ case class ModOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends ArithmeticOp(lef
       leftVal % rightVal
     case (leftVal: Int, rightVal: Int) =>
       leftVal % rightVal
+  }
+}
+
+case class MinusOp(op: AlgebraOp) extends AlgebraOp {
+  def evaluate(wordNet: WordNet, bindings: Bindings) = {
+    DataSet(op.evaluate(wordNet, bindings).paths.map(_.last).map {
+        case x: Int => List(-x)
+        case x: Double => List(-x)
+    })
   }
 }
 
