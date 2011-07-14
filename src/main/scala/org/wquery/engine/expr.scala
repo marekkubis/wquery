@@ -101,6 +101,7 @@ case class BinaryArithmeticExpr(op: String, left: EvaluableExpr, right: Evaluabl
 }
 
 case class MinusExpr(expr: EvaluableExpr) extends EvaluableExpr {
+  // TODO provide static type check
   def evaluationPlan(wordNet: WordNet, bindings: Bindings) = MinusOp(expr.evaluationPlan(wordNet, bindings))
 }
 
