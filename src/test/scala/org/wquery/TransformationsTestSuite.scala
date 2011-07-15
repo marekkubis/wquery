@@ -52,7 +52,7 @@ class TransformationsTestSuite extends WQueryTestSuite {
   
   @Test def testNAryRelationMultiProjection() = result of ("count(`n`.pos^literal^source^num)") should equal ("176\n")
   
-  @Test def testNAryRelationInvalidProjection() = result of ("car:1:n.destination^num") should equal ("ERROR: Relation 'num' with source type SenseType not found")
+  @Test def testNAryRelationInvalidProjection() = result of ("car:1:n.destination^num") should equal ("ERROR: Arc expression destination^num references an unknown relation or argument")
   
   @Test def testRegularPathFrom2To2() = result of ("{car}.hypernym{2}") should equal ("{ cable car:1:n car:5:n } hypernym { compartment:2:n } hypernym { room:1:n }\n{ car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n } hypernym { motor vehicle:1:n automotive vehicle:1:n } hypernym { self-propelled vehicle:1:n }\n{ car:2:n railcar:1:n railway car:1:n railroad car:1:n } hypernym { wheeled vehicle:1:n } hypernym { container:1:n }\n{ car:2:n railcar:1:n railway car:1:n railroad car:1:n } hypernym { wheeled vehicle:1:n } hypernym { vehicle:1:n }\n{ car:4:n elevator car:1:n } hypernym { compartment:2:n } hypernym { room:1:n }\n{ car:3:n gondola:3:n } hypernym { compartment:2:n } hypernym { room:1:n }\n")
   

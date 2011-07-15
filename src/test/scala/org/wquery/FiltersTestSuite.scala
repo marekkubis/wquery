@@ -136,7 +136,7 @@ class FiltersTestSuite extends WQueryTestSuite {
 
   @Test def testQuotedWordGeneratorFilter()  = result of ("{bus}.hypernym.words.'car'") should equal ("{ bus:4:n jalopy:1:n heap:3:n } hypernym { car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n } words car\n")
 
-  @Test def testUnquotedWordGeneratorFilter()  = result of ("{bus}.hypernym.words.car") should startWith ("ERROR: Relation 'car' with source type StringType not found")
+  @Test def testUnquotedWordGeneratorFilter()  = result of ("{bus}.hypernym.words.car") should startWith ("ERROR: Arc expression car references an unknown relation or argument")
 
   @Test def testQuotedSenseGeneratorFilter()  = result of ("{bus}.hypernym.senses.'car':1:n") should equal ("{ bus:4:n jalopy:1:n heap:3:n } hypernym { car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n } senses car:1:n\n")
 

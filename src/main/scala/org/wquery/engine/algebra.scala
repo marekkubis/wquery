@@ -332,6 +332,10 @@ case class ExtendOp(op: AlgebraOp, pos: Int, patterns: List[ExtensionPattern]) e
 
 case class ExtensionPattern(val relation: Relation, val from: String, val to: List[String])
 
+case class CloseOp() extends AlgebraOp {
+  def evaluate(wordNet: WordNet, bindings: Bindings) = null
+}
+
 case class BindOp(op: AlgebraOp, declarations: List[Variable]) extends AlgebraOp with VariableBindings {
   def evaluate(wordNet: WordNet, bindings: Bindings) = {
     bind(op.evaluate(wordNet, bindings), declarations)

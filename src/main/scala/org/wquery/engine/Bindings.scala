@@ -1,13 +1,13 @@
 package org.wquery.engine
 
 import java.lang.reflect.Method
-import org.wquery.model.{Function, FunctionArgumentType, ScalarFunction, ValueType, AggregateFunction, DataSet, TupleType}
 import scala.collection.mutable.Map
+import org.wquery.model._
 
 class Bindings(parent: Option[Bindings]) {  
   val pathVariables = Map[String, List[Any]]()
   val stepVariables = Map[String, Any]()  
-  val relationalExprAliases = Map[String, RelationalExpr]()
+  val relationalExprAliases = Map[String, ArcExprUnion]()
   val functions = Map[(String, List[FunctionArgumentType]), (Function, Method)]()  
   
   private var contextVars = List[Any]()
@@ -34,7 +34,7 @@ class Bindings(parent: Option[Bindings]) {
 	}
   }
   
-  def bindRelationalExprAlias(name: String, value: RelationalExpr) = (relationalExprAliases(name) = value)
+  def bindRelationalExprAlias(name: String, value: ArcExprUnion) = (relationalExprAliases(name) = value)
   
   def bindFunction(function: Function, clazz: java.lang.Class[_] , methodName: String) {
     val method = (function match {
@@ -58,7 +58,7 @@ class Bindings(parent: Option[Bindings]) {
    
   def lookupStepVariable(name: String): Option[Any] = stepVariables.get(name).orElse(parent.flatMap(_.lookupStepVariable(name)))
   
-  def lookupRelationalExprAlias(name: String): Option[RelationalExpr] = relationalExprAliases.get(name).orElse(parent.flatMap(_.lookupRelationalExprAlias(name)))
+  def lookupRelationalExprAlias(name: String): Option[ArcExprUnion] = relationalExprAliases.get(name).orElse(parent.flatMap(_.lookupRelationalExprAlias(name)))
   
   def lookupFunction(name: String, args: List[FunctionArgumentType]): Option[(Function, Method)] = functions.get(name, args).orElse(parent.flatMap(_.lookupFunction(name, args)))  
   
@@ -67,6 +67,8 @@ class Bindings(parent: Option[Bindings]) {
   def contextVariables = contextVars
 
   def areContextVariablesBound = contextVars != Nil
+
+  def contextVariableType(pos: Int) = BasicType(contextVars(contextVars.size - 1 - pos))
 
   def isPathVariableBound(name: String) = lookupPathVariable(name).isDefined
   
