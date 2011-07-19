@@ -464,18 +464,16 @@ case class SynsetByExprReq(expr: EvaluableExpr) extends SelfPlannedExpr {
   def evaluate(wordNet: WordNet, bindings: Bindings) = {
     val eresult = expr.evaluationPlan(wordNet, bindings).evaluate(wordNet, bindings)
 
-    if (eresult.minPathSize == 1 && eresult.maxPathSize == 1) {
+    if (eresult.pathCount > 0) {
       if (eresult.getType(0) == SenseType) {
         wordNet.getSynsetsBySenses(eresult.paths.map(_.head.asInstanceOf[Sense]))
       } else if (eresult.getType(0) == StringType) {
         wordNet.getSynsetsByWordForms(eresult.paths.map(_.head.asInstanceOf[String]))
       } else {
-        throw new WQueryEvaluationException("{...} requires an expression that generates either senses or word forms")  
-      }           
-    } else if (eresult.pathCount == 0) {
-      DataSet.empty
+        throw new WQueryEvaluationException("{...} requires an expression that generates either senses or word forms")
+      }
     } else {
-      throw new WQueryEvaluationException("{...} requires an expression that generates single element paths")        
+      DataSet.empty
     }
   }
 }
