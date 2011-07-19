@@ -9,14 +9,14 @@ class WordNet(val store: WordNetStore) {
   def generateAllTuples(relation: Relation, args: List[String]) = store.fetch(relation, args.map(x => (x, List[Any]())), args)
 
   def followRelation(dataSet: DataSet, pos: Int, relation: Relation, source: String, dests: List[String]) = {
-    store.extend(dataSet, relation, pos, source, dests)
+    store.extend(dataSet, ExtensionPattern(pos, List(Extension(relation, source, dests))))
   }
 
   def followAny(dataSet: DataSet, pos: Int) = {
     val buffer = new DataSetBuffer
 
     for (relation <- store.relations; source <- relation.argumentNames; dest <- relation.argumentNames if (source != dest))
-      buffer.append(store.extend(dataSet, relation, pos, source, List(dest)))
+      buffer.append(store.extend(dataSet, ExtensionPattern(pos, List(Extension(relation, source, List(dest))))))
 
     buffer.toDataSet
   }

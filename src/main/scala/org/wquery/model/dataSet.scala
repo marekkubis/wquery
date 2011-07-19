@@ -40,12 +40,10 @@ class DataSet(val paths: List[List[Any]], val pathVars: Map[String, List[(Int, I
       BasicType(tuple(tuple.size - 1 - pos))        
     }.distinct
     
-    if (dataTypes.size == 1) {
-      dataTypes(0)
-    } else {
-      UnionType(dataTypes.toSet)
-    }
+    DataType.fromList(dataTypes)
   }
+
+  def types = (for (i <- maxPathSize - 1 to 0 by -1) yield getType(i)).toList
   
   def toBoundPaths: List[(List[Any], Map[String, (Int, Int)], Map[String, Int])] = {
     val buffer = new ListBuffer[(List[Any], Map[String, (Int, Int)], Map[String, Int])]

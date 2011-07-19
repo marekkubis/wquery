@@ -43,7 +43,17 @@ class InMemoryWordNetStore extends WordNetStore {
     }
   }
 
-  def extend(dataSet: DataSet, relation: Relation, from: Int, through: String, to: List[String]) = {
+  def extend(dataSet: DataSet, pattern: ExtensionPattern) = {
+    val buffer = new DataSetBuffer
+
+    pattern.extensions.foreach { extension =>
+      buffer.append(extend(dataSet, extension.relation, pattern.pos, extension.from, extension.to))
+    }
+
+    buffer.toDataSet
+  }
+
+  private def extend(dataSet: DataSet, relation: Relation, from: Int, through: String, to: List[String]) = {
     relation.demandArgument(through)
     to.foreach(relation.demandArgument)
 

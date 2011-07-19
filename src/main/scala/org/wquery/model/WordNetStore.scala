@@ -13,6 +13,10 @@ trait WordNetStore {
 
   def fetch(relation: Relation, from: List[(String, List[Any])], to: List[String]): DataSet
 
-  def extend(dataSet: DataSet, relation: Relation, from: Int, through: String, to: List[String]): DataSet
+  def extend(dataSet: DataSet, pattern: ExtensionPattern): DataSet
 
 }
+
+case class ExtensionPattern(val pos: Int, val extensions: List[Extension])
+
+case class Extension(val relation: Relation, val from: String, val to: List[String])

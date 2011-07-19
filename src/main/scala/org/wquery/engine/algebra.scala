@@ -318,22 +318,66 @@ case class ProjectOp(op: AlgebraOp, projectOp: AlgebraOp) extends AlgebraOp {
   }
 }
 
-case class ExtendOp(op: AlgebraOp, pos: Int, patterns: List[ExtensionPattern]) extends AlgebraOp {
+case class ExtendOp(op: AlgebraOp, pattern: ExtensionPattern) extends AlgebraOp {
   def evaluate(wordNet: WordNet, bindings: Bindings) = {
-    // TODO consider moving this to the store
-    val store = wordNet.store
-    val dataSet = op.evaluate(wordNet, bindings)
-    val buffer = new DataSetBuffer
-
-    patterns.foreach(pattern => buffer.append(store.extend(dataSet, pattern.relation, pos, pattern.from, pattern.to)))
-    buffer.toDataSet
+    wordNet.store.extend(op.evaluate(wordNet, bindings), pattern)
   }
 }
 
-case class ExtensionPattern(val relation: Relation, val from: String, val to: List[String])
+case class CloseOp(op: AlgebraOp, patterns: List[ExtensionPattern], limit: Option[Int]) extends AlgebraOp {
+  def evaluate(wordNet: WordNet, bindings: Bindings) = {
+    val dataSet = op.evaluate(wordNet, bindings)
+    val pathVarNames = dataSet.pathVars.keys.toSeq
+    val stepVarNames = dataSet.stepVars.keys.toSeq
+    val pathBuffer = DataSetBuffers.createPathBuffer
+    val pathVarBuffers = DataSetBuffers.createPathVarBuffers(pathVarNames)
+    val stepVarBuffers = DataSetBuffers.createStepVarBuffers(stepVarNames)
 
-case class CloseOp() extends AlgebraOp {
-  def evaluate(wordNet: WordNet, bindings: Bindings) = null
+    for (i <- 0 until dataSet.pathCount) {
+      val tuple = dataSet.paths(i)
+
+      pathBuffer.append(tuple)
+      pathVarNames.foreach(x => pathVarBuffers(x).append(dataSet.pathVars(x)(i)))
+      stepVarNames.foreach(x => stepVarBuffers(x).append(dataSet.stepVars(x)(i)))
+
+      for (cnode <- closure(wordNet, bindings, tuple, Set(tuple.last), limit)) {
+        pathBuffer.append(cnode)
+        pathVarNames.foreach(x => pathVarBuffers(x).append(dataSet.pathVars(x)(i)))
+        stepVarNames.foreach(x => stepVarBuffers(x).append(dataSet.stepVars(x)(i)))
+      }
+    }
+
+    DataSet.fromBuffers(pathBuffer, pathVarBuffers, stepVarBuffers)
+  }
+
+  private def closure(wordNet: WordNet, bindings: Bindings, source: List[Any], forbidden: Set[Any], limit: Option[Int]): List[List[Any]] = {
+    if (limit.getOrElse(1) > 0) {
+      val store = wordNet.store
+      val transformed = patterns.foldLeft(DataSet.fromTuple(source))((dataSet, extension) => store.extend(dataSet, extension))
+
+      val filtered = transformed.paths.filter { x => !forbidden.contains(x.last) }
+
+      if (filtered.isEmpty) {
+        filtered
+      } else {
+        val result = new ListBuffer[List[Any]]
+        val newForbidden: Set[Any] = forbidden.++[Any, Set[Any]](filtered.map(_.last)) // TODO ugly
+	      val newLimit = limit.map(_ - 1)
+
+        result.appendAll(filtered)
+
+        filtered.foreach { x =>
+          result.appendAll(closure(wordNet, bindings, x, newForbidden, newLimit))
+        }
+
+        result.toList
+      }
+    } else {
+      Nil
+    }
+  }
+
+
 }
 
 case class BindOp(op: AlgebraOp, declarations: List[Variable]) extends AlgebraOp with VariableBindings {

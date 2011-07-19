@@ -38,6 +38,10 @@ case object BooleanType extends NodeType {
 
 case class UnionType(types: Set[BasicType]) extends DataType
 
+object DataType {
+  def fromList(types: List[BasicType]) = if (types.size == 1) types.head else UnionType(types.toSet)
+}
+
 object BasicType {
   def apply(value: Any) = value match {        
     case _:Synset =>
