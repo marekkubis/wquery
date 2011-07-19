@@ -248,27 +248,13 @@ sealed abstract class TransformationExpr extends Expr {
   def transform(wordNet: WordNet, bindings: Bindings, dataSet: DataSet): DataSet
 }
 
-sealed abstract class GeneratingTransformationExpr extends TransformationExpr {
-  def generate(wordNet: WordNet, bindings: Bindings): DataSet
-}
-
-case class QuantifiedTransformationExpr(chain: PositionedRelationChainTransformationExpr, quantifier: Quantifier) extends GeneratingTransformationExpr {
+case class QuantifiedTransformationExpr(chain: PositionedRelationChainTransformationExpr, quantifier: Quantifier) extends TransformationExpr {
   def transform(wordNet: WordNet, bindings: Bindings, dataSet: DataSet) = {
     quantifier.quantify(ConstantOp(dataSet), chain, wordNet, bindings)
   }
-
-  def generate(wordNet: WordNet, bindings: Bindings) = {
-    val dataSet = chain.generate(wordNet, bindings)
-    val lowerResult = (2 to quantifier.lowerBound).foldLeft(dataSet)((x, _) => chain.transform(wordNet, bindings, x))
-
-    if (!lowerResult.isEmpty && Some(quantifier.lowerBound) != quantifier.upperBound)
-      CloseOp(ConstantOp(lowerResult), chain.demandExtensionPatterns(wordNet, bindings, lowerResult.types), quantifier.upperBound.map(_ - quantifier.lowerBound)).evaluate(wordNet, bindings)
-    else
-      lowerResult
-  }
 }
 
-case class PositionedRelationTransformationExpr(pos: Int, arcUnion: ArcExprUnion) extends GeneratingTransformationExpr {
+case class PositionedRelationTransformationExpr(pos: Int, arcUnion: ArcExprUnion) extends TransformationExpr {
   def demandExtensionPattern(wordNet: WordNet, bindings: Bindings, types: List[DataType]) = {
     arcUnion.getExtensions(wordNet, Some(types(types.size - pos)))
       .map(extensions => ExtensionPattern(pos, extensions))
@@ -283,11 +269,9 @@ case class PositionedRelationTransformationExpr(pos: Int, arcUnion: ArcExprUnion
       .getOrElse(throw new WQueryEvaluationException("Arc expression " + arcUnion + " references an unknown relation or argument"))
       .evaluate(wordNet, bindings)
   }
-
-  def generate(wordNet: WordNet, bindings: Bindings) = arcUnion.generate(wordNet, bindings)
 }
 
-case class PositionedRelationChainTransformationExpr(exprs: List[PositionedRelationTransformationExpr]) extends GeneratingTransformationExpr {
+case class PositionedRelationChainTransformationExpr(exprs: List[PositionedRelationTransformationExpr]) extends TransformationExpr {
   def demandExtensionPatterns(wordNet: WordNet, bindings: Bindings, types: List[DataType]) = {
     val patternBuffer = new ListBuffer[ExtensionPattern]
     val typesBuffer = new ListBuffer[DataType]
@@ -313,19 +297,13 @@ case class PositionedRelationChainTransformationExpr(exprs: List[PositionedRelat
   def transform(wordNet: WordNet, bindings: Bindings, dataSet: DataSet) = {
     exprs.foldLeft(dataSet)((x, expr) => expr.transform(wordNet, bindings, x))
   }
-
-  def generate(wordNet: WordNet, bindings: Bindings) = {
-    exprs.tail.foldLeft(exprs.head.generate(wordNet, bindings))((x, expr) => expr.transform(wordNet, bindings, x))
-  }
 }
 
-case class FilterTransformationExpr(condition: ConditionalExpr) extends GeneratingTransformationExpr {
+case class FilterTransformationExpr(condition: ConditionalExpr) extends TransformationExpr {
   def transform(wordNet: WordNet, bindings: Bindings, dataSet: DataSet) = {
     // TODO remove the eager evaluation below
     SelectOp(ConstantOp(dataSet), condition).evaluate(wordNet, bindings)
   }
-
-  def generate(wordNet: WordNet, bindings: Bindings) = DataSet.fromValue(condition.satisfied(wordNet, bindings))
 }
 
 case class ProjectionTransformationExpr(expr: EvaluableExpr) extends TransformationExpr {
@@ -374,51 +352,7 @@ case class ArcExpr(ids: List[String]) extends Expr {
 
   def getLiteral = if (ids.size == 1) Some(ids.head) else None
 
-  def generate(wordNet: WordNet, bindings: Bindings) = {	
-    if (ids.size > 1) {
-        useIdentifiersAsRelationTuplesGenerator(wordNet)
-          .getOrElse(throw new WQueryEvaluationException("Relation '" + ids.head + "' not found"))
-    } else {
-      if (!bindings.areContextVariablesBound) {
-        useIdentifiersAsRelationTuplesGenerator(wordNet)
-          .getOrElse(useIdentifierAsBasicTypeGenerator(wordNet))
-      } else {             
-        useIdentifierAsBasicTypeGenerator(wordNet)	                
-      }
-    }				  
-  }
-  
-  private def useIdentifiersAsRelationTuplesGenerator(wordNet: WordNet) = {
-    ids match {
-      case first::second::dests =>
-        wordNet.findFirstRelationByNameAndSource(second, first)
-          .map(r => wordNet.generateAllTuples(r, first::dests))
-          .orElse(wordNet.findFirstRelationByNameAndSource(first, Relation.Source)
-            .map(r => wordNet.generateAllTuples(r, Relation.Source::second::dests)))
-      case List(head) =>
-        wordNet.findFirstRelationByNameAndSource(head, Relation.Source) 
-          .map(r => wordNet.generateAllTuples(r, Relation.Source::r.argumentNames.filter(_ != Relation.Source)))
-      case Nil =>
-          None        
-    }
-  }
-
-  private def useIdentifierAsBasicTypeGenerator(wordNet: WordNet) = {
-    ids.head match {
-      case "false" =>
-        DataSet.fromValue(false)
-      case "true" =>
-        DataSet.fromValue(true)
-      case id =>
-        wordNet.getWordForm(id)
-    }
-  }  
-  
-  def canTransform(wordNet: WordNet, bindings: Bindings, dataSet: DataSet) = {
-    (ids.size > 1) || wordNet.containsRelation(ids.head, dataSet.getType(0), Relation.Source)
-  }
-	
-  def transform(wordNet: WordNet, bindings: Bindings, dataSet: DataSet, pos: Int) = {	  
+  def transform(wordNet: WordNet, bindings: Bindings, dataSet: DataSet, pos: Int) = {
     if (ids.size > 1) {
       useIdentifiersAsTransformation(wordNet, dataSet, pos)  
     } else {
@@ -469,14 +403,6 @@ case class ArcExprUnion(arcExprs: List[ArcExpr]) extends Expr {
 
   override def toString = arcExprs.mkString("|")
 
-  def generate(wordNet: WordNet, bindings: Bindings) = {
-    DataSet(arcExprs.flatMap(_.generate(wordNet, bindings).paths))
-  }
-  
-  def canTransform(wordNet: WordNet, bindings: Bindings, dataSet: DataSet) = {
-	  arcExprs.forall(_.canTransform(wordNet, bindings, dataSet))
-  }
-	
   def transform(wordNet: WordNet, bindings: Bindings, dataSet: DataSet, pos: Int): DataSet = {
     val results = arcExprs.map(expr => expr.transform(wordNet, bindings, dataSet, pos))
 
