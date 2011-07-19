@@ -182,7 +182,7 @@ trait WQueryParsers extends RegexParsers {
     | quoted_word_generator
   )
 
-  def rel_expr_generator = arc_expr_union ~ quantifier ^^ { case expr~quant => ContextByRelationalExprReq(expr, quant) }
+  def rel_expr_generator = arc_expr_union ~ quantifier ^^ { case expr~quant => ContextByArcExprUnionReq(expr, quant) }
 
   def boolean_generator = (
     "true" ^^^ { AlgebraExpr(ConstantOp.fromValue(true)) }

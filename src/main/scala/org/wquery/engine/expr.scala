@@ -328,7 +328,7 @@ case class PathExpr(generator: EvaluableExpr, steps: List[TransformationExpr]) e
 }
 
 /*
- * Relational Expressions
+ * Arc Expressions
  */
 case class ArcExpr(ids: List[String]) extends Expr {
   def getExtension(wordNet: WordNet, sourceType: Option[DataType]) = {
@@ -348,43 +348,9 @@ case class ArcExpr(ids: List[String]) extends Expr {
     }
   }
 
-  override def toString = ids.mkString("^")
-
   def getLiteral = if (ids.size == 1) Some(ids.head) else None
 
-  def transform(wordNet: WordNet, bindings: Bindings, dataSet: DataSet, pos: Int) = {
-    if (ids.size > 1) {
-      useIdentifiersAsTransformation(wordNet, dataSet, pos)  
-    } else {
-      useIdentifiersAsTransformation(wordNet, dataSet, pos)
-    }
-  }
-
-  private def useIdentifiersAsTransformation(wordNet: WordNet, dataSet: DataSet, pos: Int) = {
-    if (dataSet.isEmpty) {
-      dataSet
-    } else {
-      if (ids == List("_")) {
-        wordNet.followAny(dataSet, pos)
-      } else {
-        val sourceType = dataSet.getType(pos - 1)
-        val (relation, source, dests) = (ids: @unchecked) match {
-          case List(relationName) =>
-            (wordNet.demandRelation(relationName, sourceType, Relation.Source), Relation.Source, List(Relation.Destination))
-          case List(left, right) =>
-            wordNet.getRelation(left, sourceType, Relation.Source)
-              .map((_, Relation.Source, List(right)))
-              .getOrElse((wordNet.demandRelation(right, sourceType, left), left, List(Relation.Destination)))
-          case first :: second :: dests =>
-            wordNet.getRelation(first, sourceType, Relation.Source)
-              .map((_, Relation.Source, second :: dests))
-              .getOrElse((wordNet.demandRelation(second, sourceType, first), first, dests))
-        }
-
-        wordNet.followRelation(dataSet, pos, relation, source, dests)
-      }
-    }
-  }
+  override def toString = ids.mkString("^")
 }
 
 case class ArcExprUnion(arcExprs: List[ArcExpr]) extends Expr {
@@ -397,16 +363,6 @@ case class ArcExprUnion(arcExprs: List[ArcExpr]) extends Expr {
   def getLiteral = if (arcExprs.size == 1) arcExprs.head.getLiteral else None
 
   override def toString = arcExprs.mkString("|")
-
-  def transform(wordNet: WordNet, bindings: Bindings, dataSet: DataSet, pos: Int): DataSet = {
-    val results = arcExprs.map(expr => expr.transform(wordNet, bindings, dataSet, pos))
-
-    DataSet(
-      results.flatMap(_.paths),
-      results.head.pathVars.map(pathVar => (pathVar._1, results.flatMap(_.pathVars(pathVar._1)))),
-      results.head.stepVars.map(stepVar => (stepVar._1, results.flatMap(_.stepVars(stepVar._1))))
-    )
-  }
 }
 
 /*
@@ -524,7 +480,7 @@ case class SynsetByExprReq(expr: EvaluableExpr) extends SelfPlannedExpr {
   }
 }
 
-case class ContextByRelationalExprReq(arcUnion: ArcExprUnion, quantifier: Quantifier) extends EvaluableExpr {
+case class ContextByArcExprUnionReq(arcUnion: ArcExprUnion, quantifier: Quantifier) extends EvaluableExpr {
   def evaluationPlan(wordNet: WordNet, bindings: Bindings) = {
     val chain = PositionedRelationChainTransformationExpr(List(PositionedRelationTransformationExpr(1, arcUnion)))
     val arcOp = if (bindings.areContextVariablesBound) {
