@@ -47,7 +47,7 @@ case class WhileDoExpr(conditionExpr: EvaluableExpr, iteratedExpr: EvaluableExpr
 
 case class RelationalAliasExpr(name: String, relationalExpr: ArcExprUnion) extends EvaluableExpr {
   def evaluationPlan(wordNet: WordNet, bindings: Bindings) = {
-    bindings.bindRelationalExprAlias(name, relationalExpr) // TODO a side-effect to be removed after the introduction of updates
+    // TODO provide suitable update op
     ConstantOp.empty
   }
 }
@@ -356,8 +356,7 @@ case class ArcExpr(ids: List[String]) extends Expr {
     if (ids.size > 1) {
       useIdentifiersAsTransformation(wordNet, dataSet, pos)  
     } else {
-      useIdentifierAsRelationalExprAlias(wordNet, bindings, dataSet, pos)
-        .getOrElse(useIdentifiersAsTransformation(wordNet, dataSet, pos))           
+      useIdentifiersAsTransformation(wordNet, dataSet, pos)
     }
   }
 
@@ -385,10 +384,6 @@ case class ArcExpr(ids: List[String]) extends Expr {
         wordNet.followRelation(dataSet, pos, relation, source, dests)
       }
     }
-  }
-  
-  private def useIdentifierAsRelationalExprAlias(wordNet: WordNet, bindings: Bindings, dataSet: DataSet, pos: Int) = {
-    bindings.lookupRelationalExprAlias(ids.head).map(_.transform(wordNet, bindings, dataSet, pos))      
   }
 }
 

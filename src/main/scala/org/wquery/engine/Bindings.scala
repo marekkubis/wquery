@@ -33,9 +33,7 @@ class Bindings(parent: Option[Bindings]) {
 	  stepVariables(name) = value
 	}
   }
-  
-  def bindRelationalExprAlias(name: String, value: ArcExprUnion) = (relationalExprAliases(name) = value)
-  
+
   def bindFunction(function: Function, clazz: java.lang.Class[_] , methodName: String) {
     val method = (function match {
       case ScalarFunction(name, args, result) =>
@@ -57,9 +55,7 @@ class Bindings(parent: Option[Bindings]) {
   def lookupPathVariable(name: String): Option[List[Any]] = pathVariables.get(name).orElse(parent.flatMap(_.lookupPathVariable(name)))
    
   def lookupStepVariable(name: String): Option[Any] = stepVariables.get(name).orElse(parent.flatMap(_.lookupStepVariable(name)))
-  
-  def lookupRelationalExprAlias(name: String): Option[ArcExprUnion] = relationalExprAliases.get(name).orElse(parent.flatMap(_.lookupRelationalExprAlias(name)))
-  
+
   def lookupFunction(name: String, args: List[FunctionArgumentType]): Option[(Function, Method)] = functions.get(name, args).orElse(parent.flatMap(_.lookupFunction(name, args)))  
   
   def lookupContextVariable(pos: Int): Option[Any] = if (contextVars.size - pos >= 0) Some(contextVars(contextVars.size - pos)) else parent.flatMap(_.lookupContextVariable(pos))  
