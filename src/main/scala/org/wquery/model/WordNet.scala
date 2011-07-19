@@ -6,21 +6,6 @@ class WordNet(val store: WordNetStore) {
     if (!store.relations.contains(relation))
       store.add(relation)
 
-  def generateAllTuples(relation: Relation, args: List[String]) = store.fetch(relation, args.map(x => (x, List[Any]())), args)
-
-  def followRelation(dataSet: DataSet, pos: Int, relation: Relation, source: String, dests: List[String]) = {
-    store.extend(dataSet, ExtensionPattern(pos, List(Extension(relation, source, dests))))
-  }
-
-  def followAny(dataSet: DataSet, pos: Int) = {
-    val buffer = new DataSetBuffer
-
-    for (relation <- store.relations; source <- relation.argumentNames; dest <- relation.argumentNames if (source != dest))
-      buffer.append(store.extend(dataSet, ExtensionPattern(pos, List(Extension(relation, source, List(dest))))))
-
-    buffer.toDataSet
-  }
-
   def getSynsetsBySenses(senses: List[Sense]) = {
     store.fetch(WordNet.SenseToSynset,  List((Relation.Source, senses)), List(Relation.Destination))
   }
@@ -29,8 +14,6 @@ class WordNet(val store: WordNetStore) {
     store.fetch(WordNet.WordFormToSynsets,  List((Relation.Source, wordForms)), List(Relation.Destination))
   }
 
-  def getWordForm(word: String) = store.fetch(WordNet.WordSet, List((Relation.Source, List(word))), List(Relation.Source))
-  
   def getRelation(name: String, sourceType: DataType, sourceName: String) = store.relations.find(r => r.name == name && r.arguments.get(sourceName) == Some(sourceType))
 
   def demandRelation(name: String, sourceType: DataType, sourceName: String) = {
@@ -53,6 +36,8 @@ class WordNet(val store: WordNetStore) {
         None        
     }        
   }
+
+  private def getWordForm(word: String) = store.fetch(WordNet.WordSet, List((Relation.Source, List(word))), List(Relation.Source))
 
   def addSynset(synset: Synset) {
     store.add(WordNet.SynsetSet, List((Relation.Source, synset)))
