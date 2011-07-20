@@ -306,6 +306,16 @@ case class FilterTransformationExpr(condition: ConditionalExpr) extends Transfor
   }
 }
 
+case class NodeTransformationExpr(generator: EvaluableExpr) extends TransformationExpr {
+  def transform(wordNet: WordNet, bindings: Bindings, dataSet: DataSet) = {
+    // TODO remove the eager evaluation below
+    // bindings.contextVariableType(0) instead of dataSet.getType
+    // TODO remove asInstanceOf
+    SelectOp(ConstantOp(dataSet), ComparisonExpr("in", AlgebraExpr(ContextRefOp(0, dataSet.getType(0).asInstanceOf[BasicType])), generator))
+      .evaluate(wordNet, bindings)
+  }
+}
+
 case class ProjectionTransformationExpr(expr: EvaluableExpr) extends TransformationExpr {
   def transform(wordNet: WordNet, bindings: Bindings, dataSet: DataSet) = {
     // TODO remove the eager evaluation below
@@ -482,7 +492,7 @@ case class ContextByArcExprUnionReq(arcUnion: ArcExprUnion, quantifier: Quantifi
   def evaluationPlan(wordNet: WordNet, bindings: Bindings) = {
     val chain = PositionedRelationChainTransformationExpr(List(PositionedRelationTransformationExpr(1, arcUnion)))
     val arcOp = if (bindings.areContextVariablesBound) {
-      arcUnion.getExtensions(wordNet, Some(bindings.contextVariableType(0))).map(_ => ContextRefOp(1))
+      arcUnion.getExtensions(wordNet, Some(bindings.contextVariableType(0))).map(_ => ContextRefOp(0, bindings.contextVariableType(0)))
         .map(op => ConstantOp(quantifier.quantify(op, chain, wordNet, bindings)))
     } else {
       arcUnion.getExtensions(wordNet, None).map(_.zip(arcUnion.arcExprs).map {
@@ -501,8 +511,15 @@ case class ContextByArcExprUnionReq(arcUnion: ArcExprUnion, quantifier: Quantifi
 }
 
 case class WordFormByRegexReq(regex: String) extends EvaluableExpr {
-  def evaluationPlan(wordNet: WordNet, bindings: Bindings)
-    = SelectOp(FetchOp.words, ComparisonExpr("=~", AlgebraExpr(ContextRefOp(1)), AlgebraExpr(ConstantOp.fromValue(regex))))
+  def evaluationPlan(wordNet: WordNet, bindings: Bindings) = {
+    // TODO bindings.contextVariableType(0)
+    SelectOp(FetchOp.words, ComparisonExpr("=~", AlgebraExpr(ContextRefOp(0, StringType)),
+      AlgebraExpr(ConstantOp.fromValue(regex))))
+  }
+}
+
+case class ContextReferenceReq(pos: Int) extends EvaluableExpr {
+  def evaluationPlan(wordNet: WordNet, bindings: Bindings) = ContextRefOp(pos, bindings.contextVariableType(pos))
 }
 
 case class BooleanByFilterReq(condition: ConditionalExpr) extends EvaluableExpr {
@@ -514,12 +531,12 @@ case class ContextByVariableReq(variable: Variable) extends EvaluableExpr {
   def evaluationPlan(wordNet: WordNet, bindings: Bindings) = variable match {
     case PathVariable(name) =>
       if (bindings.isPathVariableBound(name))
-        PathVariableRefOp(name)
+        PathVariableRefOp(name, bindings.pathVariableType(name))
       else
         throw new WQueryEvaluationException("A reference to unknown variable @'" + name + "' found")
     case StepVariable(name) =>
       if (bindings.isStepVariableBound(name))
-        StepVariableRefOp(name)
+        StepVariableRefOp(name, bindings.stepVariableType(name))
       else
         throw new WQueryEvaluationException("A reference to unknown variable $'" + name + "' found")
   }

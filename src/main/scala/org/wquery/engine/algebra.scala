@@ -6,6 +6,7 @@ import collection.mutable.ListBuffer
 
 sealed abstract class AlgebraOp {
   def evaluate(wordNet: WordNet, bindings: Bindings): DataSet
+  def rightType(pos: Int): Set[BasicType]
 }
 
 /*
@@ -13,6 +14,8 @@ sealed abstract class AlgebraOp {
  */
 case class EmitOp(op: AlgebraOp) extends AlgebraOp {
   def evaluate(wordNet: WordNet, bindings: Bindings) = op.evaluate(wordNet, bindings)
+
+  def rightType(pos: Int) = op.rightType(pos)
 }
 
 case class IterateOp(bindingOp: AlgebraOp, iteratedOp: AlgebraOp) extends AlgebraOp {
@@ -37,6 +40,8 @@ case class IterateOp(bindingOp: AlgebraOp, iteratedOp: AlgebraOp) extends Algebr
 
     buffer.toDataSet
   }
+
+  def rightType(pos: Int) = iteratedOp.rightType(pos)
 }
 
 case class IfElseOp(conditionOp: AlgebraOp, ifOp: AlgebraOp, elseOp: Option[AlgebraOp]) extends AlgebraOp {
@@ -46,6 +51,8 @@ case class IfElseOp(conditionOp: AlgebraOp, ifOp: AlgebraOp, elseOp: Option[Alge
     else
       elseOp.map(_.evaluate(wordNet, bindings)).getOrElse(DataSet.empty)
   }
+
+  def rightType(pos: Int) = ifOp.rightType(pos) ++ elseOp.map(_.rightType(pos)).getOrElse(Set.empty)
 }
 
 case class BlockOp(ops: List[AlgebraOp]) extends AlgebraOp {
@@ -58,6 +65,10 @@ case class BlockOp(ops: List[AlgebraOp]) extends AlgebraOp {
     }
 
     buffer.toDataSet
+  }
+
+  def rightType(pos: Int) = {
+    ops.tail.foldLeft(ops.headOption.map(_.rightType(pos)))((l, r) => l.map(_ ++ r.rightType(pos))).getOrElse(Set.empty)
   }
 }
 
@@ -80,6 +91,8 @@ case class AssignmentOp(variables: List[Variable], op: AlgebraOp) extends Algebr
       throw new WQueryEvaluationException("A multipath expression in an assignment should contain exactly one tuple")
     }
   }
+
+  def rightType(pos: Int) = Set.empty
 }
 
 case class WhileDoOp(conditionOp: AlgebraOp, iteratedOp: AlgebraOp) extends AlgebraOp {
@@ -91,6 +104,8 @@ case class WhileDoOp(conditionOp: AlgebraOp, iteratedOp: AlgebraOp) extends Alge
 
     buffer.toDataSet
   }
+
+  def rightType(pos: Int) = iteratedOp.rightType(pos)
 }
 
 /*
@@ -100,6 +115,8 @@ case class UnionOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends AlgebraOp {
   def evaluate(wordNet: WordNet, bindings: Bindings) = {
     DataSet(leftOp.evaluate(wordNet, bindings).paths union rightOp.evaluate(wordNet, bindings).paths)
   }
+
+  def rightType(pos: Int) = leftOp.rightType(pos) ++ rightOp.rightType(pos)
 }
 
 case class ExceptOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends AlgebraOp {
@@ -109,12 +126,16 @@ case class ExceptOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends AlgebraOp {
 
     DataSet(leftSet.paths.filterNot(rightSet.paths.contains))
   }
+
+  def rightType(pos: Int) = leftOp.rightType(pos)
 }
 
 case class IntersectOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends AlgebraOp {
   def evaluate(wordNet: WordNet, bindings: Bindings) = {
     DataSet(leftOp.evaluate(wordNet, bindings).paths intersect rightOp.evaluate(wordNet, bindings).paths)
   }
+
+  def rightType(pos: Int) = leftOp.rightType(pos) intersect rightOp.rightType(pos)
 }
 
 case class JoinOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends AlgebraOp {
@@ -149,6 +170,8 @@ case class JoinOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends AlgebraOp {
 
     DataSet.fromBuffers(pathBuffer, pathVarBuffers, stepVarBuffers)
   }
+
+  def rightType(pos: Int) = rightOp.rightType(pos) // TODO provide left argument inference
 }
 
 /*
@@ -163,6 +186,15 @@ abstract class BinaryArithmeticOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends
   }
 
   def combine(left: Any, right: Any): Any
+
+  def rightType(pos: Int) = if (pos == 0) {
+    val leftOpType = leftOp.rightType(pos)
+    val rightOpType = rightOp.rightType(pos)
+
+    if (leftOpType == rightOpType) leftOpType else Set(FloatType)
+  } else {
+    Set.empty
+  }
 }
 
 case class AddOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends BinaryArithmeticOp(leftOp, rightOp) {
@@ -244,6 +276,8 @@ case class MinusOp(op: AlgebraOp) extends AlgebraOp {
         case x: Double => List(-x)
     })
   }
+
+  def rightType(pos: Int) = op.rightType(pos)
 }
 
 /*
@@ -285,6 +319,8 @@ case class SelectOp(op: AlgebraOp, condition: ConditionalExpr) extends AlgebraOp
 
     DataSet.fromBuffers(pathBuffer, pathVarBuffers, stepVarBuffers)
   }
+
+  def rightType(pos: Int) = op.rightType(pos)
 }
 
 case class ProjectOp(op: AlgebraOp, projectOp: AlgebraOp) extends AlgebraOp {
@@ -316,11 +352,22 @@ case class ProjectOp(op: AlgebraOp, projectOp: AlgebraOp) extends AlgebraOp {
 
     buffer.toDataSet
   }
+
+  def rightType(pos: Int) = projectOp.rightType(pos)
 }
 
 case class ExtendOp(op: AlgebraOp, pattern: ExtensionPattern) extends AlgebraOp {
   def evaluate(wordNet: WordNet, bindings: Bindings) = {
     wordNet.store.extend(op.evaluate(wordNet, bindings), pattern)
+  }
+
+  def rightType(pos: Int) = {
+    pattern.destinationTypes.flatMap { types =>
+      if (types.isDefinedAt(types.size - 1 - pos))
+        Set(types(types.size - 1 - pos))
+      else
+        op.rightType(pos - types.size)
+    }.toSet
   }
 }
 
@@ -377,13 +424,24 @@ case class CloseOp(op: AlgebraOp, patterns: List[ExtensionPattern], limit: Optio
     }
   }
 
+  val types = patterns.tail.foldLeft(patterns.head.destinationTypes)((l, r) => crossTypes(l, r.destinationTypes))
 
+  def rightType(pos: Int) = {
+    op.rightType(pos) ++ types.filter(t => t.isDefinedAt(t.size -1 - pos)).map(t => t(t.size - 1 - pos))
+  }
+
+  private def crossTypes(leftTypes: List[List[BasicType]], rightTypes: List[List[BasicType]]) = {
+    for (left <- leftTypes; right <- rightTypes)
+      yield left ++ right
+  }
 }
 
 case class BindOp(op: AlgebraOp, declarations: List[Variable]) extends AlgebraOp with VariableBindings {
   def evaluate(wordNet: WordNet, bindings: Bindings) = {
     bind(op.evaluate(wordNet, bindings), declarations)
   }
+
+  def rightType(pos: Int) = op.rightType(pos)
 }
 
 /*
@@ -391,6 +449,8 @@ case class BindOp(op: AlgebraOp, declarations: List[Variable]) extends AlgebraOp
  */
 case class FetchOp(relation: Relation, from: List[(String, List[Any])], to: List[String]) extends AlgebraOp {
   def evaluate(wordNet: WordNet, bindings: Bindings) = wordNet.store.fetch(relation, from, to)
+
+  def rightType(pos: Int) = if (pos < to.size) Set(relation.demandArgument(to(to.size - 1 - pos))) else Set.empty
 }
 
 object FetchOp {
@@ -419,6 +479,8 @@ object FetchOp {
 
 case class ConstantOp(dataSet: DataSet) extends AlgebraOp {
   def evaluate(wordNet: WordNet, bindings: Bindings) = dataSet
+
+  def rightType(pos: Int) = Set(dataSet.getType(pos).asInstanceOf[BasicType])// TODO remove this after removing uniontype
 }
 
 object ConstantOp {
@@ -430,19 +492,25 @@ object ConstantOp {
 /*
  * Reference operations
  */
-case class ContextRefOp(ref: Int) extends AlgebraOp {
+case class ContextRefOp(ref: Int, dataType: BasicType) extends AlgebraOp {
   def evaluate(wordNet: WordNet, bindings: Bindings) = {
     bindings.lookupContextVariable(ref).map(DataSet.fromValue(_))
       .getOrElse(throw new WQueryEvaluationException("Backward reference (" + ref + ") too far"))
   }
+
+  def rightType(pos: Int) = if (pos == 0) Set(dataType) else Set.empty
 }
 
-case class PathVariableRefOp(name: String) extends AlgebraOp {
+case class PathVariableRefOp(name: String, types: List[BasicType]) extends AlgebraOp {
   def evaluate(wordNet: WordNet, bindings: Bindings) = bindings.lookupPathVariable(name).map(DataSet.fromTuple(_)).get
+
+  def rightType(pos: Int) = if (pos < types.size) Set(types(types.size - 1 - pos)) else Set.empty
 }
 
-case class StepVariableRefOp(name: String) extends AlgebraOp {
+case class StepVariableRefOp(name: String, dataType: BasicType) extends AlgebraOp {
   def evaluate(wordNet: WordNet, bindings: Bindings) = bindings.lookupStepVariable(name).map(DataSet.fromValue(_)).get
+
+  def rightType(pos: Int) = if (pos == 0) Set(dataType) else Set.empty
 }
 
 /*
@@ -450,4 +518,6 @@ case class StepVariableRefOp(name: String) extends AlgebraOp {
  */
 case class EvaluateOp(expr: SelfPlannedExpr) extends AlgebraOp {
   def evaluate(wordNet: WordNet, bindings: Bindings) = expr.evaluate(wordNet, bindings)
+
+  def rightType(pos: Int) = BasicType.all // TODO temporary - to be removed
 }

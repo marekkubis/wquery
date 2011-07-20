@@ -16,7 +16,3 @@ trait WordNetStore {
   def extend(dataSet: DataSet, pattern: ExtensionPattern): DataSet
 
 }
-
-case class ExtensionPattern(val pos: Int, val extensions: List[Extension])
-
-case class Extension(val relation: Relation, val from: String, val to: List[String])

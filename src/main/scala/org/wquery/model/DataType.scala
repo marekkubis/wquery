@@ -60,5 +60,7 @@ object BasicType {
       ArcType
     case obj =>
       throw new IllegalArgumentException("Object " + obj + " has no data type bound")
-  }  
+  }
+
+  def all = Set[BasicType](SynsetType, SenseType, StringType, IntegerType, FloatType, BooleanType, ArcType)
 }

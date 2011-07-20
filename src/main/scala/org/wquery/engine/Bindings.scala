@@ -58,13 +58,17 @@ class Bindings(parent: Option[Bindings]) {
 
   def lookupFunction(name: String, args: List[FunctionArgumentType]): Option[(Function, Method)] = functions.get(name, args).orElse(parent.flatMap(_.lookupFunction(name, args)))  
   
-  def lookupContextVariable(pos: Int): Option[Any] = if (contextVars.size - pos >= 0) Some(contextVars(contextVars.size - pos)) else parent.flatMap(_.lookupContextVariable(pos))  
+  def lookupContextVariable(pos: Int): Option[Any] = if (contextVars.size - 1 - pos >= 0) Some(contextVars(contextVars.size - 1 - pos)) else parent.flatMap(_.lookupContextVariable(pos))
   
   def contextVariables = contextVars
 
   def areContextVariablesBound = contextVars != Nil
 
   def contextVariableType(pos: Int) = BasicType(contextVars(contextVars.size - 1 - pos))
+
+  def pathVariableType(name: String) = lookupPathVariable(name).get.map(BasicType(_))
+
+  def stepVariableType(name: String) = BasicType(lookupStepVariable(name).get)
 
   def isPathVariableBound(name: String) = lookupPathVariable(name).isDefined
   
