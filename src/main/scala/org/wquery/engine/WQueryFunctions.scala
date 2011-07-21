@@ -111,7 +111,7 @@ object WQueryFunctions {
 
         if (types == Set(IntegerType))
           DataSet.fromValue(sumInt(dataSet).paths.head.head.asInstanceOf[Int].toDouble / dataSet.paths.size)
-        else if (BasicType.numeric.contains(types))
+        else if (DataType.numeric.contains(types))
           DataSet.fromValue(sumFloat(dataSet).paths.head.head.asInstanceOf[Double] / dataSet.paths.size)      
         else 
           throw new WQueryEvaluationException("Function 'avg' can compute average for numeric types only")

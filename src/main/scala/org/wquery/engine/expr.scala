@@ -81,7 +81,7 @@ case class BinaryArithmeticExpr(op: String, left: EvaluableExpr, right: Evaluabl
     val leftOp = left.evaluationPlan(wordNet, bindings)
     val rightOp = right.evaluationPlan(wordNet, bindings)
 
-    if (BasicType.numeric.contains(leftOp.rightType(0)) && BasicType.numeric.contains(rightOp.rightType(0))) {
+    if (DataType.numeric.contains(leftOp.rightType(0)) && DataType.numeric.contains(rightOp.rightType(0))) {
       op match {
         case "+" =>
           AddOp(leftOp, rightOp)
@@ -106,7 +106,7 @@ case class MinusExpr(expr: EvaluableExpr) extends EvaluableExpr {
   def evaluationPlan(wordNet: WordNet, bindings: Bindings) = {
     val op = expr.evaluationPlan(wordNet, bindings)
 
-    if (BasicType.numeric.contains(op.rightType(0)))
+    if (DataType.numeric.contains(op.rightType(0)))
       MinusOp(op)
     else
       throw new WQueryEvaluationException("Operator '-' requires a path that ends with float or integer values")
@@ -265,7 +265,7 @@ case class QuantifiedTransformationExpr(chain: PositionedRelationChainTransforma
 }
 
 case class PositionedRelationTransformationExpr(pos: Int, arcUnion: ArcExprUnion) extends TransformationExpr {
-  def demandExtensionPattern(wordNet: WordNet, bindings: Bindings, types: List[Set[BasicType]]) = {
+  def demandExtensionPattern(wordNet: WordNet, bindings: Bindings, types: List[Set[DataType]]) = {
     arcUnion.getExtensions(wordNet, Some(types(types.size - pos)))
       .map(extensions => ExtensionPattern(pos, extensions))
       .getOrElse(throw new WQueryEvaluationException("Arc expression " + arcUnion + " references an unknown relation or argument"))
@@ -282,9 +282,9 @@ case class PositionedRelationTransformationExpr(pos: Int, arcUnion: ArcExprUnion
 }
 
 case class PositionedRelationChainTransformationExpr(exprs: List[PositionedRelationTransformationExpr]) extends TransformationExpr {
-  def demandExtensionPatterns(wordNet: WordNet, bindings: Bindings, types: List[Set[BasicType]]) = {
+  def demandExtensionPatterns(wordNet: WordNet, bindings: Bindings, types: List[Set[DataType]]) = {
     val patternBuffer = new ListBuffer[ExtensionPattern]
-    val typesBuffer = new ListBuffer[Set[BasicType]]
+    val typesBuffer = new ListBuffer[Set[DataType]]
 
     typesBuffer.appendAll(types)
 
@@ -294,7 +294,7 @@ case class PositionedRelationChainTransformationExpr(exprs: List[PositionedRelat
       val maxSize = patternExtensionTypes.map(_.size).max
 
       for (i <- 0 until maxSize) {
-        val extensionTypes = patternExtensionTypes.filter(_.size <= i).map(x => x(i)).toSet[BasicType]
+        val extensionTypes = patternExtensionTypes.filter(_.size <= i).map(x => x(i)).toSet[DataType]
         typesBuffer.append(extensionTypes)
       }
 
@@ -351,7 +351,7 @@ case class PathExpr(generator: EvaluableExpr, steps: List[TransformationExpr]) e
  * Arc Expressions
  */
 case class ArcExpr(ids: List[String]) extends Expr {
-  def getExtension(wordNet: WordNet, sourceTypes: Option[Set[BasicType]]) = {
+  def getExtension(wordNet: WordNet, sourceTypes: Option[Set[DataType]]) = {
     val func = sourceTypes.map(dataTypes => wordNet.getRelation(_:String, dataTypes, _:String))
       .getOrElse(wordNet.findFirstRelationByNameAndSource(_, _))
 
@@ -374,7 +374,7 @@ case class ArcExpr(ids: List[String]) extends Expr {
 }
 
 case class ArcExprUnion(arcExprs: List[ArcExpr]) extends Expr {
-  def getExtensions(wordNet: WordNet, sourceTypes: Option[Set[BasicType]]) = {
+  def getExtensions(wordNet: WordNet, sourceTypes: Option[Set[DataType]]) = {
     val patterns = arcExprs.map(_.getExtension(wordNet, sourceTypes))
 
     if (patterns.filter(_.isDefined).size == arcExprs.size) Some(patterns.map(_.get)) else None
@@ -421,7 +421,7 @@ case class ComparisonExpr(op: String, lexpr: EvaluableExpr, rexpr: EvaluableExpr
       case "=~" =>
         if (rresult.size == 1 ) {
           // element context
-          if (BasicType(rresult.head) == StringType) {
+          if (DataType(rresult.head) == StringType) {
             val regex = rresult.head.asInstanceOf[String].r
 
             lresult.forall {

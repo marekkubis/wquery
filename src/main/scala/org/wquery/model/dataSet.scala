@@ -35,7 +35,7 @@ class DataSet(val paths: List[List[Any]], val pathVars: Map[String, List[(Int, I
     }
   }
   
-  def getType(pos: Int): Set[BasicType] = paths.map(tuple => BasicType(tuple(tuple.size - 1 - pos))).toSet
+  def getType(pos: Int): Set[DataType] = paths.map(tuple => DataType(tuple(tuple.size - 1 - pos))).toSet
 
   def types = (for (i <- maxPathSize - 1 to 0 by -1) yield getType(i)).toList
   

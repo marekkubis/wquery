@@ -6,7 +6,7 @@ import collection.mutable.ListBuffer
 
 sealed abstract class AlgebraOp {
   def evaluate(wordNet: WordNet, bindings: Bindings): DataSet
-  def rightType(pos: Int): Set[BasicType]
+  def rightType(pos: Int): Set[DataType]
 }
 
 /*
@@ -431,7 +431,7 @@ case class CloseOp(op: AlgebraOp, patterns: List[ExtensionPattern], limit: Optio
     op.rightType(pos) ++ types.filter(t => t.isDefinedAt(t.size -1 - pos)).map(t => t(t.size - 1 - pos))
   }
 
-  private def crossTypes(leftTypes: List[List[BasicType]], rightTypes: List[List[BasicType]]) = {
+  private def crossTypes(leftTypes: List[List[DataType]], rightTypes: List[List[DataType]]) = {
     for (left <- leftTypes; right <- rightTypes)
       yield left ++ right
   }
@@ -488,7 +488,7 @@ object FetchOp {
 case class ConstantOp(dataSet: DataSet) extends AlgebraOp {
   def evaluate(wordNet: WordNet, bindings: Bindings) = dataSet
 
-  def rightType(pos: Int) = Set(dataSet.getType(pos).asInstanceOf[BasicType])// TODO remove this after removing uniontype
+  def rightType(pos: Int) = dataSet.getType(pos)
 }
 
 object ConstantOp {
@@ -500,7 +500,7 @@ object ConstantOp {
 /*
  * Reference operations
  */
-case class ContextRefOp(ref: Int, types: Set[BasicType]) extends AlgebraOp {
+case class ContextRefOp(ref: Int, types: Set[DataType]) extends AlgebraOp {
   def evaluate(wordNet: WordNet, bindings: Bindings) = {
     bindings.lookupContextVariable(ref).map(DataSet.fromValue(_))
       .getOrElse(throw new WQueryEvaluationException("Backward reference (" + ref + ") too far"))
@@ -509,13 +509,13 @@ case class ContextRefOp(ref: Int, types: Set[BasicType]) extends AlgebraOp {
   def rightType(pos: Int) = if (pos == 0) types else Set.empty
 }
 
-case class PathVariableRefOp(name: String, types: List[BasicType]) extends AlgebraOp {
+case class PathVariableRefOp(name: String, types: List[DataType]) extends AlgebraOp {
   def evaluate(wordNet: WordNet, bindings: Bindings) = bindings.lookupPathVariable(name).map(DataSet.fromTuple(_)).get
 
   def rightType(pos: Int) = if (pos < types.size) Set(types(types.size - 1 - pos)) else Set.empty
 }
 
-case class StepVariableRefOp(name: String, dataType: BasicType) extends AlgebraOp {
+case class StepVariableRefOp(name: String, dataType: DataType) extends AlgebraOp {
   def evaluate(wordNet: WordNet, bindings: Bindings) = bindings.lookupStepVariable(name).map(DataSet.fromValue(_)).get
 
   def rightType(pos: Int) = if (pos == 0) Set(dataType) else Set.empty
@@ -530,6 +530,6 @@ case class EvaluateOp(expr: SelfPlannedExpr, wordNet: WordNet, bindings: Binding
   def rightType(pos: Int) = {
     val types = expr.evaluate(wordNet, bindings).getType(pos)
 
-    if (types.isEmpty) BasicType.all else types // TODO temporary - to be removed
+    if (types.isEmpty) DataType.all else types // TODO temporary - to be removed
   }
 }

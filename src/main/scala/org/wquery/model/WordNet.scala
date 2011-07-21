@@ -6,17 +6,17 @@ class WordNet(val store: WordNetStore) {
     if (!store.relations.contains(relation))
       store.add(relation)
 
-  def getRelation(name: String, sourceTypes: Set[BasicType], sourceName: String) = {
+  def getRelation(name: String, sourceTypes: Set[DataType], sourceName: String) = {
     store.relations.find(r => r.name == name && r.arguments.get(sourceName).map(sourceTypes.contains(_)).getOrElse(false))
   }
 
-  def demandRelation(name: String, sourceType: BasicType, sourceName: String) = {
+  def demandRelation(name: String, sourceType: DataType, sourceName: String) = {
     getRelation(name, Set(sourceType), sourceName).getOrElse(throw new WQueryModelException("Relation '" + name + "' with source type " + sourceType + " not found"))
   }
 
-  def containsRelation(name: String, sourceType: BasicType, sourceName: String) = getRelation(name, Set(sourceType), sourceName) != None
+  def containsRelation(name: String, sourceType: DataType, sourceName: String) = getRelation(name, Set(sourceType), sourceName) != None
   
-  def findFirstRelationByNameAndSource(name: String, sourceName: String) = getRelation(name, BasicType.all, sourceName)
+  def findFirstRelationByNameAndSource(name: String, sourceName: String) = getRelation(name, DataType.all, sourceName)
 
   private def getWordForm(word: String) = store.fetch(WordNet.WordSet, List((Relation.Source, List(word))), List(Relation.Source))
 

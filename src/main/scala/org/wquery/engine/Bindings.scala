@@ -64,11 +64,11 @@ class Bindings(parent: Option[Bindings]) {
 
   def areContextVariablesBound = contextVars != Nil
 
-  def contextVariableType(pos: Int) = BasicType(contextVars(contextVars.size - 1 - pos))
+  def contextVariableType(pos: Int) = DataType(contextVars(contextVars.size - 1 - pos))
 
-  def pathVariableType(name: String) = lookupPathVariable(name).get.map(BasicType(_))
+  def pathVariableType(name: String) = lookupPathVariable(name).get.map(DataType(_))
 
-  def stepVariableType(name: String) = BasicType(lookupStepVariable(name).get)
+  def stepVariableType(name: String) = DataType(lookupStepVariable(name).get)
 
   def isPathVariableBound(name: String) = lookupPathVariable(name).isDefined
   

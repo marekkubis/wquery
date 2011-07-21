@@ -1,16 +1,14 @@
 package org.wquery.model
 
-sealed abstract class DataType
-
-sealed abstract class BasicType extends DataType {
+sealed abstract class DataType {
   def associatedClass: java.lang.Class[_]
 }
 
-case object ArcType extends BasicType {
+case object ArcType extends DataType {
   def associatedClass = classOf[Arc]
 }
 
-sealed abstract class NodeType extends BasicType
+sealed abstract class NodeType extends DataType
 
 case object SynsetType extends NodeType {
   def associatedClass = classOf[Synset]
@@ -36,13 +34,7 @@ case object BooleanType extends NodeType {
   def associatedClass = classOf[Boolean]
 }
 
-case class UnionType(types: Set[BasicType]) extends DataType
-
 object DataType {
-  def fromList(types: List[BasicType]) = if (types.size == 1) types.head else UnionType(types.toSet)
-}
-
-object BasicType {
   def apply(value: Any) = value match {        
     case _:Synset =>
       SynsetType
@@ -62,7 +54,7 @@ object BasicType {
       throw new IllegalArgumentException("Object " + obj + " has no data type bound")
   }
 
-  def all = Set[BasicType](SynsetType, SenseType, StringType, IntegerType, FloatType, BooleanType, ArcType)
+  def all = Set[DataType](SynsetType, SenseType, StringType, IntegerType, FloatType, BooleanType, ArcType)
 
-  def numeric = Set[Set[BasicType]](Set(IntegerType), Set(FloatType), Set(IntegerType, FloatType))
+  def numeric = Set[Set[DataType]](Set(IntegerType), Set(FloatType), Set(IntegerType, FloatType))
 }

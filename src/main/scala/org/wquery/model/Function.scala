@@ -3,7 +3,7 @@ package org.wquery.model
 sealed abstract class FunctionArgumentType
 
 case object TupleType extends FunctionArgumentType
-case class ValueType(value: BasicType) extends FunctionArgumentType
+case class ValueType(value: DataType) extends FunctionArgumentType
 
 sealed abstract class Function(val name: String, val args: List[FunctionArgumentType], val result: FunctionArgumentType)
 
