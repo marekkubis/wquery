@@ -15,8 +15,6 @@ class WordNet(val store: WordNetStore) {
   }
 
   def containsRelation(name: String, sourceType: DataType, sourceName: String) = getRelation(name, Set(sourceType), sourceName) != None
-  
-  def findFirstRelationByNameAndSource(name: String, sourceName: String) = getRelation(name, DataType.all, sourceName)
 
   private def getWordForm(word: String) = store.fetch(WordNet.WordSet, List((Relation.Source, List(word))), List(Relation.Source))
 
