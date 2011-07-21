@@ -6,14 +6,6 @@ class WordNet(val store: WordNetStore) {
     if (!store.relations.contains(relation))
       store.add(relation)
 
-  def getSynsetsBySenses(senses: List[Sense]) = {
-    store.fetch(WordNet.SenseToSynset,  List((Relation.Source, senses)), List(Relation.Destination))
-  }
-
-  def getSynsetsByWordForms(wordForms: List[String]) = {
-    store.fetch(WordNet.WordFormToSynsets,  List((Relation.Source, wordForms)), List(Relation.Destination))
-  }
-
   def getRelation(name: String, sourceType: DataType, sourceName: String) = store.relations.find(r => r.name == name && r.arguments.get(sourceName) == Some(sourceType))
 
   def demandRelation(name: String, sourceType: DataType, sourceName: String) = {

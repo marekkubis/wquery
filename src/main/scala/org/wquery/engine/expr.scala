@@ -311,7 +311,7 @@ case class NodeTransformationExpr(generator: EvaluableExpr) extends Transformati
     // TODO remove the eager evaluation below
     // bindings.contextVariableType(0) instead of dataSet.getType
     // TODO remove asInstanceOf
-    SelectOp(ConstantOp(dataSet), ComparisonExpr("in", AlgebraExpr(ContextRefOp(0, dataSet.getType(0).asInstanceOf[BasicType])), generator))
+    SelectOp(ConstantOp(dataSet), ComparisonExpr("in", AlgebraExpr(ContextRefOp(0, Set(dataSet.getType(0).asInstanceOf[BasicType]))), generator))
       .evaluate(wordNet, bindings)
   }
 }
@@ -470,20 +470,22 @@ case class PathConditionExpr(expr: PathExpr) extends ConditionalExpr {
 /*
  * Generators
  */
-case class SynsetByExprReq(expr: EvaluableExpr) extends SelfPlannedExpr {
-  def evaluate(wordNet: WordNet, bindings: Bindings) = {
-    val eresult = expr.evaluationPlan(wordNet, bindings).evaluate(wordNet, bindings)
+case class SynsetByExprReq(expr: EvaluableExpr) extends EvaluableExpr {
+  def evaluationPlan(wordNet: WordNet, bindings: Bindings) = {
+    val op = expr.evaluationPlan(wordNet, bindings)
+    val contextTypes = op.rightType(0).filter(t => t == StringType || t == SenseType)
 
-    if (eresult.pathCount > 0) {
-      if (eresult.getType(0) == SenseType) {
-        wordNet.getSynsetsBySenses(eresult.paths.map(_.head.asInstanceOf[Sense]))
-      } else if (eresult.getType(0) == StringType) {
-        wordNet.getSynsetsByWordForms(eresult.paths.map(_.head.asInstanceOf[String]))
-      } else {
-        throw new WQueryEvaluationException("{...} requires an expression that generates either senses or word forms")
-      }
+    if (!contextTypes.isEmpty) {
+      val extensions = contextTypes.map{ contextType => (contextType: @unchecked) match {
+        case StringType =>
+          Extension(WordNet.WordFormToSynsets, Relation.Source, List(Relation.Destination))
+        case SenseType =>
+          Extension(WordNet.SenseToSynset, Relation.Source, List(Relation.Destination))
+      }}.toList
+
+      ProjectOp(ExtendOp(op, ExtensionPattern(1, extensions)), ContextRefOp(0, contextTypes))
     } else {
-      DataSet.empty
+      throw new WQueryEvaluationException("{...} requires an expression that generates either senses or word forms")
     }
   }
 }
@@ -492,7 +494,7 @@ case class ContextByArcExprUnionReq(arcUnion: ArcExprUnion, quantifier: Quantifi
   def evaluationPlan(wordNet: WordNet, bindings: Bindings) = {
     val chain = PositionedRelationChainTransformationExpr(List(PositionedRelationTransformationExpr(1, arcUnion)))
     val arcOp = if (bindings.areContextVariablesBound) {
-      arcUnion.getExtensions(wordNet, Some(bindings.contextVariableType(0))).map(_ => ContextRefOp(0, bindings.contextVariableType(0)))
+      arcUnion.getExtensions(wordNet, Some(bindings.contextVariableType(0))).map(_ => ContextRefOp(0, Set(bindings.contextVariableType(0))))
         .map(op => ConstantOp(quantifier.quantify(op, chain, wordNet, bindings)))
     } else {
       arcUnion.getExtensions(wordNet, None).map(_.zip(arcUnion.arcExprs).map {
@@ -513,13 +515,13 @@ case class ContextByArcExprUnionReq(arcUnion: ArcExprUnion, quantifier: Quantifi
 case class WordFormByRegexReq(regex: String) extends EvaluableExpr {
   def evaluationPlan(wordNet: WordNet, bindings: Bindings) = {
     // TODO bindings.contextVariableType(0)
-    SelectOp(FetchOp.words, ComparisonExpr("=~", AlgebraExpr(ContextRefOp(0, StringType)),
+    SelectOp(FetchOp.words, ComparisonExpr("=~", AlgebraExpr(ContextRefOp(0, Set(StringType))),
       AlgebraExpr(ConstantOp.fromValue(regex))))
   }
 }
 
 case class ContextReferenceReq(pos: Int) extends EvaluableExpr {
-  def evaluationPlan(wordNet: WordNet, bindings: Bindings) = ContextRefOp(pos, bindings.contextVariableType(pos))
+  def evaluationPlan(wordNet: WordNet, bindings: Bindings) = ContextRefOp(pos, Set(bindings.contextVariableType(pos)))
 }
 
 case class BooleanByFilterReq(condition: ConditionalExpr) extends EvaluableExpr {

@@ -97,4 +97,7 @@ class GeneratorsTestSuite extends WQueryTestSuite {
   @Test def testEmptyDataSetGenerator() = result of ("<>") should equal ("(no result)\n")
 
   @Test def testSynsetsByMultiPathDataSetGenerator() = result of ("{car union apple}") should equal ("{ cable car:1:n car:5:n }\n{ car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n }\n{ car:2:n railcar:1:n railway car:1:n railroad car:1:n }\n{ car:4:n elevator car:1:n }\n{ car:3:n gondola:3:n }\n{ apple:1:n }\n{ apple:2:n orchard apple tree:1:n Malus pumila:1:n }\n")
+
+  @Test def testSynsetsBySensesAndWords() = result of ("{car:1:n union person}") should equal ("{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n }\n{ car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n }\n{ person:2:n }\n{ person:3:n }\n")
+
 }

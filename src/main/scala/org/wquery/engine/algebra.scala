@@ -335,7 +335,8 @@ case class ProjectOp(op: AlgebraOp, projectOp: AlgebraOp) extends AlgebraOp {
 
     for (i <- 0 until dataSet.pathCount) {
       val tuple = dataSet.paths(i)
-      val tupleBuffer = new ListBuffer[Any]
+
+      binds.bindContextVariables(tuple)
 
       for (pathVar <- pathVarNames) {
         val varPos = dataSet.pathVars(pathVar)(i)
@@ -492,13 +493,13 @@ object ConstantOp {
 /*
  * Reference operations
  */
-case class ContextRefOp(ref: Int, dataType: BasicType) extends AlgebraOp {
+case class ContextRefOp(ref: Int, types: Set[BasicType]) extends AlgebraOp {
   def evaluate(wordNet: WordNet, bindings: Bindings) = {
     bindings.lookupContextVariable(ref).map(DataSet.fromValue(_))
       .getOrElse(throw new WQueryEvaluationException("Backward reference (" + ref + ") too far"))
   }
 
-  def rightType(pos: Int) = if (pos == 0) Set(dataType) else Set.empty
+  def rightType(pos: Int) = if (pos == 0) types else Set.empty
 }
 
 case class PathVariableRefOp(name: String, types: List[BasicType]) extends AlgebraOp {
