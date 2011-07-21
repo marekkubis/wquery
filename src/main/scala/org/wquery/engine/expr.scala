@@ -13,7 +13,7 @@ sealed abstract class EvaluableExpr extends Expr {
 sealed abstract class SelfPlannedExpr extends EvaluableExpr {
   def evaluate(wordNet: WordNet, bindings: Bindings): DataSet
 
-  def evaluationPlan(wordNet: WordNet, bindings: Bindings) = EvaluateOp(this)
+  def evaluationPlan(wordNet: WordNet, bindings: Bindings) = EvaluateOp(this, wordNet, bindings)
 }
 /*
  * Imperative expressions
@@ -81,28 +81,36 @@ case class BinaryArithmeticExpr(op: String, left: EvaluableExpr, right: Evaluabl
     val leftOp = left.evaluationPlan(wordNet, bindings)
     val rightOp = right.evaluationPlan(wordNet, bindings)
 
-    // TODO implement static type check
-
-    op match {
-      case "+" =>
-        AddOp(leftOp, rightOp)
-      case "-" =>
-        SubOp(leftOp, rightOp)
-      case "*" =>
-        MulOp(leftOp, rightOp)
-      case "/" =>
-        DivOp(leftOp, rightOp)
-      case "div" =>
-        IntDivOp(leftOp, rightOp)
-      case "%" =>
-        ModOp(leftOp, rightOp)
+    if (BasicType.numeric.contains(leftOp.rightType(0)) && BasicType.numeric.contains(rightOp.rightType(0))) {
+      op match {
+        case "+" =>
+          AddOp(leftOp, rightOp)
+        case "-" =>
+          SubOp(leftOp, rightOp)
+        case "*" =>
+          MulOp(leftOp, rightOp)
+        case "/" =>
+          DivOp(leftOp, rightOp)
+        case "div" =>
+          IntDivOp(leftOp, rightOp)
+        case "%" =>
+          ModOp(leftOp, rightOp)
+      }
+    } else {
+      throw new WQueryEvaluationException("Operator '" + op +"' requires paths that end with float or integer values")
     }
   }
 }
 
 case class MinusExpr(expr: EvaluableExpr) extends EvaluableExpr {
-  // TODO provide static type check
-  def evaluationPlan(wordNet: WordNet, bindings: Bindings) = MinusOp(expr.evaluationPlan(wordNet, bindings))
+  def evaluationPlan(wordNet: WordNet, bindings: Bindings) = {
+    val op = expr.evaluationPlan(wordNet, bindings)
+
+    if (BasicType.numeric.contains(op.rightType(0)))
+      MinusOp(op)
+    else
+      throw new WQueryEvaluationException("Operator '-' requires a path that ends with float or integer values")
+  }
 }
 
 /* 
@@ -115,11 +123,13 @@ case class FunctionExpr(name: String, args: EvaluableExpr) extends SelfPlannedEx
     val atypes: List[FunctionArgumentType] = if (avalues.minPathSize != avalues.maxPathSize) {
       List(TupleType)
     } else {
-      ((avalues.maxPathSize - 1) to 0 by -1).map(avalues.getType(_)).toList.map {
-          case UnionType(utypes) =>
-            if (utypes == Set(FloatType, IntegerType)) ValueType(FloatType) else TupleType
-          case t: BasicType =>
-            ValueType(t)
+      ((avalues.maxPathSize - 1) to 0 by -1).map(avalues.getType(_)).toList.map { types =>
+        if (types.size == 1)
+          ValueType(types.head)
+        else if (types == Set(FloatType, IntegerType))
+          ValueType(FloatType)
+        else
+          TupleType
       }
     }
 
@@ -255,7 +265,7 @@ case class QuantifiedTransformationExpr(chain: PositionedRelationChainTransforma
 }
 
 case class PositionedRelationTransformationExpr(pos: Int, arcUnion: ArcExprUnion) extends TransformationExpr {
-  def demandExtensionPattern(wordNet: WordNet, bindings: Bindings, types: List[DataType]) = {
+  def demandExtensionPattern(wordNet: WordNet, bindings: Bindings, types: List[Set[BasicType]]) = {
     arcUnion.getExtensions(wordNet, Some(types(types.size - pos)))
       .map(extensions => ExtensionPattern(pos, extensions))
       .getOrElse(throw new WQueryEvaluationException("Arc expression " + arcUnion + " references an unknown relation or argument"))
@@ -263,8 +273,8 @@ case class PositionedRelationTransformationExpr(pos: Int, arcUnion: ArcExprUnion
 
   def transform(wordNet: WordNet, bindings: Bindings, dataSet: DataSet) = {
     // TODO remove the eager evaluation below
-    val dataType = dataSet.getType(pos - 1)
-    arcUnion.getExtensions(wordNet, if (dataType == UnionType(Set.empty)) None else Some(dataType)) // TODO change this after type inference implementation
+    val types = dataSet.getType(pos - 1)
+    arcUnion.getExtensions(wordNet, if (types.isEmpty) None else Some(types))
       .map(extensions => ExtendOp(ConstantOp(dataSet), ExtensionPattern(pos, extensions)))
       .getOrElse(throw new WQueryEvaluationException("Arc expression " + arcUnion + " references an unknown relation or argument"))
       .evaluate(wordNet, bindings)
@@ -272,9 +282,9 @@ case class PositionedRelationTransformationExpr(pos: Int, arcUnion: ArcExprUnion
 }
 
 case class PositionedRelationChainTransformationExpr(exprs: List[PositionedRelationTransformationExpr]) extends TransformationExpr {
-  def demandExtensionPatterns(wordNet: WordNet, bindings: Bindings, types: List[DataType]) = {
+  def demandExtensionPatterns(wordNet: WordNet, bindings: Bindings, types: List[Set[BasicType]]) = {
     val patternBuffer = new ListBuffer[ExtensionPattern]
-    val typesBuffer = new ListBuffer[DataType]
+    val typesBuffer = new ListBuffer[Set[BasicType]]
 
     typesBuffer.appendAll(types)
 
@@ -284,8 +294,8 @@ case class PositionedRelationChainTransformationExpr(exprs: List[PositionedRelat
       val maxSize = patternExtensionTypes.map(_.size).max
 
       for (i <- 0 until maxSize) {
-        val extensionTypes = patternExtensionTypes.filter(_.size <= i).map(x => x(i))
-        typesBuffer.append(DataType.fromList(extensionTypes))
+        val extensionTypes = patternExtensionTypes.filter(_.size <= i).map(x => x(i)).toSet[BasicType]
+        typesBuffer.append(extensionTypes)
       }
 
       patternBuffer.append(pattern)
@@ -311,7 +321,7 @@ case class NodeTransformationExpr(generator: EvaluableExpr) extends Transformati
     // TODO remove the eager evaluation below
     // bindings.contextVariableType(0) instead of dataSet.getType
     // TODO remove asInstanceOf
-    SelectOp(ConstantOp(dataSet), ComparisonExpr("in", AlgebraExpr(ContextRefOp(0, Set(dataSet.getType(0).asInstanceOf[BasicType]))), generator))
+    SelectOp(ConstantOp(dataSet), ComparisonExpr("in", AlgebraExpr(ContextRefOp(0, dataSet.getType(0))), generator))
       .evaluate(wordNet, bindings)
   }
 }
@@ -341,8 +351,8 @@ case class PathExpr(generator: EvaluableExpr, steps: List[TransformationExpr]) e
  * Arc Expressions
  */
 case class ArcExpr(ids: List[String]) extends Expr {
-  def getExtension(wordNet: WordNet, sourceType: Option[DataType]) = {
-    val func = sourceType.map(dataType => wordNet.getRelation(_:String, dataType, _:String))
+  def getExtension(wordNet: WordNet, sourceTypes: Option[Set[BasicType]]) = {
+    val func = sourceTypes.map(dataTypes => wordNet.getRelation(_:String, dataTypes, _:String))
       .getOrElse(wordNet.findFirstRelationByNameAndSource(_, _))
 
     (ids: @unchecked) match {
@@ -364,8 +374,8 @@ case class ArcExpr(ids: List[String]) extends Expr {
 }
 
 case class ArcExprUnion(arcExprs: List[ArcExpr]) extends Expr {
-  def getExtensions(wordNet: WordNet, sourceType: Option[DataType]) = {
-    val patterns = arcExprs.map(_.getExtension(wordNet, sourceType))
+  def getExtensions(wordNet: WordNet, sourceTypes: Option[Set[BasicType]]) = {
+    val patterns = arcExprs.map(_.getExtension(wordNet, sourceTypes))
 
     if (patterns.filter(_.isDefined).size == arcExprs.size) Some(patterns.map(_.get)) else None
   }
@@ -494,7 +504,7 @@ case class ContextByArcExprUnionReq(arcUnion: ArcExprUnion, quantifier: Quantifi
   def evaluationPlan(wordNet: WordNet, bindings: Bindings) = {
     val chain = PositionedRelationChainTransformationExpr(List(PositionedRelationTransformationExpr(1, arcUnion)))
     val arcOp = if (bindings.areContextVariablesBound) {
-      arcUnion.getExtensions(wordNet, Some(bindings.contextVariableType(0))).map(_ => ContextRefOp(0, Set(bindings.contextVariableType(0))))
+      arcUnion.getExtensions(wordNet, Some(Set(bindings.contextVariableType(0)))).map(_ => ContextRefOp(0, Set(bindings.contextVariableType(0))))
         .map(op => ConstantOp(quantifier.quantify(op, chain, wordNet, bindings)))
     } else {
       arcUnion.getExtensions(wordNet, None).map(_.zip(arcUnion.arcExprs).map {

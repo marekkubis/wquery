@@ -6,28 +6,17 @@ class WordNet(val store: WordNetStore) {
     if (!store.relations.contains(relation))
       store.add(relation)
 
-  def getRelation(name: String, sourceType: DataType, sourceName: String) = store.relations.find(r => r.name == name && r.arguments.get(sourceName) == Some(sourceType))
-
-  def demandRelation(name: String, sourceType: DataType, sourceName: String) = {
-    getRelation(name, sourceType, sourceName).getOrElse(throw new WQueryModelException("Relation '" + name + "' with source type " + sourceType + " not found"))
+  def getRelation(name: String, sourceTypes: Set[BasicType], sourceName: String) = {
+    store.relations.find(r => r.name == name && r.arguments.get(sourceName).map(sourceTypes.contains(_)).getOrElse(false))
   }
 
-  def containsRelation(name: String, sourceType: DataType, sourceName: String) = getRelation(name, sourceType, sourceName) != None
-
-  def findRelationsByNameAndSource(name: String, sourceName: String) = {
-    List(getRelation(name, SynsetType, sourceName), getRelation(name, SenseType, sourceName), getRelation(name, StringType, sourceName),
-      getRelation(name, IntegerType, sourceName), getRelation(name, FloatType, sourceName), getRelation(name, BooleanType, sourceName))
-        .filter(_.map(_ => true).getOrElse(false)).map(_.get)
+  def demandRelation(name: String, sourceType: BasicType, sourceName: String) = {
+    getRelation(name, Set(sourceType), sourceName).getOrElse(throw new WQueryModelException("Relation '" + name + "' with source type " + sourceType + " not found"))
   }
+
+  def containsRelation(name: String, sourceType: BasicType, sourceName: String) = getRelation(name, Set(sourceType), sourceName) != None
   
-  def findFirstRelationByNameAndSource(name: String, sourceName: String) = {
-    findRelationsByNameAndSource(name, sourceName) match {
-      case head::_ =>
-        Some(head)         
-      case Nil =>
-        None        
-    }        
-  }
+  def findFirstRelationByNameAndSource(name: String, sourceName: String) = getRelation(name, BasicType.all, sourceName)
 
   private def getWordForm(word: String) = store.fetch(WordNet.WordSet, List((Relation.Source, List(word))), List(Relation.Source))
 

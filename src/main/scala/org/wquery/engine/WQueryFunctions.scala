@@ -106,10 +106,12 @@ object WQueryFunctions {
   }  
   
   def avg(dataSet: DataSet) = {      
-    if (dataSet.minPathSize == 1 && dataSet.maxPathSize == 1) {  
-        if (dataSet.getType(0) == IntegerType)
+    if (dataSet.minPathSize == 1 && dataSet.maxPathSize == 1) {
+        val types = dataSet.getType(0)
+
+        if (types == Set(IntegerType))
           DataSet.fromValue(sumInt(dataSet).paths.head.head.asInstanceOf[Int].toDouble / dataSet.paths.size)
-        else if (dataSet.isNumeric(0))
+        else if (BasicType.numeric.contains(types))
           DataSet.fromValue(sumFloat(dataSet).paths.head.head.asInstanceOf[Double] / dataSet.paths.size)      
         else 
           throw new WQueryEvaluationException("Function 'avg' can compute average for numeric types only")

@@ -35,13 +35,7 @@ class DataSet(val paths: List[List[Any]], val pathVars: Map[String, List[(Int, I
     }
   }
   
-  def getType(pos: Int): DataType = { // TODO optimize
-    val dataTypes: List[BasicType] = paths.map { tuple =>
-      BasicType(tuple(tuple.size - 1 - pos))        
-    }.distinct
-    
-    DataType.fromList(dataTypes)
-  }
+  def getType(pos: Int): Set[BasicType] = paths.map(tuple => BasicType(tuple(tuple.size - 1 - pos))).toSet
 
   def types = (for (i <- maxPathSize - 1 to 0 by -1) yield getType(i)).toList
   
@@ -59,11 +53,6 @@ class DataSet(val paths: List[List[Any]], val pathVars: Map[String, List[(Int, I
     }
 
     buffer.toList
-  }
-
-  def isNumeric(pos: Int) = {
-    val dataType = getType(pos)
-    dataType == IntegerType || dataType == FloatType || dataType == UnionType(Set(IntegerType, FloatType))
   }
 
   override def toString = paths.toString

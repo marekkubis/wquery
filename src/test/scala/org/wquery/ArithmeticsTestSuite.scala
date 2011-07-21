@@ -26,6 +26,8 @@ class ArithmeticsTestSuite extends WQueryTestSuite {
 
   @Test def testIntPlusString() = result of ("2 + `a`") should startWith ("ERROR: Operator '+' requires paths that end with float or integer values")  
 
+  @Test def testMinusString() = result of ("- `a`") should startWith ("ERROR: Operator '-' requires a path that ends with float or integer values")
+
   @Test def testFloatMinusInt() = result of ("2.0 - 3") should equal ("-1.0\n")
     
   @Test def testFloatMulInt() = result of ("2.0 * 3") should equal ("6.0\n")

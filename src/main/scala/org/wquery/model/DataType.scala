@@ -63,4 +63,6 @@ object BasicType {
   }
 
   def all = Set[BasicType](SynsetType, SenseType, StringType, IntegerType, FloatType, BooleanType, ArcType)
+
+  def numeric = Set[Set[BasicType]](Set(IntegerType), Set(FloatType), Set(IntegerType, FloatType))
 }

@@ -451,7 +451,14 @@ case class BindOp(op: AlgebraOp, declarations: List[Variable]) extends AlgebraOp
 case class FetchOp(relation: Relation, from: List[(String, List[Any])], to: List[String]) extends AlgebraOp {
   def evaluate(wordNet: WordNet, bindings: Bindings) = wordNet.store.fetch(relation, from, to)
 
-  def rightType(pos: Int) = if (pos < to.size) Set(relation.demandArgument(to(to.size - 1 - pos))) else Set.empty
+  def rightType(pos: Int) = {
+    val args = from.map(_._1) ++ to
+
+    if (pos < to.size)
+      Set(relation.demandArgument(args(args.size - 1 - pos)))
+    else
+      Set.empty
+  }
 }
 
 object FetchOp {
@@ -517,8 +524,12 @@ case class StepVariableRefOp(name: String, dataType: BasicType) extends AlgebraO
 /*
  * Evaluate operation
  */
-case class EvaluateOp(expr: SelfPlannedExpr) extends AlgebraOp {
+case class EvaluateOp(expr: SelfPlannedExpr, wordNet: WordNet, bindings: Bindings) extends AlgebraOp {
   def evaluate(wordNet: WordNet, bindings: Bindings) = expr.evaluate(wordNet, bindings)
 
-  def rightType(pos: Int) = BasicType.all // TODO temporary - to be removed
+  def rightType(pos: Int) = {
+    val types = expr.evaluate(wordNet, bindings).getType(pos)
+
+    if (types.isEmpty) BasicType.all else types // TODO temporary - to be removed
+  }
 }
