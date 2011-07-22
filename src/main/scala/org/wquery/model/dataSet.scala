@@ -3,17 +3,17 @@ import scala.collection.mutable.ListBuffer
 import java.lang.IllegalArgumentException
 
 class DataSet(val paths: List[List[Any]], val pathVars: Map[String, List[(Int, Int)]], val stepVars: Map[String, List[Int]]) {
-  val minTupleSize = {// TODO optimize these two
+  private val minAndMaxTupleSizes = {
     val sizes = paths.map(_.size)
-    if (sizes.size > 0) sizes.min else 0
+    (if (sizes.isEmpty) 0 else sizes.min, if (sizes.isEmpty) 0 else sizes.max)
   }
 
-  val maxTupleSize = {// TODO optimize these two
-    val sizes = paths.map(_.size)
-    if (sizes.size > 0) sizes.max else 0
-  }
+  val minTupleSize = minAndMaxTupleSizes._1
+
+  val maxTupleSize = minAndMaxTupleSizes._2
         
   val pathCount = paths.size
+
   val isEmpty = pathCount == 0
 
   def isTrue = {
