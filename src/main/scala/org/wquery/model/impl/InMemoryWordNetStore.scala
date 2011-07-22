@@ -105,6 +105,6 @@ class InMemoryWordNetStore extends WordNetStore {
     }
   }
 
-  def remove(relation: Relation, tuple: List[(String, Any)]) = null
+  def remove(relation: Relation, tuple: List[(String, Any)]) = null // TODO remove a tuple
 
 }
