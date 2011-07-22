@@ -533,7 +533,7 @@ case class CloseOp(op: AlgebraOp, patterns: List[ExtensionPattern], limit: Optio
         filtered
       } else {
         val result = new ListBuffer[List[Any]]
-        val newForbidden: Set[Any] = forbidden.++[Any, Set[Any]](filtered.map(_.last)) // TODO ugly
+        val newForbidden = forbidden ++ filtered.map(_.last)
 	      val newLimit = limit.map(_ - 1)
 
         result.appendAll(filtered)
