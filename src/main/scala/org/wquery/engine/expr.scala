@@ -305,8 +305,7 @@ case class FilterTransformationExpr(condition: ConditionalExpr) extends Transfor
 case class NodeTransformationExpr(generator: EvaluableExpr) extends TransformationExpr {
   def transform(wordNet: WordNet, bindings: Bindings, dataSet: DataSet) = {
     // TODO remove the eager evaluation below
-    // bindings.contextVariableType(0) instead of dataSet.getType
-    // TODO remove asInstanceOf
+    // TODO replace bindings.contextVariableType(0) instead of dataSet.getType
     SelectOp(ConstantOp(dataSet), ComparisonExpr("in", AlgebraExpr(ContextRefOp(0, dataSet.getType(0))), generator))
       .evaluate(wordNet, bindings)
   }
