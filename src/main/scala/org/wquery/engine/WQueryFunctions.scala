@@ -74,9 +74,9 @@ object WQueryFunctions {
     
   def max(dataSet: DataSet) = sort(dataSet).paths.lastOption.map(x => DataSet(List(x))).getOrElse(DataSet.empty)
 
-  def shortest(dataSet: DataSet) = DataSet.fromBoundPaths(dataSet.toBoundPaths.filter(p => p._1.size == dataSet.minPathSize))
+  def shortest(dataSet: DataSet) = DataSet.fromBoundPaths(dataSet.toBoundPaths.filter(p => p._1.size == dataSet.minTupleSize))
 
-  def longest(dataSet: DataSet) = DataSet.fromBoundPaths(dataSet.toBoundPaths.filter(p => p._1.size == dataSet.maxPathSize))
+  def longest(dataSet: DataSet) = DataSet.fromBoundPaths(dataSet.toBoundPaths.filter(p => p._1.size == dataSet.maxTupleSize))
 
   def sumInt(dataSet: DataSet) = {
     var sum: Int = 0
@@ -106,7 +106,7 @@ object WQueryFunctions {
   }  
   
   def avg(dataSet: DataSet) = {      
-    if (dataSet.minPathSize == 1 && dataSet.maxPathSize == 1) {
+    if (dataSet.minTupleSize == 1 && dataSet.maxTupleSize == 1) {
         val types = dataSet.getType(0)
 
         if (types == Set(IntegerType))

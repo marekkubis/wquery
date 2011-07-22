@@ -3,10 +3,13 @@ package org.wquery.engine
 import org.wquery.WQueryEvaluationException
 import org.wquery.model._
 import collection.mutable.ListBuffer
+import java.lang.reflect.Method
 
 sealed abstract class AlgebraOp {
   def evaluate(wordNet: WordNet, bindings: Bindings): DataSet
   def rightType(pos: Int): Set[DataType]
+  def minTupleSize: Int
+  def maxTupleSize: Option[Int]
 }
 
 /*
@@ -16,6 +19,10 @@ case class EmitOp(op: AlgebraOp) extends AlgebraOp {
   def evaluate(wordNet: WordNet, bindings: Bindings) = op.evaluate(wordNet, bindings)
 
   def rightType(pos: Int) = op.rightType(pos)
+
+  def minTupleSize = op.minTupleSize
+
+  def maxTupleSize = op.maxTupleSize
 }
 
 case class IterateOp(bindingOp: AlgebraOp, iteratedOp: AlgebraOp) extends AlgebraOp {
@@ -42,6 +49,10 @@ case class IterateOp(bindingOp: AlgebraOp, iteratedOp: AlgebraOp) extends Algebr
   }
 
   def rightType(pos: Int) = iteratedOp.rightType(pos)
+
+  def minTupleSize = iteratedOp.minTupleSize
+
+  def maxTupleSize = iteratedOp.maxTupleSize
 }
 
 case class IfElseOp(conditionOp: AlgebraOp, ifOp: AlgebraOp, elseOp: Option[AlgebraOp]) extends AlgebraOp {
@@ -53,6 +64,10 @@ case class IfElseOp(conditionOp: AlgebraOp, ifOp: AlgebraOp, elseOp: Option[Alge
   }
 
   def rightType(pos: Int) = ifOp.rightType(pos) ++ elseOp.map(_.rightType(pos)).getOrElse(Set.empty)
+
+  def minTupleSize = elseOp.map(_.minTupleSize.min(ifOp.minTupleSize)).getOrElse(ifOp.minTupleSize)
+
+  def maxTupleSize = elseOp.map(_.maxTupleSize.map(elseSize => ifOp.maxTupleSize.map(_.max(elseSize))).getOrElse(None)).getOrElse(ifOp.maxTupleSize)
 }
 
 case class BlockOp(ops: List[AlgebraOp]) extends AlgebraOp {
@@ -67,8 +82,14 @@ case class BlockOp(ops: List[AlgebraOp]) extends AlgebraOp {
     buffer.toDataSet
   }
 
-  def rightType(pos: Int) = {
-    ops.tail.foldLeft(ops.headOption.map(_.rightType(pos)))((l, r) => l.map(_ ++ r.rightType(pos))).getOrElse(Set.empty)
+  def rightType(pos: Int) = ops.map(_.rightType(pos)).flatten.toSet
+
+  def minTupleSize = ops.map(_.minTupleSize).min
+
+  def maxTupleSize = {
+    val opSizes = ops.map(_.maxTupleSize).collect { case Some(x) => x}
+
+    if (opSizes.size != ops.size) None else Some(opSizes.max)
   }
 }
 
@@ -93,6 +114,10 @@ case class AssignmentOp(variables: List[Variable], op: AlgebraOp) extends Algebr
   }
 
   def rightType(pos: Int) = Set.empty
+
+  def minTupleSize = 0
+
+  def maxTupleSize = Some(0)
 }
 
 case class WhileDoOp(conditionOp: AlgebraOp, iteratedOp: AlgebraOp) extends AlgebraOp {
@@ -106,6 +131,10 @@ case class WhileDoOp(conditionOp: AlgebraOp, iteratedOp: AlgebraOp) extends Alge
   }
 
   def rightType(pos: Int) = iteratedOp.rightType(pos)
+
+  def minTupleSize = iteratedOp.minTupleSize
+
+  def maxTupleSize = iteratedOp.maxTupleSize
 }
 
 /*
@@ -117,6 +146,10 @@ case class UnionOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends AlgebraOp {
   }
 
   def rightType(pos: Int) = leftOp.rightType(pos) ++ rightOp.rightType(pos)
+
+  def minTupleSize = leftOp.minTupleSize min rightOp.minTupleSize
+
+  def maxTupleSize = leftOp.maxTupleSize.map(leftSize => rightOp.maxTupleSize.map(_.max(leftSize))).getOrElse(None)
 }
 
 case class ExceptOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends AlgebraOp {
@@ -128,6 +161,10 @@ case class ExceptOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends AlgebraOp {
   }
 
   def rightType(pos: Int) = leftOp.rightType(pos)
+
+  def minTupleSize = leftOp.minTupleSize
+
+  def maxTupleSize = leftOp.maxTupleSize
 }
 
 case class IntersectOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends AlgebraOp {
@@ -136,6 +173,10 @@ case class IntersectOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends AlgebraOp 
   }
 
   def rightType(pos: Int) = leftOp.rightType(pos) intersect rightOp.rightType(pos)
+
+  def minTupleSize = leftOp.minTupleSize max rightOp.minTupleSize
+
+  def maxTupleSize = leftOp.maxTupleSize.map(leftSize => rightOp.maxTupleSize.map(_.min(leftSize))).getOrElse(None)
 }
 
 case class JoinOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends AlgebraOp {
@@ -171,7 +212,24 @@ case class JoinOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends AlgebraOp {
     DataSet.fromBuffers(pathBuffer, pathVarBuffers, stepVarBuffers)
   }
 
-  def rightType(pos: Int) = rightOp.rightType(pos) // TODO provide left argument inference
+  def rightType(pos: Int) ={
+    val rightMinSize = rightOp.minTupleSize
+    val rightMaxSize = rightOp.maxTupleSize
+
+    if (pos < rightMinSize) {
+      rightOp.rightType(pos)
+    } else if (rightMaxSize.map(pos < _).getOrElse(true)) { // pos < rightMaxSize or rightMaxSize undefined
+      val leftOpTypes = for (i <- 0 to pos - rightMinSize) yield leftOp.rightType(i)
+
+      (leftOpTypes :+ rightOp.rightType(pos)).flatten.toSet
+    } else { // rightMaxSize defined and pos >= rightMaxSize
+      (for (i <- rightMinSize to rightMaxSize.get) yield leftOp.rightType(pos - i)).flatten.toSet
+    }
+  }
+
+  def minTupleSize = leftOp.minTupleSize + rightOp.minTupleSize
+
+  def maxTupleSize = leftOp.maxTupleSize.map(leftSize => rightOp.maxTupleSize.map(_ + leftSize)).getOrElse(None)
 }
 
 /*
@@ -195,6 +253,10 @@ abstract class BinaryArithmeticOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends
   } else {
     Set.empty
   }
+
+  def minTupleSize = 1
+
+  def maxTupleSize = Some(1)
 }
 
 case class AddOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends BinaryArithmeticOp(leftOp, rightOp) {
@@ -278,6 +340,56 @@ case class MinusOp(op: AlgebraOp) extends AlgebraOp {
   }
 
   def rightType(pos: Int) = op.rightType(pos)
+
+  def minTupleSize = 1
+
+  def maxTupleSize = Some(1)
+}
+
+sealed abstract class FunctionOp(function: Function, method: Method, args: AlgebraOp) extends AlgebraOp {
+  def rightType(pos: Int) = function.result match {
+    case TupleType =>
+      DataType.all
+    case ValueType(dataType) =>
+      if (pos == 0) Set(dataType) else Set.empty
+  }
+
+  def minTupleSize = function.result match {
+    case TupleType =>
+      0
+    case ValueType(dataType) =>
+      1
+  }
+
+  def maxTupleSize = function.result match {
+    case TupleType =>
+      None
+    case ValueType(dataType) =>
+      Some(1)
+  }
+}
+
+case class AggregateFunctionOp(function: Function, method: Method, args: AlgebraOp) extends FunctionOp(function, method, args) {
+  def evaluate(wordNet: WordNet, bindings: Bindings) = {
+    method.invoke(WQueryFunctions, args.evaluate(wordNet, bindings)).asInstanceOf[DataSet]
+  }
+}
+
+case class ScalarFunctionOp(function: Function, method: Method, args: AlgebraOp) extends FunctionOp(function, method, args) {
+  def evaluate(wordNet: WordNet, bindings: Bindings) = {
+    val argsValues = args.evaluate(wordNet, bindings)
+    val buffer = new ListBuffer[List[Any]]()
+    val invocationArgs = new Array[AnyRef](function.args.size)
+
+    for (tuple <- argsValues.paths) {
+      for (i <- 0 until invocationArgs.size)
+        invocationArgs(i) = tuple(i).asInstanceOf[AnyRef]
+
+      buffer.append(List(method.invoke(WQueryFunctions, invocationArgs: _*)))
+    }
+
+    DataSet(buffer.toList)
+  }
 }
 
 /*
@@ -321,6 +433,10 @@ case class SelectOp(op: AlgebraOp, condition: ConditionalExpr) extends AlgebraOp
   }
 
   def rightType(pos: Int) = op.rightType(pos)
+
+  def minTupleSize = op.minTupleSize
+
+  def maxTupleSize = op.maxTupleSize
 }
 
 case class ProjectOp(op: AlgebraOp, projectOp: AlgebraOp) extends AlgebraOp {
@@ -355,6 +471,10 @@ case class ProjectOp(op: AlgebraOp, projectOp: AlgebraOp) extends AlgebraOp {
   }
 
   def rightType(pos: Int) = projectOp.rightType(pos)
+
+  def minTupleSize = projectOp.minTupleSize
+
+  def maxTupleSize = projectOp.maxTupleSize
 }
 
 case class ExtendOp(op: AlgebraOp, pattern: ExtensionPattern) extends AlgebraOp {
@@ -370,6 +490,10 @@ case class ExtendOp(op: AlgebraOp, pattern: ExtensionPattern) extends AlgebraOp 
         op.rightType(pos - types.size)
     }.toSet
   }
+
+  def minTupleSize = op.minTupleSize + pattern.minDestinationTypesSize
+
+  def maxTupleSize = op.maxTupleSize.map(_ + pattern.maxDestinationTypesSize)
 }
 
 case class CloseOp(op: AlgebraOp, patterns: List[ExtensionPattern], limit: Option[Int]) extends AlgebraOp {
@@ -428,13 +552,17 @@ case class CloseOp(op: AlgebraOp, patterns: List[ExtensionPattern], limit: Optio
   val types = patterns.tail.foldLeft(patterns.head.destinationTypes)((l, r) => crossTypes(l, r.destinationTypes))
 
   def rightType(pos: Int) = {
-    op.rightType(pos) ++ types.filter(t => t.isDefinedAt(t.size -1 - pos)).map(t => t(t.size - 1 - pos))
+    op.rightType(pos) ++ types.filter(t => t.isDefinedAt(t.size - 1 - pos)).map(t => t(t.size - 1 - pos))
   }
 
   private def crossTypes(leftTypes: List[List[DataType]], rightTypes: List[List[DataType]]) = {
     for (left <- leftTypes; right <- rightTypes)
       yield left ++ right
   }
+
+  def minTupleSize = op.minTupleSize
+
+  def maxTupleSize = None
 }
 
 case class BindOp(op: AlgebraOp, declarations: List[Variable]) extends AlgebraOp with VariableBindings {
@@ -443,6 +571,10 @@ case class BindOp(op: AlgebraOp, declarations: List[Variable]) extends AlgebraOp
   }
 
   def rightType(pos: Int) = op.rightType(pos)
+
+  def minTupleSize = op.minTupleSize
+
+  def maxTupleSize = op.maxTupleSize
 }
 
 /*
@@ -453,12 +585,17 @@ case class FetchOp(relation: Relation, from: List[(String, List[Any])], to: List
 
   def rightType(pos: Int) = {
     val args = from.map(_._1) ++ to
+    val index = args.size - 1 - pos
 
-    if (pos < to.size)
-      Set(relation.demandArgument(args(args.size - 1 - pos)))
+    if (args.isDefinedAt(index))
+      Set(relation.demandArgument(args(index)))
     else
       Set.empty
   }
+
+  def minTupleSize = from.size + to.size
+
+  def maxTupleSize = Some(from.size + to.size)
 }
 
 object FetchOp {
@@ -489,6 +626,10 @@ case class ConstantOp(dataSet: DataSet) extends AlgebraOp {
   def evaluate(wordNet: WordNet, bindings: Bindings) = dataSet
 
   def rightType(pos: Int) = dataSet.getType(pos)
+
+  def minTupleSize = dataSet.minTupleSize
+
+  def maxTupleSize = Some(dataSet.maxTupleSize)
 }
 
 object ConstantOp {
@@ -507,18 +648,30 @@ case class ContextRefOp(ref: Int, types: Set[DataType]) extends AlgebraOp {
   }
 
   def rightType(pos: Int) = if (pos == 0) types else Set.empty
+
+  def minTupleSize = 1
+
+  def maxTupleSize = Some(1)
 }
 
 case class PathVariableRefOp(name: String, types: List[DataType]) extends AlgebraOp {
   def evaluate(wordNet: WordNet, bindings: Bindings) = bindings.lookupPathVariable(name).map(DataSet.fromTuple(_)).get
 
-  def rightType(pos: Int) = if (pos < types.size) Set(types(types.size - 1 - pos)) else Set.empty
+  def rightType(pos: Int) = if (types.isDefinedAt(types.size - 1 - pos)) Set(types(types.size - 1 - pos)) else Set.empty
+
+  def minTupleSize = types.size
+
+  def maxTupleSize = Some(types.size)
 }
 
 case class StepVariableRefOp(name: String, dataType: DataType) extends AlgebraOp {
   def evaluate(wordNet: WordNet, bindings: Bindings) = bindings.lookupStepVariable(name).map(DataSet.fromValue(_)).get
 
   def rightType(pos: Int) = if (pos == 0) Set(dataType) else Set.empty
+
+  def minTupleSize = 1
+
+  def maxTupleSize = Some(1)
 }
 
 /*
@@ -532,4 +685,8 @@ case class EvaluateOp(expr: SelfPlannedExpr, wordNet: WordNet, bindings: Binding
 
     if (types.isEmpty) DataType.all else types // TODO temporary - to be removed
   }
+
+  def minTupleSize = expr.evaluate(wordNet, bindings).minTupleSize
+
+  def maxTupleSize = Some(expr.evaluate(wordNet, bindings).maxTupleSize)
 }

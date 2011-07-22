@@ -3,12 +3,12 @@ import scala.collection.mutable.ListBuffer
 import java.lang.IllegalArgumentException
 
 class DataSet(val paths: List[List[Any]], val pathVars: Map[String, List[(Int, Int)]], val stepVars: Map[String, List[Int]]) {
-  val minPathSize = {// TODO optimize these two
+  val minTupleSize = {// TODO optimize these two
     val sizes = paths.map(_.size)
     if (sizes.size > 0) sizes.min else 0
   }
 
-  val maxPathSize = {// TODO optimize these two
+  val maxTupleSize = {// TODO optimize these two
     val sizes = paths.map(_.size)
     if (sizes.size > 0) sizes.max else 0
   }
@@ -20,7 +20,7 @@ class DataSet(val paths: List[List[Any]], val pathVars: Map[String, List[(Int, I
     if (paths.isEmpty) {
       false
     } else {
-      if (maxPathSize == 1) {
+      if (maxTupleSize == 1) {
         val booleans = paths.map { x => 
           if (x.head.isInstanceOf[Boolean]) 
             x.head.asInstanceOf[Boolean] 
@@ -30,14 +30,14 @@ class DataSet(val paths: List[List[Any]], val pathVars: Map[String, List[(Int, I
 
         booleans.forall(x => x)
       } else {
-        maxPathSize > 1
+        maxTupleSize > 1
       }
     }
   }
   
-  def getType(pos: Int): Set[DataType] = paths.map(tuple => DataType(tuple(tuple.size - 1 - pos))).toSet
+  def getType(pos: Int): Set[DataType] = paths.filter(pos < _.size).map(tuple => DataType(tuple(tuple.size - 1 - pos))).toSet
 
-  def types = (for (i <- maxPathSize - 1 to 0 by -1) yield getType(i)).toList
+  def types = (for (i <- maxTupleSize - 1 to 0 by -1) yield getType(i)).toList
   
   def toBoundPaths: List[(List[Any], Map[String, (Int, Int)], Map[String, Int])] = {
     val buffer = new ListBuffer[(List[Any], Map[String, (Int, Int)], Map[String, Int])]

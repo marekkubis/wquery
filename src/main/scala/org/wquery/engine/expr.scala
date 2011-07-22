@@ -2,6 +2,7 @@ package org.wquery.engine
 import org.wquery.{WQueryEvaluationException, WQueryModelException}
 import scala.collection.mutable.ListBuffer
 import org.wquery.model._
+import java.lang.reflect.Method
 
 sealed abstract class Expr
 
@@ -116,14 +117,14 @@ case class MinusExpr(expr: EvaluableExpr) extends EvaluableExpr {
 /* 
  * Function call expressions
  */
-case class FunctionExpr(name: String, args: EvaluableExpr) extends SelfPlannedExpr {
-  def evaluate(wordNet: WordNet, bindings: Bindings) = {
-    val avalues = args.evaluationPlan(wordNet, bindings).evaluate(wordNet, bindings)
-    
-    val atypes: List[FunctionArgumentType] = if (avalues.minPathSize != avalues.maxPathSize) {
+case class FunctionExpr(name: String, args: EvaluableExpr) extends EvaluableExpr {
+  def evaluationPlan(wordNet: WordNet, bindings: Bindings) = {
+    val argsOp = args.evaluationPlan(wordNet, bindings)
+
+    val argsTypes: List[FunctionArgumentType] = if (argsOp.maxTupleSize.map(_ != argsOp.minTupleSize).getOrElse(true)) {
       List(TupleType)
     } else {
-      ((avalues.maxPathSize - 1) to 0 by -1).map(avalues.getType(_)).toList.map { types =>
+      ((argsOp.minTupleSize - 1) to 0 by -1).map(argsOp.rightType(_)).toList.map { types =>
         if (types.size == 1)
           ValueType(types.head)
         else if (types == Set(FloatType, IntegerType))
@@ -133,46 +134,31 @@ case class FunctionExpr(name: String, args: EvaluableExpr) extends SelfPlannedEx
       }
     }
 
-    bindings.lookupFunction(name, atypes) 
-      .map(invokeFunction(_, atypes, avalues))
+    bindings.lookupFunction(name, argsTypes)
+      .map(invokeFunction(_, argsOp))
       .getOrElse {
-        val floatTypes = atypes.map { 
+        val floatTypes = argsTypes.map {
           case ValueType(IntegerType) => ValueType(FloatType)
           case t => t
-        }  
-          
+        }
+
         bindings.lookupFunction(name, floatTypes)
-          .map(invokeFunction(_, floatTypes, avalues))
+          .map(invokeFunction(_, argsOp))
           .getOrElse {
              bindings.lookupFunction(name, List(TupleType))
-               .map(invokeFunction(_, List(TupleType), avalues))
-               .getOrElse(throw new WQueryModelException("Function '" + name + "' with argument types " + atypes + " not found"))
-          }          
+               .map(invokeFunction(_, argsOp))
+               .getOrElse(throw new WQueryModelException("Function '" + name + "' with argument types " + argsTypes + " not found"))
+          }
       }
   }
-  
-  private def invokeFunction(fdesc: (org.wquery.model.Function, java.lang.reflect.Method), atypes: List[FunctionArgumentType], avalues: DataSet) = {
-    fdesc match {
-      case (func: AggregateFunction, method) =>
-        method.invoke(WQueryFunctions, avalues).asInstanceOf[DataSet]
-      case (func: ScalarFunction, method) =>
-        val buffer = new ListBuffer[List[Any]]()
-        val margs = new Array[AnyRef](atypes.size)
 
-        for (tuple <- avalues.paths) {
-          for (i <- 0 until margs.size)
-            margs(i) = tuple(i).asInstanceOf[AnyRef]
-
-          buffer.append(List(method.invoke(WQueryFunctions, margs: _*)))
-        }
-
-        func.result match {
-          case ValueType(dtype) =>
-            DataSet(buffer.toList)
-          case TupleType =>
-            throw new RuntimeException("ScalarFunction '" + func.name + "' returned TupleType")
-        }
-    }      
+  private def invokeFunction(functionDescription: (Function, Method), argsOp: AlgebraOp) = {
+    functionDescription._1 match {
+      case _: AggregateFunction =>
+        AggregateFunctionOp(functionDescription._1, functionDescription._2, argsOp)
+      case _: ScalarFunction =>
+        ScalarFunctionOp(functionDescription._1, functionDescription._2, argsOp)
+    }
   }
 }
 
