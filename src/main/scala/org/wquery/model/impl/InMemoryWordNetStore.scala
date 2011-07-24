@@ -5,9 +5,9 @@ import org.wquery.model._
 
 class InMemoryWordNetStore extends WordNetStore {
   private val successors = scala.collection.mutable.Map[(Any, Relation, String), List[Map[String, Any]]]()
-  private val relationsSet = scala.collection.mutable.Set[Relation]()
+  private var relationsList = List[Relation]()
 
-  def relations = relationsSet.toList
+  def relations = relationsList
 
   def fetch(relation: Relation, from: List[(String, List[Any])], to: List[String]) = {
     val buffer = DataSetBuffers.createPathBuffer
@@ -91,7 +91,9 @@ class InMemoryWordNetStore extends WordNetStore {
     DataSet.fromBuffers(pathBuffer, pathVarBuffers, stepVarBuffers)
   }
 
-  def add(relation: Relation) = relationsSet += relation
+  def add(relation: Relation) = {
+    relationsList = (relationsList :+ relation).sortWith((l, r) => l.name < r.name || l.name == r.name && l.sourceType < r.sourceType)
+  }
 
   def remove(relation: Relation) = null // TODO remove all relation tuples
 

@@ -8,7 +8,7 @@ class VariablesTestSuite extends WQueryTestSuite {
   
   @Test def generatorWithTooManyStepVariables() = result of ("{car}$a$b") should startWith ("ERROR: Variable $a cannot be bound")
 
-  @Test def generatorWithTooManyPathVariables() = result of ("{car}@P@Q") should startWith ("ERROR: Variable list '@P@Q' contains more than one path variable")
+  @Test def generatorWithTooManyPathVariables() = result of ("{car}@P@Q") should startWith ("ERROR: Variable list @P@Q contains more than one path variable")
   
   @Test def generatorWithTooManyVariables() = result of ("{car}$a$P") should startWith ("ERROR: Variable $a cannot be bound")  
   
@@ -74,7 +74,7 @@ class VariablesTestSuite extends WQueryTestSuite {
 
   @Test def tooManyStepVariables() = result of ("{car}.hypernym$a$b$c$d@P$w$x$y$z") should startWith ("ERROR: Variable $w cannot be bound")
   
-  @Test def duplicatedVariables() = result of ("{car}.hypernym$a$a") should startWith ("ERROR: Variable list contains duplicated variable names")
+  @Test def duplicatedVariables() = result of ("{car}.hypernym$a$a") should startWith ("ERROR: Variable list $a$a contains duplicated variable names")
       
   @Test def stepVariablesInProjection() = result of ("{car}.hypernym$a$_$b<$b,$a>") should equal ("{ compartment:2:n } { cable car:1:n car:5:n }\n{ compartment:2:n } { car:4:n elevator car:1:n }\n{ compartment:2:n } { car:3:n gondola:3:n }\n{ motor vehicle:1:n automotive vehicle:1:n } { car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n }\n{ wheeled vehicle:1:n } { car:2:n railcar:1:n railway car:1:n railroad car:1:n }\n")
   
@@ -82,12 +82,13 @@ class VariablesTestSuite extends WQueryTestSuite {
   
   @Test def duplicatedVariableInProjection() = result of ("{car}.hypernym$a<$a,$a>") should equal ("{ compartment:2:n } { compartment:2:n }\n{ motor vehicle:1:n automotive vehicle:1:n } { motor vehicle:1:n automotive vehicle:1:n }\n{ wheeled vehicle:1:n } { wheeled vehicle:1:n }\n")
   
-  @Test def unboundVariableInProjection() = result of ("{car}.hypernym$a<$z>") should startWith ("ERROR: A reference to unknown variable $'z' found")
+  @Test def unboundVariableInProjection() = result of ("{car}.hypernym$a<$z>") should startWith ("ERROR: A reference to unknown variable $z found")
       
   @Test def twoStepsWithStepVariablesProjection() = result of ("{car}$a.hypernym$b<$a,$b>") should equal ("{ cable car:1:n car:5:n } { compartment:2:n }\n{ car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n } { motor vehicle:1:n automotive vehicle:1:n }\n{ car:2:n railcar:1:n railway car:1:n railroad car:1:n } { wheeled vehicle:1:n }\n{ car:4:n elevator car:1:n } { compartment:2:n }\n{ car:3:n gondola:3:n } { compartment:2:n }\n")
   
   @Test def twoStepsWithPathVariablesProjection() = result of ("{car}@P.hypernym@Q<@P,@Q>") should equal ("{ cable car:1:n car:5:n } { cable car:1:n car:5:n } hypernym { compartment:2:n }\n{ car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n } { car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n } hypernym { motor vehicle:1:n automotive vehicle:1:n }\n{ car:2:n railcar:1:n railway car:1:n railroad car:1:n } { car:2:n railcar:1:n railway car:1:n railroad car:1:n } hypernym { wheeled vehicle:1:n }\n{ car:4:n elevator car:1:n } { car:4:n elevator car:1:n } hypernym { compartment:2:n }\n{ car:3:n gondola:3:n } { car:3:n gondola:3:n } hypernym { compartment:2:n }\n")  
     
   @Test def multipleVariableInMultipleStepsProjection() = result of ("{car}$a.hypernym$b$c<$c,$b,$a>") should equal ("{ compartment:2:n } hypernym { cable car:1:n car:5:n }\n{ compartment:2:n } hypernym { car:4:n elevator car:1:n }\n{ compartment:2:n } hypernym { car:3:n gondola:3:n }\n{ motor vehicle:1:n automotive vehicle:1:n } hypernym { car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n }\n{ wheeled vehicle:1:n } hypernym { car:2:n railcar:1:n railway car:1:n railroad car:1:n }\n")  
-  
+
+  @Test def stepVariablePrecedingPathVariableUsedInFiler() = result of ("{car}.hypernym$_a@_[$_a = {car:1:n}]") should equal ("{ car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n } hypernym { motor vehicle:1:n automotive vehicle:1:n }\n")
 }

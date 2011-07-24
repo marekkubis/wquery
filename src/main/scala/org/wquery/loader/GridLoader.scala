@@ -246,7 +246,7 @@ class GridHandler(wordnet: WordNet) extends DefaultHandler with Logging {
     info("non-ILR relations loaded")    
   }
     
-  private def getType(destination: String) = {
+  private def getType(destination: String): NodeType = {
     synsetsById.get(destination).map(_ => SynsetType).getOrElse(
       try {
         destination.toBoolean

@@ -364,7 +364,7 @@ sealed abstract class FunctionOp(function: Function, method: Method, args: Algeb
   def maxTupleSize = function.result match {
     case TupleType =>
       None
-    case ValueType(dataType) =>
+    case ValueType(_) =>
       Some(1)
   }
 }
@@ -593,9 +593,9 @@ case class FetchOp(relation: Relation, from: List[(String, List[Any])], to: List
       Set.empty
   }
 
-  def minTupleSize = from.size + to.size
+  def minTupleSize = to.size
 
-  def maxTupleSize = Some(from.size + to.size)
+  def maxTupleSize = Some(to.size)
 }
 
 object FetchOp {
@@ -654,20 +654,20 @@ case class ContextRefOp(ref: Int, types: Set[DataType]) extends AlgebraOp {
   def maxTupleSize = Some(1)
 }
 
-case class PathVariableRefOp(name: String, types: List[DataType]) extends AlgebraOp {
+case class PathVariableRefOp(name: String, types: (AlgebraOp, Int, Int)) extends AlgebraOp {
   def evaluate(wordNet: WordNet, bindings: Bindings) = bindings.lookupPathVariable(name).map(DataSet.fromTuple(_)).get
 
-  def rightType(pos: Int) = if (types.isDefinedAt(types.size - 1 - pos)) Set(types(types.size - 1 - pos)) else Set.empty
+  def rightType(pos: Int) = types._1.rightType(pos + types._3)
 
-  def minTupleSize = types.size
+  def minTupleSize = types._1.minTupleSize  - types._2
 
-  def maxTupleSize = Some(types.size)
+  def maxTupleSize = types._1.maxTupleSize.map(_ - types._3)
 }
 
-case class StepVariableRefOp(name: String, dataType: DataType) extends AlgebraOp {
+case class StepVariableRefOp(name: String, types: Set[DataType]) extends AlgebraOp {
   def evaluate(wordNet: WordNet, bindings: Bindings) = bindings.lookupStepVariable(name).map(DataSet.fromValue(_)).get
 
-  def rightType(pos: Int) = if (pos == 0) Set(dataType) else Set.empty
+  def rightType(pos: Int) = if (pos == 0) types else Set.empty
 
   def minTupleSize = 1
 

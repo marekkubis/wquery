@@ -1,36 +1,47 @@
 package org.wquery.model
 
-sealed abstract class DataType {
+sealed abstract class DataType extends Ordered[DataType] {
+  def rank: Int
+
   def associatedClass: java.lang.Class[_]
+
+  def compare(that: DataType) = rank - that.rank
 }
 
 case object ArcType extends DataType {
+  def rank = 0
   def associatedClass = classOf[Arc]
 }
 
 sealed abstract class NodeType extends DataType
 
 case object SynsetType extends NodeType {
+  def rank = 1
   def associatedClass = classOf[Synset]
 }
 
 case object SenseType extends NodeType {
+  def rank = 2
   def associatedClass = classOf[Sense]
 }
 
 case object StringType extends NodeType {
+  def rank = 3
   def associatedClass = classOf[String]
 }
 
 case object IntegerType extends NodeType {
+  def rank = 4
   def associatedClass = classOf[Int]
 }
 
 case object FloatType extends NodeType {
+  def rank = 5
   def associatedClass = classOf[Double]
 }
 
 case object BooleanType extends NodeType {
+  def rank = 6
   def associatedClass = classOf[Boolean]
 }
 

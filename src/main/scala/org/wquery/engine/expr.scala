@@ -34,11 +34,18 @@ case class IfElseExpr(conditionExpr: EvaluableExpr, ifExpr: EvaluableExpr, elseE
 }
 
 case class BlockExpr(exprs: List[EvaluableExpr]) extends EvaluableExpr {
-  def evaluationPlan(wordNet: WordNet, bindings: Bindings) = BlockOp(exprs.map(_.evaluationPlan(wordNet, bindings)))
+  def evaluationPlan(wordNet: WordNet, bindings: Bindings) = {
+    BlockOp(exprs.map(_.evaluationPlan(wordNet, bindings)))
+  }
 }
 
-case class AssignmentExpr(variables: List[Variable], expr: EvaluableExpr) extends EvaluableExpr {
-  def evaluationPlan(wordNet: WordNet, bindings: Bindings) = AssignmentOp(variables, expr.evaluationPlan(wordNet, bindings))
+case class AssignmentExpr(variables: List[Variable], expr: EvaluableExpr) extends EvaluableExpr with VariableTypeBindings {
+  def evaluationPlan(wordNet: WordNet, bindings: Bindings) = {
+    val op = expr.evaluationPlan(wordNet, bindings)
+
+    bind(bindings, op, variables)
+    AssignmentOp(variables, op)
+  }
 }
 
 case class WhileDoExpr(conditionExpr: EvaluableExpr, iteratedExpr: EvaluableExpr) extends EvaluableExpr {
@@ -240,13 +247,74 @@ trait VariableBindings {
   }
 }
 
+trait VariableTypeBindings {
+  def bind(bindings: Bindings, op: AlgebraOp, variables: List[Variable]) {
+    demandUniqueVariableNames(variables)
+
+    getPathVariableNameAndPos(variables) match {
+      case Some((pathVarName, pathVarPos)) =>
+        val leftVars = variables.slice(0, pathVarPos).map(_.value).zipWithIndex.filterNot{_._1 == "_"}.toMap
+        val rightVars = variables.slice(pathVarPos + 1, variables.size).map(_.value).reverse.zipWithIndex.filterNot{_._1 == "_"}.toMap
+
+        bindVariablesFromRight(bindings, op, rightVars)
+
+        if (pathVarName != "_")
+          bindings.bindPathVariableType(pathVarName, op, pathVarPos, variables.size - pathVarPos - 1)
+
+        bindVariablesFromLeft(bindings, op, leftVars)
+      case None =>
+        val rightVars = variables.map(_.value).reverse.zipWithIndex.filterNot{_._1 == "_"}.toMap
+        bindVariablesFromRight(bindings, op, rightVars)
+    }
+  }
+
+  private def demandUniqueVariableNames(variables: List[Variable]) {
+    val vars = variables.filter(x => !x.isInstanceOf[PathVariable] && x.value != "_").map(_.value)
+
+    if (vars.size != vars.distinct.size)
+      throw new WQueryEvaluationException("Variable list " + variables.mkString + " contains duplicated variable names")
+  }
+
+  private def getPathVariableNameAndPos(variables: List[Variable]) = {
+    val pathVarPos = variables.indexWhere{_.isInstanceOf[PathVariable]}
+
+    if (pathVarPos != variables.lastIndexWhere{_.isInstanceOf[PathVariable]}) {
+      throw new WQueryEvaluationException("Variable list " + variables.mkString + " contains more than one path variable")
+    } else {
+      if (pathVarPos != -1)
+        Some(variables(pathVarPos).value, pathVarPos)
+      else
+        None
+    }
+  }
+
+  private def bindVariablesFromLeft(bindings: Bindings, op: AlgebraOp, vars: Map[String, Int]) {
+    // TODO bind variables from left
+  }
+
+  private def bindVariablesFromRight(bindings: Bindings, op: AlgebraOp, vars: Map[String, Int]) {
+    for ((name, pos) <- vars) {
+      if (op.maxTupleSize.map(pos < _).getOrElse(true))
+        bindings.bindStepVariableType(name, op.rightType(pos))
+      else
+        throw new WQueryEvaluationException("Variable $" + name + " cannot be bound")
+    }
+  }
+}
+
 sealed abstract class TransformationExpr extends Expr { 
   def transform(wordNet: WordNet, bindings: Bindings, dataSet: DataSet): DataSet
+
+  def transformPlan(wordNet: WordNet, bindings: Bindings, op: AlgebraOp): AlgebraOp
 }
 
 case class QuantifiedTransformationExpr(chain: PositionedRelationChainTransformationExpr, quantifier: Quantifier) extends TransformationExpr {
   def transform(wordNet: WordNet, bindings: Bindings, dataSet: DataSet) = {
-    quantifier.quantify(ConstantOp(dataSet), chain, wordNet, bindings)
+    quantifier.quantify(ConstantOp(dataSet), chain, wordNet, bindings).evaluate(wordNet, bindings)
+  }
+
+  def transformPlan(wordNet: WordNet, bindings: Bindings, op: AlgebraOp) = {
+    quantifier.quantify(op, chain, wordNet, bindings)
   }
 }
 
@@ -264,6 +332,13 @@ case class PositionedRelationTransformationExpr(pos: Int, arcUnion: ArcExprUnion
       .map(extensions => ExtendOp(ConstantOp(dataSet), ExtensionPattern(pos, extensions)))
       .getOrElse(throw new WQueryEvaluationException("Arc expression " + arcUnion + " references an unknown relation or argument"))
       .evaluate(wordNet, bindings)
+  }
+
+  def transformPlan(wordNet: WordNet, bindings: Bindings, op: AlgebraOp) = {
+    val types = op.rightType(pos - 1)
+    arcUnion.getExtensions(wordNet, if (types.isEmpty) DataType.all else types)
+      .map(extensions => ExtendOp(op, ExtensionPattern(pos, extensions)))
+      .getOrElse(throw new WQueryEvaluationException("Arc expression " + arcUnion + " references an unknown relation or argument"))
   }
 }
 
@@ -293,6 +368,10 @@ case class PositionedRelationChainTransformationExpr(exprs: List[PositionedRelat
   def transform(wordNet: WordNet, bindings: Bindings, dataSet: DataSet) = {
     exprs.foldLeft(dataSet)((x, expr) => expr.transform(wordNet, bindings, x))
   }
+
+  def transformPlan(wordNet: WordNet, bindings: Bindings, op: AlgebraOp) = {
+    exprs.foldLeft(op)((x, expr) => expr.transformPlan(wordNet, bindings, x))
+  }
 }
 
 case class FilterTransformationExpr(condition: ConditionalExpr) extends TransformationExpr {
@@ -300,6 +379,8 @@ case class FilterTransformationExpr(condition: ConditionalExpr) extends Transfor
     // TODO remove the eager evaluation below
     SelectOp(ConstantOp(dataSet), condition).evaluate(wordNet, bindings)
   }
+
+  def transformPlan(wordNet: WordNet, bindings: Bindings, op: AlgebraOp) = SelectOp(op, condition)
 }
 
 case class NodeTransformationExpr(generator: EvaluableExpr) extends TransformationExpr {
@@ -309,26 +390,43 @@ case class NodeTransformationExpr(generator: EvaluableExpr) extends Transformati
     SelectOp(ConstantOp(dataSet), ComparisonExpr("in", AlgebraExpr(ContextRefOp(0, dataSet.getType(0))), generator))
       .evaluate(wordNet, bindings)
   }
+
+  def transformPlan(wordNet: WordNet, bindings: Bindings, op: AlgebraOp) = {
+    SelectOp(op, ComparisonExpr("in", AlgebraExpr(ContextRefOp(0, op.rightType(0))), generator))
+  }
 }
 
 case class ProjectionTransformationExpr(expr: EvaluableExpr) extends TransformationExpr {
   def transform(wordNet: WordNet, bindings: Bindings, dataSet: DataSet) = {
     // TODO remove the eager evaluation below
     ProjectOp(ConstantOp(dataSet), expr.evaluationPlan(wordNet, bindings)).evaluate(wordNet, bindings)
-  }  	
+  }
+
+  def transformPlan(wordNet: WordNet, bindings: Bindings, op: AlgebraOp) = {
+    ProjectOp(op, expr.evaluationPlan(wordNet, bindings))
+  }
 }
 
-case class BindTransformationExpr(variables: List[Variable]) extends TransformationExpr with VariableBindings {
+case class BindTransformationExpr(variables: List[Variable]) extends TransformationExpr with VariableTypeBindings {
   def transform(wordNet: WordNet, bindings: Bindings, dataSet: DataSet) = {
     // TODO remove the eager evaluation below
     BindOp(ConstantOp(dataSet), variables).evaluate(wordNet, bindings)
   }
+
+  def transformPlan(wordNet: WordNet, bindings: Bindings, op: AlgebraOp) = {
+    bind(bindings, op, variables)
+    BindOp(op, variables)
+  }
 }
 
-case class PathExpr(generator: EvaluableExpr, steps: List[TransformationExpr]) extends SelfPlannedExpr {
-  def evaluate(wordNet: WordNet, bindings: Bindings) = {
-    // separate projections
-    steps.foldLeft(generator.evaluationPlan(wordNet, bindings).evaluate(wordNet, bindings))((step, trans) => trans.transform(wordNet, bindings, step))
+case class PathExpr(generator: EvaluableExpr, steps: List[TransformationExpr]) extends EvaluableExpr {
+//  def evaluate(wordNet: WordNet, bindings: Bindings) = {
+//    // separate projections
+//    steps.foldLeft(generator.evaluationPlan(wordNet, bindings).evaluate(wordNet, bindings))((step, trans) => trans.transform(wordNet, bindings, step))
+//  }
+
+  def evaluationPlan(wordNet: WordNet, bindings: Bindings) = {
+    steps.foldLeft(generator.evaluationPlan(wordNet, bindings))((step, trans) => trans.transformPlan(wordNet, bindings, step))
   }
 }
 
@@ -455,7 +553,7 @@ case class ComparisonExpr(op: String, lexpr: EvaluableExpr, rexpr: EvaluableExpr
 
 case class PathConditionExpr(expr: PathExpr) extends ConditionalExpr {
   def satisfied(wordNet: WordNet, bindings: Bindings) = {
-    val lastSteps = expr.evaluate(wordNet, bindings).paths.map(_.last)
+    val lastSteps = expr.evaluationPlan(wordNet, bindings).evaluate(wordNet, bindings).paths.map(_.last)
 
     !lastSteps.isEmpty && lastSteps.forall(x => x.isInstanceOf[Boolean] && x.asInstanceOf[Boolean])
   }
@@ -477,7 +575,7 @@ case class SynsetByExprReq(expr: EvaluableExpr) extends EvaluableExpr {
           Extension(WordNet.SenseToSynset, Relation.Source, List(Relation.Destination))
       }}.toList
 
-      ProjectOp(ExtendOp(op, ExtensionPattern(1, extensions)), ContextRefOp(0, contextTypes))
+      ProjectOp(ExtendOp(op, ExtensionPattern(1, extensions)), ContextRefOp(0, Set(SynsetType)))
     } else {
       throw new WQueryEvaluationException("{...} requires an expression that generates either senses or word forms")
     }
@@ -489,7 +587,7 @@ case class ContextByArcExprUnionReq(arcUnion: ArcExprUnion, quantifier: Quantifi
     val chain = PositionedRelationChainTransformationExpr(List(PositionedRelationTransformationExpr(1, arcUnion)))
     val arcOp = if (bindings.areContextVariablesBound) {
       arcUnion.getExtensions(wordNet, Set(bindings.contextVariableType(0))).map(_ => ContextRefOp(0, Set(bindings.contextVariableType(0))))
-        .map(op => ConstantOp(quantifier.quantify(op, chain, wordNet, bindings)))
+        .map(op => quantifier.quantify(op, chain, wordNet, bindings))
     } else {
       arcUnion.getExtensions(wordNet, DataType.all).map(_.zip(arcUnion.arcExprs).map {
         case (pattern, expr) =>
@@ -498,7 +596,7 @@ case class ContextByArcExprUnionReq(arcUnion: ArcExprUnion, quantifier: Quantifi
           else
             FetchOp.relationTuplesByArgumentNames(pattern.relation, pattern.from::pattern.to)
       }).map(extensions => extensions.tail.foldLeft(UnionOp(extensions.head, ConstantOp.empty))((sum, elem) => UnionOp(sum, elem))) // TODO optimize
-        .map(op => ConstantOp(quantifier.decrement.quantify(op, chain, wordNet, bindings)))
+        .map(op => quantifier.decrement.quantify(op, chain, wordNet, bindings))
     }
 
     arcOp.getOrElse(arcUnion.getLiteral.map(FetchOp.wordByValue(_))
@@ -526,15 +624,11 @@ case class BooleanByFilterReq(condition: ConditionalExpr) extends EvaluableExpr 
 case class ContextByVariableReq(variable: Variable) extends EvaluableExpr {
   def evaluationPlan(wordNet: WordNet, bindings: Bindings) = variable match {
     case PathVariable(name) =>
-      if (bindings.isPathVariableBound(name))
-        PathVariableRefOp(name, bindings.pathVariableType(name))
-      else
-        throw new WQueryEvaluationException("A reference to unknown variable @'" + name + "' found")
+      bindings.lookupPathVariableType(name).map(PathVariableRefOp(name, _))
+        .getOrElse(throw new WQueryEvaluationException("A reference to unknown variable @" + name + " found"))
     case StepVariable(name) =>
-      if (bindings.isStepVariableBound(name))
-        StepVariableRefOp(name, bindings.stepVariableType(name))
-      else
-        throw new WQueryEvaluationException("A reference to unknown variable $'" + name + "' found")
+      bindings.lookupStepVariableType(name).map(StepVariableRefOp(name, _))
+        .getOrElse(throw new WQueryEvaluationException("A reference to unknown variable $" + name + " found"))
   }
 }
 
@@ -555,21 +649,27 @@ case class AlgebraExpr(op: AlgebraOp) extends EvaluableExpr {
  */
 sealed abstract class Variable(val value: String) extends Expr
 
-case class StepVariable(override val value: String) extends Variable(value)
-case class PathVariable(override val value: String) extends Variable(value)
+case class StepVariable(override val value: String) extends Variable(value) {
+  override def toString = "$" + value
+}
+
+case class PathVariable(override val value: String) extends Variable(value) {
+  override def toString = "@" + value
+}
 
 /*
  * Quantifier
  */
 case class Quantifier(val lowerBound: Int, val upperBound: Option[Int]) extends Expr {
   def quantify(op: AlgebraOp, chain: PositionedRelationChainTransformationExpr, wordNet: WordNet, bindings: Bindings) = {
-    val dataSet = op.evaluate(wordNet, bindings)
-    val lowerResult = (1 to lowerBound).foldLeft(dataSet)((x, _) => chain.transform(wordNet, bindings, x))
+    val lowerOp = (1 to lowerBound).foldLeft(op)((x, _) => chain.transformPlan(wordNet, bindings, x))
+    val furthestReference = chain.exprs.map(_.pos).max - 1
+    val typeReferences = (for (i <- furthestReference to 0 by -1) yield lowerOp.rightType(i)).toList
 
-    if (!lowerResult.isEmpty && Some(lowerBound) != upperBound)
-      CloseOp(ConstantOp(lowerResult), chain.demandExtensionPatterns(wordNet, bindings, lowerResult.types), upperBound.map(_ - lowerBound)).evaluate(wordNet, bindings)
+    if (Some(lowerBound) != upperBound)
+      CloseOp(lowerOp, chain.demandExtensionPatterns(wordNet, bindings, typeReferences), upperBound.map(_ - lowerBound))
     else
-      lowerResult
+      lowerOp
   }
 
   def decrement = Quantifier(lowerBound - 1, upperBound.map(_ - 1))

@@ -8,30 +8,34 @@ class Bindings(parent: Option[Bindings]) {
   val pathVariables = Map[String, List[Any]]()
   val stepVariables = Map[String, Any]()  
   val relationalExprAliases = Map[String, ArcExprUnion]()
-  val functions = Map[(String, List[FunctionArgumentType]), (Function, Method)]()  
-  
+  val functions = Map[(String, List[FunctionArgumentType]), (Function, Method)]()
+
+  // syntax based structures
+  val stepVariablesTypes = Map[String, Set[DataType]]()
+  val pathVariablesTypes = Map[String, (AlgebraOp, Int, Int)]()
+
   private var contextVars = List[Any]()
 
   def bindPathVariable(name: String, value: List[Any]) {
-	parent.map { p =>
-	  if (p.lookupPathVariable(name).isEmpty)
-	    pathVariables(name) = value
-	  else
-	 	p.bindPathVariable(name, value)  
-	}.getOrElse {
-	  pathVariables(name) = value
-	}	   
+    parent.map { p =>
+      if (p.lookupPathVariable(name).isEmpty)
+        pathVariables(name) = value
+      else
+        p.bindPathVariable(name, value)
+    }.getOrElse {
+      pathVariables(name) = value
+    }
   }
   
   def bindStepVariable(name: String, value: Any) {
-	parent.map { p =>
-	  if (p.lookupStepVariable(name).isEmpty)
-	    stepVariables(name) = value
-	  else
-	 	p.bindStepVariable(name, value)  
-	}.getOrElse {
-	  stepVariables(name) = value
-	}
+    parent.map { p =>
+      if (p.lookupStepVariable(name).isEmpty)
+        stepVariables(name) = value
+      else
+        p.bindStepVariable(name, value)
+    }.getOrElse {
+      stepVariables(name) = value
+    }
   }
 
   def bindFunction(function: Function, clazz: java.lang.Class[_] , methodName: String) {
@@ -66,13 +70,33 @@ class Bindings(parent: Option[Bindings]) {
 
   def contextVariableType(pos: Int) = DataType(contextVars(contextVars.size - 1 - pos))
 
-  def pathVariableType(name: String) = lookupPathVariable(name).get.map(DataType(_))
+  // syntax based ops
+  def bindStepVariableType(name: String, types: Set[DataType]) {
+    parent.map { p =>
+      if (p.lookupStepVariableType(name).isEmpty)
+        stepVariablesTypes(name) = types
+      else
+        p.bindStepVariable(name, types)
+    }.getOrElse {
+      stepVariablesTypes(name) = types
+    }
+  }
 
-  def stepVariableType(name: String) = DataType(lookupStepVariable(name).get)
+  def bindPathVariableType(name: String, op: AlgebraOp, leftShift: Int, rightShift: Int) {
+    parent.map { p =>
+      if (p.lookupPathVariableType(name).isEmpty)
+        pathVariablesTypes(name) = (op, leftShift, rightShift)
+      else
+        p.bindPathVariableType(name, op, leftShift, rightShift)
+    }.getOrElse {
+      pathVariablesTypes(name) = (op, leftShift, rightShift)
+    }
+  }
 
-  def isPathVariableBound(name: String) = lookupPathVariable(name).isDefined
-  
-  def isStepVariableBound(name: String) = lookupStepVariable(name).isDefined
+
+  def lookupStepVariableType(name: String): Option[Set[DataType]] = stepVariablesTypes.get(name).orElse(parent.flatMap(_.lookupStepVariableType(name)))
+
+  def lookupPathVariableType(name: String): Option[(AlgebraOp, Int, Int)] = pathVariablesTypes.get(name).orElse(parent.flatMap(_.lookupPathVariableType(name)))
 }
 
 object Bindings {
