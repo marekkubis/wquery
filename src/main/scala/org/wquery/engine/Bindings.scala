@@ -4,7 +4,7 @@ import java.lang.reflect.Method
 import scala.collection.mutable.Map
 import org.wquery.model._
 
-class Bindings(parent: Option[Bindings]) {  
+class Bindings(parent: Option[Bindings], updatesParent: Boolean) {
   val pathVariables = Map[String, List[Any]]()
   val stepVariables = Map[String, Any]()  
   val relationalExprAliases = Map[String, ArcExprUnion]()
@@ -16,25 +16,19 @@ class Bindings(parent: Option[Bindings]) {
 
   private var contextVars = List[Any]()
 
-  def bindPathVariable(name: String, value: List[Any]) {
-    parent.map { p =>
-      if (p.lookupPathVariable(name).isEmpty)
-        pathVariables(name) = value
-      else
-        p.bindPathVariable(name, value)
-    }.getOrElse {
-      pathVariables(name) = value
+  def bindStepVariable(name: String, value: Any) {
+    if (updatesParent && parent.map(_.lookupStepVariable(name).isDefined).getOrElse(false)) {
+      parent.get.bindStepVariable(name, value)
+    } else {
+      stepVariables(name) = value
     }
   }
-  
-  def bindStepVariable(name: String, value: Any) {
-    parent.map { p =>
-      if (p.lookupStepVariable(name).isEmpty)
-        stepVariables(name) = value
-      else
-        p.bindStepVariable(name, value)
-    }.getOrElse {
-      stepVariables(name) = value
+
+  def bindPathVariable(name: String, value: List[Any]) {
+    if (updatesParent && parent.map(_.lookupPathVariable(name).isDefined).getOrElse(false)) {
+      parent.get.bindPathVariable(name, value)
+    } else {
+      pathVariables(name) = value
     }
   }
 
@@ -72,27 +66,20 @@ class Bindings(parent: Option[Bindings]) {
 
   // syntax based ops
   def bindStepVariableType(name: String, types: Set[DataType]) {
-    parent.map { p =>
-      if (p.lookupStepVariableType(name).isEmpty)
-        stepVariablesTypes(name) = types
-      else
-        p.bindStepVariable(name, types)
-    }.getOrElse {
+    if (updatesParent && parent.map(_.lookupStepVariableType(name).isDefined).getOrElse(false)) {
+      parent.get.bindStepVariableType(name, types)
+    } else {
       stepVariablesTypes(name) = types
     }
   }
 
   def bindPathVariableType(name: String, op: AlgebraOp, leftShift: Int, rightShift: Int) {
-    parent.map { p =>
-      if (p.lookupPathVariableType(name).isEmpty)
-        pathVariablesTypes(name) = (op, leftShift, rightShift)
-      else
-        p.bindPathVariableType(name, op, leftShift, rightShift)
-    }.getOrElse {
+    if (updatesParent && parent.map(_.lookupPathVariableType(name).isDefined).getOrElse(false)) {
+      parent.get.bindPathVariableType(name, op, leftShift, rightShift)
+    } else {
       pathVariablesTypes(name) = (op, leftShift, rightShift)
     }
   }
-
 
   def lookupStepVariableType(name: String): Option[Set[DataType]] = stepVariablesTypes.get(name).orElse(parent.flatMap(_.lookupStepVariableType(name)))
 
@@ -100,7 +87,7 @@ class Bindings(parent: Option[Bindings]) {
 }
 
 object Bindings {
-  def apply() = new Bindings(None)
+  def apply() = new Bindings(None, false)
   
-  def apply(parent: Bindings) = new Bindings(Some(parent))  
+  def apply(parent: Bindings, updatesParent: Boolean) = new Bindings(Some(parent), updatesParent)
 }

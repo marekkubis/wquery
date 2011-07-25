@@ -28,7 +28,6 @@ case class EmitOp(op: AlgebraOp) extends AlgebraOp {
 case class IterateOp(bindingOp: AlgebraOp, iteratedOp: AlgebraOp) extends AlgebraOp {
   def evaluate(wordNet: WordNet, bindings: Bindings) = {
     val bindingSet = bindingOp.evaluate(wordNet, bindings)
-    val tupleBindings = Bindings(bindings)
     val buffer = new DataSetBuffer
     val pathVarNames = bindingSet.pathVars.keys.toSeq
     val stepVarNames = bindingSet.stepVars.keys.toSeq
@@ -38,11 +37,11 @@ case class IterateOp(bindingOp: AlgebraOp, iteratedOp: AlgebraOp) extends Algebr
 
       pathVarNames.foreach { pathVar =>
         val varPos = bindingSet.pathVars(pathVar)(i)
-        tupleBindings.bindPathVariable(pathVar, tuple.slice(varPos._1, varPos._2))
+        bindings.bindPathVariable(pathVar, tuple.slice(varPos._1, varPos._2))
       }
 
-      stepVarNames.foreach(stepVar => tupleBindings.bindStepVariable(stepVar, tuple(bindingSet.stepVars(stepVar)(i))))
-      buffer.append(iteratedOp.evaluate(wordNet, tupleBindings))
+      stepVarNames.foreach(stepVar => bindings.bindStepVariable(stepVar, tuple(bindingSet.stepVars(stepVar)(i))))
+      buffer.append(iteratedOp.evaluate(wordNet, bindings))
     }
 
     buffer.toDataSet
@@ -72,11 +71,16 @@ case class IfElseOp(conditionOp: AlgebraOp, ifOp: AlgebraOp, elseOp: Option[Alge
 
 case class BlockOp(ops: List[AlgebraOp]) extends AlgebraOp {
   def evaluate(wordNet: WordNet, bindings: Bindings) = {
-    val blockBindings = Bindings(bindings)
+    val blockBindings = Bindings(bindings, true)
     val buffer = new DataSetBuffer
 
     for (op <- ops) {
-      buffer.append(op.evaluate(wordNet, blockBindings))
+      buffer.append(op.evaluate(wordNet, op match {
+        case op: AssignmentOp =>
+          blockBindings
+        case op =>
+          Bindings(blockBindings, false)
+      }))
     }
 
     buffer.toDataSet
@@ -408,7 +412,7 @@ case class SelectOp(op: AlgebraOp, condition: ConditionalExpr) extends AlgebraOp
 
     for (i <- 0 until dataSet.pathCount) {
       val tuple = dataSet.paths(i)
-      val binds = Bindings(bindings)
+      val binds = Bindings(bindings, false)
 
       for (pathVar <- pathVarNames) {
         val varPos = dataSet.pathVars(pathVar)(i)
@@ -445,7 +449,7 @@ case class ProjectOp(op: AlgebraOp, projectOp: AlgebraOp) extends AlgebraOp {
     val buffer = new DataSetBuffer
     val pathVarNames = dataSet.pathVars.keys
     val stepVarNames = dataSet.stepVars.keys
-    val binds = Bindings(bindings)
+    val binds = Bindings(bindings, false)
 
     // TODO OPT here determine which variables are to be used by projection
 
@@ -672,21 +676,4 @@ case class StepVariableRefOp(name: String, types: Set[DataType]) extends Algebra
   def minTupleSize = 1
 
   def maxTupleSize = Some(1)
-}
-
-/*
- * Evaluate operation
- */
-case class EvaluateOp(expr: SelfPlannedExpr, wordNet: WordNet, bindings: Bindings) extends AlgebraOp {
-  def evaluate(wordNet: WordNet, bindings: Bindings) = expr.evaluate(wordNet, bindings)
-
-  def rightType(pos: Int) = {
-    val types = expr.evaluate(wordNet, bindings).getType(pos)
-
-    if (types.isEmpty) DataType.all else types // TODO temporary - to be removed
-  }
-
-  def minTupleSize = expr.evaluate(wordNet, bindings).minTupleSize
-
-  def maxTupleSize = Some(expr.evaluate(wordNet, bindings).maxTupleSize)
 }

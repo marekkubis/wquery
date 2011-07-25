@@ -11,11 +11,6 @@ sealed abstract class EvaluableExpr extends Expr {
 
 }
 
-sealed abstract class SelfPlannedExpr extends EvaluableExpr {
-  def evaluate(wordNet: WordNet, bindings: Bindings): DataSet
-
-  def evaluationPlan(wordNet: WordNet, bindings: Bindings) = EvaluateOp(this, wordNet, bindings)
-}
 /*
  * Imperative expressions
  */
@@ -24,8 +19,9 @@ case class EmissionExpr(expr: EvaluableExpr) extends EvaluableExpr {
 }
 
 case class IteratorExpr(bindingExpr: EvaluableExpr, iteratedExpr: EvaluableExpr) extends EvaluableExpr {
-  def evaluationPlan(wordNet: WordNet, bindings: Bindings)
-    = IterateOp(bindingExpr.evaluationPlan(wordNet, bindings), iteratedExpr.evaluationPlan(wordNet, bindings))
+  def evaluationPlan(wordNet: WordNet, bindings: Bindings) = {
+    IterateOp(bindingExpr.evaluationPlan(wordNet, bindings), iteratedExpr.evaluationPlan(wordNet, bindings))
+  }
 }
 
 case class IfElseExpr(conditionExpr: EvaluableExpr, ifExpr: EvaluableExpr, elseExpr: Option[EvaluableExpr]) extends EvaluableExpr {
@@ -35,7 +31,12 @@ case class IfElseExpr(conditionExpr: EvaluableExpr, ifExpr: EvaluableExpr, elseE
 
 case class BlockExpr(exprs: List[EvaluableExpr]) extends EvaluableExpr {
   def evaluationPlan(wordNet: WordNet, bindings: Bindings) = {
-    BlockOp(exprs.map(_.evaluationPlan(wordNet, bindings)))
+    BlockOp(exprs.map(expr => expr.evaluationPlan(wordNet, expr match {
+      case expr: AssignmentExpr =>
+        bindings
+      case expr =>
+        Bindings(bindings, false)
+    })))
   }
 }
 
@@ -302,17 +303,11 @@ trait VariableTypeBindings {
   }
 }
 
-sealed abstract class TransformationExpr extends Expr { 
-  def transform(wordNet: WordNet, bindings: Bindings, dataSet: DataSet): DataSet
-
+sealed abstract class TransformationExpr extends Expr {
   def transformPlan(wordNet: WordNet, bindings: Bindings, op: AlgebraOp): AlgebraOp
 }
 
 case class QuantifiedTransformationExpr(chain: PositionedRelationChainTransformationExpr, quantifier: Quantifier) extends TransformationExpr {
-  def transform(wordNet: WordNet, bindings: Bindings, dataSet: DataSet) = {
-    quantifier.quantify(ConstantOp(dataSet), chain, wordNet, bindings).evaluate(wordNet, bindings)
-  }
-
   def transformPlan(wordNet: WordNet, bindings: Bindings, op: AlgebraOp) = {
     quantifier.quantify(op, chain, wordNet, bindings)
   }
@@ -323,15 +318,6 @@ case class PositionedRelationTransformationExpr(pos: Int, arcUnion: ArcExprUnion
     arcUnion.getExtensions(wordNet, types(types.size - pos))
       .map(extensions => ExtensionPattern(pos, extensions))
       .getOrElse(throw new WQueryEvaluationException("Arc expression " + arcUnion + " references an unknown relation or argument"))
-  }
-
-  def transform(wordNet: WordNet, bindings: Bindings, dataSet: DataSet) = {
-    // TODO remove the eager evaluation below
-    val types = dataSet.getType(pos - 1)
-    arcUnion.getExtensions(wordNet, if (types.isEmpty) DataType.all else types)
-      .map(extensions => ExtendOp(ConstantOp(dataSet), ExtensionPattern(pos, extensions)))
-      .getOrElse(throw new WQueryEvaluationException("Arc expression " + arcUnion + " references an unknown relation or argument"))
-      .evaluate(wordNet, bindings)
   }
 
   def transformPlan(wordNet: WordNet, bindings: Bindings, op: AlgebraOp) = {
@@ -365,54 +351,28 @@ case class PositionedRelationChainTransformationExpr(exprs: List[PositionedRelat
     patternBuffer.toList
   }
 
-  def transform(wordNet: WordNet, bindings: Bindings, dataSet: DataSet) = {
-    exprs.foldLeft(dataSet)((x, expr) => expr.transform(wordNet, bindings, x))
-  }
-
   def transformPlan(wordNet: WordNet, bindings: Bindings, op: AlgebraOp) = {
     exprs.foldLeft(op)((x, expr) => expr.transformPlan(wordNet, bindings, x))
   }
 }
 
 case class FilterTransformationExpr(condition: ConditionalExpr) extends TransformationExpr {
-  def transform(wordNet: WordNet, bindings: Bindings, dataSet: DataSet) = {
-    // TODO remove the eager evaluation below
-    SelectOp(ConstantOp(dataSet), condition).evaluate(wordNet, bindings)
-  }
-
   def transformPlan(wordNet: WordNet, bindings: Bindings, op: AlgebraOp) = SelectOp(op, condition)
 }
 
 case class NodeTransformationExpr(generator: EvaluableExpr) extends TransformationExpr {
-  def transform(wordNet: WordNet, bindings: Bindings, dataSet: DataSet) = {
-    // TODO remove the eager evaluation below
-    // TODO replace bindings.contextVariableType(0) instead of dataSet.getType
-    SelectOp(ConstantOp(dataSet), ComparisonExpr("in", AlgebraExpr(ContextRefOp(0, dataSet.getType(0))), generator))
-      .evaluate(wordNet, bindings)
-  }
-
   def transformPlan(wordNet: WordNet, bindings: Bindings, op: AlgebraOp) = {
     SelectOp(op, ComparisonExpr("in", AlgebraExpr(ContextRefOp(0, op.rightType(0))), generator))
   }
 }
 
 case class ProjectionTransformationExpr(expr: EvaluableExpr) extends TransformationExpr {
-  def transform(wordNet: WordNet, bindings: Bindings, dataSet: DataSet) = {
-    // TODO remove the eager evaluation below
-    ProjectOp(ConstantOp(dataSet), expr.evaluationPlan(wordNet, bindings)).evaluate(wordNet, bindings)
-  }
-
   def transformPlan(wordNet: WordNet, bindings: Bindings, op: AlgebraOp) = {
-    ProjectOp(op, expr.evaluationPlan(wordNet, bindings))
+    ProjectOp(op, expr.evaluationPlan(wordNet, Bindings(bindings, false)))
   }
 }
 
 case class BindTransformationExpr(variables: List[Variable]) extends TransformationExpr with VariableTypeBindings {
-  def transform(wordNet: WordNet, bindings: Bindings, dataSet: DataSet) = {
-    // TODO remove the eager evaluation below
-    BindOp(ConstantOp(dataSet), variables).evaluate(wordNet, bindings)
-  }
-
   def transformPlan(wordNet: WordNet, bindings: Bindings, op: AlgebraOp) = {
     bind(bindings, op, variables)
     BindOp(op, variables)
@@ -420,11 +380,6 @@ case class BindTransformationExpr(variables: List[Variable]) extends Transformat
 }
 
 case class PathExpr(generator: EvaluableExpr, steps: List[TransformationExpr]) extends EvaluableExpr {
-//  def evaluate(wordNet: WordNet, bindings: Bindings) = {
-//    // separate projections
-//    steps.foldLeft(generator.evaluationPlan(wordNet, bindings).evaluate(wordNet, bindings))((step, trans) => trans.transform(wordNet, bindings, step))
-//  }
-
   def evaluationPlan(wordNet: WordNet, bindings: Bindings) = {
     steps.foldLeft(generator.evaluationPlan(wordNet, bindings))((step, trans) => trans.transformPlan(wordNet, bindings, step))
   }
