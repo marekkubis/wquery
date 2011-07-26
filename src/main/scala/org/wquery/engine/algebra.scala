@@ -74,14 +74,8 @@ case class BlockOp(ops: List[AlgebraOp]) extends AlgebraOp {
     val blockBindings = Bindings(bindings, true)
     val buffer = new DataSetBuffer
 
-    for (op <- ops) {
-      buffer.append(op.evaluate(wordNet, op match {
-        case op: AssignmentOp =>
-          blockBindings
-        case op =>
-          Bindings(blockBindings, false)
-      }))
-    }
+    for (op <- ops)
+      buffer.append(op.evaluate(wordNet, blockBindings))
 
     buffer.toDataSet
   }
@@ -407,12 +401,12 @@ case class SelectOp(op: AlgebraOp, condition: ConditionalExpr) extends AlgebraOp
     val pathBuffer = DataSetBuffers.createPathBuffer
     val pathVarBuffers = DataSetBuffers.createPathVarBuffers(pathVarNames)
     val stepVarBuffers = DataSetBuffers.createStepVarBuffers(stepVarNames)
+    val binds = Bindings(bindings, false)
 
     // TODO OPT here determine which variables are to be used by filter
 
     for (i <- 0 until dataSet.pathCount) {
       val tuple = dataSet.paths(i)
-      val binds = Bindings(bindings, false)
 
       for (pathVar <- pathVarNames) {
         val varPos = dataSet.pathVars(pathVar)(i)

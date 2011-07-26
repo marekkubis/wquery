@@ -31,12 +31,9 @@ case class IfElseExpr(conditionExpr: EvaluableExpr, ifExpr: EvaluableExpr, elseE
 
 case class BlockExpr(exprs: List[EvaluableExpr]) extends EvaluableExpr {
   def evaluationPlan(wordNet: WordNet, bindings: Bindings) = {
-    BlockOp(exprs.map(expr => expr.evaluationPlan(wordNet, expr match {
-      case expr: AssignmentExpr =>
-        bindings
-      case expr =>
-        Bindings(bindings, false)
-    })))
+    val blockBindings = Bindings(bindings, true)
+
+    BlockOp(exprs.map(expr => expr.evaluationPlan(wordNet, blockBindings)))
   }
 }
 
