@@ -366,15 +366,17 @@ case class PositionedRelationChainTransformationExpr(exprs: List[PositionedRelat
 
 case class FilterTransformationExpr(conditionalExpr: ConditionalExpr) extends TransformationExpr {
   def transformPlan(wordNet: WordNet, bindings: BindingsSchema, op: AlgebraOp) = {
-    bindings.bindContextOp(op)
-    SelectOp(op, conditionalExpr.conditionPlan(wordNet, bindings))
+    val filterBindings = BindingsSchema(bindings, false)
+    filterBindings.bindContextOp(op)
+    SelectOp(op, conditionalExpr.conditionPlan(wordNet, filterBindings))
   }
 }
 
 case class NodeTransformationExpr(generator: EvaluableExpr) extends TransformationExpr {
   def transformPlan(wordNet: WordNet, bindings: BindingsSchema, op: AlgebraOp) = {
-    bindings.bindContextOp(op)
-    SelectOp(op, ComparisonExpr("in", AlgebraExpr(ContextRefOp(0, op.rightType(0))), generator).conditionPlan(wordNet, bindings))
+    val filterBindings = BindingsSchema(bindings, false)
+    filterBindings.bindContextOp(op)
+    SelectOp(op, ComparisonExpr("in", AlgebraExpr(ContextRefOp(0, op.rightType(0))), generator).conditionPlan(wordNet, filterBindings))
   }
 }
 
