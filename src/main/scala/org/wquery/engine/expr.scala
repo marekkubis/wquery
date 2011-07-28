@@ -177,18 +177,18 @@ case class FunctionExpr(name: String, args: EvaluableExpr) extends EvaluableExpr
  * Step related expressions
  */
 trait VariableBindings {
-  def bind(dataSet: DataSet, decls: List[Variable]) = {
-    if (decls != Nil) {          
-      val pathVarBuffers = DataSetBuffers.createPathVarBuffers(decls.filter(x => (x.isInstanceOf[PathVariable] && x.value != "_")).map(_.value))                
-      val stepVarBuffers = DataSetBuffers.createStepVarBuffers(decls.filterNot(x => (x.isInstanceOf[PathVariable] || x.value == "_")).map(_.value))        
+  def bind(dataSet: DataSet, variables: List[Variable]) = {
+    if (variables != Nil) {
+      val pathVarBuffers = DataSetBuffers.createPathVarBuffers(variables.filter(x => (x.isInstanceOf[PathVariable] && x.name != "_")).map(_.name))
+      val stepVarBuffers = DataSetBuffers.createStepVarBuffers(variables.filterNot(x => (x.isInstanceOf[PathVariable] || x.name == "_")).map(_.name))
     
-      demandUniqueVariableNames(decls)
+      demandUniqueVariableNames(variables)
       
-      getPathVariablePosition(decls) match {
+      getPathVariablePosition(variables) match {
         case Some(pathVarPos) => 
-          val leftVars = decls.slice(0, pathVarPos).map(_.value).zipWithIndex.filterNot{_._1 == "_"}.toMap
-          val rightVars = decls.slice(pathVarPos + 1, decls.size).map(_.value).reverse.zipWithIndex.filterNot{_._1 == "_"}.toMap
-          val pathVarBuffer = if (decls(pathVarPos).value != "_") Some(pathVarBuffers(decls(pathVarPos).value)) else None          
+          val leftVars = variables.slice(0, pathVarPos).map(_.name).zipWithIndex.filterNot{_._1 == "_"}.toMap
+          val rightVars = variables.slice(pathVarPos + 1, variables.size).map(_.name).reverse.zipWithIndex.filterNot{_._1 == "_"}.toMap
+          val pathVarBuffer = if (variables(pathVarPos).name != "_") Some(pathVarBuffers(variables(pathVarPos).name)) else None
           val pathVarStart = leftVars.size
           val pathVarEnd = rightVars.size
       
@@ -198,7 +198,7 @@ trait VariableBindings {
             dataSet.paths.foreach(tuple => bindVariablesFromLeft(leftVars, stepVarBuffers, tuple.size))            
           }
         case None =>
-          val rightVars = decls.map(_.value).reverse.zipWithIndex.filterNot{_._1 == "_"}.toMap                
+          val rightVars = variables.map(_.name).reverse.zipWithIndex.filterNot{_._1 == "_"}.toMap
           dataSet.paths.foreach(tuple => bindVariablesFromRight(rightVars, stepVarBuffers, tuple.size))      
       }
     
@@ -208,18 +208,18 @@ trait VariableBindings {
     }
   }
   
-  private def demandUniqueVariableNames(decls: List[Variable]) {
-    val vars = decls.filter(x => !x.isInstanceOf[PathVariable] && x.value != "_").map(_.value)
+  private def demandUniqueVariableNames(variables: List[Variable]) {
+    val variableNames = variables.filter(x => !x.isInstanceOf[PathVariable] && x.name != "_").map(_.name)
     
-    if (vars.size != vars.distinct.size)
+    if (variableNames.size != variableNames.distinct.size)
       throw new WQueryEvaluationException("Variable list contains duplicated variable names")
   }
   
-  private def getPathVariablePosition(decls: List[Variable]) = {
-    val pathVarPos = decls.indexWhere{_.isInstanceOf[PathVariable]}
+  private def getPathVariablePosition(variables: List[Variable]) = {
+    val pathVarPos = variables.indexWhere{_.isInstanceOf[PathVariable]}
     
-    if (pathVarPos != decls.lastIndexWhere{_.isInstanceOf[PathVariable]}) {
-      throw new WQueryEvaluationException("Variable list '" + decls.map { 
+    if (pathVarPos != variables.lastIndexWhere{_.isInstanceOf[PathVariable]}) {
+      throw new WQueryEvaluationException("Variable list '" + variables.map {
         case PathVariable(v) => "@" + v 
         case StepVariable(v) => "$" + v
       }.mkString + "' contains more than one path variable")
@@ -257,8 +257,8 @@ trait VariableTypeBindings {
 
     getPathVariableNameAndPos(variables) match {
       case Some((pathVarName, pathVarPos)) =>
-        val leftVars = variables.slice(0, pathVarPos).map(_.value).zipWithIndex.filterNot{_._1 == "_"}.toMap
-        val rightVars = variables.slice(pathVarPos + 1, variables.size).map(_.value).reverse.zipWithIndex.filterNot{_._1 == "_"}.toMap
+        val leftVars = variables.slice(0, pathVarPos).map(_.name).zipWithIndex.filterNot{_._1 == "_"}.toMap
+        val rightVars = variables.slice(pathVarPos + 1, variables.size).map(_.name).reverse.zipWithIndex.filterNot{_._1 == "_"}.toMap
 
         bindVariablesFromRight(bindings, op, rightVars)
 
@@ -267,13 +267,13 @@ trait VariableTypeBindings {
 
         bindVariablesFromLeft(bindings, op, leftVars)
       case None =>
-        val rightVars = variables.map(_.value).reverse.zipWithIndex.filterNot{_._1 == "_"}.toMap
+        val rightVars = variables.map(_.name).reverse.zipWithIndex.filterNot{_._1 == "_"}.toMap
         bindVariablesFromRight(bindings, op, rightVars)
     }
   }
 
   private def demandUniqueVariableNames(variables: List[Variable]) {
-    val vars = variables.filter(x => !x.isInstanceOf[PathVariable] && x.value != "_").map(_.value)
+    val vars = variables.filter(x => !x.isInstanceOf[PathVariable] && x.name != "_").map(_.name)
 
     if (vars.size != vars.distinct.size)
       throw new WQueryEvaluationException("Variable list " + variables.mkString + " contains duplicated variable names")
@@ -286,7 +286,7 @@ trait VariableTypeBindings {
       throw new WQueryEvaluationException("Variable list " + variables.mkString + " contains more than one path variable")
     } else {
       if (pathVarPos != -1)
-        Some(variables(pathVarPos).value, pathVarPos)
+        Some(variables(pathVarPos).name, pathVarPos)
       else
         None
     }
@@ -578,20 +578,20 @@ case class AlgebraExpr(op: AlgebraOp) extends EvaluableExpr {
 /*
  * Variables
  */
-sealed abstract class Variable(val value: String) extends Expr
+sealed abstract class Variable(val name: String) extends Expr
 
-case class StepVariable(override val value: String) extends Variable(value) {
-  override def toString = "$" + value
+case class StepVariable(override val name: String) extends Variable(name) {
+  override def toString = "$" + name
 }
 
-case class PathVariable(override val value: String) extends Variable(value) {
-  override def toString = "@" + value
+case class PathVariable(override val name: String) extends Variable(name) {
+  override def toString = "@" + name
 }
 
 /*
  * Quantifier
  */
-case class Quantifier(val lowerBound: Int, val upperBound: Option[Int]) extends Expr {
+case class Quantifier(lowerBound: Int, upperBound: Option[Int]) extends Expr {
   def quantify(op: AlgebraOp, chain: PositionedRelationChainTransformationExpr, wordNet: WordNet, bindings: BindingsSchema) = {
     val lowerOp = (1 to lowerBound).foldLeft(op)((x, _) => chain.transformPlan(wordNet, bindings, x))
     val furthestReference = chain.exprs.map(_.pos).max - 1
