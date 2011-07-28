@@ -71,7 +71,7 @@ trait WQueryParsers extends RegexParsers {
               "intersect" ^^ { x => ((l:EvaluableExpr, r:EvaluableExpr) => BinarySetExpr(x, l , r)) })
 
   def with_expr
-    = chainl1(add_expr, "," ^^ { x => ((l:EvaluableExpr, r:EvaluableExpr) => BinarySetExpr(x, l , r)) })
+    = chainl1(add_expr, "," ^^ { x => ((l:EvaluableExpr, r:EvaluableExpr) => BinarySetExpr(x, l , r)) }) ^^ { ConjunctiveExpr(_) }
 
   // arithmetics
 

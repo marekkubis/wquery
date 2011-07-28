@@ -107,7 +107,7 @@ object WQueryFunctions {
   
   def avg(dataSet: DataSet) = {      
     if (dataSet.minTupleSize == 1 && dataSet.maxTupleSize == 1) {
-        val types = dataSet.getType(0)
+        val types = dataSet.rightType(0)
 
         if (types == Set(IntegerType))
           DataSet.fromValue(sumInt(dataSet).paths.head.head.asInstanceOf[Int].toDouble / dataSet.paths.size)

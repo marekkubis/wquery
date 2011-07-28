@@ -1,16 +1,17 @@
 package org.wquery
 
+import engine._
 import loader.{LmfLoader, GridLoader, WordNetLoader}
-import org.wquery.engine.{WQueryFunctions, Result, Error, Answer, Bindings}
 import org.wquery.model.WordNet
 import org.wquery.parser.WQueryParsers
 import org.wquery.utils.Logging
 import scala.collection.mutable.LinkedHashSet
 
 class WQuery(val wordNet: WordNet) extends Logging {
+  val bindingsSchema = BindingsSchema()
   val bindings = Bindings()
   
-  WQueryFunctions.functions.foreach(f => bindings.bindFunction(f._1, f._2, f._3))
+  WQueryFunctions.functions.foreach(f => bindingsSchema.bindFunction(f._1, f._2, f._3))
   
   private val parser = new Object with WQueryParsers  
   
@@ -19,7 +20,7 @@ class WQuery(val wordNet: WordNet) extends Logging {
       val expr = parser parse input    
       debug("Expr: " + expr)
 
-      val plan = expr.evaluationPlan(wordNet, bindings)
+      val plan = expr.evaluationPlan(wordNet, bindingsSchema)
       debug("Plan: " + plan)
 
       Answer(plan.evaluate(wordNet, bindings))
