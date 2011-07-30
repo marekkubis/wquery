@@ -73,7 +73,7 @@ object WordNet {
   val WordFormToSenses = Relation("senses", StringType, SenseType)
   val SenseToSynset = Relation("synset", SenseType, SynsetType)
   val WordFormToSynsets = Relation("synsets", StringType, SynsetType)
-  
+
   val relations = List(IdToSynset, SynsetToId, IdToSense, SenseToId, SenseToWordForm, SenseToSenseNumber,
     SenseToPos, SynsetToWordForms, SynsetToSenses, WordFormToSenses, SenseToSynset, WordFormToSynsets,
     SenseToWordFormSenseNumberAndPos)

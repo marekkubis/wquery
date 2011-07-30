@@ -1,6 +1,6 @@
 package org.wquery.model
 
-case class ExtensionPattern(val pos: Int, val extensions: List[Extension]) {
+case class ExtensionPattern(pos: Int, extensions: List[Extension]) {
   val sourceType = extensions.map(extension => extension.relation.sourceType).toSet
   val destinationTypes = extensions.map(extension => extension.to.flatMap(arg => List(ArcType, extension.relation.arguments(arg))))
   val minDestinationTypesSize = destinationTypes.map(_.size).min
@@ -11,4 +11,4 @@ case class ExtensionPattern(val pos: Int, val extensions: List[Extension]) {
   }
 }
 
-case class Extension(val relation: Relation, val from: String, val to: List[String])
+case class Extension(relation: Relation, from: String, to: List[String])
