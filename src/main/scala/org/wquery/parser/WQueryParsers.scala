@@ -49,8 +49,8 @@ trait WQueryParsers extends RegexParsers {
   def emission = "emit" ~> multipath_expr ^^ { EmissionExpr(_) }
 
   def assignment = (
-     var_decls ~ ":=" ~ multipath_expr ^^ { case vdecls~_~mexpr => AssignmentExpr(vdecls, mexpr) }
-     | notQuotedString ~ ":=" ~ arc_expr_union  ^^ { case name~_~rexpr => RelationalAliasExpr(name, rexpr) }
+     var_decls ~ ":=" ~ multipath_expr ^^ { case vdecls~_~mexpr => VariableAssignmentExpr(vdecls, mexpr) }
+     | notQuotedString ~ ":=" ~ arc_expr_union  ^^ { case name~_~rexpr => RelationAssignmentExpr(name, rexpr) }
       // | expr ~ ("+="|"-="|":=") ~ expr ^^ { case lexpr~op~rexpr => UpdateExpr(lexpr, op, rexpr) }
   )
 

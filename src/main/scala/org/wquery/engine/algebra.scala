@@ -3,9 +3,8 @@ package org.wquery.engine
 import org.wquery.WQueryEvaluationException
 import org.wquery.model._
 import collection.mutable.ListBuffer
-import java.lang.reflect.Method
 
-sealed abstract class AlgebraOp {
+abstract class AlgebraOp {
   def evaluate(wordNet: WordNet, bindings: Bindings): DataSet
   def leftType(pos: Int): Set[DataType]
   def rightType(pos: Int): Set[DataType]
@@ -533,11 +532,11 @@ case class ExtendOp(op: AlgebraOp, pattern: ExtensionPattern) extends AlgebraOp 
     if (pos < op.minTupleSize) {
       op.leftType(pos)
     } else if (op.maxTupleSize.map(pos < _).getOrElse(true)) { // pos < maxTupleSize or maxTupleSize undefined
-      val extendOpTypes = for (i <- 0 to pos - op.minTupleSize) yield pattern.typeAt(i)
+      val extendOpTypes = for (i <- 0 to pos - op.minTupleSize) yield pattern.destinationTypeAt(i)
 
       (extendOpTypes :+ op.leftType(pos)).flatten.toSet
     } else { // maxTupleSize defined and pos >= maxTupleSize
-      (for (i <- op.minTupleSize to op.maxTupleSize.get) yield pattern.typeAt(pos - i)).flatten.toSet
+      (for (i <- op.minTupleSize to op.maxTupleSize.get) yield pattern.destinationTypeAt(pos - i)).flatten.toSet
     }
   }
 
@@ -616,11 +615,11 @@ case class CloseOp(op: AlgebraOp, patterns: List[ExtensionPattern], limit: Optio
     if (pos < op.minTupleSize) {
       op.leftType(pos)
     } else if (op.maxTupleSize.map(pos < _).getOrElse(true)) { // pos < maxTupleSize or maxTupleSize undefined
-      val extendOpTypes = for (i <- 0 to pos - op.minTupleSize) yield patterns.map(_.typeAt(i)).flatten.toSet
+      val extendOpTypes = for (i <- 0 to pos - op.minTupleSize) yield patterns.map(_.destinationTypeAt(i)).flatten.toSet
 
       (extendOpTypes :+ op.leftType(pos)).flatten.toSet
     } else { // maxTupleSize defined and pos >= maxTupleSize
-      (for (i <- op.minTupleSize to op.maxTupleSize.get) yield patterns.map(_.typeAt(pos - i)).flatten).flatten.toSet
+      (for (i <- op.minTupleSize to op.maxTupleSize.get) yield patterns.map(_.destinationTypeAt(pos - i)).flatten).flatten.toSet
     }
   }
 

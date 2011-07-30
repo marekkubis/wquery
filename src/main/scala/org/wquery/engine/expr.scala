@@ -1,9 +1,7 @@
 package org.wquery.engine
-import org.wquery.{WQueryEvaluationException, WQueryModelException}
+import org.wquery.WQueryEvaluationException
 import scala.collection.mutable.ListBuffer
 import org.wquery.model._
-import java.lang.reflect.Method
-
 sealed abstract class Expr
 
 sealed abstract class EvaluableExpr extends Expr {
@@ -37,7 +35,12 @@ case class BlockExpr(exprs: List[EvaluableExpr]) extends EvaluableExpr {
   }
 }
 
-case class AssignmentExpr(variables: List[Variable], expr: EvaluableExpr) extends EvaluableExpr with VariableTypeBindings {
+case class WhileDoExpr(conditionExpr: EvaluableExpr, iteratedExpr: EvaluableExpr) extends EvaluableExpr {
+  def evaluationPlan(wordNet: WordNet, bindings: BindingsSchema)
+    = WhileDoOp(conditionExpr.evaluationPlan(wordNet, bindings), iteratedExpr.evaluationPlan(wordNet, bindings))
+}
+
+case class VariableAssignmentExpr(variables: List[Variable], expr: EvaluableExpr) extends EvaluableExpr with VariableTypeBindings {
   def evaluationPlan(wordNet: WordNet, bindings: BindingsSchema) = {
     val op = expr.evaluationPlan(wordNet, bindings)
 
@@ -46,16 +49,24 @@ case class AssignmentExpr(variables: List[Variable], expr: EvaluableExpr) extend
   }
 }
 
-case class WhileDoExpr(conditionExpr: EvaluableExpr, iteratedExpr: EvaluableExpr) extends EvaluableExpr {
-  def evaluationPlan(wordNet: WordNet, bindings: BindingsSchema)
-    = WhileDoOp(conditionExpr.evaluationPlan(wordNet, bindings), iteratedExpr.evaluationPlan(wordNet, bindings))
-}
-
-case class RelationalAliasExpr(name: String, relationalExpr: ArcExprUnion) extends EvaluableExpr {
+case class RelationAssignmentExpr(name: String, arcUnion: ArcExprUnion) extends EvaluableExpr {
   def evaluationPlan(wordNet: WordNet, bindings: BindingsSchema) = {
-    // TODO provide suitable update op
-    ConstantOp.empty
+    arcUnion.getExtensions(wordNet, DataType.all).map{ extensions =>
+      val pattern = ExtensionPattern(0, extensions)
+      val sourceType = demandSingleNodeType(pattern.sourceType, "source")
+      val destinationType = demandSingleNodeType(pattern.destinationTypeAt(pattern.maxDestinationTypesSize - 1), "destination")
+
+      CreateRelationFromPatternOp(name, sourceType, destinationType, pattern)
+    }.getOrElse(throw new WQueryEvaluationException("Arc expression " + arcUnion + " references an unknown relation or argument"))
   }
+
+  private def demandSingleNodeType(types: Set[_ <: DataType], typeName: String) = {
+    if (types.size == 1 && types.head.isInstanceOf[NodeType])
+      types.head.asInstanceOf[NodeType]
+    else
+      throw new WQueryEvaluationException("Expression " + arcUnion + " does not determine single " + typeName + " type")
+  }
+
 }
 
 /*

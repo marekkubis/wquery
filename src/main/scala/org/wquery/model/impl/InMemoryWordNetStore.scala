@@ -2,9 +2,11 @@ package org.wquery.model.impl
 
 import collection.mutable.ListBuffer
 import org.wquery.model._
+import org.wquery.WQueryEvaluationException
 
 class InMemoryWordNetStore extends WordNetStore {
   private val successors = scala.collection.mutable.Map[(Any, Relation, String), List[Map[String, Any]]]()
+  private val patterns = scala.collection.mutable.Map[Relation, List[ExtensionPattern]]()
   private var relationsList = List[Relation]()
 
   def relations = relationsList
@@ -47,13 +49,14 @@ class InMemoryWordNetStore extends WordNetStore {
     val buffer = new DataSetBuffer
 
     pattern.extensions.foreach { extension =>
-      buffer.append(extend(dataSet, extension.relation, pattern.pos, extension.from, extension.to))
+      buffer.append(extendWithTuples(dataSet, extension.relation, pattern.pos, extension.from, extension.to))
+      extendWithPatterns(dataSet, extension.relation, pattern.pos, extension.from, extension.to, buffer)
     }
 
     buffer.toDataSet
   }
 
-  private def extend(dataSet: DataSet, relation: Relation, from: Int, through: String, to: List[String]) = {
+  private def extendWithTuples(dataSet: DataSet, relation: Relation, from: Int, through: String, to: List[String]) = {
     relation.demandArgument(through)
     to.foreach(relation.demandArgument)
 
@@ -91,11 +94,30 @@ class InMemoryWordNetStore extends WordNetStore {
     DataSet.fromBuffers(pathBuffer, pathVarBuffers, stepVarBuffers)
   }
 
-  def add(relation: Relation) = {
+  private def extendWithPatterns(dataSet: DataSet, relation: Relation, from: Int, through: String, to: List[String], buffer: DataSetBuffer) {
+    if (patterns.contains(relation)) {
+      if (through == Relation.Source && to.size == 1 && to.head == Relation.Destination) {
+        patterns(relation).foreach{ case ExtensionPattern(_, extensions) =>
+          buffer.append(extend(dataSet, ExtensionPattern(from, extensions)))
+        }
+      } else {
+        throw new WQueryEvaluationException("One cannot traverse the inferred relation "
+          + relation + " using custom source or destination arguments")
+      }
+    }
+  }
+
+  def add(relation: Relation) {
     relationsList = (relationsList :+ relation).sortWith((l, r) => l.name < r.name || l.name == r.name && l.sourceType < r.sourceType)
   }
 
-  def remove(relation: Relation) = null // TODO remove all relation tuples
+  def add(relation: Relation, pattern: ExtensionPattern) {
+    if (!(patterns.contains(relation))) {
+      patterns(relation) = Nil
+    }
+
+    patterns(relation) = patterns(relation) :+ pattern
+  }
 
   def add(relation: Relation, tuple: List[(String, Any)]) {
     for ((sourceName: String, sourceValue: Any) <- tuple) {
@@ -107,6 +129,9 @@ class InMemoryWordNetStore extends WordNetStore {
     }
   }
 
-  def remove(relation: Relation, tuple: List[(String, Any)]) = null // TODO remove a tuple
-
+  def remove(relation: Relation) {
+    relationsList = relationsList.filterNot(_ == relation)
+    patterns.remove(relation)
+    successors.keys.filter { case (_, rel, _) => rel == relation }.foreach(successors.remove(_))
+  }
 }

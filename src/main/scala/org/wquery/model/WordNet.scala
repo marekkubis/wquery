@@ -47,6 +47,8 @@ class WordNet(val store: WordNetStore) {
   def addSuccessor(pred: Any, relation: Relation, succ: Any) = addTuple(relation, List((Relation.Source, pred), (Relation.Destination, succ)))
 
   def addRelation(relation: Relation) = store.add(relation)
+
+  def removeRelation(relation: Relation) = store.remove(relation)
 }
 
 
