@@ -51,18 +51,17 @@ class BindingsSchema(val parent: Option[BindingsSchema], updatesParent: Boolean)
         that.parent.map(BindingsSchema(_, false)).getOrElse(BindingsSchema())
     }
 
-    // TODO ugly loops
-    for ((k, v) <- stepVariablesTypes)
-      sum.bindStepVariableType(k, v)
+    for ((name, types) <- stepVariablesTypes)
+      sum.bindStepVariableType(name, types)
 
-    for ((k, v) <- that.stepVariablesTypes)
-      sum.bindStepVariableType(k, v)
+    for ((name, types) <- that.stepVariablesTypes)
+      sum.bindStepVariableType(name, types)
 
-    for ((k, v) <- pathVariablesTypes)
-      sum.bindPathVariableType(k, v._1, v._2, v._3)
+    for ((name, (op, left, right)) <- pathVariablesTypes)
+      sum.bindPathVariableType(name, op, left, right)
 
-    for ((k, v) <- that.pathVariablesTypes)
-      sum.bindPathVariableType(k, v._1, v._2, v._3)
+    for ((name, (op, left, right)) <- that.pathVariablesTypes)
+      sum.bindPathVariableType(name, op, left, right)
 
     sum
   }
