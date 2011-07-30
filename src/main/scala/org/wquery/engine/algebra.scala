@@ -417,56 +417,18 @@ case class MinusOp(op: AlgebraOp) extends AlgebraOp {
   def bindingsSchema = BindingsSchema()
 }
 
-sealed abstract class FunctionOp(function: Function, method: Method, args: AlgebraOp) extends AlgebraOp {
-  private def functionResultType(pos: Int): Set[DataType] = function.result match {
-    case TupleType =>
-      DataType.all
-    case ValueType(dataType) =>
-      if (pos == 0) Set(dataType) else Set.empty
-  }
+case class FunctionOp(function: Function, args: AlgebraOp) extends AlgebraOp {
+  def evaluate(wordNet: WordNet, bindings: Bindings) = function.evaluate(args, wordNet, bindings)
 
-  def leftType(pos: Int) = functionResultType(pos)
+  def leftType(pos: Int) = function.leftType(args, pos)
 
-  def rightType(pos: Int) = functionResultType(pos)
+  def rightType(pos: Int) = function.rightType(args, pos)
 
-  def minTupleSize = function.result match {
-    case TupleType =>
-      0
-    case ValueType(dataType) =>
-      1
-  }
+  def minTupleSize = function.minTupleSize(args)
 
-  def maxTupleSize = function.result match {
-    case TupleType =>
-      None
-    case ValueType(_) =>
-      Some(1)
-  }
+  def maxTupleSize = function.maxTupleSize(args)
 
-  def bindingsSchema = args.bindingsSchema // TODO provide suitable metadata
-}
-
-case class AggregateFunctionOp(function: Function, method: Method, args: AlgebraOp) extends FunctionOp(function, method, args) {
-  def evaluate(wordNet: WordNet, bindings: Bindings) = {
-    method.invoke(WQueryFunctions, args.evaluate(wordNet, bindings)).asInstanceOf[DataSet]
-  }
-}
-
-case class ScalarFunctionOp(function: Function, method: Method, args: AlgebraOp) extends FunctionOp(function, method, args) {
-  def evaluate(wordNet: WordNet, bindings: Bindings) = {
-    val argsValues = args.evaluate(wordNet, bindings)
-    val buffer = new ListBuffer[List[Any]]()
-    val invocationArgs = new Array[AnyRef](function.args.size)
-
-    for (tuple <- argsValues.paths) {
-      for (i <- 0 until invocationArgs.size)
-        invocationArgs(i) = tuple(i).asInstanceOf[AnyRef]
-
-      buffer.append(List(method.invoke(WQueryFunctions, invocationArgs: _*)))
-    }
-
-    DataSet(buffer.toList)
-  }
+  def bindingsSchema = function.bindingsSchema(args)
 }
 
 /*

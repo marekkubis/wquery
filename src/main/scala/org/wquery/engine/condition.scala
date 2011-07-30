@@ -1,7 +1,7 @@
 package org.wquery.engine
 
 import org.wquery.WQueryEvaluationException
-import org.wquery.model.{DataType, StringType, WordNet}
+import org.wquery.model.{WQueryListOrdering, DataType, StringType, WordNet}
 
 sealed abstract class Condition {
   def satisfied(wordNet: WordNet, bindings: Bindings): Boolean
@@ -57,13 +57,13 @@ case class BinaryCondition(op: String, leftOp: AlgebraOp, rightOp: AlgebraOp) ex
           // element context
           op match {
             case "<=" =>
-              WQueryFunctions.compare(leftResult, rightResult) <= 0
+              WQueryListOrdering.lteq(leftResult, rightResult)
             case "<" =>
-              WQueryFunctions.compare(leftResult, rightResult) < 0
+              WQueryListOrdering.lt(leftResult, rightResult)
             case ">=" =>
-              WQueryFunctions.compare(leftResult, rightResult) >= 0
+              WQueryListOrdering.gteq(leftResult, rightResult)
             case ">" =>
-              WQueryFunctions.compare(leftResult, rightResult) > 0
+              WQueryListOrdering.gt(leftResult, rightResult)
           }
         } else {
           if (leftResult.isEmpty)

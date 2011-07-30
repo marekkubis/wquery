@@ -132,44 +132,10 @@ case class FunctionExpr(name: String, args: EvaluableExpr) extends EvaluableExpr
   def evaluationPlan(wordNet: WordNet, bindings: BindingsSchema) = {
     val argsOp = args.evaluationPlan(wordNet, bindings)
 
-    val argsTypes: List[FunctionArgumentType] = if (argsOp.maxTupleSize.map(_ != argsOp.minTupleSize).getOrElse(true)) {
-      List(TupleType)
-    } else {
-      ((argsOp.minTupleSize - 1) to 0 by -1).map(argsOp.rightType(_)).toList.map { types =>
-        if (types.size == 1)
-          ValueType(types.head)
-        else if (types == Set(FloatType, IntegerType))
-          ValueType(FloatType)
-        else
-          TupleType
-      }
-    }
-
-    bindings.lookupFunction(name, argsTypes)
-      .map(invokeFunction(_, argsOp))
-      .getOrElse {
-        val floatTypes = argsTypes.map {
-          case ValueType(IntegerType) => ValueType(FloatType)
-          case t => t
-        }
-
-        bindings.lookupFunction(name, floatTypes)
-          .map(invokeFunction(_, argsOp))
-          .getOrElse {
-             bindings.lookupFunction(name, List(TupleType))
-               .map(invokeFunction(_, argsOp))
-               .getOrElse(throw new WQueryModelException("Function '" + name + "' with argument types " + argsTypes + " not found"))
-          }
-      }
-  }
-
-  private def invokeFunction(functionDescription: (Function, Method), argsOp: AlgebraOp) = {
-    functionDescription._1 match {
-      case _: AggregateFunction =>
-        AggregateFunctionOp(functionDescription._1, functionDescription._2, argsOp)
-      case _: ScalarFunction =>
-        ScalarFunctionOp(functionDescription._1, functionDescription._2, argsOp)
-    }
+    Functions.findFunctionsByName(name).map { functions =>
+      functions.find(_.accepts(argsOp)).map(FunctionOp(_, argsOp))
+        .getOrElse(throw new WQueryEvaluationException("Function '" + name + "' cannot accept provided arguments"))
+    }.getOrElse(throw new WQueryEvaluationException("Function '" + name + "' not found"))
   }
 }
 
@@ -376,7 +342,7 @@ case class NodeTransformationExpr(generator: EvaluableExpr) extends Transformati
   def transformPlan(wordNet: WordNet, bindings: BindingsSchema, op: AlgebraOp) = {
     val filterBindings = BindingsSchema(bindings, false)
     filterBindings.bindContextOp(op)
-    SelectOp(op, ComparisonExpr("in", AlgebraExpr(ContextRefOp(0, op.rightType(0))), generator).conditionPlan(wordNet, filterBindings))
+    SelectOp(op, BinaryConditionalExpr("in", AlgebraExpr(ContextRefOp(0, op.rightType(0))), generator).conditionPlan(wordNet, filterBindings))
   }
 }
 
@@ -455,7 +421,7 @@ case class NotExpr(expr: ConditionalExpr) extends ConditionalExpr {
   def conditionPlan(wordNet: WordNet, bindings: BindingsSchema) = NotCondition(expr.conditionPlan(wordNet, bindings))
 }
 
-case class ComparisonExpr(op: String, leftExpr: EvaluableExpr, rightExpr: EvaluableExpr) extends ConditionalExpr {
+case class BinaryConditionalExpr(op: String, leftExpr: EvaluableExpr, rightExpr: EvaluableExpr) extends ConditionalExpr {
   def conditionPlan(wordNet: WordNet, bindings: BindingsSchema) = {
     val leftOp = leftExpr.evaluationPlan(wordNet, bindings)
     val rightOp = rightExpr.evaluationPlan(wordNet, bindings)
@@ -463,6 +429,7 @@ case class ComparisonExpr(op: String, leftExpr: EvaluableExpr, rightExpr: Evalua
     op match {
       case "=" =>
         BinaryCondition(op, leftOp, rightOp)
+
       case "!=" =>
         BinaryCondition(op, leftOp, rightOp)
       case "in" =>
@@ -536,7 +503,7 @@ case class ContextByArcExprUnionReq(arcUnion: ArcExprUnion, quantifier: Quantifi
 
 case class WordFormByRegexReq(regex: String) extends EvaluableExpr {
   def evaluationPlan(wordNet: WordNet, bindings: BindingsSchema) = {
-    SelectOp(FetchOp.words, ComparisonExpr("=~", AlgebraExpr(ContextRefOp(0, Set(StringType))),
+    SelectOp(FetchOp.words, BinaryConditionalExpr("=~", AlgebraExpr(ContextRefOp(0, Set(StringType))),
       AlgebraExpr(ConstantOp.fromValue(regex))).conditionPlan(wordNet, bindings))
   }
 }

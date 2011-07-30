@@ -11,8 +11,6 @@ class WQuery(val wordNet: WordNet) extends Logging {
   val bindingsSchema = BindingsSchema()
   val bindings = Bindings()
   
-  WQueryFunctions.functions.foreach(f => bindingsSchema.bindFunction(f._1, f._2, f._3))
-  
   private val parser = new Object with WQueryParsers  
   
   def execute(input:String): Result = {    

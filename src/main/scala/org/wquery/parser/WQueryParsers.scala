@@ -1,8 +1,8 @@
 package org.wquery.parser
 import org.wquery.{WQueryParsingErrorException, WQueryParsingFailureException}
 import scala.util.parsing.combinator.RegexParsers
-import org.wquery.model.DataSet
 import org.wquery.engine._
+import org.wquery.model.DataSet
 
 trait WQueryParsers extends RegexParsers {
 
@@ -21,7 +21,7 @@ trait WQueryParsers extends RegexParsers {
 
   def query = (
     imp_expr
-    | multipath_expr ^^ { x => FunctionExpr(WQueryFunctions.Sort, FunctionExpr(WQueryFunctions.Distinct, x)) }
+    | multipath_expr ^^ { x => FunctionExpr(SortFunction.name, FunctionExpr(DistinctFunction.name, x)) }
   )
 
   def expr = (
@@ -148,7 +148,7 @@ trait WQueryParsers extends RegexParsers {
   )
 
   def comparison = expr ~ ("<="|"<"|">="|">"|"=~"|"="|"!="|"in"|"pin") ~ expr ^^ {
-    case lexpr~op~rexpr => ComparisonExpr(op, lexpr, rexpr)
+    case lexpr~op~rexpr => BinaryConditionalExpr(op, lexpr, rexpr)
   }
 
   def node_trans = "." ~> non_rel_expr_generator ^^ { NodeTransformationExpr(_) }

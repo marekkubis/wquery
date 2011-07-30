@@ -6,26 +6,9 @@ import org.wquery.model._
 import org.wquery.WQueryEvaluationException
 
 class BindingsSchema(val parent: Option[BindingsSchema], updatesParent: Boolean) {
-  val functions = Map[(String, List[FunctionArgumentType]), (Function, Method)]()
   val stepVariablesTypes = Map[String, Set[DataType]]()
   val pathVariablesTypes = Map[String, (AlgebraOp, Int, Int)]()
   private var contextOp: Option[AlgebraOp] = None
-
-  def bindFunction(function: Function, clazz: java.lang.Class[_] , methodName: String) {
-    val method = (function match {
-      case ScalarFunction(name, args, result) =>
-        clazz.getMethod(methodName, args.map{ 
-          case ValueType(basicType) =>
-            basicType.associatedClass
-          case TupleType => 
-            throw new IllegalArgumentException("Scalar function '" + name + "' must not take TupleType as an argument")
-        }.toArray:_*)      
-      case AggregateFunction(name, args, result) =>
-        clazz.getMethod(methodName, Array.fill(args.size)(classOf[DataSet]):_*)
-    })
-    
-    functions((function.name, function.args)) = (function, method)
-  }
 
   def bindStepVariableType(name: String, types: Set[DataType]) {
     if (updatesParent && parent.map(_.lookupStepVariableType(name).isDefined).getOrElse(false)) {
@@ -44,8 +27,6 @@ class BindingsSchema(val parent: Option[BindingsSchema], updatesParent: Boolean)
   }
 
   def bindContextOp(op: AlgebraOp) = contextOp = Some(op)
-
-  def lookupFunction(name: String, args: List[FunctionArgumentType]): Option[(Function, Method)] = functions.get(name, args).orElse(parent.flatMap(_.lookupFunction(name, args)))
 
   def lookupStepVariableType(name: String): Option[Set[DataType]] = {
     stepVariablesTypes.get(name).orElse(parent.flatMap(_.lookupStepVariableType(name)))
@@ -71,12 +52,6 @@ class BindingsSchema(val parent: Option[BindingsSchema], updatesParent: Boolean)
     }
 
     // TODO ugly loops
-    for (v <- functions.values)
-      sum.bindFunction(v._1, v._2.getDeclaringClass, v._2.getName)
-
-    for (v <- that.functions.values)
-      sum.bindFunction(v._1, v._2.getDeclaringClass, v._2.getName)
-
     for ((k, v) <- stepVariablesTypes)
       sum.bindStepVariableType(k, v)
 
