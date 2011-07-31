@@ -57,6 +57,20 @@ class InMemoryWordNetStore extends WordNetStore {
   }
 
   private def extendWithTuples(dataSet: DataSet, relation: Relation, from: Int, through: String, to: List[String]) = {
+    if (relation.name != "_") {
+      extendWithRelationTuples(dataSet, relation, from, through, to)
+    } else {
+      val buffer = new DataSetBuffer
+
+      for (relation <- relations if (relation.name != "_") ; source <- relation.argumentNames ;
+           destination <- relation.argumentNames if (source != destination))
+        buffer.append(extendWithRelationTuples(dataSet, relation, from, source, List(destination)))
+
+      buffer.toDataSet
+    }
+  }
+
+  private def extendWithRelationTuples(dataSet: DataSet, relation: Relation, from: Int, through: String, to: List[String]) = {
     relation.demandArgument(through)
     to.foreach(relation.demandArgument)
 

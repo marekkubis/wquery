@@ -67,5 +67,7 @@ object DataType {
 
   def all = Set[DataType](SynsetType, SenseType, StringType, IntegerType, FloatType, BooleanType, ArcType)
 
+  def nodes = Set[NodeType](SynsetType, SenseType, StringType, IntegerType, FloatType, BooleanType)
+
   def numeric = Set[Set[DataType]](Set(IntegerType), Set(FloatType), Set(IntegerType, FloatType))
 }

@@ -6,6 +6,9 @@ class WordNet(val store: WordNetStore) {
     if (!store.relations.contains(relation))
       store.add(relation)
 
+  for (sourceType <- DataType.nodes; destinationType <- DataType.nodes)
+    store.add(Relation("_", sourceType, destinationType))
+
   def getRelation(name: String, sourceTypes: Set[DataType], sourceName: String) = {
     store.relations.find(r => r.name == name && r.arguments.get(sourceName).map(sourceTypes.contains(_)).getOrElse(false))
   }

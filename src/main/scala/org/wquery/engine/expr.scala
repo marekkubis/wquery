@@ -66,7 +66,6 @@ case class RelationAssignmentExpr(name: String, arcUnion: ArcExprUnion) extends 
     else
       throw new WQueryEvaluationException("Expression " + arcUnion + " does not determine single " + typeName + " type")
   }
-
 }
 
 /*
