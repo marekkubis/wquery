@@ -49,7 +49,7 @@ case class BinaryCondition(op: String, leftOp: AlgebraOp, rightOp: AlgebraOp) ex
           }
         } else if (rightResult.isEmpty) {
           throw new WQueryEvaluationException("The rightSet side of '" + op + "' returns no values")
-        } else { // rresult.pathCount > 0
+        } else { // rightResult.pathCount > 0
           throw new WQueryEvaluationException("The rightSet side of '" + op + "' returns more than one values")
         }
       case _ =>
