@@ -19,7 +19,7 @@ case class EmissionExpr(expr: EvaluableExpr) extends EvaluableExpr {
 case class IteratorExpr(bindingExpr: EvaluableExpr, iteratedExpr: EvaluableExpr) extends EvaluableExpr {
   def evaluationPlan(wordNet: WordNet, bindings: BindingsSchema) = {
     val bindingsOp = bindingExpr.evaluationPlan(wordNet, bindings)
-    IterateOp(bindingsOp, iteratedExpr.evaluationPlan(wordNet, bindings union bindingsOp.bindingsSchema))
+    IterateOp(bindingsOp, iteratedExpr.evaluationPlan(wordNet, bindings union bindingsOp.bindingsPattern))
   }
 }
 
@@ -154,7 +154,7 @@ case class FunctionExpr(name: String, args: EvaluableExpr) extends EvaluableExpr
  * Step related expressions
  */
 trait VariableTypeBindings {
-  def bindTypes(bindings: BindingsSchema, op: AlgebraOp, variables: List[Variable]) {
+  def bindTypes(bindings: BindingsPattern, op: AlgebraOp, variables: List[Variable]) {
     demandUniqueVariableNames(variables)
 
     getPathVariableNameAndPos(variables) match {
@@ -194,7 +194,7 @@ trait VariableTypeBindings {
     }
   }
 
-  private def bindVariablesFromLeft(bindings: BindingsSchema, op: AlgebraOp, vars: Map[String, Int]) {
+  private def bindVariablesFromLeft(bindings: BindingsPattern, op: AlgebraOp, vars: Map[String, Int]) {
     for ((name, pos) <- vars) {
       if (op.maxTupleSize.map(pos < _).getOrElse(true))
         bindings.bindStepVariableType(name, op.leftType(pos))
@@ -203,7 +203,7 @@ trait VariableTypeBindings {
     }
   }
 
-  private def bindVariablesFromRight(bindings: BindingsSchema, op: AlgebraOp, vars: Map[String, Int]) {
+  private def bindVariablesFromRight(bindings: BindingsPattern, op: AlgebraOp, vars: Map[String, Int]) {
     for ((name, pos) <- vars) {
       if (op.maxTupleSize.map(pos < _).getOrElse(true))
         bindings.bindStepVariableType(name, op.rightType(pos))

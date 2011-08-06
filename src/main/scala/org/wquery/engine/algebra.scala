@@ -20,7 +20,7 @@ case class EmitOp(op: AlgebraOp) extends QueryOp {
 
   def maxTupleSize = op.maxTupleSize
 
-  def bindingsSchema = op.bindingsSchema
+  def bindingsPattern = op.bindingsPattern
 }
 
 case class IterateOp(bindingOp: AlgebraOp, iteratedOp: AlgebraOp) extends QueryOp {
@@ -53,7 +53,7 @@ case class IterateOp(bindingOp: AlgebraOp, iteratedOp: AlgebraOp) extends QueryO
 
   def maxTupleSize = iteratedOp.maxTupleSize
 
-  def bindingsSchema = iteratedOp.bindingsSchema
+  def bindingsPattern = iteratedOp.bindingsPattern
 }
 
 case class IfElseOp(conditionOp: AlgebraOp, ifOp: AlgebraOp, elseOp: Option[AlgebraOp]) extends QueryOp {
@@ -72,7 +72,7 @@ case class IfElseOp(conditionOp: AlgebraOp, ifOp: AlgebraOp, elseOp: Option[Alge
 
   def maxTupleSize = elseOp.map(_.maxTupleSize.map(elseSize => ifOp.maxTupleSize.map(_.max(elseSize))).getOrElse(None)).getOrElse(ifOp.maxTupleSize)
 
-  def bindingsSchema = elseOp.map(_.bindingsSchema union ifOp.bindingsSchema).getOrElse(ifOp.bindingsSchema)
+  def bindingsPattern = elseOp.map(_.bindingsPattern union ifOp.bindingsPattern).getOrElse(ifOp.bindingsPattern)
 }
 
 case class BlockOp(ops: List[AlgebraOp]) extends QueryOp {
@@ -98,9 +98,9 @@ case class BlockOp(ops: List[AlgebraOp]) extends QueryOp {
     if (opSizes.size != ops.size) None else Some(opSizes.max)
   }
 
-  def bindingsSchema = {
+  def bindingsPattern = {
     // It is assumed that all statements in a block provide same binding schemas
-    ops.headOption.map(_.bindingsSchema).getOrElse(BindingsSchema())
+    ops.headOption.map(_.bindingsPattern).getOrElse(BindingsPattern())
   }
 }
 
@@ -132,7 +132,7 @@ case class AssignmentOp(variables: List[Variable], op: AlgebraOp) extends QueryO
 
   def maxTupleSize = Some(0)
 
-  def bindingsSchema = BindingsSchema()
+  def bindingsPattern = BindingsPattern()
 }
 
 case class WhileDoOp(conditionOp: AlgebraOp, iteratedOp: AlgebraOp) extends QueryOp {
@@ -153,7 +153,7 @@ case class WhileDoOp(conditionOp: AlgebraOp, iteratedOp: AlgebraOp) extends Quer
 
   def maxTupleSize = iteratedOp.maxTupleSize
 
-  def bindingsSchema = iteratedOp.bindingsSchema
+  def bindingsPattern = iteratedOp.bindingsPattern
 }
 
 /*
@@ -172,7 +172,7 @@ case class UnionOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends QueryOp {
 
   def maxTupleSize = leftOp.maxTupleSize.map(leftSize => rightOp.maxTupleSize.map(_.max(leftSize))).getOrElse(None)
 
-  def bindingsSchema = BindingsSchema()
+  def bindingsPattern = BindingsPattern()
 }
 
 case class ExceptOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends QueryOp {
@@ -191,7 +191,7 @@ case class ExceptOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends QueryOp {
 
   def maxTupleSize = leftOp.maxTupleSize
 
-  def bindingsSchema = BindingsSchema()
+  def bindingsPattern = BindingsPattern()
 }
 
 case class IntersectOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends QueryOp {
@@ -207,7 +207,7 @@ case class IntersectOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends QueryOp {
 
   def maxTupleSize = leftOp.maxTupleSize.map(leftSize => rightOp.maxTupleSize.map(_.min(leftSize))).getOrElse(None)
 
-  def bindingsSchema = BindingsSchema()
+  def bindingsPattern = BindingsPattern()
 }
 
 case class JoinOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends QueryOp {
@@ -277,7 +277,7 @@ case class JoinOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends QueryOp {
 
   def maxTupleSize = leftOp.maxTupleSize.map(leftSize => rightOp.maxTupleSize.map(_ + leftSize)).getOrElse(None)
 
-  def bindingsSchema = leftOp.bindingsSchema union rightOp.bindingsSchema
+  def bindingsPattern = leftOp.bindingsPattern union rightOp.bindingsPattern
 }
 
 /*
@@ -315,7 +315,7 @@ abstract class BinaryArithmeticOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends
 
   def maxTupleSize = Some(1)
 
-  def bindingsSchema = BindingsSchema()
+  def bindingsPattern = BindingsPattern()
 }
 
 case class AddOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends BinaryArithmeticOp(leftOp, rightOp) {
@@ -406,7 +406,7 @@ case class MinusOp(op: AlgebraOp) extends QueryOp {
 
   def maxTupleSize = Some(1)
 
-  def bindingsSchema = BindingsSchema()
+  def bindingsPattern = BindingsPattern()
 }
 
 case class FunctionOp(function: Function, args: AlgebraOp) extends QueryOp {
@@ -420,7 +420,7 @@ case class FunctionOp(function: Function, args: AlgebraOp) extends QueryOp {
 
   def maxTupleSize = function.maxTupleSize(args)
 
-  def bindingsSchema = function.bindingsSchema(args)
+  def bindingsPattern = function.bindingsPattern(args)
 }
 
 /*
@@ -471,7 +471,7 @@ case class SelectOp(op: AlgebraOp, condition: Condition) extends QueryOp {
 
   def maxTupleSize = op.maxTupleSize
 
-  def bindingsSchema = op.bindingsSchema
+  def bindingsPattern = op.bindingsPattern
 }
 
 case class ProjectOp(op: AlgebraOp, projectOp: AlgebraOp) extends QueryOp {
@@ -513,7 +513,7 @@ case class ProjectOp(op: AlgebraOp, projectOp: AlgebraOp) extends QueryOp {
 
   def maxTupleSize = projectOp.maxTupleSize
 
-  def bindingsSchema = projectOp.bindingsSchema
+  def bindingsPattern = projectOp.bindingsPattern
 }
 
 case class ExtendOp(op: AlgebraOp, pattern: ExtensionPattern) extends QueryOp {
@@ -546,7 +546,7 @@ case class ExtendOp(op: AlgebraOp, pattern: ExtensionPattern) extends QueryOp {
 
   def maxTupleSize = op.maxTupleSize.map(_ + pattern.maxDestinationTypesSize)
 
-  def bindingsSchema = op.bindingsSchema
+  def bindingsPattern = op.bindingsPattern
 }
 
 case class CloseOp(op: AlgebraOp, patterns: List[ExtensionPattern], limit: Option[Int]) extends QueryOp {
@@ -629,7 +629,7 @@ case class CloseOp(op: AlgebraOp, patterns: List[ExtensionPattern], limit: Optio
 
   def maxTupleSize = None
 
-  def bindingsSchema = op.bindingsSchema
+  def bindingsPattern = op.bindingsPattern
 }
 
 case class BindOp(op: AlgebraOp, variables: List[Variable]) extends QueryOp with VariableBindings with VariableTypeBindings {
@@ -645,10 +645,10 @@ case class BindOp(op: AlgebraOp, variables: List[Variable]) extends QueryOp with
 
   def maxTupleSize = op.maxTupleSize
 
-  def bindingsSchema = {
-    val schema = op.bindingsSchema
-    bindTypes(schema, op, variables)
-    schema
+  def bindingsPattern = {
+    val pattern = op.bindingsPattern
+    bindTypes(pattern, op, variables)
+    pattern
   }
 }
 
@@ -750,7 +750,7 @@ case class FetchOp(relation: Relation, from: List[(String, List[Any])], to: List
 
   def maxTupleSize = Some(to.size)
 
-  def bindingsSchema = BindingsSchema()
+  def bindingsPattern = BindingsPattern()
 }
 
 object FetchOp {
@@ -788,7 +788,7 @@ case class ConstantOp(dataSet: DataSet) extends QueryOp {
 
   def maxTupleSize = Some(dataSet.maxTupleSize)
 
-  def bindingsSchema = BindingsSchema() // assumed that constant dataset does not contain variable bindings
+  def bindingsPattern = BindingsPattern() // assumed that constant dataset does not contain variable bindings
 }
 
 object ConstantOp {
@@ -814,7 +814,7 @@ case class ContextRefOp(ref: Int, types: Set[DataType]) extends QueryOp {
 
   def maxTupleSize = Some(1)
 
-  def bindingsSchema = BindingsSchema()
+  def bindingsPattern = BindingsPattern()
 }
 
 case class PathVariableRefOp(name: String, types: (AlgebraOp, Int, Int)) extends QueryOp {
@@ -828,7 +828,7 @@ case class PathVariableRefOp(name: String, types: (AlgebraOp, Int, Int)) extends
 
   def maxTupleSize = types._1.maxTupleSize.map(_ - types._3)
 
-  def bindingsSchema = BindingsSchema()
+  def bindingsPattern = BindingsPattern()
 }
 
 case class StepVariableRefOp(name: String, types: Set[DataType]) extends QueryOp {
@@ -842,5 +842,5 @@ case class StepVariableRefOp(name: String, types: Set[DataType]) extends QueryOp
 
   def maxTupleSize = Some(1)
 
-  def bindingsSchema = BindingsSchema()
+  def bindingsPattern = BindingsPattern()
 }

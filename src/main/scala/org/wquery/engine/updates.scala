@@ -18,7 +18,7 @@ sealed abstract class UpdateOp extends AlgebraOp {
 
   def maxTupleSize = Some(0)
 
-  def bindingsSchema = BindingsSchema()
+  def bindingsPattern = BindingsSchema()
 }
 
 //

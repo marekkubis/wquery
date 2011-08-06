@@ -8,5 +8,5 @@ abstract class AlgebraOp {
   def rightType(pos: Int): Set[DataType]
   def minTupleSize: Int
   def maxTupleSize: Option[Int]
-  def bindingsSchema: BindingsSchema
+  def bindingsPattern: BindingsPattern
 }
