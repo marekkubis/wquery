@@ -659,6 +659,81 @@ case class BindOp(op: AlgebraOp, variables: List[Variable]) extends AlgebraOp wi
   }
 }
 
+trait VariableBindings {
+  def bind(dataSet: DataSet, variables: List[Variable]) = {
+    if (variables != Nil) {
+      val pathVarBuffers = DataSetBuffers.createPathVarBuffers(variables.filter(x => (x.isInstanceOf[PathVariable] && x.name != "_")).map(_.name))
+      val stepVarBuffers = DataSetBuffers.createStepVarBuffers(variables.filterNot(x => (x.isInstanceOf[PathVariable] || x.name == "_")).map(_.name))
+
+      demandUniqueVariableNames(variables)
+
+      getPathVariablePosition(variables) match {
+        case Some(pathVarPos) =>
+          val leftVars = variables.slice(0, pathVarPos).map(_.name).zipWithIndex.filterNot{_._1 == "_"}.toMap
+          val rightVars = variables.slice(pathVarPos + 1, variables.size).map(_.name).reverse.zipWithIndex.filterNot{_._1 == "_"}.toMap
+          val pathVarBuffer = if (variables(pathVarPos).name != "_") Some(pathVarBuffers(variables(pathVarPos).name)) else None
+          val pathVarStart = leftVars.size
+          val pathVarEnd = rightVars.size
+
+          for (tuple <- dataSet.paths) {
+            dataSet.paths.foreach(tuple => bindVariablesFromRight(rightVars, stepVarBuffers, tuple.size))
+            pathVarBuffer.map(_.append((pathVarStart, tuple.size - pathVarEnd)))
+            dataSet.paths.foreach(tuple => bindVariablesFromLeft(leftVars, stepVarBuffers, tuple.size))
+          }
+        case None =>
+          val rightVars = variables.map(_.name).reverse.zipWithIndex.filterNot{_._1 == "_"}.toMap
+          dataSet.paths.foreach(tuple => bindVariablesFromRight(rightVars, stepVarBuffers, tuple.size))
+      }
+
+      DataSet(dataSet.paths, dataSet.pathVars ++ pathVarBuffers.mapValues(_.toList), dataSet.stepVars ++ stepVarBuffers.mapValues(_.toList))
+    } else {
+      dataSet
+    }
+  }
+
+  private def demandUniqueVariableNames(variables: List[Variable]) {
+    val variableNames = variables.filter(x => !x.isInstanceOf[PathVariable] && x.name != "_").map(_.name)
+
+    if (variableNames.size != variableNames.distinct.size)
+      throw new WQueryEvaluationException("Variable list contains duplicated variable names")
+  }
+
+  private def getPathVariablePosition(variables: List[Variable]) = {
+    val pathVarPos = variables.indexWhere{_.isInstanceOf[PathVariable]}
+
+    if (pathVarPos != variables.lastIndexWhere{_.isInstanceOf[PathVariable]}) {
+      throw new WQueryEvaluationException("Variable list '" + variables.map {
+        case PathVariable(v) => "@" + v
+        case StepVariable(v) => "$" + v
+      }.mkString + "' contains more than one path variable")
+    } else {
+      if (pathVarPos != -1)
+        Some(pathVarPos)
+      else
+        None
+    }
+  }
+
+  private def bindVariablesFromLeft(vars: Map[String, Int], varIndexes: Map[String, ListBuffer[Int]], tupleSize: Int) {
+    for ((v, pos) <- vars)
+      if (pos < tupleSize)
+        varIndexes(v).append(pos)
+      else
+        throw new WQueryEvaluationException("Variable $" + v + " cannot be bound")
+  }
+
+  private def bindVariablesFromRight(vars: Map[String, Int], varIndexes: Map[String, ListBuffer[Int]], tupleSize: Int) {
+    for ((v, pos) <- vars) {
+      val index = tupleSize - 1 - pos
+
+      if (index >= 0)
+        varIndexes(v).append(index)
+      else
+        throw new WQueryEvaluationException("Variable $" + v + " cannot be bound")
+    }
+  }
+}
+
 /*
  * Elementary operations
  */

@@ -8,6 +8,8 @@ class WQueryParsingFailureException(message: String) extends WQueryParsingExcept
 
 class WQueryParsingErrorException(message: String) extends WQueryParsingException(message)
 
+class WQueryStaticCheckException(message: String) extends WQueryException(message)
+
 class WQueryEvaluationException(message: String) extends WQueryException(message)
 
 class WQueryModelException(message: String) extends WQueryException(message)

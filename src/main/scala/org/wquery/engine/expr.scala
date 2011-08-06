@@ -1,7 +1,8 @@
 package org.wquery.engine
-import org.wquery.WQueryEvaluationException
 import scala.collection.mutable.ListBuffer
 import org.wquery.model._
+import org.wquery.{WQueryStaticCheckException, WQueryEvaluationException}
+
 sealed abstract class Expr
 
 sealed abstract class EvaluableExpr extends Expr {
@@ -152,81 +153,6 @@ case class FunctionExpr(name: String, args: EvaluableExpr) extends EvaluableExpr
 /*
  * Step related expressions
  */
-trait VariableBindings {
-  def bind(dataSet: DataSet, variables: List[Variable]) = {
-    if (variables != Nil) {
-      val pathVarBuffers = DataSetBuffers.createPathVarBuffers(variables.filter(x => (x.isInstanceOf[PathVariable] && x.name != "_")).map(_.name))
-      val stepVarBuffers = DataSetBuffers.createStepVarBuffers(variables.filterNot(x => (x.isInstanceOf[PathVariable] || x.name == "_")).map(_.name))
-    
-      demandUniqueVariableNames(variables)
-      
-      getPathVariablePosition(variables) match {
-        case Some(pathVarPos) => 
-          val leftVars = variables.slice(0, pathVarPos).map(_.name).zipWithIndex.filterNot{_._1 == "_"}.toMap
-          val rightVars = variables.slice(pathVarPos + 1, variables.size).map(_.name).reverse.zipWithIndex.filterNot{_._1 == "_"}.toMap
-          val pathVarBuffer = if (variables(pathVarPos).name != "_") Some(pathVarBuffers(variables(pathVarPos).name)) else None
-          val pathVarStart = leftVars.size
-          val pathVarEnd = rightVars.size
-      
-          for (tuple <- dataSet.paths) {  
-            dataSet.paths.foreach(tuple => bindVariablesFromRight(rightVars, stepVarBuffers, tuple.size))            
-            pathVarBuffer.map(_.append((pathVarStart, tuple.size - pathVarEnd)))
-            dataSet.paths.foreach(tuple => bindVariablesFromLeft(leftVars, stepVarBuffers, tuple.size))            
-          }
-        case None =>
-          val rightVars = variables.map(_.name).reverse.zipWithIndex.filterNot{_._1 == "_"}.toMap
-          dataSet.paths.foreach(tuple => bindVariablesFromRight(rightVars, stepVarBuffers, tuple.size))      
-      }
-    
-      DataSet(dataSet.paths, dataSet.pathVars ++ pathVarBuffers.mapValues(_.toList), dataSet.stepVars ++ stepVarBuffers.mapValues(_.toList))
-    } else {
-      dataSet
-    }
-  }
-  
-  private def demandUniqueVariableNames(variables: List[Variable]) {
-    val variableNames = variables.filter(x => !x.isInstanceOf[PathVariable] && x.name != "_").map(_.name)
-    
-    if (variableNames.size != variableNames.distinct.size)
-      throw new WQueryEvaluationException("Variable list contains duplicated variable names")
-  }
-  
-  private def getPathVariablePosition(variables: List[Variable]) = {
-    val pathVarPos = variables.indexWhere{_.isInstanceOf[PathVariable]}
-    
-    if (pathVarPos != variables.lastIndexWhere{_.isInstanceOf[PathVariable]}) {
-      throw new WQueryEvaluationException("Variable list '" + variables.map {
-        case PathVariable(v) => "@" + v 
-        case StepVariable(v) => "$" + v
-      }.mkString + "' contains more than one path variable")
-    } else {
-      if (pathVarPos != -1)
-        Some(pathVarPos)
-      else
-        None
-    }
-  }
-  
-  private def bindVariablesFromLeft(vars: Map[String, Int], varIndexes: Map[String, ListBuffer[Int]], tupleSize: Int) {
-    for ((v, pos) <- vars)        
-      if (pos < tupleSize)
-        varIndexes(v).append(pos)
-      else 
-        throw new WQueryEvaluationException("Variable $" + v + " cannot be bound")
-  }    
-  
-  private def bindVariablesFromRight(vars: Map[String, Int], varIndexes: Map[String, ListBuffer[Int]], tupleSize: Int) {
-    for ((v, pos) <- vars) {
-      val index = tupleSize - 1 - pos
-      
-      if (index >= 0)
-        varIndexes(v).append(index)
-      else 
-        throw new WQueryEvaluationException("Variable $" + v + " cannot be bound")
-    }
-  }
-}
-
 trait VariableTypeBindings {
   def bindTypes(bindings: BindingsSchema, op: AlgebraOp, variables: List[Variable]) {
     demandUniqueVariableNames(variables)
@@ -252,14 +178,14 @@ trait VariableTypeBindings {
     val vars = variables.filter(x => !x.isInstanceOf[PathVariable] && x.name != "_").map(_.name)
 
     if (vars.size != vars.distinct.size)
-      throw new WQueryEvaluationException("Variable list " + variables.mkString + " contains duplicated variable names")
+      throw new WQueryStaticCheckException("Variable list " + variables.mkString + " contains duplicated variable names")
   }
 
   private def getPathVariableNameAndPos(variables: List[Variable]) = {
     val pathVarPos = variables.indexWhere{_.isInstanceOf[PathVariable]}
 
     if (pathVarPos != variables.lastIndexWhere{_.isInstanceOf[PathVariable]}) {
-      throw new WQueryEvaluationException("Variable list " + variables.mkString + " contains more than one path variable")
+      throw new WQueryStaticCheckException("Variable list " + variables.mkString + " contains more than one path variable")
     } else {
       if (pathVarPos != -1)
         Some(variables(pathVarPos).name, pathVarPos)
@@ -273,7 +199,7 @@ trait VariableTypeBindings {
       if (op.maxTupleSize.map(pos < _).getOrElse(true))
         bindings.bindStepVariableType(name, op.leftType(pos))
       else
-        throw new WQueryEvaluationException("Variable $" + name + " cannot be bound")
+        throw new WQueryStaticCheckException("Variable $" + name + " cannot be bound")
     }
   }
 
@@ -282,7 +208,7 @@ trait VariableTypeBindings {
       if (op.maxTupleSize.map(pos < _).getOrElse(true))
         bindings.bindStepVariableType(name, op.rightType(pos))
       else
-        throw new WQueryEvaluationException("Variable $" + name + " cannot be bound")
+        throw new WQueryStaticCheckException("Variable $" + name + " cannot be bound")
     }
   }
 }
@@ -301,14 +227,14 @@ case class PositionedRelationTransformationExpr(pos: Int, arcUnion: ArcExprUnion
   def demandExtensionPattern(wordNet: WordNet, bindings: BindingsSchema, types: List[Set[DataType]]) = {
     arcUnion.getExtensions(wordNet, types(types.size - pos))
       .map(extensions => ExtensionPattern(pos - 1, extensions))
-      .getOrElse(throw new WQueryEvaluationException("Arc expression " + arcUnion + " references an unknown relation or argument"))
+      .getOrElse(throw new WQueryStaticCheckException("Arc expression " + arcUnion + " references an unknown relation or argument"))
   }
 
   def transformPlan(wordNet: WordNet, bindings: BindingsSchema, op: AlgebraOp) = {
     val types = op.rightType(pos - 1)
     arcUnion.getExtensions(wordNet, if (types.isEmpty) DataType.all else types)
       .map(extensions => ExtendOp(op, ExtensionPattern(pos - 1, extensions)))
-      .getOrElse(throw new WQueryEvaluationException("Arc expression " + arcUnion + " references an unknown relation or argument"))
+      .getOrElse(throw new WQueryStaticCheckException("Arc expression " + arcUnion + " references an unknown relation or argument"))
   }
 }
 
@@ -484,7 +410,7 @@ case class SynsetByExprReq(expr: EvaluableExpr) extends EvaluableExpr {
 
       ProjectOp(ExtendOp(op, ExtensionPattern(0, extensions)), ContextRefOp(0, Set(SynsetType)))
     } else {
-      throw new WQueryEvaluationException("{...} requires an expression that generates either senses or word forms")
+      throw new WQueryStaticCheckException("{...} requires an expression that generates either senses or word forms")
     }
   }
 }
@@ -507,7 +433,7 @@ case class ContextByArcExprUnionReq(arcUnion: ArcExprUnion, quantifier: Quantifi
     }
 
     arcOp.getOrElse(arcUnion.getLiteral.map(FetchOp.wordByValue(_))
-      .getOrElse(throw new WQueryEvaluationException("Expression " + arcUnion + " contains an invalid relation or argument name")))
+      .getOrElse(throw new WQueryStaticCheckException("Expression " + arcUnion + " contains an invalid relation or argument name")))
   }
 }
 
@@ -533,10 +459,10 @@ case class ContextByVariableReq(variable: Variable) extends EvaluableExpr {
   def evaluationPlan(wordNet: WordNet, bindings: BindingsSchema) = variable match {
     case PathVariable(name) =>
       bindings.lookupPathVariableType(name).map(PathVariableRefOp(name, _))
-        .getOrElse(throw new WQueryEvaluationException("A reference to unknown variable @" + name + " found"))
+        .getOrElse(throw new WQueryStaticCheckException("A reference to unknown variable @" + name + " found"))
     case StepVariable(name) =>
       bindings.lookupStepVariableType(name).map(StepVariableRefOp(name, _))
-        .getOrElse(throw new WQueryEvaluationException("A reference to unknown variable $" + name + " found"))
+        .getOrElse(throw new WQueryStaticCheckException("A reference to unknown variable $" + name + " found"))
   }
 }
 
@@ -544,7 +470,7 @@ case class ArcByArcExprReq(arcExpr: ArcExpr) extends EvaluableExpr {
   def evaluationPlan(wordNet: WordNet, bindings: BindingsSchema) = {
     arcExpr.getExtension(wordNet, DataType.all)
       .map(pattern => ConstantOp(DataSet(pattern.to.map(to => List(Arc(pattern.relation, pattern.from, to))))))
-      .getOrElse(throw new WQueryEvaluationException("Arc generator " + arcExpr + " references an unknown relation or argument"))
+      .getOrElse(throw new WQueryStaticCheckException("Arc generator " + arcExpr + " references an unknown relation or argument"))
   }
 }
 
