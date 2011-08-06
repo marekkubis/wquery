@@ -6,30 +6,30 @@ import org.wquery.{WQueryStaticCheckException, WQueryEvaluationException}
 sealed abstract class Expr
 
 sealed abstract class EvaluableExpr extends Expr {
-  def evaluationPlan(wordNet: WordNet, bindings: BindingsSchema): AlgebraOp
+  def evaluationPlan(wordNet: WordNetSchema, bindings: BindingsSchema): AlgebraOp
 }
 
 /*
  * Imperative expressions
  */
 case class EmissionExpr(expr: EvaluableExpr) extends EvaluableExpr {
-  def evaluationPlan(wordNet: WordNet, bindings: BindingsSchema) = EmitOp(expr.evaluationPlan(wordNet, bindings))
+  def evaluationPlan(wordNet: WordNetSchema, bindings: BindingsSchema) = EmitOp(expr.evaluationPlan(wordNet, bindings))
 }
 
 case class IteratorExpr(bindingExpr: EvaluableExpr, iteratedExpr: EvaluableExpr) extends EvaluableExpr {
-  def evaluationPlan(wordNet: WordNet, bindings: BindingsSchema) = {
+  def evaluationPlan(wordNet: WordNetSchema, bindings: BindingsSchema) = {
     val bindingsOp = bindingExpr.evaluationPlan(wordNet, bindings)
     IterateOp(bindingsOp, iteratedExpr.evaluationPlan(wordNet, bindings union bindingsOp.bindingsPattern))
   }
 }
 
 case class IfElseExpr(conditionExpr: EvaluableExpr, ifExpr: EvaluableExpr, elseExpr: Option[EvaluableExpr]) extends EvaluableExpr {
-  def evaluationPlan(wordNet: WordNet, bindings: BindingsSchema) = IfElseOp(conditionExpr.evaluationPlan(wordNet, bindings),
+  def evaluationPlan(wordNet: WordNetSchema, bindings: BindingsSchema) = IfElseOp(conditionExpr.evaluationPlan(wordNet, bindings),
     ifExpr.evaluationPlan(wordNet, bindings), elseExpr.map(_.evaluationPlan(wordNet, bindings)))
 }
 
 case class BlockExpr(exprs: List[EvaluableExpr]) extends EvaluableExpr {
-  def evaluationPlan(wordNet: WordNet, bindings: BindingsSchema) = {
+  def evaluationPlan(wordNet: WordNetSchema, bindings: BindingsSchema) = {
     val blockBindings = BindingsSchema(bindings, true)
 
     BlockOp(exprs.map(expr => expr.evaluationPlan(wordNet, blockBindings)))
@@ -37,12 +37,12 @@ case class BlockExpr(exprs: List[EvaluableExpr]) extends EvaluableExpr {
 }
 
 case class WhileDoExpr(conditionExpr: EvaluableExpr, iteratedExpr: EvaluableExpr) extends EvaluableExpr {
-  def evaluationPlan(wordNet: WordNet, bindings: BindingsSchema)
+  def evaluationPlan(wordNet: WordNetSchema, bindings: BindingsSchema)
     = WhileDoOp(conditionExpr.evaluationPlan(wordNet, bindings), iteratedExpr.evaluationPlan(wordNet, bindings))
 }
 
 case class VariableAssignmentExpr(variables: List[Variable], expr: EvaluableExpr) extends EvaluableExpr with VariableTypeBindings {
-  def evaluationPlan(wordNet: WordNet, bindings: BindingsSchema) = {
+  def evaluationPlan(wordNet: WordNetSchema, bindings: BindingsSchema) = {
     val op = expr.evaluationPlan(wordNet, bindings)
 
     bindTypes(bindings, op, variables)
@@ -51,7 +51,7 @@ case class VariableAssignmentExpr(variables: List[Variable], expr: EvaluableExpr
 }
 
 case class RelationAssignmentExpr(name: String, arcUnion: ArcExprUnion) extends EvaluableExpr {
-  def evaluationPlan(wordNet: WordNet, bindings: BindingsSchema) = {
+  def evaluationPlan(wordNet: WordNetSchema, bindings: BindingsSchema) = {
     arcUnion.getExtensions(wordNet, DataType.all).map{ extensions =>
       val pattern = ExtensionPattern(0, extensions)
       val sourceType = demandSingleNodeType(pattern.sourceType, "source")
@@ -73,7 +73,7 @@ case class RelationAssignmentExpr(name: String, arcUnion: ArcExprUnion) extends 
  * Path expressions
  */
 case class BinarySetExpr(op: String, left: EvaluableExpr, right: EvaluableExpr) extends EvaluableExpr {
-  def evaluationPlan(wordNet: WordNet, bindings: BindingsSchema) = {
+  def evaluationPlan(wordNet: WordNetSchema, bindings: BindingsSchema) = {
     val leftPlan = left.evaluationPlan(wordNet, bindings)
     val rightPlan = right.evaluationPlan(wordNet, bindings)
 
@@ -91,7 +91,7 @@ case class BinarySetExpr(op: String, left: EvaluableExpr, right: EvaluableExpr) 
 }
 
 case class ConjunctiveExpr(expr: EvaluableExpr) extends EvaluableExpr {
-  def evaluationPlan(wordNet: WordNet, bindings: BindingsSchema) = {
+  def evaluationPlan(wordNet: WordNetSchema, bindings: BindingsSchema) = {
     expr.evaluationPlan(wordNet, BindingsSchema(bindings, false))
   }
 }
@@ -100,7 +100,7 @@ case class ConjunctiveExpr(expr: EvaluableExpr) extends EvaluableExpr {
  * Arithmetic expressions
  */
 case class BinaryArithmeticExpr(op: String, left: EvaluableExpr, right: EvaluableExpr) extends EvaluableExpr {
-  def evaluationPlan(wordNet: WordNet, bindings: BindingsSchema) = {
+  def evaluationPlan(wordNet: WordNetSchema, bindings: BindingsSchema) = {
     val leftOp = left.evaluationPlan(wordNet, bindings)
     val rightOp = right.evaluationPlan(wordNet, bindings)
 
@@ -126,7 +126,7 @@ case class BinaryArithmeticExpr(op: String, left: EvaluableExpr, right: Evaluabl
 }
 
 case class MinusExpr(expr: EvaluableExpr) extends EvaluableExpr {
-  def evaluationPlan(wordNet: WordNet, bindings: BindingsSchema) = {
+  def evaluationPlan(wordNet: WordNetSchema, bindings: BindingsSchema) = {
     val op = expr.evaluationPlan(wordNet, bindings)
 
     if (DataType.numeric.contains(op.rightType(0)))
@@ -140,7 +140,7 @@ case class MinusExpr(expr: EvaluableExpr) extends EvaluableExpr {
  * Function call expressions
  */
 case class FunctionExpr(name: String, args: EvaluableExpr) extends EvaluableExpr {
-  def evaluationPlan(wordNet: WordNet, bindings: BindingsSchema) = {
+  def evaluationPlan(wordNet: WordNetSchema, bindings: BindingsSchema) = {
     val argsOp = args.evaluationPlan(wordNet, bindings)
 
     Functions.findFunctionsByName(name).map { functions =>
@@ -214,23 +214,23 @@ trait VariableTypeBindings {
 }
 
 sealed abstract class TransformationExpr extends Expr {
-  def transformPlan(wordNet: WordNet, bindings: BindingsSchema, op: AlgebraOp): AlgebraOp
+  def transformPlan(wordNet: WordNetSchema, bindings: BindingsSchema, op: AlgebraOp): AlgebraOp
 }
 
 case class QuantifiedTransformationExpr(chain: PositionedRelationChainTransformationExpr, quantifier: Quantifier) extends TransformationExpr {
-  def transformPlan(wordNet: WordNet, bindings: BindingsSchema, op: AlgebraOp) = {
+  def transformPlan(wordNet: WordNetSchema, bindings: BindingsSchema, op: AlgebraOp) = {
     quantifier.quantify(op, chain, wordNet, bindings)
   }
 }
 
 case class PositionedRelationTransformationExpr(pos: Int, arcUnion: ArcExprUnion) extends TransformationExpr {
-  def demandExtensionPattern(wordNet: WordNet, bindings: BindingsSchema, types: List[Set[DataType]]) = {
+  def demandExtensionPattern(wordNet: WordNetSchema, bindings: BindingsSchema, types: List[Set[DataType]]) = {
     arcUnion.getExtensions(wordNet, types(types.size - pos))
       .map(extensions => ExtensionPattern(pos - 1, extensions))
       .getOrElse(throw new WQueryStaticCheckException("Arc expression " + arcUnion + " references an unknown relation or argument"))
   }
 
-  def transformPlan(wordNet: WordNet, bindings: BindingsSchema, op: AlgebraOp) = {
+  def transformPlan(wordNet: WordNetSchema, bindings: BindingsSchema, op: AlgebraOp) = {
     val types = op.rightType(pos - 1)
     arcUnion.getExtensions(wordNet, if (types.isEmpty) DataType.all else types)
       .map(extensions => ExtendOp(op, ExtensionPattern(pos - 1, extensions)))
@@ -239,7 +239,7 @@ case class PositionedRelationTransformationExpr(pos: Int, arcUnion: ArcExprUnion
 }
 
 case class PositionedRelationChainTransformationExpr(exprs: List[PositionedRelationTransformationExpr]) extends TransformationExpr {
-  def demandExtensionPatterns(wordNet: WordNet, bindings: BindingsSchema, types: List[Set[DataType]]) = {
+  def demandExtensionPatterns(wordNet: WordNetSchema, bindings: BindingsSchema, types: List[Set[DataType]]) = {
     val patternBuffer = new ListBuffer[ExtensionPattern]
     val typesBuffer = new ListBuffer[Set[DataType]]
 
@@ -261,13 +261,13 @@ case class PositionedRelationChainTransformationExpr(exprs: List[PositionedRelat
     patternBuffer.toList
   }
 
-  def transformPlan(wordNet: WordNet, bindings: BindingsSchema, op: AlgebraOp) = {
+  def transformPlan(wordNet: WordNetSchema, bindings: BindingsSchema, op: AlgebraOp) = {
     exprs.foldLeft(op)((x, expr) => expr.transformPlan(wordNet, bindings, x))
   }
 }
 
 case class FilterTransformationExpr(conditionalExpr: ConditionalExpr) extends TransformationExpr {
-  def transformPlan(wordNet: WordNet, bindings: BindingsSchema, op: AlgebraOp) = {
+  def transformPlan(wordNet: WordNetSchema, bindings: BindingsSchema, op: AlgebraOp) = {
     val filterBindings = BindingsSchema(bindings, false)
     filterBindings.bindContextOp(op)
     SelectOp(op, conditionalExpr.conditionPlan(wordNet, filterBindings))
@@ -275,7 +275,7 @@ case class FilterTransformationExpr(conditionalExpr: ConditionalExpr) extends Tr
 }
 
 case class NodeTransformationExpr(generator: EvaluableExpr) extends TransformationExpr {
-  def transformPlan(wordNet: WordNet, bindings: BindingsSchema, op: AlgebraOp) = {
+  def transformPlan(wordNet: WordNetSchema, bindings: BindingsSchema, op: AlgebraOp) = {
     val filterBindings = BindingsSchema(bindings, false)
     filterBindings.bindContextOp(op)
     SelectOp(op, BinaryConditionalExpr("in", AlgebraExpr(ContextRefOp(0, op.rightType(0))), generator).conditionPlan(wordNet, filterBindings))
@@ -283,20 +283,20 @@ case class NodeTransformationExpr(generator: EvaluableExpr) extends Transformati
 }
 
 case class ProjectionTransformationExpr(expr: EvaluableExpr) extends TransformationExpr {
-  def transformPlan(wordNet: WordNet, bindings: BindingsSchema, op: AlgebraOp) = {
+  def transformPlan(wordNet: WordNetSchema, bindings: BindingsSchema, op: AlgebraOp) = {
     ProjectOp(op, expr.evaluationPlan(wordNet, bindings))
   }
 }
 
 case class BindTransformationExpr(variables: List[Variable]) extends TransformationExpr with VariableTypeBindings {
-  def transformPlan(wordNet: WordNet, bindings: BindingsSchema, op: AlgebraOp) = {
+  def transformPlan(wordNet: WordNetSchema, bindings: BindingsSchema, op: AlgebraOp) = {
     bindTypes(bindings, op, variables)
     BindOp(op, variables)
   }
 }
 
 case class PathExpr(generator: EvaluableExpr, steps: List[TransformationExpr]) extends EvaluableExpr {
-  def evaluationPlan(wordNet: WordNet, bindings: BindingsSchema) = {
+  def evaluationPlan(wordNet: WordNetSchema, bindings: BindingsSchema) = {
     steps.foldLeft(generator.evaluationPlan(wordNet, bindings))((step, trans) => trans.transformPlan(wordNet, bindings, step))
   }
 }
@@ -305,7 +305,7 @@ case class PathExpr(generator: EvaluableExpr, steps: List[TransformationExpr]) e
  * Arc Expressions
  */
 case class ArcExpr(ids: List[String]) extends Expr {
-  def getExtension(wordNet: WordNet, sourceTypes: Set[DataType]) = {
+  def getExtension(wordNet: WordNetSchema, sourceTypes: Set[DataType]) = {
     (ids: @unchecked) match {
       case List(relationName) =>
         wordNet.getRelation(relationName, sourceTypes, Relation.Source)
@@ -327,7 +327,7 @@ case class ArcExpr(ids: List[String]) extends Expr {
 }
 
 case class ArcExprUnion(arcExprs: List[ArcExpr]) extends Expr {
-  def getExtensions(wordNet: WordNet, sourceTypes: Set[DataType]) = {
+  def getExtensions(wordNet: WordNetSchema, sourceTypes: Set[DataType]) = {
     val patterns = arcExprs.map(_.getExtension(wordNet, sourceTypes))
 
     if (patterns.filter(_.isDefined).size == arcExprs.size) Some(patterns.map(_.get)) else None
@@ -342,23 +342,23 @@ case class ArcExprUnion(arcExprs: List[ArcExpr]) extends Expr {
  * Conditional Expressions
  */
 sealed abstract class ConditionalExpr extends Expr {
-  def conditionPlan(wordNet: WordNet, bindings: BindingsSchema): Condition
+  def conditionPlan(wordNet: WordNetSchema, bindings: BindingsSchema): Condition
 }
 
 case class OrExpr(exprs: List[ConditionalExpr]) extends ConditionalExpr {
-  def conditionPlan(wordNet: WordNet, bindings: BindingsSchema) = OrCondition(exprs.map(_.conditionPlan(wordNet, bindings)))
+  def conditionPlan(wordNet: WordNetSchema, bindings: BindingsSchema) = OrCondition(exprs.map(_.conditionPlan(wordNet, bindings)))
 }
 
 case class AndExpr(exprs: List[ConditionalExpr]) extends ConditionalExpr {
-  def conditionPlan(wordNet: WordNet, bindings: BindingsSchema) = AndCondition(exprs.map(_.conditionPlan(wordNet, bindings)))
+  def conditionPlan(wordNet: WordNetSchema, bindings: BindingsSchema) = AndCondition(exprs.map(_.conditionPlan(wordNet, bindings)))
 }
 
 case class NotExpr(expr: ConditionalExpr) extends ConditionalExpr {
-  def conditionPlan(wordNet: WordNet, bindings: BindingsSchema) = NotCondition(expr.conditionPlan(wordNet, bindings))
+  def conditionPlan(wordNet: WordNetSchema, bindings: BindingsSchema) = NotCondition(expr.conditionPlan(wordNet, bindings))
 }
 
 case class BinaryConditionalExpr(op: String, leftExpr: EvaluableExpr, rightExpr: EvaluableExpr) extends ConditionalExpr {
-  def conditionPlan(wordNet: WordNet, bindings: BindingsSchema) = {
+  def conditionPlan(wordNet: WordNetSchema, bindings: BindingsSchema) = {
     val leftOp = leftExpr.evaluationPlan(wordNet, bindings)
     val rightOp = rightExpr.evaluationPlan(wordNet, bindings)
 
@@ -389,14 +389,14 @@ case class BinaryConditionalExpr(op: String, leftExpr: EvaluableExpr, rightExpr:
 }
 
 case class PathConditionExpr(expr: PathExpr) extends ConditionalExpr {
-  def conditionPlan(wordNet: WordNet, bindings: BindingsSchema) = RightFringeCondition(expr.evaluationPlan(wordNet, bindings))
+  def conditionPlan(wordNet: WordNetSchema, bindings: BindingsSchema) = RightFringeCondition(expr.evaluationPlan(wordNet, bindings))
 }
 
 /*
  * Generators
  */
 case class SynsetByExprReq(expr: EvaluableExpr) extends EvaluableExpr {
-  def evaluationPlan(wordNet: WordNet, bindings: BindingsSchema) = {
+  def evaluationPlan(wordNet: WordNetSchema, bindings: BindingsSchema) = {
     val op = expr.evaluationPlan(wordNet, bindings)
     val contextTypes = op.rightType(0).filter(t => t == StringType || t == SenseType)
 
@@ -416,7 +416,7 @@ case class SynsetByExprReq(expr: EvaluableExpr) extends EvaluableExpr {
 }
 
 case class ContextByArcExprUnionReq(arcUnion: ArcExprUnion, quantifier: Quantifier) extends EvaluableExpr {
-  def evaluationPlan(wordNet: WordNet, bindings: BindingsSchema) = {
+  def evaluationPlan(wordNet: WordNetSchema, bindings: BindingsSchema) = {
     val chain = PositionedRelationChainTransformationExpr(List(PositionedRelationTransformationExpr(1, arcUnion)))
     val arcOp = if (bindings.areContextVariablesBound) {
       arcUnion.getExtensions(wordNet, bindings.lookupContextVariableType(0)).map(_ => ContextRefOp(0, bindings.lookupContextVariableType(0)))
@@ -438,25 +438,25 @@ case class ContextByArcExprUnionReq(arcUnion: ArcExprUnion, quantifier: Quantifi
 }
 
 case class WordFormByRegexReq(regex: String) extends EvaluableExpr {
-  def evaluationPlan(wordNet: WordNet, bindings: BindingsSchema) = {
+  def evaluationPlan(wordNet: WordNetSchema, bindings: BindingsSchema) = {
     SelectOp(FetchOp.words, BinaryConditionalExpr("=~", AlgebraExpr(ContextRefOp(0, Set(StringType))),
       AlgebraExpr(ConstantOp.fromValue(regex))).conditionPlan(wordNet, bindings))
   }
 }
 
 case class ContextReferenceReq(pos: Int) extends EvaluableExpr {
-  def evaluationPlan(wordNet: WordNet, bindings: BindingsSchema) = ContextRefOp(pos, bindings.lookupContextVariableType(pos))
+  def evaluationPlan(wordNet: WordNetSchema, bindings: BindingsSchema) = ContextRefOp(pos, bindings.lookupContextVariableType(pos))
 }
 
 case class BooleanByFilterReq(conditionalExpr: ConditionalExpr) extends EvaluableExpr {
-  def evaluationPlan(wordNet: WordNet, bindings: BindingsSchema) = {
+  def evaluationPlan(wordNet: WordNetSchema, bindings: BindingsSchema) = {
     IfElseOp(SelectOp(ConstantOp.fromValue(true), conditionalExpr.conditionPlan(wordNet, bindings)),
       ConstantOp.fromValue(true), Some(ConstantOp.fromValue(false)))
   }
 }
 
 case class ContextByVariableReq(variable: Variable) extends EvaluableExpr {
-  def evaluationPlan(wordNet: WordNet, bindings: BindingsSchema) = variable match {
+  def evaluationPlan(wordNet: WordNetSchema, bindings: BindingsSchema) = variable match {
     case PathVariable(name) =>
       bindings.lookupPathVariableType(name).map(PathVariableRefOp(name, _))
         .getOrElse(throw new WQueryStaticCheckException("A reference to unknown variable @" + name + " found"))
@@ -467,7 +467,7 @@ case class ContextByVariableReq(variable: Variable) extends EvaluableExpr {
 }
 
 case class ArcByArcExprReq(arcExpr: ArcExpr) extends EvaluableExpr {
-  def evaluationPlan(wordNet: WordNet, bindings: BindingsSchema) = {
+  def evaluationPlan(wordNet: WordNetSchema, bindings: BindingsSchema) = {
     arcExpr.getExtension(wordNet, DataType.all)
       .map(pattern => ConstantOp(DataSet(pattern.to.map(to => List(Arc(pattern.relation, pattern.from, to))))))
       .getOrElse(throw new WQueryStaticCheckException("Arc generator " + arcExpr + " references an unknown relation or argument"))
@@ -475,7 +475,7 @@ case class ArcByArcExprReq(arcExpr: ArcExpr) extends EvaluableExpr {
 }
 
 case class AlgebraExpr(op: AlgebraOp) extends EvaluableExpr {
-  def evaluationPlan(wordNet: WordNet, bindings: BindingsSchema) = op
+  def evaluationPlan(wordNet: WordNetSchema, bindings: BindingsSchema) = op
 }
 
 /*
@@ -495,7 +495,7 @@ case class PathVariable(override val name: String) extends Variable(name) {
  * Quantifier
  */
 case class Quantifier(lowerBound: Int, upperBound: Option[Int]) extends Expr {
-  def quantify(op: AlgebraOp, chain: PositionedRelationChainTransformationExpr, wordNet: WordNet, bindings: BindingsSchema) = {
+  def quantify(op: AlgebraOp, chain: PositionedRelationChainTransformationExpr, wordNet: WordNetSchema, bindings: BindingsSchema) = {
     val lowerOp = (1 to lowerBound).foldLeft(op)((x, _) => chain.transformPlan(wordNet, bindings, x))
     val furthestReference = chain.exprs.map(_.pos).max - 1
     val typeReferences = (for (i <- furthestReference to 0 by -1) yield lowerOp.rightType(i)).toList

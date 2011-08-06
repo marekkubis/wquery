@@ -2,22 +2,14 @@ package org.wquery.model
 import org.wquery.WQueryModelException
 
 class WordNet(val store: WordNetStore) {
+  val schema = new WordNetSchema(store)
+
   for (relation <- WordNet.relations)
     if (!store.relations.contains(relation))
       store.add(relation)
 
   for (sourceType <- DataType.nodes; destinationType <- DataType.nodes)
     store.add(Relation("_", sourceType, destinationType))
-
-  def getRelation(name: String, sourceTypes: Set[DataType], sourceName: String) = {
-    store.relations.find(r => r.name == name && r.arguments.get(sourceName).map(sourceTypes.contains(_)).getOrElse(false))
-  }
-
-  def demandRelation(name: String, sourceType: DataType, sourceName: String) = {
-    getRelation(name, Set(sourceType), sourceName).getOrElse(throw new WQueryModelException("Relation '" + name + "' with source type " + sourceType + " not found"))
-  }
-
-  def containsRelation(name: String, sourceType: DataType, sourceName: String) = getRelation(name, Set(sourceType), sourceName) != None
 
   private def getWordForm(word: String) = store.fetch(WordNet.WordSet, List((Relation.Source, List(word))), List(Relation.Source))
 
