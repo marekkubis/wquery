@@ -4,19 +4,12 @@ import org.wquery.WQueryEvaluationException
 import org.wquery.model._
 import collection.mutable.ListBuffer
 
-abstract class AlgebraOp {
-  def evaluate(wordNet: WordNet, bindings: Bindings): DataSet
-  def leftType(pos: Int): Set[DataType]
-  def rightType(pos: Int): Set[DataType]
-  def minTupleSize: Int
-  def maxTupleSize: Option[Int]
-  def bindingsSchema: BindingsSchema
-}
+sealed abstract class QueryOp extends AlgebraOp
 
 /*
  * Imperative operations
  */
-case class EmitOp(op: AlgebraOp) extends AlgebraOp {
+case class EmitOp(op: AlgebraOp) extends QueryOp {
   def evaluate(wordNet: WordNet, bindings: Bindings) = op.evaluate(wordNet, bindings)
 
   def leftType(pos: Int) = op.leftType(pos)
@@ -30,7 +23,7 @@ case class EmitOp(op: AlgebraOp) extends AlgebraOp {
   def bindingsSchema = op.bindingsSchema
 }
 
-case class IterateOp(bindingOp: AlgebraOp, iteratedOp: AlgebraOp) extends AlgebraOp {
+case class IterateOp(bindingOp: AlgebraOp, iteratedOp: AlgebraOp) extends QueryOp {
   def evaluate(wordNet: WordNet, bindings: Bindings) = {
     val bindingSet = bindingOp.evaluate(wordNet, bindings)
     val buffer = new DataSetBuffer
@@ -63,7 +56,7 @@ case class IterateOp(bindingOp: AlgebraOp, iteratedOp: AlgebraOp) extends Algebr
   def bindingsSchema = iteratedOp.bindingsSchema
 }
 
-case class IfElseOp(conditionOp: AlgebraOp, ifOp: AlgebraOp, elseOp: Option[AlgebraOp]) extends AlgebraOp {
+case class IfElseOp(conditionOp: AlgebraOp, ifOp: AlgebraOp, elseOp: Option[AlgebraOp]) extends QueryOp {
   def evaluate(wordNet: WordNet, bindings: Bindings) = {
     if (conditionOp.evaluate(wordNet, bindings).isTrue)
       ifOp.evaluate(wordNet, bindings)
@@ -82,7 +75,7 @@ case class IfElseOp(conditionOp: AlgebraOp, ifOp: AlgebraOp, elseOp: Option[Alge
   def bindingsSchema = elseOp.map(_.bindingsSchema union ifOp.bindingsSchema).getOrElse(ifOp.bindingsSchema)
 }
 
-case class BlockOp(ops: List[AlgebraOp]) extends AlgebraOp {
+case class BlockOp(ops: List[AlgebraOp]) extends QueryOp {
   def evaluate(wordNet: WordNet, bindings: Bindings) = {
     val blockBindings = Bindings(bindings, true)
     val buffer = new DataSetBuffer
@@ -111,7 +104,7 @@ case class BlockOp(ops: List[AlgebraOp]) extends AlgebraOp {
   }
 }
 
-case class AssignmentOp(variables: List[Variable], op: AlgebraOp) extends AlgebraOp with VariableBindings {
+case class AssignmentOp(variables: List[Variable], op: AlgebraOp) extends QueryOp with VariableBindings {
   def evaluate(wordNet: WordNet, bindings: Bindings) = {
     val result = op.evaluate(wordNet, bindings)
 
@@ -142,7 +135,7 @@ case class AssignmentOp(variables: List[Variable], op: AlgebraOp) extends Algebr
   def bindingsSchema = BindingsSchema()
 }
 
-case class WhileDoOp(conditionOp: AlgebraOp, iteratedOp: AlgebraOp) extends AlgebraOp {
+case class WhileDoOp(conditionOp: AlgebraOp, iteratedOp: AlgebraOp) extends QueryOp {
   def evaluate(wordNet: WordNet, bindings: Bindings) = {
     val buffer = new DataSetBuffer
 
@@ -166,7 +159,7 @@ case class WhileDoOp(conditionOp: AlgebraOp, iteratedOp: AlgebraOp) extends Alge
 /*
  * Set operations
  */
-case class UnionOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends AlgebraOp {
+case class UnionOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends QueryOp {
   def evaluate(wordNet: WordNet, bindings: Bindings) = {
     DataSet(leftOp.evaluate(wordNet, bindings).paths union rightOp.evaluate(wordNet, bindings).paths)
   }
@@ -182,7 +175,7 @@ case class UnionOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends AlgebraOp {
   def bindingsSchema = BindingsSchema()
 }
 
-case class ExceptOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends AlgebraOp {
+case class ExceptOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends QueryOp {
   def evaluate(wordNet: WordNet, bindings: Bindings) = {
     val leftSet = leftOp.evaluate(wordNet, bindings)
     val rightSet = rightOp.evaluate(wordNet, bindings)
@@ -201,7 +194,7 @@ case class ExceptOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends AlgebraOp {
   def bindingsSchema = BindingsSchema()
 }
 
-case class IntersectOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends AlgebraOp {
+case class IntersectOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends QueryOp {
   def evaluate(wordNet: WordNet, bindings: Bindings) = {
     DataSet(leftOp.evaluate(wordNet, bindings).paths intersect rightOp.evaluate(wordNet, bindings).paths)
   }
@@ -217,7 +210,7 @@ case class IntersectOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends AlgebraOp 
   def bindingsSchema = BindingsSchema()
 }
 
-case class JoinOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends AlgebraOp {
+case class JoinOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends QueryOp {
   def evaluate(wordNet: WordNet, bindings: Bindings) = {
     val leftSet = leftOp.evaluate(wordNet, bindings)
     val rightSet = rightOp.evaluate(wordNet, bindings)
@@ -290,7 +283,7 @@ case class JoinOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends AlgebraOp {
 /*
  * Arithmetic operations
  */
-abstract class BinaryArithmeticOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends AlgebraOp {
+abstract class BinaryArithmeticOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends QueryOp {
   def evaluate(wordNet: WordNet, bindings: Bindings) = {
     val leftSet = leftOp.evaluate(wordNet, bindings).paths.map(_.last)
     val rightSet = rightOp.evaluate(wordNet, bindings).paths.map(_.last)
@@ -397,7 +390,7 @@ case class ModOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends BinaryArithmetic
   }
 }
 
-case class MinusOp(op: AlgebraOp) extends AlgebraOp {
+case class MinusOp(op: AlgebraOp) extends QueryOp {
   def evaluate(wordNet: WordNet, bindings: Bindings) = {
     DataSet(op.evaluate(wordNet, bindings).paths.map(_.last).map {
         case x: Int => List(-x)
@@ -416,7 +409,7 @@ case class MinusOp(op: AlgebraOp) extends AlgebraOp {
   def bindingsSchema = BindingsSchema()
 }
 
-case class FunctionOp(function: Function, args: AlgebraOp) extends AlgebraOp {
+case class FunctionOp(function: Function, args: AlgebraOp) extends QueryOp {
   def evaluate(wordNet: WordNet, bindings: Bindings) = function.evaluate(args, wordNet, bindings)
 
   def leftType(pos: Int) = function.leftType(args, pos)
@@ -433,7 +426,7 @@ case class FunctionOp(function: Function, args: AlgebraOp) extends AlgebraOp {
 /*
  * Declarative operations
  */
-case class SelectOp(op: AlgebraOp, condition: Condition) extends AlgebraOp {
+case class SelectOp(op: AlgebraOp, condition: Condition) extends QueryOp {
   def evaluate(wordNet: WordNet, bindings: Bindings) = {
     val dataSet = op.evaluate(wordNet, bindings)
     val pathVarNames = dataSet.pathVars.keys.toSeq
@@ -481,7 +474,7 @@ case class SelectOp(op: AlgebraOp, condition: Condition) extends AlgebraOp {
   def bindingsSchema = op.bindingsSchema
 }
 
-case class ProjectOp(op: AlgebraOp, projectOp: AlgebraOp) extends AlgebraOp {
+case class ProjectOp(op: AlgebraOp, projectOp: AlgebraOp) extends QueryOp {
   def evaluate(wordNet: WordNet, bindings: Bindings) = {
     val dataSet = op.evaluate(wordNet, bindings)
     val buffer = new DataSetBuffer
@@ -523,7 +516,7 @@ case class ProjectOp(op: AlgebraOp, projectOp: AlgebraOp) extends AlgebraOp {
   def bindingsSchema = projectOp.bindingsSchema
 }
 
-case class ExtendOp(op: AlgebraOp, pattern: ExtensionPattern) extends AlgebraOp {
+case class ExtendOp(op: AlgebraOp, pattern: ExtensionPattern) extends QueryOp {
   def evaluate(wordNet: WordNet, bindings: Bindings) = {
     wordNet.store.extend(op.evaluate(wordNet, bindings), pattern)
   }
@@ -556,7 +549,7 @@ case class ExtendOp(op: AlgebraOp, pattern: ExtensionPattern) extends AlgebraOp 
   def bindingsSchema = op.bindingsSchema
 }
 
-case class CloseOp(op: AlgebraOp, patterns: List[ExtensionPattern], limit: Option[Int]) extends AlgebraOp {
+case class CloseOp(op: AlgebraOp, patterns: List[ExtensionPattern], limit: Option[Int]) extends QueryOp {
   def evaluate(wordNet: WordNet, bindings: Bindings) = {
     val dataSet = op.evaluate(wordNet, bindings)
     val pathVarNames = dataSet.pathVars.keys.toSeq
@@ -639,7 +632,7 @@ case class CloseOp(op: AlgebraOp, patterns: List[ExtensionPattern], limit: Optio
   def bindingsSchema = op.bindingsSchema
 }
 
-case class BindOp(op: AlgebraOp, variables: List[Variable]) extends AlgebraOp with VariableBindings with VariableTypeBindings {
+case class BindOp(op: AlgebraOp, variables: List[Variable]) extends QueryOp with VariableBindings with VariableTypeBindings {
   def evaluate(wordNet: WordNet, bindings: Bindings) = {
     bind(op.evaluate(wordNet, bindings), variables)
   }
@@ -737,7 +730,7 @@ trait VariableBindings {
 /*
  * Elementary operations
  */
-case class FetchOp(relation: Relation, from: List[(String, List[Any])], to: List[String]) extends AlgebraOp {
+case class FetchOp(relation: Relation, from: List[(String, List[Any])], to: List[String]) extends QueryOp {
   def evaluate(wordNet: WordNet, bindings: Bindings) = wordNet.store.fetch(relation, from, to)
 
   def leftType(pos: Int) = typeAt(pos)
@@ -784,7 +777,7 @@ object FetchOp {
     = FetchOp(relation, argumentNames.map(x => (x, List[Any]())), argumentNames)
 }
 
-case class ConstantOp(dataSet: DataSet) extends AlgebraOp {
+case class ConstantOp(dataSet: DataSet) extends QueryOp {
   def evaluate(wordNet: WordNet, bindings: Bindings) = dataSet
 
   def leftType(pos: Int) = dataSet.leftType(pos)
@@ -807,7 +800,7 @@ object ConstantOp {
 /*
  * Reference operations
  */
-case class ContextRefOp(ref: Int, types: Set[DataType]) extends AlgebraOp {
+case class ContextRefOp(ref: Int, types: Set[DataType]) extends QueryOp {
   def evaluate(wordNet: WordNet, bindings: Bindings) = {
     bindings.lookupContextVariable(ref).map(DataSet.fromValue(_))
       .getOrElse(throw new WQueryEvaluationException("Backward reference (" + ref + ") too far"))
@@ -824,7 +817,7 @@ case class ContextRefOp(ref: Int, types: Set[DataType]) extends AlgebraOp {
   def bindingsSchema = BindingsSchema()
 }
 
-case class PathVariableRefOp(name: String, types: (AlgebraOp, Int, Int)) extends AlgebraOp {
+case class PathVariableRefOp(name: String, types: (AlgebraOp, Int, Int)) extends QueryOp {
   def evaluate(wordNet: WordNet, bindings: Bindings) = bindings.lookupPathVariable(name).map(DataSet.fromTuple(_)).get
 
   def leftType(pos: Int) = types._1.leftType(pos + types._2)
@@ -838,7 +831,7 @@ case class PathVariableRefOp(name: String, types: (AlgebraOp, Int, Int)) extends
   def bindingsSchema = BindingsSchema()
 }
 
-case class StepVariableRefOp(name: String, types: Set[DataType]) extends AlgebraOp {
+case class StepVariableRefOp(name: String, types: Set[DataType]) extends QueryOp {
   def evaluate(wordNet: WordNet, bindings: Bindings) = bindings.lookupStepVariable(name).map(DataSet.fromValue(_)).get
 
   def leftType(pos: Int) = if (pos == 0) types else Set.empty
