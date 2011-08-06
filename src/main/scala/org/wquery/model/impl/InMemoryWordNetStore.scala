@@ -82,9 +82,10 @@ class InMemoryWordNetStore extends WordNetStore {
 
     for (i <- 0 until dataSet.pathCount) {
       val tuple = dataSet.paths(i)
+      val source = tuple(tuple.size - 1 - from)
 
-      if (successors.contains((tuple(tuple.size - from), relation, through))) {
-        for (succs <- successors(tuple(tuple.size - from), relation, through)) {
+      if (successors.contains((source, relation, through))) {
+        for (succs <- successors(source, relation, through)) {
           val tupleBuffer = new ListBuffer[Any]
           tupleBuffer.appendAll(tuple)
           to.foreach { dest =>

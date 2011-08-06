@@ -300,14 +300,14 @@ case class QuantifiedTransformationExpr(chain: PositionedRelationChainTransforma
 case class PositionedRelationTransformationExpr(pos: Int, arcUnion: ArcExprUnion) extends TransformationExpr {
   def demandExtensionPattern(wordNet: WordNet, bindings: BindingsSchema, types: List[Set[DataType]]) = {
     arcUnion.getExtensions(wordNet, types(types.size - pos))
-      .map(extensions => ExtensionPattern(pos, extensions))
+      .map(extensions => ExtensionPattern(pos - 1, extensions))
       .getOrElse(throw new WQueryEvaluationException("Arc expression " + arcUnion + " references an unknown relation or argument"))
   }
 
   def transformPlan(wordNet: WordNet, bindings: BindingsSchema, op: AlgebraOp) = {
     val types = op.rightType(pos - 1)
     arcUnion.getExtensions(wordNet, if (types.isEmpty) DataType.all else types)
-      .map(extensions => ExtendOp(op, ExtensionPattern(pos, extensions)))
+      .map(extensions => ExtendOp(op, ExtensionPattern(pos - 1, extensions)))
       .getOrElse(throw new WQueryEvaluationException("Arc expression " + arcUnion + " references an unknown relation or argument"))
   }
 }
@@ -482,7 +482,7 @@ case class SynsetByExprReq(expr: EvaluableExpr) extends EvaluableExpr {
           Extension(WordNet.SenseToSynset, Relation.Source, List(Relation.Destination))
       }}.toList
 
-      ProjectOp(ExtendOp(op, ExtensionPattern(1, extensions)), ContextRefOp(0, Set(SynsetType)))
+      ProjectOp(ExtendOp(op, ExtensionPattern(0, extensions)), ContextRefOp(0, Set(SynsetType)))
     } else {
       throw new WQueryEvaluationException("{...} requires an expression that generates either senses or word forms")
     }
