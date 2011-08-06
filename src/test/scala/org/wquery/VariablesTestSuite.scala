@@ -91,4 +91,7 @@ class VariablesTestSuite extends WQueryTestSuite {
   @Test def multipleVariableInMultipleStepsProjection() = result of ("{car}$a.hypernym$b$c<$c,$b,$a>") should equal ("{ compartment:2:n } hypernym { cable car:1:n car:5:n }\n{ compartment:2:n } hypernym { car:4:n elevator car:1:n }\n{ compartment:2:n } hypernym { car:3:n gondola:3:n }\n{ motor vehicle:1:n automotive vehicle:1:n } hypernym { car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n }\n{ wheeled vehicle:1:n } hypernym { car:2:n railcar:1:n railway car:1:n railroad car:1:n }\n")  
 
   @Test def stepVariablePrecedingPathVariableUsedInFiler() = result of ("{car}.hypernym$_a@_[$_a = {car:1:n}]") should equal ("{ car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n } hypernym { motor vehicle:1:n automotive vehicle:1:n }\n")
+
+  @Test def variableReferenceInNestedFiler() = result of ("{car}$a[count(hypernym[$a != {car:1:n}]) > 0]") should equal ("$a={ cable car:1:n car:5:n } { cable car:1:n car:5:n }\n$a={ car:2:n railcar:1:n railway car:1:n railroad car:1:n } { car:2:n railcar:1:n railway car:1:n railroad car:1:n }\n$a={ car:4:n elevator car:1:n } { car:4:n elevator car:1:n }\n$a={ car:3:n gondola:3:n } { car:3:n gondola:3:n }\n")
+
 }
