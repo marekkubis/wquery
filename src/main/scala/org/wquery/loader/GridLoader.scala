@@ -182,7 +182,7 @@ class GridHandler(wordnet: WordNet) extends DefaultHandler with Logging {
     }
     
     // create semantic relations
-    ilrRelationsNames.map {name => wordnet.addRelation(Relation(name, SynsetType, SynsetType))}
+    ilrRelationsNames.map {name => wordnet.store.add(Relation(name, SynsetType, SynsetType))}
 
     // create semantic relations successors       
     for ((synset, relname, reldest) <- ilrRelationsTuples) {      
@@ -218,7 +218,7 @@ class GridHandler(wordnet: WordNet) extends DefaultHandler with Logging {
 
     // create relations
     for ((relname, dtype) <- genericRelationsDestTypes) {
-      wordnet.addRelation(Relation(relname, SynsetType, dtype))
+      wordnet.store.add(Relation(relname, SynsetType, dtype))
     }
     
     // create successors

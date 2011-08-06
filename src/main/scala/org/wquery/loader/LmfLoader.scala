@@ -107,7 +107,7 @@ class LmfHandler(wordNet: WordNet) extends DefaultHandler with Logging {
   private def createSynsetRelations {
     for ((sourceSynsetId, relationName, destinationSynsetId) <- synsetRelationsTuples) {
       val relation = wordNet.schema.getRelation(relationName, Set(SynsetType), Relation.Source).getOrElse {
-        wordNet.addRelation(Relation(relationName, SynsetType, SynsetType))
+        wordNet.store.add(Relation(relationName, SynsetType, SynsetType))
         wordNet.schema.demandRelation(relationName, SynsetType, Relation.Source)
       }
 
@@ -135,7 +135,7 @@ class LmfHandler(wordNet: WordNet) extends DefaultHandler with Logging {
   private def createStringRelations {
     for ((sourceSynsetId, relationName, destination) <- stringRelationsTuples) {
       val relation = wordNet.schema.getRelation(relationName, Set(SynsetType), Relation.Source).getOrElse {
-        wordNet.addRelation(Relation(relationName, SynsetType, StringType))
+        wordNet.store.add(Relation(relationName, SynsetType, StringType))
         wordNet.schema.demandRelation(relationName, SynsetType, Relation.Source)
       }
 

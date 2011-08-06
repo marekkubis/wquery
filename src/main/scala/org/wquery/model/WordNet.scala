@@ -1,5 +1,4 @@
 package org.wquery.model
-import org.wquery.WQueryModelException
 
 class WordNet(val store: WordNetStore) {
   val schema = new WordNetSchema(store)
@@ -7,9 +6,6 @@ class WordNet(val store: WordNetStore) {
   for (relation <- WordNet.relations)
     if (!store.relations.contains(relation))
       store.add(relation)
-
-  for (sourceType <- DataType.nodes; destinationType <- DataType.nodes)
-    store.add(Relation("_", sourceType, destinationType))
 
   private def getWordForm(word: String) = store.fetch(WordNet.WordSet, List((Relation.Source, List(word))), List(Relation.Source))
 
@@ -33,17 +29,11 @@ class WordNet(val store: WordNetStore) {
       addSuccessor(sense.wordForm, WordNet.WordFormToSenses, sense)
       addSuccessor(sense,WordNet. SenseToSynset, synset)
       addSuccessor(sense.wordForm, WordNet.WordFormToSynsets, synset)
-      addTuple(WordNet.SenseToWordFormSenseNumberAndPos, List((Relation.Source, sense), (Relation.Destination, sense.wordForm), ("num", sense.senseNumber), ("pos", sense.pos)))
+      store.add(WordNet.SenseToWordFormSenseNumberAndPos, List((Relation.Source, sense), (Relation.Destination, sense.wordForm), ("num", sense.senseNumber), ("pos", sense.pos)))
     }
   }
 
-  def addTuple(relation: Relation, tuple: List[(String, Any)]) = store.add(relation, tuple)
-
-  def addSuccessor(pred: Any, relation: Relation, succ: Any) = addTuple(relation, List((Relation.Source, pred), (Relation.Destination, succ)))
-
-  def addRelation(relation: Relation) = store.add(relation)
-
-  def removeRelation(relation: Relation) = store.remove(relation)
+  def addSuccessor(pred: Any, relation: Relation, succ: Any) = store.add(relation, List((Relation.Source, pred), (Relation.Destination, succ)))
 }
 
 
@@ -71,5 +61,5 @@ object WordNet {
 
   val relations = List(IdToSynset, SynsetToId, IdToSense, SenseToId, SenseToWordForm, SenseToSenseNumber,
     SenseToPos, SynsetToWordForms, SynsetToSenses, WordFormToSenses, SenseToSynset, WordFormToSynsets,
-    SenseToWordFormSenseNumberAndPos)
+    SenseToWordFormSenseNumberAndPos) ++ (for (sourceType <- DataType.nodes; destinationType <- DataType.nodes) yield Relation("_", sourceType, destinationType))
 }
