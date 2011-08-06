@@ -3,7 +3,7 @@ package org.wquery.engine
 import org.wquery.model._
 
 sealed abstract class UpdateOp extends AlgebraOp {
-  def update(wordNet: WordNet, bindings: Bindings): Unit
+  def update(wordNet: WordNet, bindings: Bindings)
 
   def evaluate(wordNet: WordNet, bindings: Bindings) = {
     update(wordNet, bindings)
