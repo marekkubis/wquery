@@ -50,22 +50,20 @@ case class VariableAssignmentExpr(variables: List[Variable], expr: EvaluableExpr
   }
 }
 
-case class RelationAssignmentExpr(name: String, arcUnion: ArcExprUnion) extends EvaluableExpr {
+case class RelationAssignmentExpr(name: String, expr: RelationalExpr) extends EvaluableExpr {
   def evaluationPlan(wordNet: WordNetSchema, bindings: BindingsSchema) = {
-    arcUnion.getExtensions(wordNet, DataType.all).map{ extensions =>
-      val pattern = ExtensionPattern(0, extensions)
-      val sourceType = demandSingleNodeType(pattern.sourceType, "source")
-      val destinationType = demandSingleNodeType(pattern.destinationTypeAt(pattern.maxDestinationTypesSize - 1), "destination")
+    val pattern = expr.evaluationPattern(wordNet, DataType.all)
+    val sourceType = demandSingleNodeType(pattern.sourceType, "source")
+    val destinationType = demandSingleNodeType(pattern.rightType(0), "destination")
 
-      CreateRelationFromPatternOp(name, sourceType, destinationType, pattern)
-    }.getOrElse(throw new WQueryEvaluationException("Arc expression " + arcUnion + " references an unknown relation or argument"))
+    CreateRelationFromPatternOp(name, pattern, sourceType, destinationType)
   }
 
   private def demandSingleNodeType(types: Set[_ <: DataType], typeName: String) = {
     if (types.size == 1 && types.head.isInstanceOf[NodeType])
       types.head.asInstanceOf[NodeType]
     else
-      throw new WQueryEvaluationException("Expression " + arcUnion + " does not determine single " + typeName + " type")
+      throw new WQueryEvaluationException("Expression " + expr + " does not determine single " + typeName + " type")
   }
 }
 
@@ -213,60 +211,17 @@ trait VariableTypeBindings {
   }
 }
 
-sealed abstract class TransformationExpr extends Expr {
+sealed abstract class StepExpr extends Expr {
   def transformPlan(wordNet: WordNetSchema, bindings: BindingsSchema, op: AlgebraOp): AlgebraOp
 }
 
-case class QuantifiedTransformationExpr(chain: PositionedRelationChainTransformationExpr, quantifier: Quantifier) extends TransformationExpr {
+case class RelationStepExpr(pos: Int, expr: RelationalExpr) extends StepExpr {
   def transformPlan(wordNet: WordNetSchema, bindings: BindingsSchema, op: AlgebraOp) = {
-    quantifier.quantify(op, chain, wordNet, bindings)
+    ExtendOp(op, pos, expr.evaluationPattern(wordNet, op.rightType(pos)))
   }
 }
 
-case class PositionedRelationTransformationExpr(pos: Int, arcUnion: ArcExprUnion) extends TransformationExpr {
-  def demandExtensionPattern(wordNet: WordNetSchema, bindings: BindingsSchema, types: List[Set[DataType]]) = {
-    arcUnion.getExtensions(wordNet, types(types.size - pos))
-      .map(extensions => ExtensionPattern(pos - 1, extensions))
-      .getOrElse(throw new WQueryStaticCheckException("Arc expression " + arcUnion + " references an unknown relation or argument"))
-  }
-
-  def transformPlan(wordNet: WordNetSchema, bindings: BindingsSchema, op: AlgebraOp) = {
-    val types = op.rightType(pos - 1)
-    arcUnion.getExtensions(wordNet, if (types.isEmpty) DataType.all else types)
-      .map(extensions => ExtendOp(op, ExtensionPattern(pos - 1, extensions)))
-      .getOrElse(throw new WQueryStaticCheckException("Arc expression " + arcUnion + " references an unknown relation or argument"))
-  }
-}
-
-case class PositionedRelationChainTransformationExpr(exprs: List[PositionedRelationTransformationExpr]) extends TransformationExpr {
-  def demandExtensionPatterns(wordNet: WordNetSchema, bindings: BindingsSchema, types: List[Set[DataType]]) = {
-    val patternBuffer = new ListBuffer[ExtensionPattern]
-    val typesBuffer = new ListBuffer[Set[DataType]]
-
-    typesBuffer.appendAll(types)
-
-    for (expr <- exprs) {
-      val pattern = expr.demandExtensionPattern(wordNet, bindings, typesBuffer.toList)
-      val patternExtensionTypes = pattern.extensions.map(extension => extension.to.map(x => extension.relation.arguments(x)))
-      val maxSize = patternExtensionTypes.map(_.size).max
-
-      for (i <- 0 until maxSize) {
-        val extensionTypes = patternExtensionTypes.filter(_.size <= i).map(x => x(i)).toSet[DataType]
-        typesBuffer.append(extensionTypes)
-      }
-
-      patternBuffer.append(pattern)
-    }
-
-    patternBuffer.toList
-  }
-
-  def transformPlan(wordNet: WordNetSchema, bindings: BindingsSchema, op: AlgebraOp) = {
-    exprs.foldLeft(op)((x, expr) => expr.transformPlan(wordNet, bindings, x))
-  }
-}
-
-case class FilterTransformationExpr(conditionalExpr: ConditionalExpr) extends TransformationExpr {
+case class FilterStepExpr(conditionalExpr: ConditionalExpr) extends StepExpr {
   def transformPlan(wordNet: WordNetSchema, bindings: BindingsSchema, op: AlgebraOp) = {
     val filterBindings = BindingsSchema(bindings, false)
     filterBindings.bindContextOp(op)
@@ -274,7 +229,9 @@ case class FilterTransformationExpr(conditionalExpr: ConditionalExpr) extends Tr
   }
 }
 
-case class NodeTransformationExpr(generator: EvaluableExpr) extends TransformationExpr {
+case class NodeStepExpr(generator: EvaluableExpr) extends StepExpr {
+  def generatePlan(wordNet: WordNetSchema, bindings: BindingsSchema) = generator.evaluationPlan(wordNet, bindings)
+
   def transformPlan(wordNet: WordNetSchema, bindings: BindingsSchema, op: AlgebraOp) = {
     val filterBindings = BindingsSchema(bindings, false)
     filterBindings.bindContextOp(op)
@@ -282,60 +239,76 @@ case class NodeTransformationExpr(generator: EvaluableExpr) extends Transformati
   }
 }
 
-case class ProjectionTransformationExpr(expr: EvaluableExpr) extends TransformationExpr {
+case class ProjectionStepExpr(expr: EvaluableExpr) extends StepExpr {
   def transformPlan(wordNet: WordNetSchema, bindings: BindingsSchema, op: AlgebraOp) = {
     ProjectOp(op, expr.evaluationPlan(wordNet, bindings))
   }
 }
 
-case class BindTransformationExpr(variables: List[Variable]) extends TransformationExpr with VariableTypeBindings {
+case class BindStepExpr(variables: List[Variable]) extends StepExpr with VariableTypeBindings {
   def transformPlan(wordNet: WordNetSchema, bindings: BindingsSchema, op: AlgebraOp) = {
     bindTypes(bindings, op, variables)
     BindOp(op, variables)
   }
 }
 
-case class PathExpr(generator: EvaluableExpr, steps: List[TransformationExpr]) extends EvaluableExpr {
-  def evaluationPlan(wordNet: WordNetSchema, bindings: BindingsSchema) = {
-    steps.foldLeft(generator.evaluationPlan(wordNet, bindings))((step, trans) => trans.transformPlan(wordNet, bindings, step))
+sealed abstract class RelationalExpr extends Expr {
+  def evaluationPattern(wordNet: WordNetSchema, sourceTypes: Set[DataType]): RelationalPattern
+}
+
+case class RelationUnionExpr(exprs: List[RelationalExpr]) extends RelationalExpr {
+  def evaluationPattern(wordNet: WordNetSchema, sourceTypes: Set[DataType]) = {
+    if (exprs.size == 1)
+      exprs.head.evaluationPattern(wordNet, sourceTypes)
+    else
+      RelationUnionPattern(exprs.map(_.evaluationPattern(wordNet, sourceTypes)))
   }
 }
 
-/*
- * Arc Expressions
- */
-case class ArcExpr(ids: List[String]) extends Expr {
-  def getExtension(wordNet: WordNetSchema, sourceTypes: Set[DataType]) = {
-    (ids: @unchecked) match {
-      case List(relationName) =>
-        wordNet.getRelation(relationName, sourceTypes, Relation.Source)
-          .map(Extension(_, Relation.Source, List(Relation.Destination)))
-      case List(left, right) =>
-        wordNet.getRelation(left, sourceTypes, Relation.Source)
-          .map(Extension(_, Relation.Source, List(right)))
-          .orElse(wordNet.getRelation(right, sourceTypes, left).map(Extension(_, left, List(Relation.Destination))))
-      case first :: second :: dests =>
-        wordNet.getRelation(first, sourceTypes, Relation.Source)
-          .map(Extension(_, Relation.Source, second :: dests))
-          .orElse((wordNet.getRelation(second, sourceTypes, first).map(Extension(_, first, dests))))
+case class RelationCompositionExpr(exprs: List[RelationalExpr]) extends RelationalExpr {
+  def evaluationPattern(wordNet: WordNetSchema, sourceTypes: Set[DataType]) = {
+    val headPattern = exprs.head.evaluationPattern(wordNet, sourceTypes)
+
+    if (exprs.size == 1) {
+      headPattern
+    } else {
+      val buffer = new ListBuffer[RelationalPattern]
+
+      buffer.append(headPattern)
+      exprs.tail.foreach(expr => buffer.append(expr.evaluationPattern(wordNet, buffer.last.rightType(0))))
+      RelationCompositionPattern(buffer.toList)
     }
   }
-
-  def getLiteral = if (ids.size == 1) Some(ids.head) else None
-
-  override def toString = ids.mkString("^")
 }
 
-case class ArcExprUnion(arcExprs: List[ArcExpr]) extends Expr {
-  def getExtensions(wordNet: WordNetSchema, sourceTypes: Set[DataType]) = {
-    val patterns = arcExprs.map(_.getExtension(wordNet, sourceTypes))
-
-    if (patterns.filter(_.isDefined).size == arcExprs.size) Some(patterns.map(_.get)) else None
+case class QuantifiedRelationExpr(expr: RelationalExpr, quantifier: Quantifier) extends RelationalExpr {
+  def evaluationPattern(wordNet: WordNetSchema, sourceTypes: Set[DataType]) = {
+    QuantifiedRelationPattern(expr.evaluationPattern(wordNet, sourceTypes), quantifier)
   }
+}
 
-  def getLiteral = if (arcExprs.size == 1) arcExprs.head.getLiteral else None
+case class ArcExpr(ids: List[String]) extends RelationalExpr {
+  def evaluationPattern(wordNet: WordNetSchema, sourceTypes: Set[DataType]) = {
+    ((ids: @unchecked) match {
+      case List(relationName) =>
+        wordNet.getRelation(relationName, sourceTypes, Relation.Source)
+          .map(ArcPattern(_, Relation.Source, List(Relation.Destination)))
+      case List(left, right) =>
+        wordNet.getRelation(left, sourceTypes, Relation.Source)
+          .map(ArcPattern(_, Relation.Source, List(right)))
+          .orElse(wordNet.getRelation(right, sourceTypes, left).map(ArcPattern(_, left, List(Relation.Destination))))
+      case first :: second :: destinations =>
+        wordNet.getRelation(first, sourceTypes, Relation.Source)
+          .map(ArcPattern(_, Relation.Source, second :: destinations))
+          .orElse((wordNet.getRelation(second, sourceTypes, first).map(ArcPattern(_, first, destinations))))
+    }).getOrElse(throw new WQueryStaticCheckException("Arc expression " + ids.mkString("^") + " references an unknown relation or argument"))
+  }
+}
 
-  override def toString = arcExprs.mkString("|")
+case class PathExpr(steps: List[StepExpr]) extends EvaluableExpr {
+  def evaluationPlan(wordNet: WordNetSchema, bindings: BindingsSchema) = {
+    PathExprPlanner.plan(steps, wordNet, bindings)
+  }
 }
 
 /*
@@ -401,39 +374,57 @@ case class SynsetByExprReq(expr: EvaluableExpr) extends EvaluableExpr {
     val contextTypes = op.rightType(0).filter(t => t == StringType || t == SenseType)
 
     if (!contextTypes.isEmpty) {
-      val extensions = contextTypes.map{ contextType => (contextType: @unchecked) match {
+      val patterns = contextTypes.map{ contextType => (contextType: @unchecked) match {
         case StringType =>
-          Extension(WordNet.WordFormToSynsets, Relation.Source, List(Relation.Destination))
+          ArcPattern(WordNet.WordFormToSynsets, Relation.Source, List(Relation.Destination))
         case SenseType =>
-          Extension(WordNet.SenseToSynset, Relation.Source, List(Relation.Destination))
+          ArcPattern(WordNet.SenseToSynset, Relation.Source, List(Relation.Destination))
       }}.toList
 
-      ProjectOp(ExtendOp(op, ExtensionPattern(0, extensions)), ContextRefOp(0, Set(SynsetType)))
+      ProjectOp(ExtendOp(op, 0, RelationUnionPattern(patterns)), ContextRefOp(0, Set(SynsetType)))
     } else {
       throw new WQueryStaticCheckException("{...} requires an expression that generates either senses or word forms")
     }
   }
 }
 
-case class ContextByArcExprUnionReq(arcUnion: ArcExprUnion, quantifier: Quantifier) extends EvaluableExpr {
+case class ContextByRelationalExprReq(expr: RelationalExpr) extends EvaluableExpr {
   def evaluationPlan(wordNet: WordNetSchema, bindings: BindingsSchema) = {
-    val chain = PositionedRelationChainTransformationExpr(List(PositionedRelationTransformationExpr(1, arcUnion)))
-    val arcOp = if (bindings.areContextVariablesBound) {
-      arcUnion.getExtensions(wordNet, bindings.lookupContextVariableType(0)).map(_ => ContextRefOp(0, bindings.lookupContextVariableType(0)))
-        .map(op => quantifier.quantify(op, chain, wordNet, bindings))
-    } else {
-      arcUnion.getExtensions(wordNet, DataType.all).map(_.zip(arcUnion.arcExprs).map {
-        case (pattern, expr) =>
-          if (expr.getLiteral.isDefined)
-            FetchOp.relationTuplesByArgumentNames(pattern.relation, pattern.relation.argumentNames)
-          else
-            FetchOp.relationTuplesByArgumentNames(pattern.relation, pattern.from::pattern.to)
-      }).map(extensions => extensions.tail.foldLeft(UnionOp(extensions.head, ConstantOp.empty))((sum, elem) => UnionOp(sum, elem))) // TODO optimize
-        .map(op => quantifier.decrement.quantify(op, chain, wordNet, bindings))
-    }
+    expr match {
+      case RelationUnionExpr(List(RelationCompositionExpr(QuantifiedRelationExpr(ArcExpr(List(id)),Quantifier(1,Some(1)))::composites))) =>
+        val sourceTypes = if (bindings.areContextVariablesBound) bindings.lookupContextVariableType(0) else DataType.all
 
-    arcOp.getOrElse(arcUnion.getLiteral.map(FetchOp.wordByValue(_))
-      .getOrElse(throw new WQueryStaticCheckException("Expression " + arcUnion + " contains an invalid relation or argument name")))
+        if (wordNet.containsRelation(id, sourceTypes, Relation.Source)) {
+          extendBasedEvaluationPlan(wordNet, bindings)
+        } else {
+          val fetchWord = FetchOp.wordByValue(id)
+
+          if (!composites.isEmpty)
+            ExtendOp(fetchWord, 0, RelationCompositionExpr(composites.asInstanceOf[List[RelationalExpr]]).evaluationPattern(wordNet, fetchWord.rightType(0)))
+          else
+            fetchWord
+        }
+      case _ =>
+        extendBasedEvaluationPlan(wordNet, bindings)
+    }
+  }
+
+  private def extendBasedEvaluationPlan(wordNet: WordNetSchema, bindings: BindingsSchema) = {
+    if (bindings.areContextVariablesBound) {
+      val contextType = bindings.lookupContextVariableType(0)
+
+      ExtendOp(ContextRefOp(0, contextType), 0, expr.evaluationPattern(wordNet, contextType))
+    } else {
+      val pattern = expr.evaluationPattern(wordNet, DataType.all)
+      val fetches = pattern.sourceType.collect {
+        case SynsetType => FetchOp.synsets
+        case SenseType => FetchOp.senses
+        case StringType => FetchOp.words
+        case _ => ConstantOp.empty
+      }
+
+      ExtendOp(fetches.tail.foldLeft(UnionOp(fetches.head, ConstantOp.empty))((left, right) => UnionOp(left, right)) , 0, pattern)
+    }
   }
 }
 
@@ -466,11 +457,10 @@ case class ContextByVariableReq(variable: Variable) extends EvaluableExpr {
   }
 }
 
-case class ArcByArcExprReq(arcExpr: ArcExpr) extends EvaluableExpr {
+case class ArcByArcExprReq(expr: ArcExpr) extends EvaluableExpr {
   def evaluationPlan(wordNet: WordNetSchema, bindings: BindingsSchema) = {
-    arcExpr.getExtension(wordNet, DataType.all)
-      .map(pattern => ConstantOp(DataSet(pattern.to.map(to => List(Arc(pattern.relation, pattern.from, to))))))
-      .getOrElse(throw new WQueryStaticCheckException("Arc generator " + arcExpr + " references an unknown relation or argument"))
+    val pattern = expr.evaluationPattern(wordNet, DataType.all)
+    ConstantOp(DataSet(pattern.destinations.map(destination => List(Arc(pattern.relation, pattern.source, destination)))))
   }
 }
 
@@ -489,22 +479,4 @@ case class StepVariable(override val name: String) extends Variable(name) {
 
 case class PathVariable(override val name: String) extends Variable(name) {
   override def toString = "@" + name
-}
-
-/*
- * Quantifier
- */
-case class Quantifier(lowerBound: Int, upperBound: Option[Int]) extends Expr {
-  def quantify(op: AlgebraOp, chain: PositionedRelationChainTransformationExpr, wordNet: WordNetSchema, bindings: BindingsSchema) = {
-    val lowerOp = (1 to lowerBound).foldLeft(op)((x, _) => chain.transformPlan(wordNet, bindings, x))
-    val furthestReference = chain.exprs.map(_.pos).max - 1
-    val typeReferences = (for (i <- furthestReference to 0 by -1) yield lowerOp.rightType(i)).toList
-
-    if (Some(lowerBound) != upperBound)
-      CloseOp(lowerOp, chain.demandExtensionPatterns(wordNet, bindings, typeReferences), upperBound.map(_ - lowerBound))
-    else
-      lowerOp
-  }
-
-  def decrement = Quantifier(lowerBound - 1, upperBound.map(_ - 1))
 }

@@ -7,9 +7,9 @@ class WordNetSchema(store: WordNetStore) {
     store.relations.find(r => r.name == name && r.arguments.get(sourceName).map(sourceTypes.contains(_)).getOrElse(false))
   }
 
-  def demandRelation(name: String, sourceType: DataType, sourceName: String) = {
-    getRelation(name, Set(sourceType), sourceName).getOrElse(throw new WQueryModelException("Relation '" + name + "' with source type " + sourceType + " not found"))
+  def demandRelation(name: String, sourceType: Set[DataType], sourceName: String) = {
+    getRelation(name, sourceType, sourceName).getOrElse(throw new WQueryModelException("Relation '" + name + "' with source type " + sourceType + " not found"))
   }
 
-  def containsRelation(name: String, sourceType: DataType, sourceName: String) = getRelation(name, Set(sourceType), sourceName) != None
+  def containsRelation(name: String, sourceType: Set[DataType], sourceName: String) = getRelation(name, sourceType, sourceName) != None
 }

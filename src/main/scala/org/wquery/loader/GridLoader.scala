@@ -1,12 +1,12 @@
 package org.wquery.loader
 import javax.xml.parsers.SAXParserFactory
 import java.io.File
-import org.wquery.model.{WordNet, Synset, Sense, Relation, SynsetType, BooleanType, IntegerType, FloatType, StringType, SenseType, NodeType}
 import org.wquery.utils.Logging
 import org.xml.sax.{Locator, Attributes}
 import org.xml.sax.helpers.DefaultHandler
 import scala.collection.mutable.{Set, Map, ListBuffer}
 import org.wquery.model.impl.InMemoryWordNetStore
+import org.wquery.model._
 
 class GridLoader extends WordNetLoader with Logging {
   override def canLoad(url: String): Boolean = url.endsWith(".xml") // TODO provide a better check
@@ -186,7 +186,7 @@ class GridHandler(wordnet: WordNet) extends DefaultHandler with Logging {
 
     // create semantic relations successors       
     for ((synset, relname, reldest) <- ilrRelationsTuples) {      
-      val relation = wordnet.schema.demandRelation(relname, SynsetType, Relation.Source)
+      val relation = wordnet.schema.demandRelation(relname, scala.collection.immutable.Set(SynsetType), Relation.Source)
 
       relation.destinationType.map { dt =>
         dt match {
@@ -223,7 +223,7 @@ class GridHandler(wordnet: WordNet) extends DefaultHandler with Logging {
     
     // create successors
     for ((synset, relname, reldest) <- genericRelationsTuples) {
-      val relation = wordnet.schema.demandRelation(relname, SynsetType, Relation.Source)
+      val relation = wordnet.schema.demandRelation(relname, scala.collection.immutable.Set(SynsetType), Relation.Source)
 
       relation.destinationType.map { dt =>
         dt match {

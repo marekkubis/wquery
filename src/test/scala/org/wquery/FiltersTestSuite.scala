@@ -124,7 +124,7 @@ class FiltersTestSuite extends WQueryTestSuite {
 
   @Test def testHashFreeBackReferenceDotHypernymsCount() = result of ("{person}[count(hypernym)>1]") should equal ("{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n }\n")
 
-  @Test def testHashFreeBackReferenceDotHypernymsOrHyponymsWords() = result of ("{person}[organism in hypernym|^hypernym.words]") should equal ("{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n }\n")
+  @Test def testHashFreeBackReferenceDotHypernymsOrHyponymsWords() = result of ("{person}[organism in (hypernym|^hypernym).words]") should equal ("{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n }\n")
   
   @Test def testArcFilter() = result of ("{}.partial_holonym|member_holonym$r$_[$r = \\member_holonym]") should equal ("$r=member_holonym { person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n } member_holonym { people:1:n }\n$r=member_holonym { cab:3:n hack:5:n taxi:1:n taxicab:1:n } member_holonym { fleet:2:n }\n")
 
@@ -140,17 +140,15 @@ class FiltersTestSuite extends WQueryTestSuite {
 
   @Test def testQuotedSenseGeneratorFilter()  = result of ("{bus}.hypernym.senses.'car':1:n") should equal ("{ bus:4:n jalopy:1:n heap:3:n } hypernym { car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n } senses car:1:n\n")
 
-  @Test def testUnquotedSenseGeneratorFilter()  = result of ("{bus}.hypernym.senses.car:1:n") should equal ("{ bus:4:n jalopy:1:n heap:3:n } hypernym { car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n } senses car:1:n\n")
-
   @Test def testParenthesedSenseGeneratorFilter()  = result of ("{bus}.hypernym.senses.(car:1:n)") should equal ("{ bus:4:n jalopy:1:n heap:3:n } hypernym { car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n } senses car:1:n\n")
 
   @Test def testIntegerGeneratorFilter()  = result of ("{bus}.senses.sensenum.3") should equal ("{ bus:4:n jalopy:1:n heap:3:n } senses heap:3:n sensenum 3\n")
 
   @Test def testSequenceGeneratorFilter()  = result of ("{bus}.senses.sensenum.3..8") should equal ("{ bus:4:n jalopy:1:n heap:3:n } senses bus:4:n sensenum 4\n{ bus:4:n jalopy:1:n heap:3:n } senses heap:3:n sensenum 3\n")
 
-    @Test def testFloatGeneratorFilter()  = result of ("{bus}.senses.sensenum.(3.0)") should equal ("{ bus:4:n jalopy:1:n heap:3:n } senses heap:3:n sensenum 3\n")
+  @Test def testFloatGeneratorFilter()  = result of ("{bus}.senses.sensenum.(3.0)") should equal ("{ bus:4:n jalopy:1:n heap:3:n } senses heap:3:n sensenum 3\n")
 
-   @Test def testSingleBackReferenceGeneratorFilter()  = result of ("{bus}.hypernym.#") should equal ("{ bus:4:n jalopy:1:n heap:3:n } hypernym { car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n }\n")
+  @Test def testSingleBackReferenceGeneratorFilter()  = result of ("{bus}.hypernym.#") should equal ("{ bus:4:n jalopy:1:n heap:3:n } hypernym { car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n }\n")
 
   @Test def testMultiBackReferenceGeneratorFilter()  = result of ("{bus}.hypernym.###") should equal ("(no result)\n")
 
@@ -160,9 +158,9 @@ class FiltersTestSuite extends WQueryTestSuite {
 
   @Test def testArcGeneratorFilter()  = result of ("{bus}.hypernym$a$_<$a>.\\hypernym") should equal ("hypernym\n")
 
-  @Test def testFunctionGeneratorFilter()  = result of ("{bus}.senses.sensenum.min(1..10)") should equal ("{ bus:4:n jalopy:1:n heap:3:n } senses jalopy:1:n sensenum 1\n")
+  @Test def testFunctionGeneratorFilter()  = result of ("{bus}.senses.sensenum.(min(1..10))") should equal ("{ bus:4:n jalopy:1:n heap:3:n } senses jalopy:1:n sensenum 1\n")
 
-  @Test def testBooleanGeneratorFilter()  = result of ("{car}.nl.false") should equal ("{ car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n } nl false\n")
+  @Test def testBooleanGeneratorFilter()  = result of ("{car}.nl.[false]") should equal ("{ car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n } nl false\n")
 
   // boolean path filters
 

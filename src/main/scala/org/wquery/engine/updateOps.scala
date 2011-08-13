@@ -25,9 +25,9 @@ sealed abstract class UpdateOp extends AlgebraOp {
 // Add/Remove/Create ... Op
 //
 
-case class CreateRelationFromPatternOp(name: String, sourceType: NodeType, destinationType: NodeType, pattern: ExtensionPattern) extends UpdateOp {
+case class CreateRelationFromPatternOp(name: String, pattern: RelationalPattern, sourceType: NodeType, destinationType: NodeType) extends UpdateOp {
   def update(wordNet: WordNet, bindings: Bindings) {
-    wordNet.schema.getRelation(name, Set(sourceType), Relation.Source).map(wordNet.store.remove(_))
+    wordNet.schema.getRelation(name, pattern.sourceType, Relation.Source).map(wordNet.store.remove(_))
 
     val relation = Relation(name, sourceType, destinationType)
 

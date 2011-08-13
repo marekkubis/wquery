@@ -1,8 +1,8 @@
 package org.wquery.engine
 
-import org.wquery.WQueryEvaluationException
 import org.wquery.model._
 import collection.mutable.ListBuffer
+import org.wquery.{WQueryStaticCheckException, WQueryEvaluationException}
 
 sealed abstract class QueryOp extends AlgebraOp
 
@@ -516,42 +516,133 @@ case class ProjectOp(op: AlgebraOp, projectOp: AlgebraOp) extends QueryOp {
   def bindingsPattern = projectOp.bindingsPattern
 }
 
-case class ExtendOp(op: AlgebraOp, pattern: ExtensionPattern) extends QueryOp {
+case class ExtendOp(op: AlgebraOp, from: Int, pattern: RelationalPattern) extends QueryOp {
   def evaluate(wordNet: WordNet, bindings: Bindings) = {
-    wordNet.store.extend(op.evaluate(wordNet, bindings), pattern)
+    pattern.extend(wordNet.store, op.evaluate(wordNet, bindings), from)
   }
 
   def leftType(pos: Int) = {
     if (pos < op.minTupleSize) {
       op.leftType(pos)
     } else if (op.maxTupleSize.map(pos < _).getOrElse(true)) { // pos < maxTupleSize or maxTupleSize undefined
-      val extendOpTypes = for (i <- 0 to pos - op.minTupleSize) yield pattern.destinationTypeAt(i)
+      val extendOpTypes = for (i <- 0 to pos - op.minTupleSize) yield pattern.leftType(i)
 
       (extendOpTypes :+ op.leftType(pos)).flatten.toSet
     } else { // maxTupleSize defined and pos >= maxTupleSize
-      (for (i <- op.minTupleSize to op.maxTupleSize.get) yield pattern.destinationTypeAt(pos - i)).flatten.toSet
+      (for (i <- op.minTupleSize to op.maxTupleSize.get) yield pattern.leftType(pos - i)).flatten.toSet
     }
   }
 
   def rightType(pos: Int) = {
-    pattern.destinationTypes.flatMap { types =>
-      if (types.isDefinedAt(types.size - 1 - pos))
-        Set(types(types.size - 1 - pos))
-      else
-        op.rightType(pos - types.size)
-    }.toSet
+    if (pos < pattern.minSize) {
+      pattern.rightType(pos)
+    } else if (pattern.maxSize.map(pos < _).getOrElse(true)) { // pos < maxSize or maxSize undefined
+      val extendOpTypes = for (i <- 0 to pos - pattern.minSize) yield op.rightType(i)
+
+      (extendOpTypes :+ pattern.rightType(pos)).flatten.toSet
+    } else { // maxSize defined and pos >= maxSize
+      (for (i <- pattern.minSize to pattern.maxSize.get) yield op.rightType(pos - i)).flatten.toSet
+    }
   }
 
-  def minTupleSize = op.minTupleSize + pattern.minDestinationTypesSize
+  def minTupleSize = op.minTupleSize + pattern.minSize
 
-  def maxTupleSize = op.maxTupleSize.map(_ + pattern.maxDestinationTypesSize)
+  def maxTupleSize = op.maxTupleSize.map(maxTupleSize => pattern.maxSize.map(maxSize => maxTupleSize + maxSize)).getOrElse(None)
 
   def bindingsPattern = op.bindingsPattern
 }
 
-case class CloseOp(op: AlgebraOp, patterns: List[ExtensionPattern], limit: Option[Int]) extends QueryOp {
-  def evaluate(wordNet: WordNet, bindings: Bindings) = {
-    val dataSet = op.evaluate(wordNet, bindings)
+sealed abstract class RelationalPattern {
+  def extend(wordNet: WordNetStore, dataSet: DataSet, from: Int): DataSet
+
+  def minSize: Int
+
+  def maxSize: Option[Int]
+
+  def sourceType: Set[DataType]
+
+  def leftType(pos: Int): Set[DataType]
+
+  def rightType(pos: Int): Set[DataType]
+}
+
+case class RelationUnionPattern(patterns: List[RelationalPattern]) extends RelationalPattern {
+  def extend(wordNet: WordNetStore, dataSet: DataSet, from: Int) = {
+    val buffer = new DataSetBuffer
+
+    patterns.foreach(expr => buffer.append(expr.extend(wordNet, dataSet, from)))
+    buffer.toDataSet
+  }
+
+  def minSize = patterns.map(_.minSize).min
+
+  def maxSize = if (patterns.exists(!_.maxSize.isDefined)) None else patterns.map(_.maxSize).max
+
+  def sourceType = patterns.flatMap(_.sourceType).toSet
+
+  def leftType(pos: Int) = patterns.flatMap(_.leftType(pos)).toSet
+
+  def rightType(pos: Int) = patterns.flatMap(_.rightType(pos)).toSet
+}
+
+case class RelationCompositionPattern(patterns: List[RelationalPattern]) extends RelationalPattern {
+  def extend(wordNet: WordNetStore, dataSet: DataSet, from: Int) = {
+    val headSet = patterns.head.extend(wordNet, dataSet, from)
+
+    patterns.tail.foldLeft(headSet)((dataSet, expr) => expr.extend(wordNet, dataSet, 0))
+  }
+
+  def minSize = patterns.map(_.minSize).sum
+
+  def maxSize = {
+    if (patterns.exists(!_.maxSize.isDefined))
+      None
+    else
+      Some(patterns.map(_.maxSize).collect{ case Some(num) => num }.sum)
+  }
+
+  def sourceType = patterns.head.sourceType
+
+  def leftType(pos: Int) = leftType(patterns, pos)
+
+  private def leftType(patterns: List[RelationalPattern], pos: Int): Set[DataType] = {
+    patterns.headOption.map { headPattern =>
+      if (pos < headPattern.minSize)
+        headPattern.leftType(pos)
+      else if (headPattern.maxSize.map(pos < _).getOrElse(true)) { // pos < maxSize or maxSize undefined
+        headPattern.leftType(pos) union leftType(patterns.tail, pos - headPattern.minSize)
+      } else { // else pos < maxSize and defined
+        leftType(patterns.tail, pos - headPattern.maxSize.get)
+      }
+    }.getOrElse(Set.empty)
+  }
+
+  def rightType(pos: Int) = rightType(patterns.reverse, pos)
+
+  private def rightType(patterns: List[RelationalPattern], pos: Int): Set[DataType] = {
+    patterns.headOption.map { headPattern =>
+      if (pos < headPattern.minSize)
+        headPattern.rightType(pos)
+      else if (headPattern.maxSize.map(pos < _).getOrElse(true)) { // pos < maxSize or maxSize undefined
+        headPattern.rightType(pos) union rightType(patterns.tail, pos - headPattern.minSize)
+      } else { // else pos < maxSize and defined
+        rightType(patterns.tail, pos - headPattern.maxSize.get)
+      }
+    }.getOrElse(Set.empty)
+  }
+}
+
+case class QuantifiedRelationPattern(pattern: RelationalPattern, quantifier: Quantifier) extends RelationalPattern {
+  def extend(wordNet: WordNetStore, dataSet: DataSet, from: Int) = {
+    val lowerDataSet = (1 to quantifier.lowerBound).foldLeft(dataSet)((x, _) => pattern.extend(wordNet, x, from))
+
+    if (Some(quantifier.lowerBound) != quantifier.upperBound)
+      computeClosure(wordNet, lowerDataSet, from, quantifier.upperBound.map(_ - quantifier.lowerBound))
+    else
+      lowerDataSet
+  }
+
+  private def computeClosure(wordNet: WordNetStore, dataSet: DataSet, from: Int, limit: Option[Int]) = {
     val pathVarNames = dataSet.pathVars.keys.toSeq
     val stepVarNames = dataSet.stepVars.keys.toSeq
     val pathBuffer = DataSetBuffers.createPathBuffer
@@ -565,7 +656,7 @@ case class CloseOp(op: AlgebraOp, patterns: List[ExtensionPattern], limit: Optio
       pathVarNames.foreach(x => pathVarBuffers(x).append(dataSet.pathVars(x)(i)))
       stepVarNames.foreach(x => stepVarBuffers(x).append(dataSet.stepVars(x)(i)))
 
-      for (cnode <- closure(wordNet, bindings, tuple, Set(tuple.last), limit)) {
+      for (cnode <- closeTuple(wordNet, tuple, from, Set(tuple.last), limit)) {
         pathBuffer.append(cnode)
         pathVarNames.foreach(x => pathVarBuffers(x).append(dataSet.pathVars(x)(i)))
         stepVarNames.foreach(x => stepVarBuffers(x).append(dataSet.stepVars(x)(i)))
@@ -575,11 +666,9 @@ case class CloseOp(op: AlgebraOp, patterns: List[ExtensionPattern], limit: Optio
     DataSet.fromBuffers(pathBuffer, pathVarBuffers, stepVarBuffers)
   }
 
-  private def closure(wordNet: WordNet, bindings: Bindings, source: List[Any], forbidden: Set[Any], limit: Option[Int]): List[List[Any]] = {
+  private def closeTuple(wordNet: WordNetStore, source: List[Any], from: Int, forbidden: Set[Any], limit: Option[Int]): List[List[Any]] = {
     if (limit.getOrElse(1) > 0) {
-      val store = wordNet.store
-      val transformed = patterns.foldLeft(DataSet.fromTuple(source))((dataSet, extension) => store.extend(dataSet, extension))
-
+      val transformed = pattern.extend(wordNet, DataSet.fromTuple(source), from)
       val filtered = transformed.paths.filter { x => !forbidden.contains(x.last) }
 
       if (filtered.isEmpty) {
@@ -592,7 +681,7 @@ case class CloseOp(op: AlgebraOp, patterns: List[ExtensionPattern], limit: Optio
         result.appendAll(filtered)
 
         filtered.foreach { x =>
-          result.appendAll(closure(wordNet, bindings, x, newForbidden, newLimit))
+          result.appendAll(closeTuple(wordNet, x, from, newForbidden, newLimit))
         }
 
         result.toList
@@ -602,34 +691,63 @@ case class CloseOp(op: AlgebraOp, patterns: List[ExtensionPattern], limit: Optio
     }
   }
 
-  val types = patterns.tail.foldLeft(patterns.head.destinationTypes)((l, r) => crossTypes(l, r.destinationTypes))
+  def minSize = pattern.minSize * quantifier.lowerBound
+
+  def maxSize = pattern.maxSize.map(maxSize => quantifier.upperBound.map(upperBound => maxSize * upperBound)).getOrElse(None)
+
+  def sourceType = pattern.sourceType
+
+  def leftType(pos: Int) = if (maxSize.map(pos < _).getOrElse(true)) {
+    (for (i <- pattern.minSize to pattern.maxSize.getOrElse(pos + 1))
+      yield pattern.leftType(if (i > 0) pos % i else 0)).flatten.toSet
+  } else {
+    Set[DataType]()
+  }
+
+  def rightType(pos: Int) = if (maxSize.map(pos < _).getOrElse(true)) {
+    (for (i <- pattern.minSize to pattern.maxSize.getOrElse(pos + 1))
+      yield pattern.rightType(if (i > 0) pos % i else 0)).flatten.toSet
+  } else {
+    Set[DataType]()
+  }
+}
+
+case class Quantifier(lowerBound: Int, upperBound: Option[Int])
+
+case class ArcPattern(relation: Relation, source: String, destinations: List[String]) extends RelationalPattern {
+  def extend(wordNet: WordNetStore, dataSet: DataSet, from: Int) = {
+    wordNet.extend(dataSet, relation, from, source, destinations)
+  }
+
+  def minSize = 2*destinations.size
+
+  def maxSize = Some(2*destinations.size)
+
+  def sourceType = Set(relation.demandArgument(source))
 
   def leftType(pos: Int) = {
-    if (pos < op.minTupleSize) {
-      op.leftType(pos)
-    } else if (op.maxTupleSize.map(pos < _).getOrElse(true)) { // pos < maxTupleSize or maxTupleSize undefined
-      val extendOpTypes = for (i <- 0 to pos - op.minTupleSize) yield patterns.map(_.destinationTypeAt(i)).flatten.toSet
-
-      (extendOpTypes :+ op.leftType(pos)).flatten.toSet
-    } else { // maxTupleSize defined and pos >= maxTupleSize
-      (for (i <- op.minTupleSize to op.maxTupleSize.get) yield patterns.map(_.destinationTypeAt(pos - i)).flatten).flatten.toSet
-    }
+    if (pos < minSize)
+      if (pos % 2 == 0) {
+        Set(ArcType)
+      } else {
+        Set(relation.demandArgument(destinations((pos - 1)/2)))
+      }
+    else
+      Set.empty
   }
 
   def rightType(pos: Int) = {
-    op.rightType(pos) ++ types.filter(t => t.isDefinedAt(t.size - 1 - pos)).map(t => t(t.size - 1 - pos))
+    if (pos < destinations.size)
+      if (pos % 2 == 1) {
+        Set(ArcType)
+      } else {
+        Set(relation.demandArgument(destinations(destinations.size - 1 - pos/2)))
+      }
+    else
+      Set.empty
   }
 
-  private def crossTypes(leftTypes: List[List[DataType]], rightTypes: List[List[DataType]]) = {
-    for (left <- leftTypes; right <- rightTypes)
-      yield left ++ right
-  }
-
-  def minTupleSize = op.minTupleSize
-
-  def maxTupleSize = None
-
-  def bindingsPattern = op.bindingsPattern
+  override def toString = (source::relation.name::destinations).mkString("^")
 }
 
 case class BindOp(op: AlgebraOp, variables: List[Variable]) extends QueryOp with VariableBindings with VariableTypeBindings {

@@ -50,7 +50,7 @@ trait WQueryParsers extends RegexParsers {
 
   def assignment = (
      var_decls ~ ":=" ~ multipath_expr ^^ { case vdecls~_~mexpr => VariableAssignmentExpr(vdecls, mexpr) }
-     | notQuotedString ~ ":=" ~ arc_expr_union  ^^ { case name~_~rexpr => RelationAssignmentExpr(name, rexpr) }
+     | notQuotedString ~ ":=" ~ relation_union_expr  ^^ { case name~_~rexpr => RelationAssignmentExpr(name, rexpr) }
       // | expr ~ ("+="|"-="|":=") ~ expr ^^ { case lexpr~op~rexpr => UpdateExpr(lexpr, op, rexpr) }
   )
 
@@ -87,28 +87,30 @@ trait WQueryParsers extends RegexParsers {
     | path
   )
 
-  def path = generator ~ rep(step) ^^ { case gen~steps => PathExpr(gen, steps) }
+  def path = generator ~ rep(step) ^^ { case gen~steps => PathExpr(NodeStepExpr(gen)::steps) }
 
   def step = (
-    node_trans
-    | relation_trans
+    relation_trans
+    | node_trans
     | filter_trans
     | projection_trans
     | bind_trans
   )
 
-  def relation_trans = positioned_relation_chain_trans ~ quantifier ^^ { case trans~quant => QuantifiedTransformationExpr(trans, quant) }
+  def relation_trans = dots ~ relation_union_expr ^^ { case pos~expr => RelationStepExpr(pos, expr) }
 
-  def positioned_relation_chain_trans = (
-    "(" ~> rep1(positioned_relation_trans) <~ ")" ^^ { PositionedRelationChainTransformationExpr(_) }
-    | positioned_relation_trans ^^ { trans => PositionedRelationChainTransformationExpr(List(trans)) }
+  def dots = rep1(".") ^^ { _.size - 1 }
+
+  def relation_union_expr: Parser[RelationalExpr] = rep1sep(relation_composition_expr, "|") ^^ { RelationUnionExpr(_) }
+
+  def relation_composition_expr = rep1sep(quantified_relation_expr, ".") ^^ { RelationCompositionExpr(_) }
+
+  def quantified_relation_expr = simple_relation_expr ~ quantifier ^^ { case expr~quant => QuantifiedRelationExpr(expr, quant) }
+
+  def simple_relation_expr = (
+    "(" ~> relation_union_expr <~ ")"
+    | arc_expr
   )
-
-  def positioned_relation_trans = dots ~ arc_expr_union ^^ { case pos~expr => PositionedRelationTransformationExpr(pos, expr) }
-
-  def dots = rep1(".") ^^ { _.size }
-
-  def arc_expr_union = rep1sep(arc_expr, "|")  ^^ { ArcExprUnion(_) }
 
   def arc_expr = (
     ("^" ~> notQuotedString) ^^ { id => ArcExpr(List("destination", id, "source")) } // syntactic sugar
@@ -128,7 +130,7 @@ trait WQueryParsers extends RegexParsers {
     | success(Quantifier(1, Some(1)))
   )
 
-  def filter_trans = filter ^^ { FilterTransformationExpr(_) }
+  def filter_trans = filter ^^ { FilterStepExpr(_) }
 
   def filter = "[" ~> or_condition <~ "]"
 
@@ -151,13 +153,13 @@ trait WQueryParsers extends RegexParsers {
     case lexpr~op~rexpr => BinaryConditionalExpr(op, lexpr, rexpr)
   }
 
-  def node_trans = "." ~> non_rel_expr_generator ^^ { NodeTransformationExpr(_) }
+  def node_trans = "." ~> non_rel_expr_generator ^^ { NodeStepExpr(_) }
 
-  def projection_trans = projection  ^^ { ProjectionTransformationExpr(_) }
+  def projection_trans = projection  ^^ { ProjectionStepExpr(_) }
 
   def projection = "<" ~> expr <~ ">"
 
-  def bind_trans = var_decls ^^ { BindTransformationExpr(_) }
+  def bind_trans = var_decls ^^ { BindStepExpr(_) }
 
   // generators
   def generator = (
@@ -182,7 +184,7 @@ trait WQueryParsers extends RegexParsers {
     | quoted_word_generator
   )
 
-  def rel_expr_generator = arc_expr_union ~ quantifier ^^ { case expr~quant => ContextByArcExprUnionReq(expr, quant) }
+  def rel_expr_generator = relation_union_expr ^^ { ContextByRelationalExprReq(_) }
 
   def boolean_generator = (
     "true" ^^^ { AlgebraExpr(ConstantOp.fromValue(true)) }
