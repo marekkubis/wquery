@@ -2,7 +2,7 @@ package org.wquery.engine
 
 import org.wquery.model._
 import collection.mutable.ListBuffer
-import org.wquery.{WQueryStaticCheckException, WQueryEvaluationException}
+import org.wquery.WQueryEvaluationException
 
 sealed abstract class QueryOp extends AlgebraOp
 
@@ -962,3 +962,5 @@ case class StepVariableRefOp(name: String, types: Set[DataType]) extends QueryOp
 
   def bindingsPattern = BindingsPattern()
 }
+
+

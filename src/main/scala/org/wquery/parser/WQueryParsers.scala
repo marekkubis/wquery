@@ -101,14 +101,14 @@ trait WQueryParsers extends RegexParsers {
 
   def dots = rep1(".") ^^ { _.size - 1 }
 
-  def relation_union_expr: Parser[RelationalExpr] = rep1sep(relation_composition_expr, "|") ^^ { RelationUnionExpr(_) }
+  def relation_composition_expr = rep1sep(relation_union_expr, ".") ^^ { RelationCompositionExpr(_) }
 
-  def relation_composition_expr = rep1sep(quantified_relation_expr, ".") ^^ { RelationCompositionExpr(_) }
+  def relation_union_expr: Parser[RelationalExpr] = rep1sep(quantified_relation_expr, "|") ^^ { RelationUnionExpr(_) }
 
   def quantified_relation_expr = simple_relation_expr ~ quantifier ^^ { case expr~quant => QuantifiedRelationExpr(expr, quant) }
 
   def simple_relation_expr = (
-    "(" ~> relation_union_expr <~ ")"
+    "(" ~> relation_composition_expr <~ ")"
     | arc_expr
   )
 
