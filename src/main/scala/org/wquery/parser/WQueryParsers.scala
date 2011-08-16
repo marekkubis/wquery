@@ -87,17 +87,18 @@ trait WQueryParsers extends RegexParsers {
     | path
   )
 
-  def path = generator ~ rep(step) ^^ { case gen~steps => PathExpr(NodeStepExpr(gen)::steps) }
+  def path = generator_step ~ rep(step) ^^ { case gen~steps => PathExpr(gen::steps) }
+
+  def generator_step = generator ~ opt(var_decls) ^^ { case gen~decls => StepExpr(NodeTransformationExpr(gen), decls.getOrElse(Nil)) }
 
   def step = (
     relation_trans
     | node_trans
     | filter_trans
     | projection_trans
-    | bind_trans
-  )
+  ) ~ opt(var_decls) ^^ { case trans~decls => StepExpr(trans, decls.getOrElse(Nil)) }
 
-  def relation_trans = dots ~ relation_union_expr ^^ { case pos~expr => RelationStepExpr(pos, expr) }
+  def relation_trans = dots ~ relation_union_expr ^^ { case pos~expr => RelationTransformationExpr(pos, expr) }
 
   def dots = rep1(".") ^^ { _.size - 1 }
 
@@ -130,7 +131,7 @@ trait WQueryParsers extends RegexParsers {
     | success(Quantifier(1, Some(1)))
   )
 
-  def filter_trans = filter ^^ { FilterStepExpr(_) }
+  def filter_trans = filter ^^ { FilterTransformationExpr(_) }
 
   def filter = "[" ~> or_condition <~ "]"
 
@@ -153,13 +154,11 @@ trait WQueryParsers extends RegexParsers {
     case lexpr~op~rexpr => BinaryConditionalExpr(op, lexpr, rexpr)
   }
 
-  def node_trans = "." ~> non_rel_expr_generator ^^ { NodeStepExpr(_) }
+  def node_trans = "." ~> non_rel_expr_generator ^^ { NodeTransformationExpr(_) }
 
-  def projection_trans = projection  ^^ { ProjectionStepExpr(_) }
+  def projection_trans = projection  ^^ { ProjectionTransformationExpr(_) }
 
   def projection = "<" ~> expr <~ ">"
-
-  def bind_trans = var_decls ^^ { BindStepExpr(_) }
 
   // generators
   def generator = (
