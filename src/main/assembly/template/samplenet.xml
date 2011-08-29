@@ -1008,15 +1008,6 @@ Princeton University and LICENSEE agrees to preserve same.
 		<ILR type="hypernym">103079741</ILR>
 	</SYNSET>
 	<SYNSET>
-		<ID>103079741</ID>
-		<POS>n</POS>
-		<DESC>a partitioned section, chamber, or separate room within a larger enclosed area</DESC>
-		<SYNONYM>
-			<LITERAL sense="2">compartment</LITERAL>
-		</SYNONYM>
-		<ILR type="hypernym">104105893</ILR>
-	</SYNSET>
-	<SYNSET>
 		<ID>102960352</ID>
 		<POS>n</POS>
 		<DESC>where passengers ride up and down; "the car was on the top floor"</DESC>

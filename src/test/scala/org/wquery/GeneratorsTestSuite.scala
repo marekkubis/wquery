@@ -60,17 +60,17 @@ class GeneratorsTestSuite extends WQueryTestSuite {
    
   @Test def testAllWords() = result of ("count('')") should equal ("171\n")
 
-  @Test def testAllSenses() = result of ("count(::)") should equal ("188\n")
+  @Test def testAllSenses() = result of ("count(::)") should equal ("187\n")
       
-  @Test def testAllSynsets() = result of ("count({})") should equal ("92\n")
+  @Test def testAllSynsets() = result of ("count({})") should equal ("91\n")
   
-  @Test def testRelationGenerator() = result of ("count(literal)") should equal ("188\n")
+  @Test def testRelationGenerator() = result of ("count(literal)") should equal ("187\n")
   
   @Test def testRelationGeneratorSingleQuoted() = result of ("count('literal')") should equal ("0\n")  
 
   @Test def testRelationGeneratorBackQuoted() = result of ("count(`literal`)") should equal ("1\n")
   
-  @Test def testRelationGeneratorInverse() = result of ("count(^hypernym)") should equal ("71\n")    
+  @Test def testRelationGeneratorInverse() = result of ("count(^hypernym)") should equal ("70\n")
   
   @Test def testRelationGeneratorClosure() = result of ("avg(size(hypernym!))") should startWith ("7.6")  
   

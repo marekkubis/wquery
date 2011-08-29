@@ -4,7 +4,7 @@ import org.testng.annotations.Test
 class FunctionsTestSuite extends WQueryTestSuite {
   // aggregates
    
-  @Test def testCount() = result of ("count({})") should equal ("92\n")
+  @Test def testCount() = result of ("count({})") should equal ("91\n")
 
   @Test def testMin() = result of ("min(1..10)") should equal ("1\n")  
     

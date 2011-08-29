@@ -6,13 +6,13 @@ class TransformationsTestSuite extends WQueryTestSuite {
 
   @Test def testEmptyDataSetTransformation() = result of ("{aaaaaa}.hypernym") should equal ("(no result)\n")
 
-  @Test def testSynsetsHypernymsCount() = result of ("count({}.hypernym)") should equal ("71\n")
+  @Test def testSynsetsHypernymsCount() = result of ("count({}.hypernym)") should equal ("70\n")
 
-  @Test def testSynsetsHypernymsHypernymCount() = result of ("count({}.hypernym.hypernym)") should equal ("69\n")  
+  @Test def testSynsetsHypernymsHypernymCount() = result of ("count({}.hypernym.hypernym)") should equal ("68\n")
 
-  @Test def testSynsetsHypernymsHypernymCountByComposition() = result of ("count({}.(hypernym.hypernym))") should equal ("69\n")
+  @Test def testSynsetsHypernymsHypernymCountByComposition() = result of ("count({}.(hypernym.hypernym))") should equal ("68\n")
 
-  @Test def testSynsetsHyponymsCount() = result of ("count({}.^hypernym)") should equal ("71\n")    
+  @Test def testSynsetsHyponymsCount() = result of ("count({}.^hypernym)") should equal ("70\n")
 
   @Test def testPerson1nSynsetDesc() = result of ("{person:1:n}.desc") should equal ("{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n } desc 'a human being; \"there was too much for one person to do\"'\n")
 
@@ -46,9 +46,9 @@ class TransformationsTestSuite extends WQueryTestSuite {
   
   @Test def testNAryRelationPartialDestinationMultiProjection() = result of ("car:1:n.literal^pos^num") should equal ("car:1:n source^literal^pos n source^literal^num 1\n")
 
-  @Test def testNAryRelationPartialSourceProjection() = result of ("count(`n`.pos^literal)") should equal ("176\n")
+  @Test def testNAryRelationPartialSourceProjection() = result of ("count(`n`.pos^literal)") should equal ("175\n")
   
-  @Test def testNAryRelationMultiProjection() = result of ("count(`n`.pos^literal^source^num)") should equal ("176\n")
+  @Test def testNAryRelationMultiProjection() = result of ("count(`n`.pos^literal^source^num)") should equal ("175\n")
   
   @Test def testNAryRelationInvalidProjection() = result of ("car:1:n.destination^num") should equal ("ERROR: Arc expression destination^num references an unknown relation or argument")
   
