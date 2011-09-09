@@ -35,9 +35,9 @@ class DataSet(val paths: List[List[Any]], val pathVars: Map[String, List[(Int, I
     }
   }
 
-  def leftType(pos: Int): Set[DataType] = paths.filter(pos < _.size).map(tuple => DataType(tuple(pos))).toSet
+  def leftType(pos: Int): Set[DataType] = paths.filter(pos < _.size).map(tuple => DataType.fromValue(tuple(pos))).toSet
 
-  def rightType(pos: Int): Set[DataType] = paths.filter(pos < _.size).map(tuple => DataType(tuple(tuple.size - 1 - pos))).toSet
+  def rightType(pos: Int): Set[DataType] = paths.filter(pos < _.size).map(tuple => DataType.fromValue(tuple(tuple.size - 1 - pos))).toSet
 
   def types = (for (i <- maxTupleSize - 1 to 0 by -1) yield rightType(i)).toList
   

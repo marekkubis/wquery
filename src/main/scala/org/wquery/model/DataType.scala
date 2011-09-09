@@ -48,7 +48,10 @@ case object BooleanType extends NodeType {
 }
 
 object DataType {
-  def apply(value: Any) = value match {        
+  val all = NodeType.all.toSet[DataType] +  ArcType
+  val numeric = Set[DataType](IntegerType, FloatType)
+
+  def fromValue(value: Any) = value match {
     case _:Synset =>
       SynsetType
     case _:Sense =>
@@ -66,15 +69,11 @@ object DataType {
     case obj =>
       throw new IllegalArgumentException("Object " + obj + " has no data type bound")
   }
-
-  def all = Set[DataType](SynsetType, SenseType, StringType, IntegerType, FloatType, BooleanType, ArcType)
-
-  def nodes = Set[NodeType](SynsetType, SenseType, StringType, IntegerType, FloatType, BooleanType)
-
-  def numeric = Set[Set[DataType]](Set(IntegerType), Set(FloatType), Set(IntegerType, FloatType))
 }
 
 object NodeType {
+  val all = Set[NodeType](SynsetType, SenseType, StringType, IntegerType, FloatType, BooleanType)
+
   def fromName(name: String) = name match {
     case "synset" =>
       SynsetType
@@ -92,3 +91,4 @@ object NodeType {
       throw new WQueryModelException("Datatype '" + name + "' not found")
   }
 }
+

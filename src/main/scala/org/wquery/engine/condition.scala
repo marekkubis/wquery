@@ -36,7 +36,7 @@ case class BinaryCondition(op: String, leftOp: AlgebraOp, rightOp: AlgebraOp) ex
       case "=~" =>
         if (rightResult.size == 1 ) {
           // element context
-          if (DataType(rightResult.head) == StringType) {
+          if (DataType.fromValue(rightResult.head) == StringType) {
             val regex = rightResult.head.asInstanceOf[String].r
 
             leftResult.forall {

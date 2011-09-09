@@ -61,5 +61,5 @@ object WordNet {
 
   val relations = List(IdToSynset, SynsetToId, IdToSense, SenseToId, SenseToWordForm, SenseToSenseNumber,
     SenseToPos, SynsetToWordForms, SynsetToSenses, WordFormToSenses, SenseToSynset, WordFormToSynsets,
-    SenseToWordFormSenseNumberAndPos) ++ (for (sourceType <- DataType.nodes; destinationType <- DataType.nodes) yield Relation("_", sourceType, destinationType))
+    SenseToWordFormSenseNumberAndPos) ++ (for (sourceType <- NodeType.all; destinationType <- NodeType.all) yield Relation("_", sourceType, destinationType))
 }

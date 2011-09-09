@@ -27,7 +27,7 @@ trait AcceptsAll {
 }
 
 trait AcceptsNumbers {
-  def accepts(args: AlgebraOp) = args.minTupleSize == 1 && args.maxTupleSize == Some(1) && DataType.numeric.contains(args.rightType(0))
+  def accepts(args: AlgebraOp) = args.minTupleSize == 1 && args.maxTupleSize == Some(1) && args.rightType(0).subsetOf(DataType.numeric)
 }
 
 trait AcceptsTypes {
@@ -395,7 +395,7 @@ object Functions {
    with ReturnsSingletonTuples with ClearsBindingsPattern {
     def accepts(args: AlgebraOp) = {
       args.minTupleSize == 2 && args.maxTupleSize == Some(2) &&
-        DataType.numeric.contains(args.leftType(0)) && DataType.numeric.contains(args.leftType(1))
+        args.leftType(0).subsetOf(DataType.numeric) && args.leftType(1).subsetOf(DataType.numeric)
     }
 
     def returnType(args: AlgebraOp) = Set(FloatType)
