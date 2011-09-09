@@ -309,7 +309,7 @@ case class ArcExpr(ids: List[ArcExprArgument]) extends RelationalExpr {
     ((ids: @unchecked) match {
       case List(arg) =>
         if (arg.nodeType.isEmpty) {
-          wordNet.getRelation(arg.name, contextTypes, Relation.Source)
+          wordNet.getRelation(arg.name, Map((Relation.Source, contextTypes)))
             .map(ArcPattern(_, Relation.Source, List(Relation.Destination)))
         } else {
           throw new WQueryStaticCheckException("Relation name " + arg.name + " cannot be followed by type specifier &")
@@ -329,14 +329,14 @@ case class ArcExpr(ids: List[ArcExprArgument]) extends RelationalExpr {
   }
 
   private def evaluateAsSourceTypePattern(wordNet: WordNetSchema, contextTypes: Set[DataType], left: ArcExprArgument, right: ArcExprArgument, rest: List[ArcExprArgument]) = {
-    val sourceTypes = left.nodeType.map(Set[DataType](_)).getOrElse(contextTypes)
+    val sourceTypes = left.nodeType.map(Set(_)).getOrElse(contextTypes)
 
-    wordNet.getRelation(right.name, sourceTypes, left.name)
+    wordNet.getRelation(right.name, ((left.name, sourceTypes) +: (rest.map(_.nodeDescription))).toMap)
       .map(ArcPattern(_, left.name, if (rest.isEmpty) List(Relation.Destination) else rest.map(_.name)))
   }
 
   private def evaluateAsDestinationTypePattern(wordNet: WordNetSchema, contextTypes: Set[DataType], left: ArcExprArgument, right: ArcExprArgument, rest: List[ArcExprArgument]) = {
-    wordNet.getRelation(left.name, contextTypes, Relation.Source)
+    wordNet.getRelation(left.name, ((Relation.Source, contextTypes) +: right.nodeDescription +: (rest.map(_.nodeDescription))).toMap)
       .map(ArcPattern(_, Relation.Source, (right::rest).map(_.name)))
   }
 
@@ -344,9 +344,10 @@ case class ArcExpr(ids: List[ArcExprArgument]) extends RelationalExpr {
 }
 
 case class ArcExprArgument(name: String, nodeTypeName: Option[String]) extends Expr {
-  def nodeType: Option[NodeType] = nodeTypeName.map(n => NodeType.fromName(n))
+  val nodeType: Option[DataType] = nodeTypeName.map(n => NodeType.fromName(n))
+  val nodeDescription = (name, nodeType.map(Set(_)).getOrElse(NodeType.all.toSet[DataType]))
 
-  override def toString = name + nodeTypeName.getOrElse("")
+  override def toString = name + nodeTypeName.map("&" + _).getOrElse("")
 }
 
 case class PathExpr(exprs: List[StepExpr]) extends EvaluableExpr {
@@ -446,7 +447,7 @@ case class ContextByRelationalExprReq(expr: RelationalExpr) extends EvaluableExp
       case RelationUnionExpr(List(QuantifiedRelationExpr(ArcExpr(List(ArcExprArgument(id, None))),Quantifier(1,Some(1))))) =>
         val sourceTypes = if (bindings.areContextVariablesBound) bindings.lookupContextVariableType(0) else DataType.all
 
-        if (wordNet.containsRelation(id, sourceTypes, Relation.Source)) {
+        if (wordNet.containsRelation(id, Map((Relation.Source, sourceTypes)))) {
           extendBasedEvaluationPlan(wordNet, bindings)
         } else {
           FetchOp.wordByValue(id)

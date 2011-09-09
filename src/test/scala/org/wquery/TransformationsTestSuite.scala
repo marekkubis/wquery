@@ -79,4 +79,12 @@ class TransformationsTestSuite extends WQueryTestSuite {
   @Test def testSourceTypeSpecifier() = result of ("({car:1:n} union car).source&string^senses") should equal ("car senses car:5:n\ncar senses car:1:n\ncar senses car:2:n\ncar senses car:4:n\ncar senses car:3:n\n")
 
   @Test def testWrongSourceTypeSpecifier() = result of ("({car:1:n} union car).source&zzz^senses") should startWith ("ERROR: Datatype 'zzz' not found")
+
+  @Test def testDestinationTypeSpecifier0() = result of ("car:1:n.destination^senses^source") should equal ("car:1:n ^senses { car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n }\n")
+
+  @Test def testDestinationTypeSpecifier1() = result of ("car:1:n.destination^senses^source&synset") should equal ("car:1:n ^senses { car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n }\n")
+
+  @Test def testDestinationTypeSpecifier2() = result of ("car:1:n.destination^senses^source&string") should equal ("car:1:n ^senses car\n")
+
+  @Test def testWrongDestinationTypeSpecifier0() = result of ("car:1:n.destination^senses^source&zzz") should startWith ("ERROR: Datatype 'zzz' not found")
 }
