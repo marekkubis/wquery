@@ -314,20 +314,17 @@ case class ArcExpr(ids: List[ArcExprArgument]) extends RelationalExpr {
         } else {
           throw new WQueryStaticCheckException("Relation name " + arg.name + " cannot be followed by type specifier &")
         }
-      case List(left, right) =>
+      case left::right::rest =>
         if (left.nodeType.isDefined && right.nodeType.isDefined) {
           throw new WQueryStaticCheckException("No relation name found in arc expression " + toString)
         } else if (left.nodeType.isDefined) {
-          evaluateAsSourceTypePattern(wordNet, contextTypes, left, right, Nil)
+          evaluateAsSourceTypePattern(wordNet, contextTypes, left, right, rest)
         } else if (right.nodeType.isDefined) {
-          evaluateAsDestinationTypePattern(wordNet, contextTypes, left, right, Nil)
+          evaluateAsDestinationTypePattern(wordNet, contextTypes, left, right, rest)
         } else {
-          evaluateAsDestinationTypePattern(wordNet, contextTypes, left, right, Nil)
-            .orElse(evaluateAsSourceTypePattern(wordNet, contextTypes, left, right, Nil))
+          evaluateAsDestinationTypePattern(wordNet, contextTypes, left, right, rest)
+            .orElse(evaluateAsSourceTypePattern(wordNet, contextTypes, left, right, rest))
         }
-      case left :: right :: rest =>
-        evaluateAsDestinationTypePattern(wordNet, contextTypes, left, right, rest)
-          .orElse(evaluateAsSourceTypePattern(wordNet, contextTypes, left, right, rest))
     }).getOrElse(throw new WQueryStaticCheckException("Arc expression " + toString + " references an unknown relation or argument"))
   }
 
