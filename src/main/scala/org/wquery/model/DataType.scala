@@ -1,5 +1,7 @@
 package org.wquery.model
 
+import org.wquery.WQueryModelException
+
 sealed abstract class DataType extends Ordered[DataType] {
   def rank: Int
 
@@ -70,4 +72,23 @@ object DataType {
   def nodes = Set[NodeType](SynsetType, SenseType, StringType, IntegerType, FloatType, BooleanType)
 
   def numeric = Set[Set[DataType]](Set(IntegerType), Set(FloatType), Set(IntegerType, FloatType))
+}
+
+object NodeType {
+  def fromName(name: String) = name match {
+    case "synset" =>
+      SynsetType
+    case "sense" =>
+      SenseType
+    case "string" =>
+      StringType
+    case "integer" =>
+      IntegerType
+    case "float" =>
+      FloatType
+    case "boolean" =>
+      BooleanType
+    case name =>
+      throw new WQueryModelException("Datatype '" + name + "' not found")
+  }
 }

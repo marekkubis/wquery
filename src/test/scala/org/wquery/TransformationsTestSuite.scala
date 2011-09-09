@@ -75,4 +75,8 @@ class TransformationsTestSuite extends WQueryTestSuite {
   @Test def testGenerateRegularPathZeroOrMore() = result of ("size(hypernym*)") should equal ("1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12\n13\n14\n")
   
   @Test def testGenerateRegularPathOneOrMore() = result of ("size(hypernym+)") should equal ("2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12\n13\n14\n")
+
+  @Test def testSourceTypeSpecifier() = result of ("({car:1:n} union car).source&string^senses") should equal ("car senses car:5:n\ncar senses car:1:n\ncar senses car:2:n\ncar senses car:4:n\ncar senses car:3:n\n")
+
+  @Test def testWrongSourceTypeSpecifier() = result of ("({car:1:n} union car).source&zzz^senses") should startWith ("ERROR: Datatype 'zzz' not found")
 }

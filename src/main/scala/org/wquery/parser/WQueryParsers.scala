@@ -114,9 +114,11 @@ trait WQueryParsers extends RegexParsers {
   )
 
   def arc_expr = (
-    ("^" ~> notQuotedString) ^^ { id => ArcExpr(List("destination", id, "source")) } // syntactic sugar
-    | rep1sep(notQuotedString, "^") ^^ { ArcExpr(_) }
+    ("^" ~> notQuotedString) ^^ { id => ArcExpr(List("destination", id, "source").map(ArcExprArgument(_, None))) } // syntactic sugar
+    | rep1sep(arc_expr_arg, "^") ^^ { ArcExpr(_) }
   )
+
+  def arc_expr_arg = notQuotedString ~ opt(("&" ~> notQuotedString)) ^^ { case name~dtype => ArcExprArgument(name, dtype) }
 
   def quantifier = (
     ("!"|"+") ^^^ { Quantifier(1, None) }
