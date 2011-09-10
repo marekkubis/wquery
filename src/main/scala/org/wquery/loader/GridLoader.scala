@@ -5,19 +5,16 @@ import org.wquery.utils.Logging
 import org.xml.sax.{Locator, Attributes}
 import org.xml.sax.helpers.DefaultHandler
 import scala.collection.mutable.{Set, Map, ListBuffer}
-import org.wquery.model.impl.InMemoryWordNetStore
 import org.wquery.model._
 
 class GridLoader extends WordNetLoader with Logging {
   override def canLoad(url: String): Boolean = url.endsWith(".xml") // TODO provide a better check
 
-  override def load(url: String): WordNet = {
-    val wordnet = new WordNet(new InMemoryWordNetStore)
+  override def load(url: String, wordNet: WordNet) = {
     val factory = SAXParserFactory.newInstance
 
-    factory.newSAXParser.parse(new File(url), new GridHandler(wordnet))
+    factory.newSAXParser.parse(new File(url), new GridHandler(wordNet))
     info("WordNet loaded via GridLoader")
-    wordnet
   }
 
 }

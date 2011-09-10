@@ -23,7 +23,7 @@ object WQueryGuiConsole extends SimpleSwingApplication {
     var xmlResultArea: TextArea = null
     
     if (!args.isEmpty) {
-        wquery = WQuery.getInstance(args.head)
+        wquery = WQuery.createInstance(args.head)
         title = new File(args.head).getAbsolutePath + " - WQuery Console"
     } else {
         title = "WQuery Console"
@@ -52,7 +52,7 @@ object WQueryGuiConsole extends SimpleSwingApplication {
         
         contents += new MenuItem("Load Wordnet...") {
           reactions += dialogApproved(this, wordNetChooser, "Load", { file =>
-            wquery = WQuery.getInstance(file.getAbsolutePath)     
+            wquery = WQuery.createInstance(file.getAbsolutePath)
             title = file.getAbsolutePath + " - WQuery Console"
           })
         }

@@ -28,7 +28,7 @@ object WQueryService {
         }
       }
       
-      val wquery = WQuery.getInstance(wfile)
+      val wquery = WQuery.createInstance(wfile)
       
       qargs.asInstanceOf[List[String]].foreach {qarg =>
         val qin = new QueryReader(new FileReader(qarg))

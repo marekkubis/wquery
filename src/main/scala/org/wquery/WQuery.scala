@@ -2,6 +2,7 @@ package org.wquery
 
 import engine._
 import loader.{LmfLoader, GridLoader, WordNetLoader}
+import model.impl.InMemoryWordNetStore
 import org.wquery.model.WordNet
 import org.wquery.parser.WQueryParsers
 import org.wquery.utils.Logging
@@ -37,14 +38,26 @@ object WQuery {
   def registerLoader(loader: WordNetLoader) { loaders += loader }
   
   def unregisterLoader(loader: WordNetLoader) { loaders -= loader }    
-  
-  def getInstance(url: String): WQuery = {
+
+  def getInstance(from: String): WQuery = {
+    createInstance(from: String) // TODO temporary stub
+  }
+
+  def createInstance(from: String, where: String = "memory"): WQuery = {
+    val store = where match {
+      case _ =>
+        new InMemoryWordNetStore
+    }
+
+    val wordNet = new WordNet(store)
+
     for (loader <- loaders) {
-      if (loader.canLoad(url)) {
-        return new WQuery(loader.load(url))
+      if (loader.canLoad(from)) {
+        loader.load(from, wordNet)
+        return new WQuery(wordNet)
       }
     }
     
-    throw new WQueryLoadingException(url + " cannot be loaded by any loader")
+    throw new WQueryLoadingException(from + " cannot be loaded by any loader")
   }
 }

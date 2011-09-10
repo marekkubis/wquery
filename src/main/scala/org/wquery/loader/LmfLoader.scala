@@ -1,7 +1,6 @@
 package org.wquery.loader
 
 import org.wquery.utils.Logging
-import org.wquery.model.impl.InMemoryWordNetStore
 import javax.xml.parsers.SAXParserFactory
 import java.io.{File, FileReader, BufferedReader}
 import org.xml.sax.helpers.DefaultHandler
@@ -18,13 +17,11 @@ class LmfLoader extends WordNetLoader with Logging {
     header.contains("<LexicalResource")
   }
 
-  override def load(url: String): WordNet = {
-    val wordnet = new WordNet(new InMemoryWordNetStore)
+  override def load(url: String, wordNet: WordNet) = {
     val factory = SAXParserFactory.newInstance
 
-    factory.newSAXParser.parse(new File(url), new LmfHandler(wordnet))
+    factory.newSAXParser.parse(new File(url), new LmfHandler(wordNet))
     info("WordNet loaded via LmfLoader")
-    wordnet
   }
 }
 

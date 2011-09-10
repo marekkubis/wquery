@@ -13,7 +13,7 @@ object WQueryConsole extends Logging {
     
     val quiet = args.head == "-q"
     val fargs = if (quiet) args.slice(1, args.size) else args
-    val wquery = WQuery.getInstance(fargs.head)
+    val wquery = WQuery.createInstance(fargs.head)
     val emitter = new PlainWQueryEmitter
     
     for (i <- 1 until fargs.size) {
