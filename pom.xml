@@ -3,7 +3,7 @@
 	<groupId>org.wquery</groupId>
 	<artifactId>wquery</artifactId>
 	<packaging>jar</packaging>
-	<version>0.5.0</version>
+	<version>0.6.0-SNAPSHOT</version>
 	<name>WQuery</name>
 	<description>WQuery is a domain specific query language designed to process wordnet-like lexical ontologies. 
 	It operates on wordnet-related terms like synsets, word senses, word forms etc. It is especially useful 
@@ -53,9 +53,9 @@
 	</mailingLists>
 
 	<scm>
-		<connection>scm:svn:https://wquery.svn.sourceforge.net/svnroot/wquery/tags/wquery-0.5.0</connection>
-		<developerConnection>scm:svn:https://wquery.svn.sourceforge.net/svnroot/wquery/tags/wquery-0.5.0</developerConnection>
-		<url>http://wquery.svn.sourceforge.net/viewvc/wquery/tags/wquery-0.5.0</url>
+		<connection>scm:svn:https://wquery.svn.sourceforge.net/svnroot/wquery/trunk</connection>
+		<developerConnection>scm:svn:https://wquery.svn.sourceforge.net/svnroot/wquery/trunk/</developerConnection>
+		<url>http://wquery.svn.sourceforge.net/viewvc/wquery/trunk</url>
 	</scm>
 
 	<properties>
