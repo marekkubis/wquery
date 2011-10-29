@@ -1,8 +1,9 @@
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <book>
 	<bookinfo>
-		<title>WQuery <?eval ${project.version}?></title>
-		<subtitle>User Guide</subtitle>			
+        <!-- <title>WQuery <?eval ${project.version}?></title> -->
+		<title>WQuery 0.4.0</title>
+		<subtitle>User Guide (outdated)</subtitle>
 		<author>
 			<firstname>Marek</firstname>
 			<surname>Kubis</surname>
@@ -13,7 +14,7 @@
 			</affiliation>
 		</author>
 		<copyright>
-			<year>2007-2010</year>
+			<year>2007-2011</year>
 			<holder>Marek Kubis</holder>
 		</copyright>
 	</bookinfo>
