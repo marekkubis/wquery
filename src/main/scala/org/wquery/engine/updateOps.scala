@@ -1,7 +1,7 @@
 package org.wquery.engine
 
 import org.wquery.model._
-import org.wquery.{WQueryInvalidValueSpecifiedForRelationPropertyException, WQueryEvaluationException}
+import org.wquery.WQueryInvalidValueSpecifiedForRelationPropertyException
 
 sealed abstract class UpdateOp extends AlgebraOp {
   def update(wordNet: WordNet, bindings: Bindings)
