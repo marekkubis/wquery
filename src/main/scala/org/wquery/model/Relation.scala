@@ -1,7 +1,7 @@
 package org.wquery.model
 import org.wquery.WQueryModelException
 
-case class Relation(val name: String, val arguments: Map[String, NodeType]) {
+case class Relation(name: String, arguments: Map[String, NodeType]) {
   val sourceType = arguments(Relation.Source) 
   
   val destinationType = arguments.get(Relation.Destination)
@@ -19,14 +19,33 @@ case class Relation(val name: String, val arguments: Map[String, NodeType]) {
 }
 
 object Relation {
-  val Source = "source" // default argument name
-  val Destination = "destination" // default argument name
+  // default argument names
+  val Source = "source"
+  val Destination = "destination"
 
-  def apply(name: String, sourceType: NodeType) = new Relation(name, Map((Source, sourceType)))
+  // property names
+  val Transitivity = "transitivity"
+  val Symmetry = "symmetry"
+  val RequiredBy = "required_by"
+  val Functional = "functional"
+  val Properties = List(Transitivity, Symmetry, RequiredBy, Functional)
 
-  def apply(name: String, sourceType: NodeType, destinationType: NodeType): Relation
-    = apply(name, sourceType, destinationType, Map())     
-  
-  def apply(name: String, sourceType: NodeType, destinationType: NodeType, arguments: Map[String, NodeType]): Relation
-    = new Relation(name, arguments + Pair(Source, sourceType) + Pair(Destination, destinationType))  
+  // property actions
+  val Restore = "restore"
+  val Preserve = "preserve"
+  val PropertyActions = List(Restore, Preserve)
+
+  def unary(name: String, sourceType: NodeType) = {
+    Relation(name, Map((Relation.Source, sourceType)))
+  }
+
+  def binary(name: String, sourceType: NodeType, destinationType: NodeType) = {
+    Relation(name, Map((Relation.Source, sourceType), (Relation.Destination, destinationType)))
+  }
 }
+
+sealed abstract class Symmetry
+
+case object Symmetric extends Symmetry
+case object Antisymmetric extends Symmetry
+case object NonSymmetric extends Symmetry

@@ -35,7 +35,7 @@ class BindingsSchema(val parent: Option[BindingsSchema], updatesParent: Boolean)
   def lookupContextVariableType(pos: Int): Set[DataType] = {
     contextOp.map(_.rightType(pos))
       .getOrElse(parent.map(_.lookupContextVariableType(pos))
-        .getOrElse{throw new WQueryEvaluationException("Operator # placed outside of a context")})
+        .getOrElse{throw new WQueryEvaluationException("Operator # placed outside of a filter")})
   }
 
   def areContextVariablesBound: Boolean = contextOp.isDefined || parent.map(_.areContextVariablesBound).getOrElse(false)

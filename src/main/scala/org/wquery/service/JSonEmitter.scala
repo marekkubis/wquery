@@ -6,7 +6,7 @@ import org.wquery.model.{Sense, Synset, DataSet}
 class JSonEmitter extends WQueryEmitter {
   def emit(result: Result):String = {
     result match {
-      case Answer(dataSet) =>
+      case Answer(wordNet, dataSet) =>
         emitDataSet(dataSet)
       case Error(exception) =>
         "{error:\""+ exception +"\"}"        
@@ -55,7 +55,7 @@ class JSonEmitter extends WQueryEmitter {
         builder append "\""        
       case element: Sense =>
         builder append "\""                
-        builder append element.id
+        builder append element
         builder append "\""                
       case element: String =>
         builder append "\""                

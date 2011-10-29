@@ -1,8 +1,8 @@
 package org.wquery.console
 import java.io.FileReader
 import org.wquery.{WQueryProperties, WQuery}
-import org.wquery.emitter.PlainWQueryEmitter
 import org.wquery.utils.Logging
+import org.wquery.emitter.{RawWQueryEmitter, PlainWQueryEmitter}
 
 object WQueryConsole extends Logging {
   def main(args: Array[String]) {
@@ -11,10 +11,10 @@ object WQueryConsole extends Logging {
       System.exit(1)
     }
     
-    val quiet = args.head == "-q"
-    val fargs = if (quiet) args.slice(1, args.size) else args
+    val raw = args.head == "-r"
+    val fargs = if (raw) args.slice(1, args.size) else args
     val wquery = WQuery.createInstance(fargs.head)
-    val emitter = new PlainWQueryEmitter
+    val emitter = if (raw) new RawWQueryEmitter else new PlainWQueryEmitter
     
     for (i <- 1 until fargs.size) {
       val qin = new QueryReader(new FileReader(fargs(i)))
@@ -31,7 +31,7 @@ object WQueryConsole extends Logging {
       qin.close      
     }
     
-    if (!quiet) {
+    if (!raw) {
       println("WQuery (" + WQueryProperties.version + ") Console")
       println(WQueryProperties.copyright)      
     }
@@ -40,7 +40,7 @@ object WQueryConsole extends Logging {
     var query = ""
     
     do {
-      if (!quiet) {
+      if (!raw) {
         print("wquery> ")
       }
       

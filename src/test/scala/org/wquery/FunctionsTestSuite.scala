@@ -4,7 +4,7 @@ import org.testng.annotations.Test
 class FunctionsTestSuite extends WQueryTestSuite {
   // aggregates
    
-  @Test def testCount() = result of ("count({})") should equal ("91\n")
+  @Test def testCount() = result of ("count({})") should equal ("90\n")
 
   @Test def testMin() = result of ("min(1..10)") should equal ("1\n")  
     
@@ -26,7 +26,7 @@ class FunctionsTestSuite extends WQueryTestSuite {
     
   @Test def testAvgFloat() = result of ("avg(1..10*1.0)") should equal ("5.5\n")
     
-  @Test def testSize() = result of ("size({car:1}.hypernym!)") should equal ("2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12\n")                                                                                    
+  @Test def testSize() = result of ("size({car:1}.hypernym+)") should equal ("2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12\n")
 
   @Test def testEmptyFalse() = result of ("empty(1..10)") should equal ("false\n")
 
@@ -64,4 +64,5 @@ class FunctionsTestSuite extends WQueryTestSuite {
 
   @Test def testUpper() = result of ("upper(`test`)") should equal ("TEST\n")
 
+  @Test def testRange() = result of ("range(1..10,7..15 union 23,25)") should equal ("1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12\n13\n14\n15\n23\n24\n25\n")
 }

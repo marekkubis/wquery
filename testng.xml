@@ -1,6 +1,6 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
 <suite name="WQueryTestSuite" verbose="1">
-	<test name="Integration">
+	<test name="Integration" preserve-order="true">
 		<classes>
 			<class name="org.wquery.GeneratorsTestSuite" />
             <class name="org.wquery.TransformationsTestSuite" />
@@ -12,6 +12,7 @@
             <class name="org.wquery.VariablesTestSuite" />            
             <class name="org.wquery.ImperativeExprsTestSuite" />
             <class name="org.wquery.QueryReaderTestSuite" />
+            <class name="org.wquery.UpdatesTestSuite" />
         </classes>
 	</test>
 </suite>

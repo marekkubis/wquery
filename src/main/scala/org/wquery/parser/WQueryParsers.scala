@@ -39,6 +39,8 @@ trait WQueryParsers extends RegexParsers {
   def statement = (
     iterator
     | emission
+    | merge
+    | split
     | assignment
     | ifelse
     | whiledo
@@ -48,11 +50,22 @@ trait WQueryParsers extends RegexParsers {
 
   def emission = "emit" ~> multipath_expr ^^ { EmissionExpr(_) }
 
+  def merge = "merge" ~> expr ~ rep(with_clause) ^^ { case expr~withs => MergeExpr(expr, withs) }
+
+  def split = "split" ~> expr ~ rep(with_clause) ^^ { case expr~withs => SplitExpr(expr, withs) }
+
   def assignment = (
      var_decls ~ ":=" ~ multipath_expr ^^ { case vdecls~_~mexpr => VariableAssignmentExpr(vdecls, mexpr) }
+     | "wordnet" ~> notQuotedString ~ assignment_op ~ multipath_expr ~ rep(with_clause) ^^ { case prop~op~rexpr~withs => WordNetUpdateExpr(prop, op, rexpr, withs) }
      | notQuotedString ~ ":=" ~ relation_union_expr  ^^ { case name~_~rexpr => RelationAssignmentExpr(name, rexpr) }
-      // | expr ~ ("+="|"-="|":=") ~ expr ^^ { case lexpr~op~rexpr => UpdateExpr(lexpr, op, rexpr) }
+     | multipath_expr ~ arc_expr ~ assignment_op ~ multipath_expr ^^ { case lexpr~prop~op~rexpr => UpdateExpr(lexpr, prop, op, rexpr) }
   )
+
+  def assignment_op = ("+="|"-="|":=")
+
+  def with_clause = "with" ~> property_assignment
+
+  def property_assignment = arc_expr ~ assignment_op ~ multipath_expr ^^ { case arc~op~expr => PropertyAssignmentExpr(arc, op, expr) }
 
   def ifelse = "if" ~> multipath_expr ~ imp_expr ~ opt("else" ~> imp_expr) ^^ {
     case cexpr ~ iexpr ~ eexpr => IfElseExpr(cexpr, iexpr, eexpr)
@@ -111,6 +124,7 @@ trait WQueryParsers extends RegexParsers {
   def simple_relation_expr = (
     "(" ~> relation_composition_expr <~ ")"
     | arc_expr
+    | "\\" ~> step_var_decl ^^ { VariableRelationalExpr(_) }
   )
 
   def arc_expr = (
@@ -121,7 +135,7 @@ trait WQueryParsers extends RegexParsers {
   def arc_expr_arg = notQuotedString ~ opt(("&" ~> notQuotedString)) ^^ { case name~dtype => ArcExprArgument(name, dtype) }
 
   def quantifier = (
-    ("!"|"+") ^^^ { Quantifier(1, None) }
+    "+" ^^^ { Quantifier(1, None) }
     | "*" ^^^ { Quantifier(0, None) }
     | "?" ^^^ { Quantifier(0, Some(1)) }
     | "{" ~> "," ~> integerNum <~ "}" ^^ { x => Quantifier(0, Some(x)) }
@@ -200,7 +214,7 @@ trait WQueryParsers extends RegexParsers {
   def sense_generator = (
     "::" ^^ { _ => AlgebraExpr(FetchOp.senses) }
     | alphaLit ~ ":" ~ integerNum ~ ":" ~ alphaLit ^^ {
-      case word~_~num~_~pos => AlgebraExpr(FetchOp.senseByWordFormAndSenseNumberAndPos(word, num, pos))
+      case word~_~num~_~pos => SenseByWordFormAndSenseNumberAndPosReq(word, num, pos)
     }
     | alphaLit ~ ":" ~ integerNum ^^ {
       case word~_~num => AlgebraExpr(FetchOp.sensesByWordFormAndSenseNumber(word, num))
@@ -229,9 +243,12 @@ trait WQueryParsers extends RegexParsers {
   def var_decls = rep1(var_decl)
 
   def var_decl = (
-    "$" ~> notQuotedString ^^ { StepVariable(_) }
-    | "@" ~> notQuotedString ^^ { PathVariable(_) }
+    step_var_decl
+    | path_var_decl
   )
+
+  def step_var_decl = "$" ~> notQuotedString ^^ { StepVariable(_) }
+  def path_var_decl = "@" ~> notQuotedString ^^ { PathVariable(_) }
 
   // literals
   def alphaLit = (

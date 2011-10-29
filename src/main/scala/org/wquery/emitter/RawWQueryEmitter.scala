@@ -5,7 +5,7 @@ import org.wquery.engine.Error
 import org.wquery.engine.Result
 import org.wquery.model._
 
-class PlainWQueryEmitter extends WQueryEmitter {
+class RawWQueryEmitter extends WQueryEmitter {
   def emit(result: Result):String = {
     result match {
       case Answer(wordNet, dataSet) =>
@@ -61,7 +61,6 @@ class PlainWQueryEmitter extends WQueryEmitter {
         emitElement(wordNet, tuple.head, builder)
                 
         for (i <- (1 until tuple.size)) {
-          builder append " "
           emitElement(wordNet, tuple(i), builder)
         }
     }      
@@ -70,38 +69,18 @@ class PlainWQueryEmitter extends WQueryEmitter {
   private def emitElement(wordNet: WordNet, element: Any, builder: StringBuilder) {
     element match {
       case element: Synset =>
-        builder append "{ "
-        
-        wordNet.store.getSenses(element).foreach{ sense =>
-          emitSense(sense, builder)
-          builder append " "
-        }
-        
-        builder append "}"             
-      case element: Sense => 
+        builder append element.id
+      case element: Sense =>
         emitSense(element, builder)
       case element: Arc =>
-        if (element.isCanonical || element.isInverse) {
-          if (element.isInverse)
-            builder append "^"
-        
-          builder append element.relation.name
-        } else {
-          builder append element.from
-          builder append "^"
-          builder append element.relation.name          
-          builder append "^"   
-          builder append element.to
-        }
+        builder append element.from
+        builder append "^"
+        builder append element.relation.name
+        builder append "^"
+        builder append element.to
       case element: String =>
-        if (element.indexOf(' ') != -1) {
-          builder append "'"
-          builder append element
-          builder append "'"
-        } else {
-          builder append element
-        }
-      case element => 
+        builder append element
+      case element =>
         builder append element      
     }
   }
@@ -109,5 +88,4 @@ class PlainWQueryEmitter extends WQueryEmitter {
   private def emitSense(sense: Sense, builder: StringBuilder) {
     builder append sense.wordForm append ":" append sense.senseNumber append ":" append sense.pos
   }
-  
 }

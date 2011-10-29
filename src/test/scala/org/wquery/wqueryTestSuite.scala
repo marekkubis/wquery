@@ -5,8 +5,10 @@ import org.testng.annotations.BeforeClass
 import org.wquery.emitter.{PlainWQueryEmitter, WQueryEmitter}
 
 object WQueryRuntime {
-  val wquery = WQuery.createInstance("src/main/assembly/template/samplenet.xml")
+  val wquery = createWQuery
   val emitter = new PlainWQueryEmitter
+
+  def createWQuery = WQuery.createInstance("src/main/assembly/template/samplenet.xml")
 }
 
 abstract class WQueryTestSuite extends TestNGSuite with ShouldMatchers {  

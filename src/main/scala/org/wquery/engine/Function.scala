@@ -317,6 +317,19 @@ object UpperFunction extends DataSetFunction("upper") with AcceptsTypes with Ret
   def returnType(args: AlgebraOp) = Set(StringType)
 }
 
+object RangeFunction extends DataSetFunction("range") with AcceptsTypes with ReturnsSingletonTuples with ClearsBindingsPattern {
+  def argumentTypes = List(Set(IntegerType), Set(IntegerType))
+
+  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings) = {
+    DataSet(dataSet.paths.flatMap(tuple => (tuple: @unchecked) match {
+      case List(left: Int, right: Int) =>
+        (left to right).map(List(_))
+    }))
+  }
+
+  def returnType(args: AlgebraOp) = Set(IntegerType)
+}
+
 abstract class JavaMethod(override val name: String, method: Method) extends Function(name) {
   def evaluate(args: AlgebraOp, wordNet: WordNet, bindings: Bindings) = {
     val argsValues = args.evaluate(wordNet, bindings)
@@ -364,6 +377,7 @@ object Functions {
   registerFunction(ReplaceFunction)
   registerFunction(LowerFunction)
   registerFunction(UpperFunction)
+  registerFunction(RangeFunction)
 
   registerFunction(new JavaMethod("abs", classOf[Math].getMethod("abs", IntegerType.associatedClass))
    with AcceptsTypes with ReturnsSingletonTuples with ClearsBindingsPattern {

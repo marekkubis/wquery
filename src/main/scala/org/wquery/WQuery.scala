@@ -19,10 +19,13 @@ class WQuery(val wordNet: WordNet) extends Logging {
       val expr = parser parse input    
       debug("Expr: " + expr)
 
-      val plan = expr.evaluationPlan(wordNet.schema, bindingsSchema)
+      val plan = expr.evaluationPlan(wordNet.schema, bindingsSchema, Context())
       debug("Plan: " + plan)
 
-      Answer(plan.evaluate(wordNet, bindings))
+      val dataSet = plan.evaluate(wordNet, bindings)
+      debug("Eval: " + dataSet.pathCount + " tuple(s) found")
+
+      Answer(wordNet, dataSet)
     } catch {
       case e: WQueryException => Error(e)
     }

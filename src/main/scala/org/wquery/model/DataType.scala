@@ -13,6 +13,7 @@ sealed abstract class DataType extends Ordered[DataType] {
 case object ArcType extends DataType {
   def rank = 0
   def associatedClass = classOf[Arc]
+  override def toString = "arc"
 }
 
 sealed abstract class NodeType extends DataType
@@ -20,31 +21,43 @@ sealed abstract class NodeType extends DataType
 case object SynsetType extends NodeType {
   def rank = 1
   def associatedClass = classOf[Synset]
+  override def toString = "synset"
 }
 
 case object SenseType extends NodeType {
   def rank = 2
   def associatedClass = classOf[Sense]
+  override def toString = "sense"
 }
 
 case object StringType extends NodeType {
   def rank = 3
   def associatedClass = classOf[String]
+  override def toString = "string"
+}
+
+case object POSType extends NodeType {
+  def rank = 4
+  def associatedClass = classOf[String]
+  override def toString = "pos"
 }
 
 case object IntegerType extends NodeType {
-  def rank = 4
+  def rank = 5
   def associatedClass = classOf[Int]
+  override def toString = "integer"
 }
 
 case object FloatType extends NodeType {
-  def rank = 5
+  def rank = 6
   def associatedClass = classOf[Double]
+  override def toString = "float"
 }
 
 case object BooleanType extends NodeType {
-  def rank = 6
+  def rank = 7
   def associatedClass = classOf[Boolean]
+  override def toString = "boolean"
 }
 
 object DataType {
@@ -72,7 +85,7 @@ object DataType {
 }
 
 object NodeType {
-  val all = Set[NodeType](SynsetType, SenseType, StringType, IntegerType, FloatType, BooleanType)
+  val all = Set[NodeType](SynsetType, SenseType, StringType, POSType, IntegerType, FloatType, BooleanType)
 
   def fromName(name: String) = name match {
     case "synset" =>

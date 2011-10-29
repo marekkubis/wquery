@@ -1,20 +1,19 @@
 package org.wquery.emitter
 
-import org.wquery.model.Arc
 import org.wquery.engine.{Result, Error, Answer}
-import org.wquery.model.{Sense, Synset, DataSet}
+import org.wquery.model._
 
 class XmlWQueryEmitter extends WQueryEmitter {
   def emit(result: Result):String = {
     result match {
-      case Answer(dataSet) =>
-        emitDataSet(dataSet)
+      case Answer(wordNet, dataSet) =>
+        emitDataSet(wordNet, dataSet)
       case Error(exception) =>
         "<ERROR>" + exception.getMessage + "</ERROR>"
     }
   }  
   
-  private def emitDataSet(dataSet: DataSet): String = {
+  private def emitDataSet(wordNet: WordNet, dataSet: DataSet): String = {
     val builder = new StringBuilder
     val pathVarNames = dataSet.pathVars.keys.toSeq.filterNot(_.startsWith("_")).sortWith((x, y) => x < y)
     val stepVarNames = dataSet.stepVars.keys.toSeq.filterNot(_.startsWith("_")).sortWith((x, y) => x < y)
@@ -35,7 +34,7 @@ class XmlWQueryEmitter extends WQueryEmitter {
           builder append "<PATHVAR name=\""
           builder append pathVarName
           builder append "\">\n"
-          emitTuple(tuple.slice(varPos._1, varPos._2), builder)
+          emitTuple(wordNet, tuple.slice(varPos._1, varPos._2), builder)
           builder append "</PATHVAR>\n"
         }
         
@@ -43,13 +42,13 @@ class XmlWQueryEmitter extends WQueryEmitter {
           builder append "<STEPVAR name=\""
           builder append stepVarName
           builder append "\">\n"
-          emitElement(tuple(dataSet.stepVars(stepVarName)(i)), builder)
+          emitElement(wordNet, tuple(dataSet.stepVars(stepVarName)(i)), builder)
           builder append "</STEPVAR>\n"
         }
       }
       
       builder append "</BINDINGS>\n"                
-      emitTuple(tuple, builder)
+      emitTuple(wordNet, tuple, builder)
       builder append "</RESULT>\n"
     }    
 
@@ -57,18 +56,18 @@ class XmlWQueryEmitter extends WQueryEmitter {
     builder.toString
   }
     
-  private def emitTuple(tuple: List[Any], builder: StringBuilder) {
+  private def emitTuple(wordNet: WordNet, tuple: List[Any], builder: StringBuilder) {
     builder append "<TUPLE>\n"    
-    tuple.foreach(emitElement(_, builder))    
+    tuple.foreach(emitElement(wordNet, _, builder))
     builder append "</TUPLE>\n"    
   }        
         
   
-  private def emitElement(element: Any, builder: StringBuilder) {
+  private def emitElement(wordNet: WordNet, element: Any, builder: StringBuilder) {
     element match {
       case element: Synset =>
         builder append "<SYNSET>\n"        
-        element.senses.foreach(emitSense(_, builder))        
+        wordNet.store.getSenses(element).foreach(emitSense(_, builder))
         builder append "</SYNSET>\n"        
       case element: Sense => 
         emitSense(element, builder)      

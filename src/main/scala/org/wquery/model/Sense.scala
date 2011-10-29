@@ -1,5 +1,5 @@
 package org.wquery.model
 
-class Sense(val id: String, val wordForm: String, val senseNumber: Int, val pos: String) {    
-    override def toString = wordForm + ":" + senseNumber + ":" + pos
+case class Sense(wordForm: String, senseNumber: Int, pos: String) {
+  override def toString = wordForm + ":" + senseNumber + ":" + pos
 }

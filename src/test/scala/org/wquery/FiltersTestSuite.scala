@@ -26,9 +26,9 @@ class FiltersTestSuite extends WQueryTestSuite {
     
   @Test def testStringLowerThanFalse() = result of ("[person < car]") should equal ("false\n")
     
-  @Test def testSenseLowerThanTrue() = result of ("[person:1:n < car:1:n]") should equal ("true\n")
+  @Test def testSenseLowerThanTrue() = result of ("[person:1:n < car:1:n]") should equal ("false\n")
     
-  @Test def testSenseLowerThanFalse() = result of ("[car:1:n < person:1:n]") should equal ("false\n")        
+  @Test def testSenseLowerThanFalse() = result of ("[car:1:n < person:1:n]") should equal ("true\n")
     
   @Test def testSynsetLowerThanTrue() = result of ("[{person:1:n} < {person:3:n}]") should equal ("true\n")
     
@@ -54,9 +54,9 @@ class FiltersTestSuite extends WQueryTestSuite {
     
   @Test def testStringGreaterThanFalse() = result of ("[car > person]") should equal ("false\n")
     
-  @Test def testSenseGreaterThanTrue() = result of ("[car:1:n > person:1:n]") should equal ("true\n")
+  @Test def testSenseGreaterThanTrue() = result of ("[car:1:n > person:1:n]") should equal ("false\n")
     
-  @Test def testSenseGreaterThanFalse() = result of ("[person:1:n > car:1:n]") should equal ("false\n")
+  @Test def testSenseGreaterThanFalse() = result of ("[person:1:n > car:1:n]") should equal ("true\n")
     
   @Test def testSynsetGreaterThanTrue() = result of ("[{person:3:n} > {person:1:n}]") should equal ("true\n")
     
@@ -68,11 +68,10 @@ class FiltersTestSuite extends WQueryTestSuite {
     
   // <= 
     
-  // >= 
-    
-  // = 
-    
-  // !=
+  // >=
+  @Test def testInequalityTrue() = result of ("[{person:1:n}.pos = {person:2:n}.pos]") should equal ("true\n")
+
+  @Test def testInequalityFalse() = result of ("[{person:1:n}.pos != {person:2:n}.pos]") should equal ("false\n")
 
   @Test def testSenseInSensesTrue() = result of ("[individual:1:n in {person}.senses]") should equal ("true\n")    
     
@@ -104,7 +103,7 @@ class FiltersTestSuite extends WQueryTestSuite {
 
   // [# < 2]
   
-  @Test def testSingleBackReference() = result of ("last({person:1}.senses[# != individual:1:n])") should equal ("person:1:n\nsomeone:1:n\nsomebody:1:n\nmortal:1:n\nsoul:2:n\n")
+  @Test def testSingleBackReference() = result of ("last({person:1}.senses[# != individual:1:n])") should equal ("mortal:1:n\nperson:1:n\nsomebody:1:n\nsomeone:1:n\nsoul:2:n\n")
     
   @Test def testRelationAfterSingleBackReference() = result of ("last({person:1}.senses[# != individual:1:n].word)") should equal ("mortal\nperson\nsomebody\nsomeone\nsoul\n")
     

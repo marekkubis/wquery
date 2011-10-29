@@ -6,6 +6,7 @@ import org.xml.sax.{Locator, Attributes}
 import org.xml.sax.helpers.DefaultHandler
 import scala.collection.mutable.{Set, Map, ListBuffer}
 import org.wquery.model._
+import org.wquery.WQueryUpdateBreaksRelationPropertyException
 
 class GridLoader extends WordNetLoader with Logging {
   override def canLoad(url: String): Boolean = url.endsWith(".xml") // TODO provide a better check
@@ -125,7 +126,7 @@ class GridHandler(wordnet: WordNet) extends DefaultHandler with Logging {
       synsetSenses.toList.zipWithIndex.foreach {case ((content, literalSense), index) =>
         try {
           if (literalSense != null) {
-            senses += new Sense(synsetId + ":" + index, content, literalSense.toInt, synsetPos)
+            senses += new Sense(content, literalSense.toInt, synsetPos)
           } else {
             warnInvalidSubtag("LITERAL", content, "sense")
           }
@@ -134,9 +135,8 @@ class GridHandler(wordnet: WordNet) extends DefaultHandler with Logging {
             warnInvalidSubtag("LITERAL", content, "sense") 
         }
       }
-      
-      val synset = new Synset(synsetId, senses.toList)
-      wordnet.addSynset(synset)
+
+      val synset = wordnet.store.addSynset(Some(synsetId), senses.toList, Nil)
       synsetsById(synset.id) = synset
       
       for ((ilrType, content) <- synsetIlrRelationsTuples) {
@@ -177,9 +177,29 @@ class GridHandler(wordnet: WordNet) extends DefaultHandler with Logging {
     for ((synset, relname, reldest) <- ilrRelationsTuples) {
       ilrRelationsNames += relname
     }
-    
+
     // create semantic relations
-    ilrRelationsNames.map {name => wordnet.store.add(Relation(name, SynsetType, SynsetType))}
+    for (name <- ilrRelationsNames) {
+      val relation = Relation.binary(name, SynsetType, SynsetType)
+      wordnet.store.addRelation(relation)
+
+      //TODO move to configuration
+
+      if (Set("hypernym", "partial_meronym", "member_meronym").contains(name)) {
+        wordnet.store.transitives(relation) = true
+        wordnet.store.transitivesActions(relation) = Relation.Restore
+      }
+
+      if (Set("hypernym").contains(name)) {
+        wordnet.store.symmetry(relation) = Antisymmetric
+        wordnet.store.symmetryActions(relation) = Relation.Preserve
+      }
+
+      if (Set("similar").contains(name)) {
+        wordnet.store.symmetry(relation) = Symmetric
+        wordnet.store.symmetryActions(relation) = Relation.Restore
+      }
+    }
 
     // create semantic relations successors       
     for ((synset, relname, reldest) <- ilrRelationsTuples) {      
@@ -188,8 +208,14 @@ class GridHandler(wordnet: WordNet) extends DefaultHandler with Logging {
       relation.destinationType.map { dt =>
         dt match {
           case SynsetType =>
-            synsetsById.get(reldest).map(wordnet.addSuccessor(synset, relation, _))
-              .getOrElse(warn("ILR tag with type '" + relname + "' found in synset '" + synset.id + "' points to unknown synset '" + reldest + "'"))
+            synsetsById.get(reldest).map { destination =>
+              try {
+                wordnet.store.addSuccessor(synset, relation, destination)
+              } catch {
+                case e: WQueryUpdateBreaksRelationPropertyException =>
+                  warn("ILR tag with type '" + relname + "' found in synset '" + synset.id + "' that points to synset '" + reldest + "' breaks property '" + e.property + "' of relation '" + e.relation.name + "'")
+              }
+            }.getOrElse(warn("ILR tag with type '" + relname + "' found in synset '" + synset.id + "' points to unknown synset '" + reldest + "'"))
           case dtype =>
             throw new RuntimeException("ILR tag points to relation " + relation + " that has incorrect destination type " + dtype)
         }
@@ -215,7 +241,14 @@ class GridHandler(wordnet: WordNet) extends DefaultHandler with Logging {
 
     // create relations
     for ((relname, dtype) <- genericRelationsDestTypes) {
-      wordnet.store.add(Relation(relname, SynsetType, dtype))
+      val relation = Relation.binary(relname, SynsetType, dtype)
+      wordnet.store.addRelation(relation)
+
+      if (relname == "desc") {
+        wordnet.store.requiredBys(relation) = scala.collection.immutable.Set(Relation.Source)
+        wordnet.store.functionalFor(relation) = scala.collection.immutable.Set(Relation.Source)
+        wordnet.store.functionalForActions((relation, Relation.Source)) = Relation.Preserve
+      }
     }
     
     // create successors
@@ -225,15 +258,15 @@ class GridHandler(wordnet: WordNet) extends DefaultHandler with Logging {
       relation.destinationType.map { dt =>
         dt match {
           case SynsetType =>
-            wordnet.addSuccessor(synset, relation, synsetsById(reldest))
+            wordnet.store.addSuccessor(synset, relation, synsetsById(reldest))
           case BooleanType =>
-            wordnet.addSuccessor(synset, relation, reldest.toBoolean)
+            wordnet.store.addSuccessor(synset, relation, reldest.toBoolean)
           case IntegerType =>
-            wordnet.addSuccessor(synset, relation, reldest.toInt)
+            wordnet.store.addSuccessor(synset, relation, reldest.toInt)
           case FloatType =>
-            wordnet.addSuccessor(synset, relation, reldest.toFloat)
+            wordnet.store.addSuccessor(synset, relation, reldest.toFloat)
           case StringType =>
-            wordnet.addSuccessor(synset, relation, reldest)
+            wordnet.store.addSuccessor(synset, relation, reldest)
           case dtype =>
             throw new RuntimeException("Incorrect destination type " + dtype + " as a successor of relation '" + relation + "'")
         }

@@ -518,7 +518,7 @@ case class ProjectOp(op: AlgebraOp, projectOp: AlgebraOp) extends QueryOp {
 
 case class ExtendOp(op: AlgebraOp, from: Int, pattern: RelationalPattern) extends QueryOp {
   def evaluate(wordNet: WordNet, bindings: Bindings) = {
-    pattern.extend(wordNet.store, op.evaluate(wordNet, bindings), from)
+    pattern.extend(wordNet.store, bindings, op.evaluate(wordNet, bindings), from)
   }
 
   def leftType(pos: Int) = {
@@ -553,7 +553,7 @@ case class ExtendOp(op: AlgebraOp, from: Int, pattern: RelationalPattern) extend
 }
 
 sealed abstract class RelationalPattern {
-  def extend(wordNet: WordNetStore, dataSet: DataSet, from: Int): DataSet
+  def extend(wordNet: WordNetStore, bindings: Bindings, dataSet: DataSet, from: Int): DataSet
 
   def minSize: Int
 
@@ -567,10 +567,10 @@ sealed abstract class RelationalPattern {
 }
 
 case class RelationUnionPattern(patterns: List[RelationalPattern]) extends RelationalPattern {
-  def extend(wordNet: WordNetStore, dataSet: DataSet, from: Int) = {
+  def extend(wordNet: WordNetStore, bindings: Bindings, dataSet: DataSet, from: Int) = {
     val buffer = new DataSetBuffer
 
-    patterns.foreach(expr => buffer.append(expr.extend(wordNet, dataSet, from)))
+    patterns.foreach(expr => buffer.append(expr.extend(wordNet, bindings, dataSet, from)))
     buffer.toDataSet
   }
 
@@ -586,10 +586,10 @@ case class RelationUnionPattern(patterns: List[RelationalPattern]) extends Relat
 }
 
 case class RelationCompositionPattern(patterns: List[RelationalPattern]) extends RelationalPattern {
-  def extend(wordNet: WordNetStore, dataSet: DataSet, from: Int) = {
-    val headSet = patterns.head.extend(wordNet, dataSet, from)
+  def extend(wordNet: WordNetStore, bindings: Bindings, dataSet: DataSet, from: Int) = {
+    val headSet = patterns.head.extend(wordNet, bindings, dataSet, from)
 
-    patterns.tail.foldLeft(headSet)((dataSet, expr) => expr.extend(wordNet, dataSet, 0))
+    patterns.tail.foldLeft(headSet)((dataSet, expr) => expr.extend(wordNet, bindings, dataSet, 0))
   }
 
   def minSize = patterns.map(_.minSize).sum
@@ -633,16 +633,16 @@ case class RelationCompositionPattern(patterns: List[RelationalPattern]) extends
 }
 
 case class QuantifiedRelationPattern(pattern: RelationalPattern, quantifier: Quantifier) extends RelationalPattern {
-  def extend(wordNet: WordNetStore, dataSet: DataSet, from: Int) = {
-    val lowerDataSet = (1 to quantifier.lowerBound).foldLeft(dataSet)((x, _) => pattern.extend(wordNet, x, from))
+  def extend(wordNet: WordNetStore, bindings: Bindings, dataSet: DataSet, from: Int) = {
+    val lowerDataSet = (1 to quantifier.lowerBound).foldLeft(dataSet)((x, _) => pattern.extend(wordNet, bindings, x, from))
 
     if (Some(quantifier.lowerBound) != quantifier.upperBound)
-      computeClosure(wordNet, lowerDataSet, from, quantifier.upperBound.map(_ - quantifier.lowerBound))
+      computeClosure(wordNet, bindings, lowerDataSet, from, quantifier.upperBound.map(_ - quantifier.lowerBound))
     else
       lowerDataSet
   }
 
-  private def computeClosure(wordNet: WordNetStore, dataSet: DataSet, from: Int, limit: Option[Int]) = {
+  private def computeClosure(wordNet: WordNetStore, bindings: Bindings, dataSet: DataSet, from: Int, limit: Option[Int]) = {
     val pathVarNames = dataSet.pathVars.keys.toSeq
     val stepVarNames = dataSet.stepVars.keys.toSeq
     val pathBuffer = DataSetBuffers.createPathBuffer
@@ -656,7 +656,7 @@ case class QuantifiedRelationPattern(pattern: RelationalPattern, quantifier: Qua
       pathVarNames.foreach(x => pathVarBuffers(x).append(dataSet.pathVars(x)(i)))
       stepVarNames.foreach(x => stepVarBuffers(x).append(dataSet.stepVars(x)(i)))
 
-      for (cnode <- closeTuple(wordNet, tuple, from, Set(tuple.last), limit)) {
+      for (cnode <- closeTuple(wordNet, bindings, tuple, from, Set(tuple.last), limit)) {
         pathBuffer.append(cnode)
         pathVarNames.foreach(x => pathVarBuffers(x).append(dataSet.pathVars(x)(i)))
         stepVarNames.foreach(x => stepVarBuffers(x).append(dataSet.stepVars(x)(i)))
@@ -666,9 +666,9 @@ case class QuantifiedRelationPattern(pattern: RelationalPattern, quantifier: Qua
     DataSet.fromBuffers(pathBuffer, pathVarBuffers, stepVarBuffers)
   }
 
-  private def closeTuple(wordNet: WordNetStore, source: List[Any], from: Int, forbidden: Set[Any], limit: Option[Int]): List[List[Any]] = {
+  private def closeTuple(wordNet: WordNetStore, bindings: Bindings, source: List[Any], from: Int, forbidden: Set[Any], limit: Option[Int]): List[List[Any]] = {
     if (limit.getOrElse(1) > 0) {
-      val transformed = pattern.extend(wordNet, DataSet.fromTuple(source), from)
+      val transformed = pattern.extend(wordNet, bindings, DataSet.fromTuple(source), from)
       val filtered = transformed.paths.filter { x => !forbidden.contains(x.last) }
 
       if (filtered.isEmpty) {
@@ -681,7 +681,7 @@ case class QuantifiedRelationPattern(pattern: RelationalPattern, quantifier: Qua
         result.appendAll(filtered)
 
         filtered.foreach { x =>
-          result.appendAll(closeTuple(wordNet, x, from, newForbidden, newLimit))
+          result.appendAll(closeTuple(wordNet, bindings, x, from, newForbidden, newLimit))
         }
 
         result.toList
@@ -714,8 +714,45 @@ case class QuantifiedRelationPattern(pattern: RelationalPattern, quantifier: Qua
 
 case class Quantifier(lowerBound: Int, upperBound: Option[Int])
 
-case class ArcPattern(relation: Relation, source: String, destinations: List[String]) extends RelationalPattern {
-  def extend(wordNet: WordNetStore, dataSet: DataSet, from: Int) = {
+case class VariableRelationalPattern(variable: StepVariable) extends RelationalPattern {
+  def extend(wordNet: WordNetStore, bindings: Bindings, dataSet: DataSet, from: Int) = {
+    bindings.lookupStepVariable(variable.name).map {
+      case Arc(relation, source, destination) =>
+        wordNet.extend(dataSet, Some(relation), from, source, List(destination))
+      case _ =>
+        throw new WQueryEvaluationException("Cannot extend a path using a non-arc value of variable " + variable)
+    }.getOrElse(throw new WQueryEvaluationException("Variable " + variable + " is not bound"))
+  }
+
+  def minSize = 2
+
+  def maxSize = Some(2)
+
+  def sourceType = DataType.all
+
+  def leftType(pos: Int) = pos match {
+    case 0 =>
+      Set(ArcType)
+    case 1 =>
+      DataType.all
+    case _ =>
+      Set.empty
+  }
+
+  def rightType(pos: Int) = pos match {
+    case 0 =>
+      DataType.all
+    case 1 =>
+      Set(ArcType)
+    case _ =>
+      Set.empty
+  }
+
+  override def toString = variable.toString
+}
+
+case class ArcPattern(relation: Option[Relation], source: String, destinations: List[String]) extends RelationalPattern {
+  def extend(wordNet: WordNetStore, bindings: Bindings, dataSet: DataSet, from: Int) = {
     wordNet.extend(dataSet, relation, from, source, destinations)
   }
 
@@ -723,14 +760,14 @@ case class ArcPattern(relation: Relation, source: String, destinations: List[Str
 
   def maxSize = Some(2*destinations.size)
 
-  def sourceType = Set(relation.demandArgument(source))
+  def sourceType = demandArgumentType(source)
 
   def leftType(pos: Int) = {
     if (pos < minSize)
       if (pos % 2 == 0) {
         Set(ArcType)
       } else {
-        Set(relation.demandArgument(destinations((pos - 1)/2)))
+        demandArgumentType(destinations((pos - 1)/2))
       }
     else
       Set.empty
@@ -741,13 +778,17 @@ case class ArcPattern(relation: Relation, source: String, destinations: List[Str
       if (pos % 2 == 1) {
         Set(ArcType)
       } else {
-        Set(relation.demandArgument(destinations(destinations.size - 1 - pos/2)))
+        demandArgumentType(destinations(destinations.size - 1 - pos/2))
       }
     else
       Set.empty
   }
 
-  override def toString = (source::relation.name::destinations).mkString("^")
+  override def toString = (source::relation.map(_.name).getOrElse("_")::destinations).mkString("^")
+
+  private def demandArgumentType(argument: String) = {
+    relation.map(rel => Set(rel.demandArgument(argument))).getOrElse(NodeType.all).asInstanceOf[Set[DataType]]
+  }
 }
 
 case class BindOp(op: AlgebraOp, variables: List[Variable]) extends QueryOp with VariableBindings with VariableTypeBindings {
@@ -878,6 +919,8 @@ object FetchOp {
 
   def synsets = FetchOp(WordNet.SynsetSet, List((Relation.Source, Nil)), List(Relation.Source))
 
+  def possyms = FetchOp(WordNet.PosSet, List((Relation.Source, Nil)), List(Relation.Source))
+
   def wordByValue(value: String)
     = FetchOp(WordNet.WordSet, List((Relation.Source, List(value))), List(Relation.Source))
 
@@ -890,9 +933,6 @@ object FetchOp {
     FetchOp(WordNet.SenseToWordFormSenseNumberAndPos,
       List((Relation.Destination, List(word)), ("num", List(num))), List(Relation.Source))
   }
-
-  def relationTuplesByArgumentNames(relation: Relation, argumentNames: List[String])
-    = FetchOp(relation, argumentNames.map(x => (x, List[Any]())), argumentNames)
 }
 
 case class ConstantOp(dataSet: DataSet) extends QueryOp {

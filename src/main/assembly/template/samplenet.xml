@@ -49,6 +49,7 @@ Princeton University and LICENSEE agrees to preserve same.
 			<LITERAL sense="1">motorcar</LITERAL>
 		</SYNONYM>
 		<ILR type="hypernym">103791235</ILR>
+        <ILR type="del_this_rel">103791235</ILR>
         <NL>false</NL>
 	</SYNSET>
 	<SYNSET>
@@ -66,6 +67,7 @@ Princeton University and LICENSEE agrees to preserve same.
 		<ILR type="member_holonym">107942152</ILR>
 		<ILR type="hypernym">100004475</ILR>
 		<ILR type="hypernym">100007347</ILR>
+        <ILR type="similar">105217688</ILR>
         <NL>false</NL>
 	</SYNSET>
 	<SYNSET>
@@ -76,6 +78,7 @@ Princeton University and LICENSEE agrees to preserve same.
 			<LITERAL sense="2">person</LITERAL>
 		</SYNONYM>
 		<ILR type="hypernym">105217168</ILR>
+        <ILR type="similar">100007846</ILR>
          <NL>false</NL>
 	</SYNSET>
 	<SYNSET>
@@ -983,17 +986,6 @@ Princeton University and LICENSEE agrees to preserve same.
 		</SYNONYM>
 		<ILR type="member_holonym">104468005</ILR>
 		<ILR type="hypernym">104576211</ILR>
-	</SYNSET>
-	<SYNSET>
-		<ID>104576211</ID>
-		<POS>n</POS>
-		<DESC>a vehicle that moves on wheels and usually has a container for transporting things or people; "the oldest known
-			wheeled vehicles were found in Sumer and Syria and date from around 3500 BC"</DESC>
-		<SYNONYM>
-			<LITERAL sense="1">wheeled vehicle</LITERAL>
-		</SYNONYM>
-		<ILR type="hypernym">104524313</ILR>
-		<ILR type="hypernym">103094503</ILR>
 	</SYNSET>
 	<SYNSET>
 		<ID>102960501</ID>

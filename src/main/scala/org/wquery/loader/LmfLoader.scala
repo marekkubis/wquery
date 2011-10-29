@@ -52,18 +52,17 @@ class LmfHandler(wordNet: WordNet) extends DefaultHandler with Logging {
         partOfSpeech = getAttributeOrWarn(tagName, attributes, "partOfSpeech", "skipping all related senses")
       case "Sense" =>
         val senseSynsetId = getAttributeOrWarn(tagName, attributes, "synset", "skipping the related sense")
-        val id = getAttributeOrWarn(tagName, attributes, "id", "skipping the related sense")
 
         if (writtenForm != null && partOfSpeech != null) {
           val senseNumber = senseNumbers.get((writtenForm, partOfSpeech)).getOrElse(0) + 1
 
           senseNumbers.put((writtenForm, partOfSpeech), senseNumber)
 
-          if (id != null && senseSynsetId != null) {
+          if (senseSynsetId != null) {
             if (!sensesBySynsetId.contains(senseSynsetId))
               sensesBySynsetId(senseSynsetId) = new ListBuffer[Sense]()
 
-            sensesBySynsetId(senseSynsetId).append(new Sense(id, writtenForm, senseNumber, partOfSpeech))
+            sensesBySynsetId(senseSynsetId).append(new Sense(writtenForm, senseNumber, partOfSpeech))
           }
         }
       case "Synset" =>
@@ -94,9 +93,7 @@ class LmfHandler(wordNet: WordNet) extends DefaultHandler with Logging {
 
   private def createSynsets {
     for ((synsetId, senses) <- sensesBySynsetId) {
-      val synset = new Synset(synsetId, senses.toList)
-      synsetsById(synsetId) = synset
-      wordNet.addSynset(synset)
+      synsetsById(synsetId) = wordNet.store.addSynset(Some(synsetId), senses.toList, Nil)
     }
     info("Synsets loaded")
   }
@@ -104,7 +101,7 @@ class LmfHandler(wordNet: WordNet) extends DefaultHandler with Logging {
   private def createSynsetRelations {
     for ((sourceSynsetId, relationName, destinationSynsetId) <- synsetRelationsTuples) {
       val relation = wordNet.schema.getRelation(relationName, scala.collection.immutable.Map((Relation.Source, Set[DataType](SynsetType)))).getOrElse {
-        wordNet.store.add(Relation(relationName, SynsetType, SynsetType))
+        wordNet.store.addRelation(Relation.binary(relationName, SynsetType, SynsetType))
         wordNet.schema.demandRelation(relationName, scala.collection.immutable.Map((Relation.Source, Set[DataType](SynsetType))))
       }
 
@@ -119,7 +116,7 @@ class LmfHandler(wordNet: WordNet) extends DefaultHandler with Logging {
             else if (destinationSynset == None)
               warn("Semantic relation '" + relation.name + "' points to an unknown destination synset '" + destinationSynsetId + "'")
             else
-              wordNet.addSuccessor(sourceSynset.get, relation, destinationSynset.get)
+              wordNet.store.addSuccessor(sourceSynset.get, relation, destinationSynset.get)
           case destinationType =>
             throw new RuntimeException("Semantic relation '" + relation.name + "' has incorrect destination type " + destinationType)
         }
@@ -132,7 +129,7 @@ class LmfHandler(wordNet: WordNet) extends DefaultHandler with Logging {
   private def createStringRelations {
     for ((sourceSynsetId, relationName, destination) <- stringRelationsTuples) {
       val relation = wordNet.schema.getRelation(relationName, scala.collection.immutable.Map((Relation.Source, Set[DataType](SynsetType)))).getOrElse {
-        wordNet.store.add(Relation(relationName, SynsetType, StringType))
+        wordNet.store.addRelation(Relation.binary(relationName, SynsetType, StringType))
         wordNet.schema.demandRelation(relationName, scala.collection.immutable.Map((Relation.Source, Set[DataType](SynsetType))))
       }
 
@@ -144,7 +141,7 @@ class LmfHandler(wordNet: WordNet) extends DefaultHandler with Logging {
             if (sourceSynset == None)
               warn("Relation '" + relation.name + "' points to an empty or unknown source synset '" + sourceSynsetId + "'")
             else
-              wordNet.addSuccessor(sourceSynset.get, relation, destination)
+              wordNet.store.addSuccessor(sourceSynset.get, relation, destination)
           case destinationType =>
             throw new RuntimeException("Relation '" + relation.name + "' has incorrect destination type " + destinationType)
         }

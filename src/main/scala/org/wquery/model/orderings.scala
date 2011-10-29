@@ -6,7 +6,19 @@ object WQueryOrdering extends Ordering[Any] {
       case (left: Synset, right: Synset) =>
         left.id compare right.id
       case (left: Sense, right: Sense) =>
-        left.id compare right.id
+        val wordFormComparison = left.wordForm compare right.wordForm
+
+        if (wordFormComparison == 0) {
+          val senseNumberComparison = left.senseNumber compare right.senseNumber
+
+          if (senseNumberComparison == 0) {
+            left.pos compare right.pos
+          } else {
+            senseNumberComparison
+          }
+        } else {
+          wordFormComparison
+        }
       case (left: String, right: String) =>
         left compare right
       case (left: Int, right: Int) =>
@@ -20,14 +32,20 @@ object WQueryOrdering extends Ordering[Any] {
       case (left: Boolean, right: Boolean) =>
         left compare right
       case (left: Arc, right: Arc) =>
-        if (left.relation.name != right.relation.name)
-            left.relation.name compare right.relation.name
-        else if (left.from != right.from)
-            left.from compare right.from
-        else
+        val nameComparison = left.relation.name compare right.relation.name
+        if (nameComparison != 0)
+          nameComparison
+        else{
+          val fromComparison = left.from compare right.from
+
+          if (fromComparison != 0) {
+            fromComparison
+          } else {
             left.to compare right.to
-      case _ =>
-        throw new IllegalArgumentException("Objects " + left + " and " + right + " cannot be compared")
+          }
+        }
+      case (left, right) =>
+        DataType.fromValue(left).rank compare DataType.fromValue(right).rank
     }
   }
 }
