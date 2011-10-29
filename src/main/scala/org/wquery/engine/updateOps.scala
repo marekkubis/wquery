@@ -103,8 +103,8 @@ case class AddSynsetsOp(valuesOp: AlgebraOp, patterns: List[PropertyAssignmentPa
 
     for (tuple <- valuesOp.evaluate(wordNet, bindings).paths) {
       tuple.last match {
-        case NewSynset(senses) =>
-          wordNet.store.addSynset(None, senses, assignments)
+        case newSynset: NewSynset =>
+          wordNet.store.addSynset(None, newSynset.senses, assignments)
         case _ =>
           // do nothing
       }
@@ -204,8 +204,8 @@ case class NewSynsetOp(sensesOp: AlgebraOp) extends AlgebraOp {
         if (wordNet.store.getSenses(synset) == senses)
           synset
         else
-          NewSynset(senses)
-      }.getOrElse(NewSynset(senses))
+          new NewSynset(senses)
+      }.getOrElse(new NewSynset(senses))
 
       DataSet.fromValue(synset)
     } else {
@@ -224,7 +224,7 @@ case class NewSynsetOp(sensesOp: AlgebraOp) extends AlgebraOp {
   def bindingsPattern = BindingsPattern()
 }
 
-case class NewSynset(senses: List[Sense]) extends Synset("synset#" + senses.head.toString)
+class NewSynset(val senses: List[Sense]) extends Synset("synset#" + senses.head.toString)
 
 case class CreateRelationFromPatternOp(name: String, pattern: RelationalPattern, sourceType: NodeType, destinationType: NodeType) extends UpdateOp {
   def update(wordNet: WordNet, bindings: Bindings) {

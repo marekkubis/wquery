@@ -305,7 +305,8 @@ class GridHandler(wordnet: WordNet) extends DefaultHandler with Logging {
     case BooleanType => 2
     case IntegerType => 3
     case FloatType => 4
-    case StringType => 5  
+    case POSType => 5
+    case StringType => 6
   } 
   
   private def warnInvalidSubtag(tag: String, content: String, attr: String) 

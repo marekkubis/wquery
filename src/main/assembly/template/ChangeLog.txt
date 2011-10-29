@@ -1,4 +1,9 @@
 =====================
+0.5.0 (29 Oct 2011)
+=====================
+        * WUpdate integration
+
+=====================
 0.4.0 (27 May 2011)
 =====================
         * regular path expressions with variables
