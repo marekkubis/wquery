@@ -23,9 +23,9 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="Maven: org.scala-lang:scala-library:2.9.1" level="project" />
     <orderEntry type="library" name="Maven: org.scala-lang:scala-swing:2.9.1" level="project" />
-    <orderEntry type="library" name="Maven: org.slf4j:slf4j-api:1.6.1" level="project" />
-    <orderEntry type="library" name="Maven: ch.qos.logback:logback-classic:0.9.29" level="project" />
-    <orderEntry type="library" name="Maven: ch.qos.logback:logback-core:0.9.29" level="project" />
+    <orderEntry type="library" name="Maven: org.slf4j:slf4j-api:1.6.4" level="project" />
+    <orderEntry type="library" name="Maven: ch.qos.logback:logback-classic:1.0.0" level="project" />
+    <orderEntry type="library" name="Maven: ch.qos.logback:logback-core:1.0.0" level="project" />
     <orderEntry type="library" name="Maven: se.scalablesolutions.akka:akka-stm:1.2" level="project" />
     <orderEntry type="library" name="Maven: org.multiverse:multiverse-alpha:0.6.2" level="project" />
     <orderEntry type="library" name="Maven: se.scalablesolutions.akka:akka-actor:1.2" level="project" />
