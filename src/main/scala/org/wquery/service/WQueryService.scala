@@ -32,15 +32,9 @@ object WQueryService {
       
       qargs.asInstanceOf[List[String]].foreach {qarg =>
         val qin = new QueryReader(new FileReader(qarg))
-        var query = ""
           
-        do {
-          query = qin.readQuery
-            
-          if (query != null && query.trim != "") {
-            println(emitter.emit(wquery.execute(query)))
-          }
-        } while (query != null)
+        while(!qin.isEof)
+          qin.readQuery.map(query => println(emitter.emit(wquery.execute(query))))
             
         qin.close            
       }

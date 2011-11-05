@@ -3,13 +3,15 @@ import java.io.{BufferedReader, Reader}
 
 class QueryReader(reader: Reader) {
   private val in = new BufferedReader(reader)
-  
+  private var eof = false
+
   def close = in.close
+
+  def isEof = eof
   
   def readQuery = {
     val builder = new StringBuilder    
     var stop = false
-    var eof = false
     
     while (!stop) {       
       in.read match {
@@ -39,13 +41,16 @@ class QueryReader(reader: Reader) {
           builder append chr.asInstanceOf[Char]  
       }
       
-      if (eof) {
+      if (eof)
         stop = true
-      }
     }
     
     val query = builder.toString
-    if (eof && query.trim == "") null else query
+
+    if (query.trim == "")
+      None
+    else
+      Some(query)
   }
   
   private def skipSingleLineComment(): Boolean = {
