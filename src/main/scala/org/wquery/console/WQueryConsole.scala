@@ -3,7 +3,7 @@ import org.wquery.{WQueryProperties, WQuery}
 import org.wquery.utils.Logging
 import org.clapper.argot.{ArgotUsageException, ArgotParser}
 import org.clapper.argot.ArgotConverters._
-import java.io.{File, FileReader, Reader}
+import java.io.{FileReader, Reader}
 import org.wquery.emitter.{WQueryEmitter, RawWQueryEmitter, PlainWQueryEmitter}
 
 object WQueryConsole extends Logging {
