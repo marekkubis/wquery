@@ -5,6 +5,8 @@ import org.clapper.argot.{ArgotUsageException, ArgotParser}
 import org.clapper.argot.ArgotConverters._
 import java.io.{FileReader, Reader}
 import org.wquery.emitter.{WQueryEmitter, RawWQueryEmitter, PlainWQueryEmitter}
+import org.slf4j.LoggerFactory
+import ch.qos.logback.classic.{Logger, Level}
 
 object WQueryConsole extends Logging {
   val WQueryBanner = "WQuery " + WQueryProperties.version + "\n" + WQueryProperties.copyright
@@ -16,8 +18,12 @@ object WQueryConsole extends Logging {
   def main(args: Array[String]) {
     try {
       argsParser.parse(args)
-
       val quiet = quietOption.value.getOrElse(false)
+
+      if (quiet) {
+        tryDisableLoggers
+      }
+
       val wquery = WQuery.createInstance(wordnetParameter.value.get)
       val emitter = if (quiet) new RawWQueryEmitter else new PlainWQueryEmitter
 
@@ -33,6 +39,19 @@ object WQueryConsole extends Logging {
         println(e.message)
         System.exit(1)
     }
+  }
+
+  private def tryDisableLoggers {
+    // slf4j - wquery and akka
+    LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME) match {
+      case logger: Logger =>
+        logger.setLevel(Level.OFF)
+      case logger =>
+        logger.warn("Cannot disable the root logger in -q mode (the logger is not an instance of " + classOf[Logger].getName + ")")
+    }
+
+    // java.util.Logging - multiverse
+    java.util.logging.Logger.getLogger("").setLevel(java.util.logging.Level.OFF);
   }
 
   private def readQueriesFromReader(reader: Reader, wquery: WQuery, emitter: WQueryEmitter, quiet: Boolean) {
