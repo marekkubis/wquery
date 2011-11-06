@@ -12,6 +12,15 @@ object WQueryConsole extends Logging {
   val WQueryBanner = "WQuery " + WQueryProperties.version + "\n" + WQueryProperties.copyright
   val argsParser = new ArgotParser("wquery", preUsage = Some(WQueryBanner))
   val quietOption = argsParser.flag[Boolean](List("q", "quiet"), "Silent mode")(convert = convertFlag)
+  val emitterOption = argsParser.option[WQueryEmitter](List("e", "emitter"), "class", "Emitter class to be used (by default " + classOf[PlainWQueryEmitter].getName + ")") {
+    (className, opt) =>
+      try {
+        Class.forName(className).newInstance.asInstanceOf[WQueryEmitter]
+      } catch {
+        case e: Exception =>
+         argsParser.usage("Unable to load emitter " + className + " (" + e.getClass.getName + ").")
+      }
+  }
   val wordnetParameter = argsParser.parameter[String]("wordnet", "Wordnet to be loaded", false)
   val queryParameter = argsParser.multiParameter[String]("queries", "File containing queries to be executed after loading the wordnet", true)
 
@@ -20,12 +29,11 @@ object WQueryConsole extends Logging {
       argsParser.parse(args)
       val quiet = quietOption.value.getOrElse(false)
 
-      if (quiet) {
+      if (quiet)
         tryDisableLoggers
-      }
 
       val wquery = WQuery.createInstance(wordnetParameter.value.get)
-      val emitter = if (quiet) new RawWQueryEmitter else new PlainWQueryEmitter
+      val emitter = emitterOption.value.getOrElse(new PlainWQueryEmitter)
 
       for (queryFile <- queryParameter.value)
         readQueriesFromReader(new FileReader(queryFile), wquery, emitter, quiet)
