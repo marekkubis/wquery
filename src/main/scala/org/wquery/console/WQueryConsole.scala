@@ -3,10 +3,10 @@ import org.wquery.{WQueryProperties, WQuery}
 import org.wquery.utils.Logging
 import org.clapper.argot.{ArgotUsageException, ArgotParser}
 import org.clapper.argot.ArgotConverters._
-import java.io.{FileReader, Reader}
-import org.wquery.emitter.{WQueryEmitter, RawWQueryEmitter, PlainWQueryEmitter}
+import org.wquery.emitter.{WQueryEmitter, PlainWQueryEmitter}
 import org.slf4j.LoggerFactory
 import ch.qos.logback.classic.{Logger, Level}
+import java.io.{StringReader, FileReader, Reader}
 
 object WQueryConsole extends Logging {
   val WQueryBanner = "WQuery " + WQueryProperties.version + "\n" + WQueryProperties.copyright
@@ -21,6 +21,7 @@ object WQueryConsole extends Logging {
          argsParser.usage("Unable to load emitter " + className + " (" + e.getClass.getName + ").")
       }
   }
+  val commandOption = argsParser.multiOption[String](List("c", "command"), "query", "Command mode i.e. executes the submitted query and exits")
   val wordnetParameter = argsParser.parameter[String]("wordnet", "Wordnet to be loaded", false)
   val queryParameter = argsParser.multiParameter[String]("queries", "File containing queries to be executed after loading the wordnet", true)
 
@@ -36,12 +37,17 @@ object WQueryConsole extends Logging {
       val emitter = emitterOption.value.getOrElse(new PlainWQueryEmitter)
 
       for (queryFile <- queryParameter.value)
-        readQueriesFromReader(new FileReader(queryFile), wquery, emitter, quiet)
+        readQueriesFromReader(new FileReader(queryFile), wquery, emitter, !quiet)
 
       if (!quiet)
         println(WQueryBanner)
 
-      readQueriesFromReader(Console.in, wquery, emitter, quiet)
+      if (commandOption.value.isEmpty) {
+        readQueriesFromReader(Console.in, wquery, emitter, !quiet)
+      } else {
+        for (query <- commandOption.value)
+          readQueriesFromReader(new StringReader(query), wquery, emitter, false)
+      }
     } catch {
       case e: ArgotUsageException =>
         println(e.message)
@@ -62,16 +68,15 @@ object WQueryConsole extends Logging {
     java.util.logging.Logger.getLogger("").setLevel(java.util.logging.Level.OFF);
   }
 
-  private def readQueriesFromReader(reader: Reader, wquery: WQuery, emitter: WQueryEmitter, quiet: Boolean) {
+  private def readQueriesFromReader(reader: Reader, wquery: WQuery, emitter: WQueryEmitter, prompt: Boolean) {
     val qin = new QueryReader(reader)
 
     while (!qin.isEof) {
-      if (!quiet)
+      if (prompt)
         print("wquery> ")
 
       qin.readQuery.map { query =>
         val result = wquery.execute(query)
-
         println(emitter.emit(result))
         debug(emitter.emit(result).replaceAll("\n","\\\\n").replaceAll("\t","\\\\t"))
       }
