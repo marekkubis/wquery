@@ -31,13 +31,13 @@
     <orderEntry type="library" name="Maven: se.scalablesolutions.akka:akka-actor:1.2" level="project" />
     <orderEntry type="library" name="Maven: org.clapper:argot_2.9.1:0.3.5" level="project" />
     <orderEntry type="library" name="Maven: org.clapper:grizzled-scala_2.9.1:1.0.8" level="project" />
-    <orderEntry type="library" name="Maven: jline:jline:0.9.94" level="project" />
-    <orderEntry type="library" name="Maven: junit:junit:3.8.1" level="project" />
     <orderEntry type="library" name="Maven: org.mortbay.jetty:jetty:6.1.24" level="project" />
     <orderEntry type="library" name="Maven: org.mortbay.jetty:jetty-util:6.1.24" level="project" />
     <orderEntry type="library" name="Maven: org.mortbay.jetty:servlet-api:2.5-20081211" level="project" />
+    <orderEntry type="library" name="Maven: org.mortbay.jetty:servlet-api:sources:2.5-20081211" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.scalatest:scalatest_2.9.1:1.6.1" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.testng:testng:6.0.1" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: junit:junit:3.8.1" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.beanshell:bsh:2.0b4" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: com.beust:jcommander:1.12" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.yaml:snakeyaml:1.6" level="project" />

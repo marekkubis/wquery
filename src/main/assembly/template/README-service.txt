@@ -4,7 +4,7 @@
   Getting started
   ---------------
   
-  Run wservice to start WQuery Web Service. By defualt the service will be listining on the port 8010.  
+  Run wservice to start WQuery Web Service. By default the service will be listening on the port 8010.
 
   License Terms
   -------------
@@ -14,4 +14,8 @@
   Third-party libraries
   ---------------------
 
-  Beside libraries listed in README.txt WQuery Web Service comes with copy of Jetty Web Container (see docs/licenses/jetty-LICENSE.txt and docs/licenses/jetty-NOTICE.txt).
+  * The software comes with a copy of WQuery library and all its third-party libraries (see README.txt for details).
+
+  * The software comes with a copy of Jetty Web Container (see docs/licenses/jetty-LICENSE.txt, docs/licenses/jetty-NOTICE.txt and http://jetty.codehaus.org/).
+    Jetty Web Container comes with a copy of Servlet Specification API (see docs/licenses/servlet-api-LICENSE.txt).
+    The source code of Servlet Specification API can be found in lib/service/servlet-api-2.5-20081211-sources.jar.

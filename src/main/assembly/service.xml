@@ -12,7 +12,7 @@
 			<includes>
 				<include>org.mortbay.jetty:jetty</include>
                 <include>org.mortbay.jetty:jetty-util</include>
-                <include>org.mortbay.jetty:servlet-api</include>				
+                <include>org.mortbay.jetty:servlet-api:*</include>
 			</includes>
 		</dependencySet>			
 	</dependencySets>
@@ -37,13 +37,18 @@
         </file>                
         <file>
             <source>src/main/assembly/template/docs/licenses/jetty-LICENSE.txt</source>
-            <outputDirectory>/docs/licenses/</outputDirectory>
+            <outputDirectory>/docs/licenses</outputDirectory>
             <lineEnding>crlf</lineEnding>            
         </file>                     
         <file>
             <source>src/main/assembly/template/docs/licenses/jetty-NOTICE.txt</source>
-            <outputDirectory>/docs/licenses/</outputDirectory>
+            <outputDirectory>/docs/licenses</outputDirectory>
             <lineEnding>crlf</lineEnding>            
-        </file>         
-	</files>   	
+        </file>
+        <file>
+            <source>src/main/assembly/template/docs/licenses/servlet-api-LICENSE.txt</source>
+            <outputDirectory>/docs/licenses</outputDirectory>
+            <lineEnding>crlf</lineEnding>
+        </file>
+	</files>
 </assembly>

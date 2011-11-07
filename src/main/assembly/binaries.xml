@@ -10,6 +10,9 @@
 			<outputDirectory>/libs</outputDirectory>
 			<excludes>
 				<exclude>org.wquery:wquery</exclude>
+                <exclude>org.mortbay.jetty:jetty</exclude>
+                <exclude>org.mortbay.jetty:jetty-util</exclude>
+                <exclude>org.mortbay.jetty:servlet-api</exclude>
 			</excludes>
 		</dependencySet>
 	</dependencySets>
@@ -69,33 +72,19 @@
         <file>
             <source>target/site/user-guide.pdf</source>
             <outputDirectory>/docs</outputDirectory>
-        </file>       
-        
+        </file>
+	</files>
+    <fileSets>
         <!-- template/docs/licenses -->
-        <file>
-            <source>src/main/assembly/template/docs/licenses/log4j-LICENSE.txt</source>
+        <fileSet>
+            <directory>src/main/assembly/template/docs/licenses</directory>
             <outputDirectory>/docs/licenses/</outputDirectory>
             <lineEnding>crlf</lineEnding>
-        </file>                     
-        <file>
-            <source>src/main/assembly/template/docs/licenses/log4j-NOTICE.txt</source>
-            <outputDirectory>/docs/licenses/</outputDirectory>
-            <lineEnding>crlf</lineEnding>
-        </file>                     
-        <file>
-            <source>src/main/assembly/template/docs/licenses/scala-LICENSE.txt</source>
-            <outputDirectory>/docs/licenses/</outputDirectory>
-            <lineEnding>crlf</lineEnding>
-        </file>                     
-        <file>
-            <source>src/main/assembly/template/docs/licenses/slf4j-LICENSE.txt</source>
-            <outputDirectory>/docs/licenses/</outputDirectory>
-            <lineEnding>crlf</lineEnding>
-        </file>                     
-        <file>
-            <source>src/main/assembly/template/docs/licenses/wquery-LICENSE.txt</source>
-            <outputDirectory>/docs/licenses/</outputDirectory>
-            <lineEnding>crlf</lineEnding>
-        </file>                             
-	</files>   	
+            <excludes>
+                <exclude>jetty-LICENSE.txt</exclude>
+                <exclude>jetty-NOTICE.txt</exclude>
+                <exclude>servlet-api-LICENSE.txt</exclude>
+            </excludes>
+        </fileSet>
+    </fileSets>
 </component>
