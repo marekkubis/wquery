@@ -4,4 +4,4 @@
 #       WQuery web service
 #
 
-java $JAVA_OPTS -classpath "${project.build.finalName}.${project.packaging}" org.wquery.service.WQueryService $*
+java $JAVA_OPTS -classpath "${project.build.finalName}.${project.packaging}" org.wquery.service.WQueryService "$@"
