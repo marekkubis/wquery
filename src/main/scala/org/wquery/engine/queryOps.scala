@@ -787,7 +787,7 @@ case class ArcPattern(relation: Option[Relation], source: String, destinations: 
   override def toString = (source::relation.map(_.name).getOrElse("_")::destinations).mkString("^")
 
   private def demandArgumentType(argument: String) = {
-    relation.map(rel => Set(rel.demandArgument(argument))).getOrElse(NodeType.all).asInstanceOf[Set[DataType]]
+    relation.map(rel => Set(rel.demandArgument(argument).nodeType)).getOrElse(NodeType.all).asInstanceOf[Set[DataType]]
   }
 }
 
@@ -900,7 +900,7 @@ case class FetchOp(relation: Relation, from: List[(String, List[Any])], to: List
     val args = from.map(_._1) ++ to
 
     if (args.isDefinedAt(pos))
-      Set(relation.demandArgument(args(pos)))
+      Set(relation.demandArgument(args(pos)).nodeType)
     else
       Set.empty
   }

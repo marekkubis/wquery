@@ -249,7 +249,7 @@ class InMemoryWordNetStore extends WordNetStore {
   }
 
   private def getRequiredBys(requiredType: NodeType) = {
-    relations.flatMap(relation => requiredBys(relation).filter(name => relation.arguments(name) == requiredType).map(name => (relation, name)))
+    relations.flatMap(relation => requiredBys(relation).filter(name => relation.demandArgument(name).nodeType == requiredType).map(name => (relation, name)))
   }
 
   private def getRelationByNodeType(nodeType: NodeType) = (nodeType: @unchecked) match {
@@ -303,7 +303,7 @@ class InMemoryWordNetStore extends WordNetStore {
   }
 
   private def handleSymmetryForAddLink(relation: Relation, tuple: Map[String, Any]) {
-    if (relation.arguments.size == 2 && relation.arguments(Relation.Source) == relation.arguments(Relation.Destination))
+    if (relation.arguments.size == 2 && relation.sourceType == relation.destinationType.get)
     symmetry(relation) match {
       case Symmetric =>
         if (symmetryActions(relation) == Relation.Restore)
@@ -383,8 +383,8 @@ class InMemoryWordNetStore extends WordNetStore {
         }
       }
 
-      for (argument <- relation.arguments.filter(_._2 == nodeType).map(_._1))
-        removeMatchingLinksByNode(relation, Map((argument, obj)), Some(obj), withDependentNodes, withCollectionDependentNodes)
+      for (argument <- relation.arguments.filter(_.nodeType == nodeType))
+        removeMatchingLinksByNode(relation, Map((argument.name, obj)), Some(obj), withDependentNodes, withCollectionDependentNodes)
     }
   }
 
@@ -439,7 +439,7 @@ class InMemoryWordNetStore extends WordNetStore {
 
     if (withDependentNodes) {
       for (dependentArg <- dependent(relation))
-        removeNode(relation.arguments(dependentArg), tuple(dependentArg), true, true)
+        removeNode(relation.demandArgument(dependentArg).nodeType, tuple(dependentArg), true, true)
     }
 
     if (withCollectionDependentNodes) {
@@ -447,7 +447,7 @@ class InMemoryWordNetStore extends WordNetStore {
         val collectionDependentNode = tuple(collectionDependentArg)
 
         if (relationSuccessors(collectionDependentArg, collectionDependentNode).isEmpty)
-          removeNode(relation.arguments(collectionDependentArg), collectionDependentNode, true, true)
+          removeNode(relation.demandArgument(collectionDependentArg).nodeType, collectionDependentNode, true, true)
       }
     }
 
@@ -462,7 +462,7 @@ class InMemoryWordNetStore extends WordNetStore {
   }
 
   private def handleSymmetryForRemoveLink(relation: Relation, tuple: Map[String, Any], node: Option[Any], symmetricEdge: Boolean) {
-    if (relation.arguments.size == 2 && relation.arguments(Relation.Source) == relation.arguments(Relation.Destination) && !symmetricEdge)
+    if (relation.arguments.size == 2 && relation.sourceType == relation.destinationType.get && !symmetricEdge)
     symmetry(relation) match {
       case Symmetric =>
         removeLinkByNode(relation, Map((Relation.Source, tuple(Relation.Destination)),(Relation.Destination, tuple(Relation.Source))), node, symmetricEdge = true)
@@ -542,9 +542,9 @@ class InMemoryWordNetStore extends WordNetStore {
   private def copyLinks(relation: Relation, requiredType: DataType, source: Any, destination: Any, skippedLinks: List[Map[String, Any]]) {
     val relationSuccessors = successors(relation)
 
-    for ((argumentName, argumentType) <- relation.arguments if argumentType == requiredType) {
-      for (succs <- relationSuccessors.get((argumentName, source)); successor <- succs) {
-        val tuple = ((argumentName, destination)::((successor - argumentName).toList)).toMap
+    for (argument <- relation.arguments if argument.nodeType == requiredType) {
+      for (succs <- relationSuccessors.get((argument.name, source)); successor <- succs) {
+        val tuple = ((argument.name, destination)::((successor - argument.name).toList)).toMap
 
         if (!skippedLinks.contains(tuple) && !containsLink(relation, tuple))
           addLink(relation, tuple)

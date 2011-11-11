@@ -21,7 +21,7 @@ object WordNet {
   val SynsetToId = Relation.binary("id", SynsetType, StringType)
   val IdToSense = Relation.binary("id_sense", StringType, SenseType)
   val SenseToId = Relation.binary("id", SenseType, StringType)
-  val SenseToWordFormSenseNumberAndPos = Relation("literal", Map((Relation.Source, SenseType), (Relation.Destination, StringType), ("num", IntegerType), ("pos", POSType)))
+  val SenseToWordFormSenseNumberAndPos = Relation("literal", Set(Argument(Relation.Source, SenseType), Argument(Relation.Destination, StringType), Argument("num", IntegerType), Argument("pos", POSType)))
   val SenseToSenseNumber = Relation.binary("sensenum", SenseType, IntegerType)
   val SenseToPos = Relation.binary("pos", SenseType, POSType)
   val SenseToWordForm = Relation.binary("word", SenseType, StringType)

@@ -502,7 +502,7 @@ case class VariableRelationalExpr(variable: StepVariable) extends RelationalExpr
 case class ArcExpr(ids: List[ArcExprArgument]) extends RelationalExpr {
   def creationPattern(wordNet: WordNetSchema) = {
     if (ids.size > 1 && ids(0).nodeType.isDefined && ids.exists(_.name == Relation.Source) && ids(1).nodeType.isEmpty && ids(1) != "_" && ids.tail.tail.forall(_.nodeType.isDefined)) {
-      val relation = Relation(ids(1).name, ((ids(0).name, ids(0).nodeType.get) +: ids.tail.tail.map(elem => (elem.name, elem.nodeType.get))).toMap)
+      val relation = Relation(ids(1).name,(Argument(ids(0).name, ids(0).nodeType.get) :: ids.tail.tail.map(elem => Argument(elem.name, elem.nodeType.get))).toSet)
 
       ArcPattern(Some(relation), ids(0).name, ids.tail.tail.map(_.name))
     } else {

@@ -1,22 +1,28 @@
 package org.wquery.model
 import org.wquery.WQueryModelException
 
-case class Relation(name: String, arguments: Map[String, NodeType]) {
-  val sourceType = arguments(Relation.Source) 
+case class Relation(name: String, arguments: Set[Argument]) {
+  private val argumentsByName = arguments.map(arg => (arg.name, arg)).toMap
+
+  val sourceType = argumentsByName(Relation.Source).nodeType
   
-  val destinationType = arguments.get(Relation.Destination)
+  val destinationType = argumentsByName.get(Relation.Destination).map(_.nodeType)
   
-  val argumentNames = Relation.Source :: (arguments - Relation.Source - Relation.Destination).keys.toList.sortWith((x, y) => x < y) ++ List(Relation.Destination)
+  val argumentNames = Relation.Source :: (arguments.map(_.name) - Relation.Source - Relation.Destination).toList.sortWith((x, y) => x < y) ++ List(Relation.Destination)
   
   def demandArgument(argument: String) = {
-    arguments.getOrElse(argument, throw new WQueryModelException("Relation '" + name + "' does not have argument '" + argument + "'"))      
+    argumentsByName.getOrElse(argument, throw new WQueryModelException("Relation '" + name + "' does not have argument '" + argument + "'"))
   }
-  
+
+  def getArgument(argument: String) = argumentsByName.get(argument)
+
   override def toString = name
 
-  if (!arguments.contains(Relation.Source))
+  if (!argumentsByName.contains(Relation.Source))
     throw new IllegalArgumentException("An attempt to create Relation '" + name + "' without source argument")
 }
+
+case class Argument(name: String, nodeType: NodeType)
 
 object Relation {
   // default argument names
@@ -36,11 +42,11 @@ object Relation {
   val PropertyActions = List(Restore, Preserve)
 
   def unary(name: String, sourceType: NodeType) = {
-    Relation(name, Map((Relation.Source, sourceType)))
+    Relation(name, Set(Argument(Relation.Source, sourceType)))
   }
 
   def binary(name: String, sourceType: NodeType, destinationType: NodeType) = {
-    Relation(name, Map((Relation.Source, sourceType), (Relation.Destination, destinationType)))
+    Relation(name, Set(Argument(Relation.Source, sourceType), Argument(Relation.Destination, destinationType)))
   }
 }
 
