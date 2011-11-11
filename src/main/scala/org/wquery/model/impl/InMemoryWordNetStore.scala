@@ -105,7 +105,8 @@ class InMemoryWordNetStore extends WordNetStore {
       val buffer = new DataSetBuffer
 
       for (relation <- relations if relation.arguments.size > 1;
-           source <- relation.argumentNames; destination <- relation.argumentNames if (source != destination))
+           source <- relation.argumentNames if through == "_" || through == source;
+           destination <- relation.argumentNames if to.isEmpty || to.contains(destination) && source != destination)
         buffer.append(extendWithRelationTuples(dataSet, relation, from, source, List(destination)))
 
       buffer.toDataSet
