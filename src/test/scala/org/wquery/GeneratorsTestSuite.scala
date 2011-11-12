@@ -92,9 +92,15 @@ class GeneratorsTestSuite extends WQueryTestSuite {
 
   @Test def testMultipleArcGenerator() = result of ("\\source^literal^num^pos") should equal ("source^literal^num\nsource^literal^pos\n")
 
-  @Test def testAnyRelationArcGenerator() = result of ("count(\\_)") should equal ("128\n")
+  @Test def testAnyRelationArcGenerator() = result of ("count(\\_)") should equal ("64\n")
 
-  @Test def testAnyBinaryRelationArcGenerator() = result of ("count(\\source^_^destination)") should equal ("29\n")
+  @Test def testAnyBinaryRelationArcGenerator() = result of ("count(\\source^_^destination)") should equal ("25\n")
+
+  @Test def testAnyBinaryRelationWithDestinationTypeArcGenerator() = result of ("count(\\source^_^destination&synset)") should equal ("12\n")
+
+  @Test def testAnyBinaryRelationWithSourceTypeArcGenerator() = result of ("count(\\source&synset^_^destination)") should equal ("15\n")
+
+  @Test def testAnyBinaryRelationWithSourceAndDestinationTypesArcGenerator() = result of ("count(\\source&synset^_^destination&synset)") should equal ("9\n")
 
   @Test def testFunctionGenerator() = result of ("max('').senses") should equal ("zymurgy senses zymurgy:1:n\n")
 

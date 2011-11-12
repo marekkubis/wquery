@@ -97,8 +97,9 @@ class InMemoryWordNetStore extends WordNetStore {
     val toMap = to.toMap
 
     for (relation <- relations if relation.arguments.size > 1;
-         source <- relation.argumentNames if through._1 == "_" || through._1 == source;
-         destination <- relation.argumentNames if toMap.isEmpty || toMap.get(destination).map(nodeTypeOption => nodeTypeOption.map(_ == relation.demandArgument(destination).nodeType).getOrElse(true)).getOrElse(false) && source != destination)
+         source <- relation.argumentNames if (through._1 == "_" || through._1 == source) && through._2.map(_ == relation.demandArgument(source).nodeType).getOrElse(true);
+         destination <- relation.argumentNames if toMap.isEmpty || toMap.get(destination).map(nodeTypeOption => nodeTypeOption.map(_ == relation.demandArgument(destination).nodeType).getOrElse(true)).getOrElse(false);
+         if source != destination)
       buffer.append(extendWithRelationTuples(dataSet, relation, from, source, List(destination)))
 
     buffer.toDataSet

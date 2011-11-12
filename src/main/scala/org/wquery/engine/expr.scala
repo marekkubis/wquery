@@ -755,10 +755,13 @@ case class ArcByArcExprReq(expr: ArcExpr) extends EvaluableExpr {
       val arcs = pattern.destinations.map(destination => List(Arc(pattern.relation.get, pattern.source.name, destination.name)))
       ConstantOp(DataSet(if (arcs.isEmpty) List(List(Arc(pattern.relation.get, pattern.source.name, pattern.source.name))) else arcs))
     }.getOrElse {
+      val toMap = pattern.destinations.map(arg => (arg.name, arg.nodeType)).toMap
       val arcs = (for (relation <- wordNet.relations;
-        source <- if (pattern.source.name == "_") relation.argumentNames else relation.argumentNames.filter(_ == pattern.source.name);
-        destination <- if (pattern.destinations.isEmpty) relation.argumentNames else relation.argumentNames.filter(pattern.destinations.map(_.name).contains(_)))
-          yield List(Arc(relation, source, destination)))
+           source <- relation.argumentNames if (pattern.source.name == "_" || pattern.source.name == source)  && pattern.source.nodeType.map(_ == relation.demandArgument(source).nodeType).getOrElse(true);
+           destination <- relation.argumentNames if toMap.isEmpty || toMap.get(destination).map(nodeTypeOption =>
+             nodeTypeOption.map(_ == relation.demandArgument(destination).nodeType).getOrElse(true)).getOrElse(false);
+           if relation.arguments.size == 1 || source != destination)
+        yield List(Arc(relation, source, destination)))
 
       ConstantOp(DataSet(arcs))
     }
