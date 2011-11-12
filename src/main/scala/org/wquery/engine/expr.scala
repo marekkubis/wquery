@@ -504,7 +504,7 @@ case class ArcExpr(ids: List[ArcExprArgument]) extends RelationalExpr {
     if (ids.size > 1 && ids(0).nodeType.isDefined && ids.exists(_.name == Relation.Source) && ids(1).nodeType.isEmpty && ids(1) != "_" && ids.tail.tail.forall(_.nodeType.isDefined)) {
       val relation = Relation(ids(1).name,(Argument(ids(0).name, ids(0).nodeType.get) :: ids.tail.tail.map(elem => Argument(elem.name, elem.nodeType.get))).toSet)
 
-      ArcPattern(Some(relation), ids(0).name, ids.tail.tail.map(_.name))
+      ArcPattern(Some(relation), ArcPatternArgument(ids(0).name, ids(0).nodeType), ids.tail.tail.map(id => ArcPatternArgument(id.name, id.nodeType)))
     } else {
       throw new WQueryStaticCheckException("Arc expression " + toString + " does not determine a relation to create unambiguously")
     }
@@ -512,13 +512,13 @@ case class ArcExpr(ids: List[ArcExprArgument]) extends RelationalExpr {
 
   def evaluationPattern(wordNet: WordNetSchema, contextTypes: Set[DataType]) = {
     ((ids: @unchecked) match {
-      case List(ArcExprArgument("_", None)) =>
-        Some(ArcPattern(None, "_", Nil))
+      case List(ArcExprArgument("_", nodeType)) =>
+        Some(ArcPattern(None, ArcPatternArgument("_", nodeType.map(NodeType.fromName(_))), Nil))
       case List(arg) =>
         if (arg.nodeType.isEmpty) {
           wordNet.getRelation(arg.name, Map((Relation.Source, contextTypes)))
-            .map(relation => ArcPattern(Some(relation), Relation.Source,
-              relation.destinationType.map(_ => List(Relation.Destination)).getOrElse(Nil)))
+            .map(relation => ArcPattern(Some(relation), ArcPatternArgument(Relation.Source, Some(relation.sourceType)),
+              relation.destinationType.map(destinationType => List(ArcPatternArgument(Relation.Destination, Some(destinationType)))).getOrElse(Nil)))
         } else {
           throw new WQueryStaticCheckException("Relation name " + arg.name + " cannot be followed by type specifier &")
         }
@@ -540,25 +540,25 @@ case class ArcExpr(ids: List[ArcExprArgument]) extends RelationalExpr {
     val sourceTypes = left.nodeType.map(Set[DataType](_)).getOrElse(contextTypes)
     val sourceName = left.name
     val relationName = right.name
-    val destinationNames = if (rest.isEmpty) List(Relation.Destination) else rest.map(_.name)
+    val destinations = if (rest.isEmpty) List(ArcPatternArgument(Relation.Destination, None)) else rest.map(arg => ArcPatternArgument(arg.name, arg.nodeType))
 
     if (relationName == "_") {
-      Some(ArcPattern(None, sourceName, destinationNames))
+      Some(ArcPattern(None, ArcPatternArgument(sourceName, left.nodeType), destinations))
     } else {
       wordNet.getRelation(right.name, ((sourceName, sourceTypes) +: (rest.map(_.nodeDescription))).toMap)
-        .map(relation => ArcPattern(Some(relation), sourceName, destinationNames))
+        .map(relation => ArcPattern(Some(relation), ArcPatternArgument(sourceName, Some(relation.sourceType)), destinations))
     }
   }
 
   private def evaluateAsDestinationTypePattern(wordNet: WordNetSchema, contextTypes: Set[DataType], left: ArcExprArgument, right: ArcExprArgument, rest: List[ArcExprArgument]) = {
     val relationName = left.name
-    val destinationNames = (right::rest).map(_.name)
+    val destinations = (right::rest).map(arg => ArcPatternArgument(arg.name, arg.nodeType))
 
     if (relationName == "_") {
-      Some(ArcPattern(None, Relation.Source, destinationNames))
+      Some(ArcPattern(None, ArcPatternArgument(Relation.Source, None), destinations))
     } else {
       wordNet.getRelation(relationName, ((Relation.Source, contextTypes) +: right.nodeDescription +: (rest.map(_.nodeDescription))).toMap)
-        .map(relation => ArcPattern(Some(relation), Relation.Source, destinationNames))
+        .map(relation => ArcPattern(Some(relation), ArcPatternArgument(Relation.Source, Some(relation.sourceType)), destinations))
     }
   }
 
@@ -654,9 +654,11 @@ case class SynsetByExprReq(expr: EvaluableExpr) extends EvaluableExpr {
       if (!contextTypes.isEmpty) {
         val patterns = contextTypes.map{ contextType => (contextType: @unchecked) match {
           case StringType =>
-            ArcPattern(Some(WordNet.WordFormToSynsets), Relation.Source, List(Relation.Destination))
+            ArcPattern(Some(WordNet.WordFormToSynsets), ArcPatternArgument(Relation.Source, Some(WordNet.WordFormToSynsets.sourceType)),
+              List(ArcPatternArgument(Relation.Destination, WordNet.WordFormToSynsets.destinationType)))
           case SenseType =>
-            ArcPattern(Some(WordNet.SenseToSynset), Relation.Source, List(Relation.Destination))
+            ArcPattern(Some(WordNet.SenseToSynset), ArcPatternArgument(Relation.Source, Some(WordNet.SenseToSynset.sourceType)),
+              List(ArcPatternArgument(Relation.Destination, WordNet.SenseToSynset.destinationType)))
         }}.toList
 
         ProjectOp(ExtendOp(op, 0, RelationUnionPattern(patterns)), ContextRefOp(0, Set(SynsetType)))
@@ -750,12 +752,12 @@ case class ArcByArcExprReq(expr: ArcExpr) extends EvaluableExpr {
     val pattern = if (context.creation) expr.creationPattern(wordNet) else expr.evaluationPattern(wordNet, DataType.all)
 
     pattern.relation.map { relation =>
-      val arcs = pattern.destinations.map(destination => List(Arc(pattern.relation.get, pattern.source, destination)))
-      ConstantOp(DataSet(if (arcs.isEmpty) List(List(Arc(pattern.relation.get, pattern.source, pattern.source))) else arcs))
+      val arcs = pattern.destinations.map(destination => List(Arc(pattern.relation.get, pattern.source.name, destination.name)))
+      ConstantOp(DataSet(if (arcs.isEmpty) List(List(Arc(pattern.relation.get, pattern.source.name, pattern.source.name))) else arcs))
     }.getOrElse {
       val arcs = (for (relation <- wordNet.relations;
-        source <- if (pattern.source == "_") relation.argumentNames else relation.argumentNames.filter(_ == pattern.source);
-        destination <- if (pattern.destinations.isEmpty) relation.argumentNames else relation.argumentNames.filter(pattern.destinations.contains(_)))
+        source <- if (pattern.source.name == "_") relation.argumentNames else relation.argumentNames.filter(_ == pattern.source.name);
+        destination <- if (pattern.destinations.isEmpty) relation.argumentNames else relation.argumentNames.filter(pattern.destinations.map(_.name).contains(_)))
           yield List(Arc(relation, source, destination)))
 
       ConstantOp(DataSet(arcs))

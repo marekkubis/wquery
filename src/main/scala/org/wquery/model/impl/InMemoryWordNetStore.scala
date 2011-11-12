@@ -92,25 +92,24 @@ class InMemoryWordNetStore extends WordNetStore {
     }
   }
 
-  def extend(dataSet: DataSet, relation: Option[Relation], from: Int, through: String, to: List[String]) = {
+  def extend(dataSet: DataSet, from: Int, through: (String, Option[NodeType]), to: List[(String, Option[NodeType])]): DataSet = {
     val buffer = new DataSetBuffer
+    val toMap = to.toMap
 
-    buffer.append(extendWithTuples(dataSet, relation, from, through, to))
-    relation.map(extendWithPatterns(dataSet, _, from, through, to, buffer))
+    for (relation <- relations if relation.arguments.size > 1;
+         source <- relation.argumentNames if through._1 == "_" || through._1 == source;
+         destination <- relation.argumentNames if toMap.isEmpty || toMap.get(destination).map(nodeTypeOption => nodeTypeOption.map(_ == relation.demandArgument(destination).nodeType).getOrElse(true)).getOrElse(false) && source != destination)
+      buffer.append(extendWithRelationTuples(dataSet, relation, from, source, List(destination)))
+
     buffer.toDataSet
   }
 
-  private def extendWithTuples(dataSet: DataSet, relation: Option[Relation], from: Int, through: String, to: List[String]) = {
-    relation.map(extendWithRelationTuples(dataSet, _, from, through, to)).getOrElse {
-      val buffer = new DataSetBuffer
+  def extend(dataSet: DataSet, relation: Relation, from: Int, through: String, to: List[String]) = {
+    val buffer = new DataSetBuffer
 
-      for (relation <- relations if relation.arguments.size > 1;
-           source <- relation.argumentNames if through == "_" || through == source;
-           destination <- relation.argumentNames if to.isEmpty || to.contains(destination) && source != destination)
-        buffer.append(extendWithRelationTuples(dataSet, relation, from, source, List(destination)))
-
-      buffer.toDataSet
-    }
+    buffer.append(extendWithRelationTuples(dataSet, relation, from, through, to))
+    extendWithPatterns(dataSet, relation, from, through, to, buffer)
+    buffer.toDataSet
   }
 
   private def extendWithRelationTuples(dataSet: DataSet, relation: Relation, from: Int, through: String, to: List[String]) = {
@@ -228,7 +227,7 @@ class InMemoryWordNetStore extends WordNetStore {
     val relation = getRelationByNodeType(nodeType)
 
     for ((relation, argument) <- getRequiredBys(nodeType)) {
-      if (!assignments.exists(pattern => pattern.pattern.relation.get == relation && pattern.pattern.source == argument && pattern.op != "-="))
+      if (!assignments.exists(pattern => pattern.pattern.relation.get == relation && pattern.pattern.source.name == argument && pattern.op != "-="))
         throw new WQueryModelException("A new " + nodeType + " does not fulfil required by constrains of the relation '" + relation + "' on the argument '" + argument + "'")
     }
 
@@ -241,7 +240,7 @@ class InMemoryWordNetStore extends WordNetStore {
         case "+=" =>
           tuples.foreach(addLink(assignment.pattern.relation.get, _))
         case ":=" =>
-          setLinks(assignment.pattern.relation.get, assignment.pattern.source, node, tuples)
+          setLinks(assignment.pattern.relation.get, assignment.pattern.source.name, node, tuples)
         case "-=" =>
           tuples.foreach(removeLink(assignment.pattern.relation.get, _, true))
       }
@@ -516,7 +515,7 @@ class InMemoryWordNetStore extends WordNetStore {
       }
 
       for (assignment <- setAssignments) {
-        removeMatchingLinksByNode(assignment.pattern.relation.get, Map((assignment.pattern.source, destination)), Some(destination), false, false)
+        removeMatchingLinksByNode(assignment.pattern.relation.get, Map((assignment.pattern.source.name, destination)), Some(destination), false, false)
         assignment.tuplesFor(destination).foreach(addLink(assignment.pattern.relation.get, _))
       }
 

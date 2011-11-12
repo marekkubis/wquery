@@ -31,9 +31,10 @@ sealed abstract class TupleUpdateOp(val leftOp: AlgebraOp, val pattern: ArcPatte
   def update(wordNet: WordNet, bindings: Bindings) {
     val leftSet = leftOp.evaluate(wordNet, bindings)
     val rightSet = rightOp.evaluate(wordNet, bindings)
+    val destinationNames = pattern.destinations.map(_.name)
 
     for (sources <- leftSet.paths; destinations <- rightSet.paths) {
-      updateWith(wordNet, bindings, pattern.relation.get, ((pattern.source, sources.last) :: pattern.destinations.zip(destinations)).toMap)
+      updateWith(wordNet, bindings, pattern.relation.get, ((pattern.source.name, sources.last) :: destinationNames.zip(destinations)).toMap)
     }
   }
 
@@ -58,13 +59,15 @@ case class SetTuplesOp(leftOp:AlgebraOp, pattern: ArcPattern, rightOp:AlgebraOp)
     val rightSet = rightOp.evaluate(wordNet, bindings)
 
     if (!rightSet.isEmpty) {
+      val destinationNames = pattern.destinations.map(_.name)
+
       for (tuple <- leftSet.paths) {
-        wordNet.store.setLinks(pattern.relation.get, pattern.source, tuple.last,
-          (for (destinations <- rightSet.paths) yield ((pattern.source, tuple.last)::pattern.destinations.zip(destinations)).toMap))
+        wordNet.store.setLinks(pattern.relation.get, pattern.source.name, tuple.last,
+          (for (destinations <- rightSet.paths) yield ((pattern.source.name, tuple.last)::destinationNames.zip(destinations)).toMap))
       }
     } else {
       for(tuple <- leftSet.paths)
-        wordNet.store.removeMatchingLinks(pattern.relation.get, Map((pattern.source, tuple.last)))
+        wordNet.store.removeMatchingLinks(pattern.relation.get, Map((pattern.source.name, tuple.last)))
     }
   }
 }

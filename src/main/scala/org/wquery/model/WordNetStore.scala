@@ -8,7 +8,9 @@ trait WordNetStore {
 
   def fetch(relation: Relation, from: List[(String, List[Any])], to: List[String]): DataSet
 
-  def extend(dataSet: DataSet, relation: Option[Relation], from: Int, through: String, to: List[String]): DataSet
+  def extend(dataSet: DataSet, relation: Relation, from: Int, through: String, to: List[String]): DataSet
+
+  def extend(dataSet: DataSet, from: Int, through: (String, Option[NodeType]), to: List[(String, Option[NodeType])]): DataSet
 
   def getSenses(synset: Synset): List[Sense]
 
@@ -85,7 +87,8 @@ trait WordNetStore {
 
 case class PropertyAssignment(pattern: ArcPattern, op: String, values: DataSet) {
   def tuplesFor(node: Any) = {
-    (for (args <- values.paths) yield ((pattern.source, node)::(pattern.destinations.zip(args.slice(args.size - pattern.destinations.size, args.size)))).toMap)
+    val destinationNames = pattern.destinations.map(_.name)
+    (for (args <- values.paths) yield ((pattern.source.name, node)::(destinationNames.zip(args.slice(args.size - pattern.destinations.size, args.size)))).toMap)
   }
 }
 

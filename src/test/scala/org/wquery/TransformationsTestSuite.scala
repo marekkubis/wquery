@@ -94,4 +94,9 @@ class TransformationsTestSuite extends WQueryTestSuite {
     result of ("{car:1:n}.\\$r") should equal ("{ car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n } hypernym { motor vehicle:1:n automotive vehicle:1:n }\n")
   }
 
+  @Test def testAnyRelationTransformation() = result of ("count({car:2:n}._)") should equal ("42\n")
+
+  @Test def testAnyRelationTransformationBySourceAndDestination() = result of ("count({car:2:n}.source^_^destination)") should equal ("12\n")
+
+  @Test def testAnyRelationTransformationBySourceAndDestinationAndNodeType() = result of ("count({car:2:n}.source^_^destination&synset)") should equal ("1\n")
 }

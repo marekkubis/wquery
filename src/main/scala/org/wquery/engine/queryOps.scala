@@ -718,7 +718,7 @@ case class VariableRelationalPattern(variable: StepVariable) extends RelationalP
   def extend(wordNet: WordNetStore, bindings: Bindings, dataSet: DataSet, from: Int) = {
     bindings.lookupStepVariable(variable.name).map {
       case Arc(relation, source, destination) =>
-        wordNet.extend(dataSet, Some(relation), from, source, List(destination))
+        wordNet.extend(dataSet, relation, from, source, List(destination))
       case _ =>
         throw new WQueryEvaluationException("Cannot extend a path using a non-arc value of variable " + variable)
     }.getOrElse(throw new WQueryEvaluationException("Variable " + variable + " is not bound"))
@@ -751,9 +751,10 @@ case class VariableRelationalPattern(variable: StepVariable) extends RelationalP
   override def toString = variable.toString
 }
 
-case class ArcPattern(relation: Option[Relation], source: String, destinations: List[String]) extends RelationalPattern {
+case class ArcPattern(relation: Option[Relation], source: ArcPatternArgument, destinations: List[ArcPatternArgument]) extends RelationalPattern {
   def extend(wordNet: WordNetStore, bindings: Bindings, dataSet: DataSet, from: Int) = {
-    wordNet.extend(dataSet, relation, from, source, destinations)
+    relation.map(wordNet.extend(dataSet, _, from, source.name, destinations.map(_.name)))
+      .getOrElse(wordNet.extend(dataSet, from, (source.name, source.nodeType), destinations.map(dest => (dest.name, dest.nodeType))))
   }
 
   def minSize = 2*destinations.size
@@ -786,10 +787,13 @@ case class ArcPattern(relation: Option[Relation], source: String, destinations: 
 
   override def toString = (source::relation.map(_.name).getOrElse("_")::destinations).mkString("^")
 
-  private def demandArgumentType(argument: String) = {
-    relation.map(rel => Set(rel.demandArgument(argument).nodeType)).getOrElse(NodeType.all).asInstanceOf[Set[DataType]]
+  private def demandArgumentType(argument: ArcPatternArgument) = {
+    relation.map(rel => Set(rel.demandArgument(argument.name).nodeType))
+      .getOrElse(argument.nodeType.map(Set(_)).getOrElse(NodeType.all)).asInstanceOf[Set[DataType]]
   }
 }
+
+case class ArcPatternArgument(name: String, nodeType: Option[NodeType])
 
 case class BindOp(op: AlgebraOp, variables: List[Variable]) extends QueryOp with VariableBindings with VariableTypeBindings {
   def evaluate(wordNet: WordNet, bindings: Bindings) = {
