@@ -9,7 +9,7 @@
   License Terms
   -------------
   
-  This software is provided under the terms of BSD-like license (see docs/licenses/wquery-LICENSE.txt).
+  This software is provided under the terms of a BSD-like license (see docs/licenses/wquery-LICENSE.txt).
 
   Third-party libraries
   ---------------------
