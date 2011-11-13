@@ -1,5 +1,6 @@
     
   WQuery ${version} Web Service - HTTP/JSON based interface to WQuery
+  ===================================================================
 
   Getting started
   ---------------

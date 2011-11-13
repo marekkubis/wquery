@@ -11,7 +11,7 @@ Run wconsole to use WQuery in interactive interpreter mode.
 License Terms
 -------------
 
-This software is provided under the terms of a BSD-like license (see [wquery-LICENSE.txt](wquery/blob/master/src/main/assembly/template/docs/licenses/wquery-LICENSE.txt)).
+This software is provided under the terms of a BSD-like license (see [LICENSE.txt](wquery/blob/master/LICENSE.txt)).
 
 Third-party libraries
 ---------------------

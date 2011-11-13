@@ -1,5 +1,6 @@
     
-  WQuery ${version} - domain-specific query language for WordNet-like lexical databases.
+  WQuery ${version} - domain-specific query language for WordNet-like lexical databases
+  =====================================================================================
 
   Getting started
   ---------------
@@ -9,7 +10,7 @@
   License Terms
   -------------
   
-  This software is provided under the terms of a BSD-like license (see docs/licenses/wquery-LICENSE.txt).
+  This software is provided under the terms of a BSD-like license (see LICENSE.txt).
 
   Third-party libraries
   ---------------------

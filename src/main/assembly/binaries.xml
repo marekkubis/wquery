@@ -47,7 +47,14 @@
             <filtered>true</filtered>
             <lineEnding>crlf</lineEnding>            
         </file>
-        
+        <!-- LICENSE -->
+        <file>
+            <source>LICENSE.txt</source>
+            <outputDirectory>/</outputDirectory>
+            <filtered>true</filtered>
+            <lineEnding>crlf</lineEnding>
+        </file>
+
         <!-- ChangeLog -->
         <file>
             <source>src/main/assembly/template/ChangeLog.txt</source>
