@@ -53,9 +53,9 @@
 	</mailingLists>
 
 	<scm>
-		<connection>scm:svn:https://wquery.svn.sourceforge.net/svnroot/wquery/trunk</connection>
-		<developerConnection>scm:svn:https://wquery.svn.sourceforge.net/svnroot/wquery/trunk/</developerConnection>
-		<url>http://wquery.svn.sourceforge.net/viewvc/wquery/trunk</url>
+		<connection>scm:git:git@github.com:marekkubis/wquery.git</connection>
+		<developerConnection>scm:git:git@github.com:marekkubis/wquery.git</developerConnection>
+		<url>scm:git:git@github.com:marekkubis/wquery.git</url>
 	</scm>
 
 	<properties>
