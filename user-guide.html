@@ -1,0 +1,1337 @@
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <title>WQuery 0.4.0</title><meta name="generator" content="DocBook XSL-NS Stylesheets V1.75.2"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="book" title="WQuery 0.4.0"><div class="titlepage"><div><div><h1 class="title"><a name="d4e1"></a>WQuery 0.4.0</h1></div><div><h2 class="subtitle">User Guide (outdated)</h2></div><div><div class="author"><h3 class="author"><span class="firstname">Marek</span> <span class="surname">Kubis</span></h3><div class="affiliation">
+				<div class="address"><p><br>
+					<code class="email">&lt;<a class="email" href="mailto:marek.kubis@gmail.com">marek.kubis@gmail.com</a>&gt;</code><br>
+				</p></div>
+			</div></div></div><div><p class="copyright">Copyright &copy; 2007-2011 Marek Kubis</p></div></div><hr></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="preface"><a href="#d4e14">Preface</a></span></dt><dt><span class="chapter"><a href="#chgettingstarted">1. Getting started</a></span></dt><dd><dl><dt><span class="sect1"><a href="#d4e21">Prerequisites</a></span></dt><dt><span class="sect1"><a href="#d4e25">Download</a></span></dt><dt><span class="sect1"><a href="#d4e29">Installation</a></span></dt><dt><span class="sect1"><a href="#d4e32">Running the console</a></span></dt><dt><span class="sect1"><a href="#d4e63">WQuery basics</a></span></dt><dt><span class="sect1"><a href="#d4e175">Next steps</a></span></dt></dl></dd><dt><span class="chapter"><a href="#chlanguagereference">2. Language reference</a></span></dt><dd><dl><dt><span class="sect1"><a href="#d4e183">Data types</a></span></dt><dd><dl><dt><span class="sect2"><a href="#d4e185">Basic data types</a></span></dt><dt><span class="sect2"><a href="#d4e201">Tuples</a></span></dt><dt><span class="sect2"><a href="#d4e209">Relations</a></span></dt></dl></dd><dt><span class="sect1"><a href="#d4e324">Generators</a></span></dt><dt><span class="sect1"><a href="#d4e390">Paths</a></span></dt><dt><span class="sect1"><a href="#d4e430">Relational expressions</a></span></dt><dt><span class="sect1"><a href="#d4e503">Filters</a></span></dt><dd><dl><dt><span class="sect2"><a href="#d4e530">Dataset-oriented conditional operators</a></span></dt><dt><span class="sect2"><a href="#d4e579">Value-oriented conditional operators</a></span></dt><dt><span class="sect2"><a href="#d4e651">Logic operators</a></span></dt></dl></dd><dt><span class="sect1"><a href="#d4e692">Functions</a></span></dt><dt><span class="sect1"><a href="#d4e712">Arithmetics</a></span></dt><dt><span class="sect1"><a href="#d4e779">Path expressions</a></span></dt><dt><span class="sect1"><a href="#s1imperativeexpressions">Imperative expressions</a></span></dt><dd><dl><dt><span class="sect2"><a href="#d4e842">Emissions</a></span></dt><dt><span class="sect2"><a href="#d4e851">Iterators</a></span></dt><dt><span class="sect2"><a href="#d4e878">Conditionals</a></span></dt><dt><span class="sect2"><a href="#d4e902">Blocks</a></span></dt><dt><span class="sect2"><a href="#d4e912">Assignments</a></span></dt></dl></dd></dl></dd><dt><span class="chapter"><a href="#chadvancedtopics">3. Advanced topics</a></span></dt><dd><dl><dt><span class="sect1"><a href="#d4e930">Embedding the interpreter</a></span></dt><dt><span class="sect1"><a href="#scregisteringcustomloaders">Registering custom wordnet loaders</a></span></dt><dt><span class="sect1"><a href="#scwrittingcustomfunctions">Registering custom functions</a></span></dt><dt><span class="sect1"><a href="#scusingcustomemitters">Using custom emitters</a></span></dt></dl></dd><dt><span class="appendix"><a href="#aptoolsreference">A. Tools reference</a></span></dt><dd><dl><dt><span class="sect1"><a href="#d4e969">WGUIConsole</a></span></dt><dt><span class="sect1"><a href="#d4e973">WConsole</a></span></dt></dl></dd><dt><span class="appendix"><a href="#builtinfunctions">B. Built-in functions</a></span></dt></dl></div><div class="list-of-tables"><p><b>List of Tables</b></p><dl><dt>2.1. <a href="#tbobligatoryrelations">Obligatory relations.</a></dt><dt>2.2. <a href="#relationaloperators">Relational operators.</a></dt><dt>2.3. <a href="#datasetconditionaloperators">Dataset-oriented conditional operators.</a></dt><dt>2.4. <a href="#valueconditionaloperators">Value-oriented conditional operators.</a></dt><dt>2.5. <a href="#logicoperators">Value-oriented conditional operators.</a></dt><dt>2.6. <a href="#arithmeticoperators">Arithmetic operators.</a></dt><dt>2.7. <a href="#pathoperators">Path operators</a></dt><dt>B.1. <a href="#scalarfunctions">Scalar functions.</a></dt><dt>B.2. <a href="#agregatefunctions">Aggregate functions.</a></dt></dl></div><div class="list-of-examples"><p><b>List of Examples</b></p><dl><dt>2.1. <a href="#d4e330">Boolean generators</a></dt><dt>2.2. <a href="#d4e335">Integer generators</a></dt><dt>2.3. <a href="#d4e339">Float generators</a></dt><dt>2.4. <a href="#d4e352">String generators</a></dt><dt>2.5. <a href="#d4e361">Generating all word forms</a></dt><dt>2.6. <a href="#d4e365">An unique word sense generator</a></dt><dt>2.7. <a href="#d4e368">A non-unique word sense generator</a></dt><dt>2.8. <a href="#d4e372">Generating all word senses</a></dt><dt>2.9. <a href="#d4e378">A word forms to synsets generator</a></dt><dt>2.10. <a href="#d4e381">A word senses to synsets generator</a></dt><dt>2.11. <a href="#d4e387">Generating all synsets</a></dt><dt>2.12. <a href="#d4e412">A simple path</a></dt><dt>2.13. <a href="#d4e415">Another simple path</a></dt><dt>2.14. <a href="#d4e427">Selectors</a></dt><dt>2.15. <a href="#d4e436">A transitive closure</a></dt><dt>2.16. <a href="#d4e500">A transitive closure alias</a></dt><dt>2.17. <a href="#d4e511">A simple filter</a></dt><dt>2.18. <a href="#d4e518">Backward reference</a></dt><dt>2.19. <a href="#d4e522">Implicit reference</a></dt><dt>2.20. <a href="#d4e526">Filter generator</a></dt><dt>2.21. <a href="#exampledatasetcomparisons">Dataset comparisons</a></dt><dt>2.22. <a href="#examplevaluecomparisons">Value comparisons</a></dt><dt>2.23. <a href="#examplelogicoperators">Logic operations</a></dt><dt>2.24. <a href="#d4e706">Sample scalar functions</a></dt><dt>2.25. <a href="#d4e709">Sample aggregate functions</a></dt><dt>2.26. <a href="#d4e715">Sample arithmetic operations</a></dt><dt>2.27. <a href="#d4e831">Path expressions</a></dt><dt>2.28. <a href="#d4e848">An emission</a></dt><dt>2.29. <a href="#d4e863">An iterator</a></dt><dt>2.30. <a href="#d4e868">The <code class="code">sort</code> function</a></dt><dt>2.31. <a href="#d4e874">The <code class="code">distinct</code> function</a></dt><dt>2.32. <a href="#d4e891">A conditional</a></dt><dt>2.33. <a href="#d4e899">An else block</a></dt><dt>2.34. <a href="#d4e909">A block</a></dt><dt>2.35. <a href="#d4e920">An assignment</a></dt><dt>2.36. <a href="#d4e924">Hidden binding</a></dt></dl></div>
+	
+	<div class="preface" title="Preface"><div class="titlepage"><div><div><h2 class="title"><a name="d4e14"></a>Preface</h2></div></div></div>
+		
+		<p>WQuery is a domain specific query language designed to process wordnet-like lexical ontologies. 
+	It operates on wordnet-related terms like synsets, word senses, word forms etc. It is especially useful 
+	for dealing with elaborate querying tasks like searching for cycles in semantic relations 
+	or calculating average depth of synsets participating in hypernymy hierarchy.
+	
+    WQuery operates on platforms that provide Java Runtime Environment and works with wordnets stored in XML files.
+    It may be used as a standalone application or as an API to a lexical ontology in Java based systems.</p>
+		
+		<p>This document is a work in progress. Some parts are marked by the <span class="emphasis"><em>To Be Written</em></span> label.
+		      The document refers to WQuery 0.6.0-SNAPSHOT. The complete user guide will be distributed with WQuery 1.0.0.   
+		</p>
+	</div>
+	<div class="chapter" title="Chapter&nbsp;1.&nbsp;Getting started"><div class="titlepage"><div><div><h2 class="title"><a name="chgettingstarted"></a>Chapter&nbsp;1.&nbsp;Getting started</h2></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="sect1"><a href="#d4e21">Prerequisites</a></span></dt><dt><span class="sect1"><a href="#d4e25">Download</a></span></dt><dt><span class="sect1"><a href="#d4e29">Installation</a></span></dt><dt><span class="sect1"><a href="#d4e32">Running the console</a></span></dt><dt><span class="sect1"><a href="#d4e63">WQuery basics</a></span></dt><dt><span class="sect1"><a href="#d4e175">Next steps</a></span></dt></dl></div>
+				
+		<div class="sect1" title="Prerequisites"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d4e21"></a>Prerequisites</h2></div></div></div>
+			
+			<p>
+				WQuery requires Java Runtime Environment (JRE) version 1.5 or higher. The latest JRE can be found at
+				<a class="ulink" href="http://java.sun.com/javase/downloads/index.jsp" target="_top">http://java.sun.com/javase/downloads/index.jsp</a>
+				.
+			</p>
+		</div>
+		<div class="sect1" title="Download"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d4e25"></a>Download</h2></div></div></div>
+			
+			<p>
+				The latest version of WQuery may be downloaded from <a class="ulink" href="http://www.wquery.org/download.html" target="_top">http://www.wquery.org/download.html</a>. 				
+			</p>
+		</div>
+		<div class="sect1" title="Installation"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d4e29"></a>Installation</h2></div></div></div>
+			
+			<p>
+				Unzip the downloaded package anywhere. WQuery is ready to use.
+			</p>
+		</div>
+		<div class="sect1" title="Running the console"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d4e32"></a>Running the console</h2></div></div></div>
+			
+			<p>Change into the unzipped directory and run <code class="filename">wguiconsole.bat</code> (<code class="filename">wguiconsole</code> on Linux). 
+			      You will see the following screen.
+			</p>
+			<p>
+				</p><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0" width="60%"><tr><td align="center"><img src="images/wguiconsoleintro.png" align="middle" width="100%"></td></tr></table></div><p>
+			</p>
+
+            <p>
+                 From the <span class="emphasis"><em><span class="guimenu">File</span></em></span> menu pick the <span class="emphasis"><em><span class="guimenuitem">Load Wordnet...</span></em></span>
+                 option and choose the file that contains a wordnet.
+            </p>			
+            
+            <p>
+                </p><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0" width="60%"><tr><td align="center"><img src="images/wguiconsoleload.png" align="middle" width="100%"></td></tr></table></div><p>
+            </p>			
+			
+			<p>
+			     Type <code class="code">count({})</code> into the text field in the upper part of the window in order to find
+			     how many synsets exist in the loaded wordnet. 			     
+			</p>
+            <p>
+                </p><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0" width="60%"><tr><td align="center"><img src="images/wguiconsolequery.png" align="middle" width="100%"></td></tr></table></div><p>
+            </p>			
+            <p>
+                 Click the <span class="emphasis"><em>Execute</em></span> button or hit <span class="keycap"><strong>Alt+E</strong></span>. 
+                 A result will appear in the text field in the lower part of the window.                 
+            </p>
+            <p>
+                </p><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0" width="60%"><tr><td align="center"><img src="images/wguiconsoleexecuted.png" align="middle" width="100%"></td></tr></table></div><p>
+            </p>         			
+		</div>
+		
+        <div class="sect1" title="WQuery basics"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d4e63"></a>WQuery basics</h2></div></div></div>
+            
+            
+            <p>
+                WQuery operates on wordnet related terms like synsets, word senses and words. 
+                For example to check whether an ontology<sup>[<a name="d4e66" href="#ftn.d4e66" class="footnote">1</a>]</sup> 
+                contains the word <span class="emphasis"><em>car</em></span> one may simply write
+                
+                </p><pre class="programlisting">car</pre><p>
+                
+                The system answers
+            
+                </p><pre class="programlisting">car</pre><p>                
+            </p>
+            
+            <p>
+                If you type the string <span class="emphasis"><em>a1b1c1d1</em></span> which is not a proper word form in SampleNet the system will answer 
+            
+                </p><pre class="programlisting">(no result)</pre><p>
+                
+                If you put <span class="emphasis"><em>a1b1c1d1</em></span> in backquotes like in the query below
+                </p><pre class="programlisting">`a1b1c1d1`</pre><p>                
+                
+                The system will not treat <span class="emphasis"><em>a1b1c1d1</em></span> as a word form but as an arbitrary character string and will return
+                it to the output.
+            </p>
+            
+            <p>
+                To check if SampleNet contains the second noun sense of <span class="emphasis"><em>person</em></span> you may type
+                
+                </p><pre class="programlisting">person:2:n</pre><p>    
+            </p>
+            
+            <p>
+                In order to find all synsets that contain the word form <span class="emphasis"><em>person</em></span> one may surround that word with curly brackets
+                
+                </p><pre class="programlisting">{person}</pre><p>    
+                
+                The system returns
+
+                </p><pre class="programlisting">{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n }
+{ person:2:n }
+{ person:3:n }</pre><p>                
+                 
+                 As you see synsets are represented in the output as lists of word senses surrounded with curly brackets.
+            </p>            
+            
+            <p>Beside wordnet-specific data types you may also use in queries:
+            
+            </p><div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
+                    <p>integers                    
+                        </p><pre class="programlisting">1 -7</pre><p>                    
+                    </p>
+                </li><li class="listitem">
+                    <p>floating point numbers                    
+                        </p><pre class="programlisting">3.4 5e-2</pre><p>                    
+                    </p>
+                </li><li class="listitem">
+                    <p>boolean values                   
+                        </p><pre class="programlisting">true false</pre><p>                    
+                    </p>
+                </li></ul></div><p>
+            </p>
+            
+            <p>
+                Datasets<sup>[<a name="d4e98" href="#ftn.d4e98" class="footnote">2</a>]</sup> 
+                may be transformed using dot operator followed by a relation name.<sup>[<a name="d4e100" href="#ftn.d4e100" class="footnote">3</a>]</sup>
+                 
+                To find all hypernyms of synsets that contain the word form <span class="emphasis"><em>person</em></span> you may type
+                
+                </p><pre class="programlisting">{person}.hypernym</pre><p>
+                
+                and to find all glosses of those hypernyms you may submit the following query
+                
+                </p><pre class="programlisting">{person}.hypernym.desc</pre><p>
+                
+                If you want to retrieve hypernyms of <span class="emphasis"><em>person</em></span> synsets together with their glosses you have to
+                surround chosen path steps with the selection signs <span class="emphasis"><em>&lt;</em></span> and <span class="emphasis"><em>&gt;</em></span>.
+                
+                </p><pre class="programlisting">{person}.&lt;hypernym&gt;.&lt;desc&gt;</pre><p>
+                                
+                By repeating dots you may apply a relation to the step that is located before the one that precedes the relation step.    
+                
+                For example to find <span class="emphasis"><em>person</em></span> synsets together with their part of speech symbols and glosses you may write
+                                
+                </p><pre class="programlisting">&lt;{person}&gt;.&lt;pos&gt;..&lt;desc&gt;</pre><p>
+                
+                or
+
+                </p><pre class="programlisting">&lt;{person}&gt;.&lt;desc&gt;..&lt;pos&gt;</pre><p>                  
+                  
+				
+				
+				
+				
+				
+				                  
+            </p>
+                        
+            <div class="note" title="Note: Available relations" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title"><a name="noterelationnames"></a>Note: Available relations</h3>
+                            
+	            <p>
+	                Relations are extracted from tags found in the wordnet file. 
+	                For every subtag <span class="emphasis"><em>T</em></span> of every <span class="emphasis"><em>SYNSET</em></span> tag found in the wordnet file the following rules
+	                are applied to extract relations:
+	                
+	                </p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem">
+	                        <p>If T equals <span class="emphasis"><em>ILR</em></span> then the value of the <span class="emphasis"><em>type</em></span> attribute becomes a relation name
+	                        and the content of T is interpreted as a synset identifier to which the relation points.</p>
+	                    </li><li class="listitem">
+	                        <p>If T equals <span class="emphasis"><em>LITERAL</em></span> or <span class="emphasis"><em>SYNONYM</em></span> or <span class="emphasis"><em>WORD</em></span> it is skipped.</p>
+	                    </li><li class="listitem">
+	                        <p>Otherwise the lowercased name of T becomes a relation name and the content of T is interpreted as:
+	                        
+	                        </p><div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
+	                                <p>a synset identifier</p>                            
+	                            </li><li class="listitem">
+	                                <p>or as a number (if it is not a valid synset identifier)</p>                            
+	                            </li><li class="listitem">
+	                                <p>or as a boolean value (if it is not a valid number)</p>                            
+	                            </li><li class="listitem">
+	                                <p>or as a character string (if it is not a valid boolean value).</p>                            
+	                            </li></ul></div><p>	                        
+	                        </p>
+	                    </li></ol></div><p>
+	            </p>
+            </div>
+            
+            <p>
+                Additional relations may be infered using relational operators.
+                For example to find all hyponyms of synsets that contain the word form <span class="emphasis"><em>var</em></span> you may precede
+                the <span class="emphasis"><em>hypernym</em></span> relation with the inverse operator <span class="emphasis"><em>^</em></span>. 
+                                        
+                </p><pre class="programlisting">{car}.^hypernym</pre><p>                    
+                
+                To find all transitive hypernyms of synsets that contain the word form <span class="emphasis"><em>car</em></span> you may succeed
+                the <span class="emphasis"><em>hypernym</em></span> relation with the transitive closure operator <span class="emphasis"><em>!</em></span>. 
+                    
+                </p><pre class="programlisting">{car}.hypernym!</pre><p>                                        
+                    
+                To find all holonyms of synsets that contain the word form <span class="emphasis"><em>car</em></span> regardless of the holonymy type
+                you may combine holonymy relations using the union operator <span class="emphasis"><em>|</em></span>. 
+
+                </p><pre class="programlisting">{car}.partial_holonym|member_holonym</pre><p>
+            </p>
+            
+            <p>
+                More pleasant names may be assigned to relations by using the assignment operator <span class="emphasis"><em>=</em></span>.
+
+                </p><pre class="programlisting">hypernyms=hypernym
+hyponyms=^hypernym
+holonyms=partial_holonym|member_holonym                
+gloss=def</pre><p>                                          
+            </p>                           
+            
+            <p>
+                Datasets may be filtered by providing a conditional expression between <span class="emphasis"><em>[</em></span> and <span class="emphasis"><em>]</em></span> signs.
+                To find all noun synsets that contain the word form <span class="emphasis"><em>car</em></span> you shall type
+                
+                </p><pre class="programlisting">{car}[type = `n`]</pre><p>
+                
+                A filter is applied separately to every element of the predeceasing dataset. 
+                You may refer to the element which is passed to the filter by using the back reference operator <span class="emphasis"><em>#</em></span>. 
+                The query below returns all hypernyms of synsets that contain the word form <span class="emphasis"><em>person</em></span> except the one
+                that contains the second noun sense of the word form <span class="emphasis"><em>being</em></span>.
+                     
+                </p><pre class="programlisting">{person}.hypernym[# != {being:2:n}]</pre><p>
+            </p>
+
+            <p>                
+				WQuery provides a set of built-in functions that operate on values of datasets.
+				For example to count synsets that contain the word form <span class="emphasis"><em>person</em></span> 
+				you may use the function <span class="emphasis"><em>count</em></span> as shown below.
+
+                </p><pre class="programlisting">count({person})</pre><p>
+				
+                The complete list of built-in functions may be found in <a class="xref" href="#builtinfunctions" title="Appendix&nbsp;B.&nbsp;Built-in functions">Appendix&nbsp;B, <i>Built-in functions</i></a>.
+            </p>
+
+            <p>
+                Paths may be combined together using dataset union, intersection and difference.
+                You may find all <span class="emphasis"><em>person</em></span> synsets hypernyms together with all <span class="emphasis"><em>car</em></span> synsets 
+                by using the <span class="emphasis"><em>union</em></span> operator.
+                
+                </p><pre class="programlisting">{person}.hypernym union {car}</pre><p>                 
+                
+                The Cartesian product of datasets returned by two paths may be constructed using the comma operator.
+
+                </p><pre class="programlisting">{person}, {car}</pre><p>                               
+            </p>
+            
+            <p>
+                Beside the expressions presented above WQuery also has a set of imperative expressions 
+                like loops, if-statements and assignments.
+                The complete description of all WQuery expressions may be found in <a class="xref" href="#chlanguagereference" title="Chapter&nbsp;2.&nbsp;Language reference">Chapter&nbsp;2, <i>Language reference</i></a>.                
+            </p>                          
+		</div>
+		
+		<div class="sect1" title="Next steps"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d4e175"></a>Next steps</h2></div></div></div>
+			
+			<p>Read <a class="xref" href="#chlanguagereference" title="Chapter&nbsp;2.&nbsp;Language reference">Chapter&nbsp;2, <i>Language reference</i></a> in order to master the WQuery language.
+			Read <a class="xref" href="#chadvancedtopics" title="Chapter&nbsp;3.&nbsp;Advanced topics">Chapter&nbsp;3, <i>Advanced topics</i></a> to learn how to customize WQuery and embed it into your own applications.
+			Consult <a class="xref" href="#builtinfunctions" title="Appendix&nbsp;B.&nbsp;Built-in functions">Appendix&nbsp;B, <i>Built-in functions</i></a> for a detailed list of functions available in WQuery.  
+			</p>			
+		</div>
+	<div class="footnotes"><br><hr width="100" align="left"><div class="footnote"><p><sup>[<a name="ftn.d4e66" href="#d4e66" class="para">1</a>] </sup>For the purpose of this section it is assumed that you have loaded
+                an ontology from the file <code class="code">samplenet.xml</code> distributed with WQuery.
+                This ontology has been derived from Princeton WordNet by selecting synsets which are used by WQuery test suite
+                (see <code class="code">samplenet.xml</code> for Princeton WordNet licensing conditions).</p></div><div class="footnote"><p><sup>[<a name="ftn.d4e98" href="#d4e98" class="para">2</a>] </sup>A dataset in WQuery is a bag (multiset) of objects that share the same type.</p></div><div class="footnote"><p><sup>[<a name="ftn.d4e100" href="#d4e100" class="para">3</a>] </sup>Such expressions are called paths.
+                Parts of paths separetad by sequences of dots are called steps.</p></div></div></div>
+	<div class="chapter" title="Chapter&nbsp;2.&nbsp;Language reference"><div class="titlepage"><div><div><h2 class="title"><a name="chlanguagereference"></a>Chapter&nbsp;2.&nbsp;Language reference</h2></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="sect1"><a href="#d4e183">Data types</a></span></dt><dd><dl><dt><span class="sect2"><a href="#d4e185">Basic data types</a></span></dt><dt><span class="sect2"><a href="#d4e201">Tuples</a></span></dt><dt><span class="sect2"><a href="#d4e209">Relations</a></span></dt></dl></dd><dt><span class="sect1"><a href="#d4e324">Generators</a></span></dt><dt><span class="sect1"><a href="#d4e390">Paths</a></span></dt><dt><span class="sect1"><a href="#d4e430">Relational expressions</a></span></dt><dt><span class="sect1"><a href="#d4e503">Filters</a></span></dt><dd><dl><dt><span class="sect2"><a href="#d4e530">Dataset-oriented conditional operators</a></span></dt><dt><span class="sect2"><a href="#d4e579">Value-oriented conditional operators</a></span></dt><dt><span class="sect2"><a href="#d4e651">Logic operators</a></span></dt></dl></dd><dt><span class="sect1"><a href="#d4e692">Functions</a></span></dt><dt><span class="sect1"><a href="#d4e712">Arithmetics</a></span></dt><dt><span class="sect1"><a href="#d4e779">Path expressions</a></span></dt><dt><span class="sect1"><a href="#s1imperativeexpressions">Imperative expressions</a></span></dt><dd><dl><dt><span class="sect2"><a href="#d4e842">Emissions</a></span></dt><dt><span class="sect2"><a href="#d4e851">Iterators</a></span></dt><dt><span class="sect2"><a href="#d4e878">Conditionals</a></span></dt><dt><span class="sect2"><a href="#d4e902">Blocks</a></span></dt><dt><span class="sect2"><a href="#d4e912">Assignments</a></span></dt></dl></dd></dl></div>
+		
+		<div class="sect1" title="Data types"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d4e183"></a>Data types</h2></div></div></div>
+			
+
+			<div class="sect2" title="Basic data types"><div class="titlepage"><div><div><h3 class="title"><a name="d4e185"></a>Basic data types</h3></div></div></div>
+			
+	            <p>
+	                There are six basic data types in WQuery: booleans, integers, floats, strings, word senses and synsets.  
+	            </p>
+						
+				<p>
+				Booleans have one of two logic values either <span class="emphasis"><em>true</em></span> or <span class="emphasis"><em>false</em></span>. 
+				They are represented in query results as two literals shown below.
+				
+				</p><pre class="programlisting">true false</pre><p>
+				
+				Integers are represented in query results as strings of decimal digits optionally prefixed with <code class="code">-</code> sign.
+				
+	            </p><pre class="programlisting">123 -4 576 0</pre><p>
+							
+				Floats (floating point numbers) are represented as strings of decimal digits followed by dot and at least one
+				decimal digit. Floats may also be prefixed with <code class="code">-</code> sign.
+				
+				</p><pre class="programlisting">3.0 -1.2 0.0 2.345</pre><p>
+				
+				Strings (character data) are passed to the output without any modifications.
+				
+	            </p><pre class="programlisting">apple person man-eating shark</pre><p>
+	            
+	            Word senses are represented as triples that consist of a word form, a sense number
+	            and a part of speech symbol joined together with colons.
+	            
+	            
+	            </p><pre class="programlisting">apple:1:n cold:2:a entail:3:v</pre><p>
+	            
+	            Synsets are represented as lists of word senses joined together with whitespaces 
+	            and surrounded with <code class="code">{</code> and <code class="code">}</code> signs.
+	            
+                </p><pre class="programlisting">{ apple:2:n orchard apple tree:1:n Malus pumila:1:n }</pre><p>                
+				</p>
+            </div>
+
+			<div class="sect2" title="Tuples"><div class="titlepage"><div><div><h3 class="title"><a name="d4e201"></a>Tuples</h3></div></div></div>
+				
+				<p>
+					Tuples are finite, ordered collections. Every element of a tuple has to be an instance of a basic data type.
+					It is not possible to create a tuple that contains another tuple as an element.
+		              
+		              </p>
+		
+				<p>
+					A tuple is represented in a query result as a single line that consists of representations of tuple elements joined together with spaces. 
+					For example a tuple that consists of the synset
+					<code class="code">{apple:2:n}</code>
+					followed by
+					<code class="code">{person:3:n}</code>
+					and the word form
+					<em class="wordasword">car</em>
+					is written as
+		
+					</p><pre class="programlisting">{ apple:1:n } { person:3:n } car</pre><p>
+				</p>
+			</div>
+			      
+			<div class="sect2" title="Relations"><div class="titlepage"><div><div><h3 class="title"><a name="d4e209"></a>Relations</h3></div></div></div>
+				
+			
+				<p>
+					Let X and Y mean sets of values of basic data types T and U. Every subset of Cartesian
+					product of X and Y is called a <span class="emphasis"><em>relation</em></span> with <span class="emphasis"><em>predecessor type</em></span>
+					T and <span class="emphasis"><em>successor type</em></span> U. 
+				</p>
+
+                <p>
+                    WQuery refers to relations stored in a wordnet by their names.
+                    <a class="xref" href="#tbobligatoryrelations" title="Table&nbsp;2.1.&nbsp;Obligatory relations.">Table&nbsp;2.1, &#8220;Obligatory relations.&#8221;</a> describes relations that are available in every wordnet loaded into WQuery.
+                    Additional relations are usualy retrieved as described in <span class="emphasis"><em><a class="xref" href="#noterelationnames" title="Note: Available relations">Note: Available relations</a></em></span> 
+                    in <a class="xref" href="#chgettingstarted" title="Chapter&nbsp;1.&nbsp;Getting started">Chapter&nbsp;1, <i>Getting started</i></a>. 
+                </p>
+			
+				<div class="table"><a name="tbobligatoryrelations"></a><p class="title"><b>Table&nbsp;2.1.&nbsp;Obligatory relations.</b></p><div class="table-contents">
+					
+					<table summary="Obligatory relations." border="1"><colgroup><col align="center"><col align="center"><col align="center"><col align="center"></colgroup><thead><tr><th align="center">Relation</th><th align="center">Predecessor type</th><th align="center">Successor type</th><th align="center">Meaning</th></tr></thead><tbody><tr valign="middle"><td align="center" valign="middle">
+									<span class="emphasis"><em>a</em></span>
+									<code class="code">id</code>
+									<span class="emphasis"><em>b</em></span>
+								</td><td align="center" valign="middle">word sense</td><td align="center" valign="middle">string</td><td align="center" valign="middle">
+									<span class="emphasis"><em>b</em></span>
+									is an identifier of word sense
+									<span class="emphasis"><em>a</em></span>
+								</td></tr><tr valign="middle"><td align="center" valign="middle">
+									<span class="emphasis"><em>a</em></span>
+									<code class="code">id</code>
+									<span class="emphasis"><em>b</em></span>
+								</td><td align="center" valign="middle">synset</td><td align="center" valign="middle">string</td><td align="center" valign="middle">
+									<span class="emphasis"><em>b</em></span>
+									is an identifier of synset
+									<span class="emphasis"><em>a</em></span>
+								</td></tr><tr valign="middle"><td align="center" valign="middle">
+									<span class="emphasis"><em>a</em></span>
+									<code class="code">sensenum</code>
+									<span class="emphasis"><em>b</em></span>
+								</td><td align="center" valign="middle">word sense</td><td align="center" valign="middle">integer</td><td align="center" valign="middle">
+									<span class="emphasis"><em>b</em></span>
+									is a sense number of word sense
+									<span class="emphasis"><em>a</em></span>
+								</td></tr><tr valign="middle"><td align="center" valign="middle">
+									<span class="emphasis"><em>a</em></span>
+									<code class="code">senses</code>
+									<span class="emphasis"><em>b</em></span>
+								</td><td align="center" valign="middle">string</td><td align="center" valign="middle">word sense</td><td align="center" valign="middle">
+									<span class="emphasis"><em>a</em></span>
+									is a word form of word sense
+									<span class="emphasis"><em>b</em></span>
+								</td></tr><tr valign="middle"><td align="center" valign="middle">
+									<span class="emphasis"><em>a</em></span>
+									<code class="code">senses</code>
+									<span class="emphasis"><em>b</em></span>
+								</td><td align="center" valign="middle">synset</td><td align="center" valign="middle">word sense</td><td align="center" valign="middle">
+									<span class="emphasis"><em>b</em></span>
+									is a word sense of synset
+									<span class="emphasis"><em>a</em></span>
+								</td></tr><tr valign="middle"><td align="center" valign="middle">
+									<span class="emphasis"><em>a</em></span>
+									<code class="code">synsets</code>
+									<span class="emphasis"><em>b</em></span>
+								</td><td align="center" valign="middle">string</td><td align="center" valign="middle">synset</td><td align="center" valign="middle">
+									<span class="emphasis"><em>a</em></span>
+									is a word form of synset
+									<span class="emphasis"><em>b</em></span>
+								</td></tr><tr valign="middle"><td align="center" valign="middle">
+									<span class="emphasis"><em>a</em></span>
+									<code class="code">synset</code>
+									<span class="emphasis"><em>b</em></span>
+								</td><td align="center" valign="middle">word sense</td><td align="center" valign="middle">synset</td><td align="center" valign="middle">
+									<span class="emphasis"><em>a</em></span>
+									is a word sense of synset
+									<span class="emphasis"><em>b</em></span>
+								</td></tr><tr valign="middle"><td align="center" valign="middle">
+									<span class="emphasis"><em>a</em></span>
+									<code class="code">words</code>
+									<span class="emphasis"><em>b</em></span>
+								</td><td align="center" valign="middle">synset</td><td align="center" valign="middle">word sense</td><td align="center" valign="middle">
+									<span class="emphasis"><em>b</em></span>
+									is a word form of synset
+									<span class="emphasis"><em>a</em></span>
+								</td></tr><tr valign="middle"><td align="center" valign="middle">
+									<span class="emphasis"><em>a</em></span>
+									<code class="code">word</code>
+									<span class="emphasis"><em>b</em></span>
+								</td><td align="center" valign="middle">word sense</td><td align="center" valign="middle">string</td><td align="center" valign="middle">
+									<span class="emphasis"><em>a</em></span>
+									is a word form of word sense
+									<span class="emphasis"><em>b</em></span>
+								</td></tr></tbody></table>
+				</div></div><br class="table-break">
+			</div>
+		</div>
+		
+		<div class="sect1" title="Generators"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d4e324"></a>Generators</h2></div></div></div>
+			
+			<p>A generator is an expression that represents a dataset of objects sharing the same basic data type.</p>
+			
+			<p>Literals <code class="code">true</code> and <code class="code">false</code> generate datasets that contain exactly one boolean value.
+            </p><div class="example"><a name="d4e330"></a><p class="title"><b>Example&nbsp;2.1.&nbsp;Boolean generators</b></p><div class="example-contents">
+            
+            <pre class="programlisting">wquery&gt; true
+true
+wquery&gt; false
+false</pre>    
+            </div></div><p><br class="example-break">		
+			</p>
+			
+            <p>A string of decimal digits generates a dataset that contains exactly one integer value. 
+            Two strings of decimals joined together with <code class="code">..</code> operator generate a dataset 
+            that contains a range of integers.
+            </p><div class="example"><a name="d4e335"></a><p class="title"><b>Example&nbsp;2.2.&nbsp;Integer generators</b></p><div class="example-contents">
+            
+            <pre class="programlisting">wquery&gt; 123
+123
+wquery&gt; 1..5
+1
+2
+3
+4
+5</pre>    
+            </div></div><p><br class="example-break">      
+            </p>			
+             
+            <p>A string that represents a floating point number generates a dataset that contains exactly one float.
+ 
+            </p><div class="example"><a name="d4e339"></a><p class="title"><b>Example&nbsp;2.3.&nbsp;Float generators</b></p><div class="example-contents">
+            
+            <pre class="programlisting">wquery&gt; 12.3
+12.3
+wquery&gt; 12e3
+12000.0
+wquery&gt; 12.3e3
+12300.0</pre>    
+            </div></div><p><br class="example-break">      
+            </p>           
+            
+            <p>The content of the multiset generated by a character string depends on signs that surround the string.
+            </p><div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
+                    <p>A dataset generated by a character string enclosed in single quotes contains that string if and only
+                    if it is a valid word form in the loaded wordnet. Otherwise the generated dataset is empty.</p>
+                </li><li class="listitem">                    
+                    <p>A dataset generated by a character string enclosed in back quotes always contains the surrounded string.</p>
+                </li><li class="listitem">
+                    <p>A dataset generated by a character string enclosed in double quotes contains every word form from the loaded wordnet
+                    that matches a regular expression defined by the surrounded string.</p>                                        
+                </li><li class="listitem">
+                    <p>A dataset generated by a character string that is not surrounded with any quotation marks has the same content as
+                    a dataset generated from that string enclosed in single quotes.</p>
+                </li></ul></div><p>            
+
+            </p><div class="example"><a name="d4e352"></a><p class="title"><b>Example&nbsp;2.4.&nbsp;String generators</b></p><div class="example-contents">
+            
+            <pre class="programlisting">wquery&gt; 'person'
+person
+wquery&gt; `zzz333`
+zzz333
+wquery&gt; zzz333
+(no result)
+wquery&gt; "^zymol"
+zymology
+zymolysis
+zymolytic
+wquery&gt; person
+person</pre>    
+            </div></div><p><br class="example-break">  
+        </p>
+        
+            <div class="note" title="Note: Ordering in the output" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title"><a name="noteorder"></a>Note: Ordering in the output</h3>
+                
+                <p>
+                    One may notice in the example above that word forms generated by the <code class="code">"^zymol"</code> expression are sorted 
+                    in the output. Sorting is by default applied to all query results except those that are generated by 
+                    constructs descibed in <a class="xref" href="#s1imperativeexpressions" title="Imperative expressions">the section called &#8220;Imperative expressions&#8221;</a>. Also if there existed duplicated elements in the query result
+                    they would be removed before passing the result to the output.
+                </p>
+            </div>        
+            
+        <p>
+            One may generate all word forms stored in the loaded wordnet by submitting two single quote signs 
+            without any characters between then.
+
+            </p><div class="example"><a name="d4e361"></a><p class="title"><b>Example&nbsp;2.5.&nbsp;Generating all word forms</b></p><div class="example-contents">
+            
+            <pre class="programlisting">wquery&gt; ''
+(...)
+</pre>        
+            </div></div><p><br class="example-break">
+        
+        </p>                           
+        
+        <p>In order to generate a dataset that contains at most one word sense one may join a character string, a sense number 
+        and a part of speech symbol with colons. The generated multiset will be empty if the loaded wordnet does not contain requested word sense. 
+        
+            </p><div class="example"><a name="d4e365"></a><p class="title"><b>Example&nbsp;2.6.&nbsp;An unique word sense generator</b></p><div class="example-contents">
+            
+            <pre class="programlisting">wquery&gt; 'person':1:n
+person
+wquery&gt; 'zzzz':23:n
+(no result)</pre>    
+            </div></div><p><br class="example-break">
+            
+        If we omit in the expression above the second colon and the part of speech symbol then all word senses with the given word form and sense number
+        will be generated.
+        
+            </p><div class="example"><a name="d4e368"></a><p class="title"><b>Example&nbsp;2.7.&nbsp;A non-unique word sense generator</b></p><div class="example-contents">
+            
+            <pre class="programlisting">wquery&gt; set:2
+set:2:n
+set:2:v
+set:2:s</pre>    
+            </div></div><p><br class="example-break">        
+        </p>    
+
+        <p>
+            All word senses stored in the loaded wordnet may be generated by submitting two colon signs.
+
+            </p><div class="example"><a name="d4e372"></a><p class="title"><b>Example&nbsp;2.8.&nbsp;Generating all word senses</b></p><div class="example-contents">
+            
+            <pre class="programlisting">wquery&gt; ::
+(...)
+</pre>        
+            </div></div><p><br class="example-break">
+        
+        </p>                           
+
+        <p>By surrounding an expression that returns a dataset of strings with <code class="code">{</code> and <code class="code">}</code> signs
+        one may obtain a dataset that consists of synsets that contain at least one word form represented by the enclosed expression. 
+            </p><div class="example"><a name="d4e378"></a><p class="title"><b>Example&nbsp;2.9.&nbsp;A word forms to synsets generator</b></p><div class="example-contents">
+            
+            <pre class="programlisting">wquery&gt; {orange}
+{ orange:2:n orangeness:1:n }
+{ orange:1:n }
+{ orange:3:n orange tree:1:n }
+{ orange:4:n }
+{ orange:1:s orangish:1:s }
+wquery&gt; {"^zymol"}
+{ zymology:1:n zymurgy:1:n }
+{ zymosis:1:n zymolysis:1:n fermentation:2:n fermenting:1:n ferment:3:n }
+{ zymotic:1:a zymolytic:1:a }</pre>    
+            </div></div><p><br class="example-break">           
+            
+            The same holds for datasets of word senses.
+            
+            </p><div class="example"><a name="d4e381"></a><p class="title"><b>Example&nbsp;2.10.&nbsp;A word senses to synsets generator</b></p><div class="example-contents">
+            
+            <pre class="programlisting">wquery&gt; 
+wquery&gt; {apple:2:n}
+{ apple:2:n orchard apple tree:1:n Malus pumila:1:n }
+wquery&gt; {apple:2}
+{ apple:2:n orchard apple tree:1:n Malus pumila:1:n }</pre>    
+            </div></div><p><br class="example-break">               
+        </p>
+        
+        <p>
+            All synsets stored in the loaded wordnet may be generated by submitting <code class="code">{</code> and <code class="code">}</code> signs
+            without any expression between them.
+
+            </p><div class="example"><a name="d4e387"></a><p class="title"><b>Example&nbsp;2.11.&nbsp;Generating all synsets</b></p><div class="example-contents">
+            
+            <pre class="programlisting">wquery&gt; {}
+(...)
+</pre>        
+            </div></div><p><br class="example-break">
+        </p>                
+           
+        </div>
+		<div class="sect1" title="Paths"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d4e390"></a>Paths</h2></div></div></div>
+			
+			<p>A path consists of a generator followed by zero or more transitions. 
+			Each transition begins with one or more dots followed by a relation name.
+			The generator and the following transitions are called <span class="emphasis"><em>steps</em></span>.
+						
+			The result of applying a transition that consits of <span class="emphasis"><em>k</em></span> dots followed by the relation name <code class="code">R</code> 			
+			to an <span class="emphasis"><em>n</em></span>-th step (<span class="emphasis"><em>1 &lt;= k &lt;= n</em></span>) expression on the left of the transition is a dataset <code class="code">{b| a in D and R(a,b)}</code> 
+			where <code class="code">D</code> is:
+			     </p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem">
+			             <p>A dataset returned by the generator of the path 
+			                 if <span class="emphasis"><em>k</em></span> = <span class="emphasis"><em>n</em></span>.</p>
+			         </li><li class="listitem">
+                         <p>A result of applying from the left to the right <span class="emphasis"><em>n - k</em></span> transitions to the generator of the path 
+                            if <span class="emphasis"><em>k</em></span> &lt; <span class="emphasis"><em>n</em></span>.</p>
+                     </li></ol></div><p>
+
+			</p>
+			
+			<p>
+			For example to find all hypernyms of a synset that contains the word form <em class="wordasword">car</em> 
+			in its first noun sense	one may write
+            </p><div class="example"><a name="d4e412"></a><p class="title"><b>Example&nbsp;2.12.&nbsp;A simple path</b></p><div class="example-contents">
+            
+            <pre class="programlisting">wquery&gt; {car:1:n}.hypernym
+{ motor vehicle:1:n automotive vehicle:1:n }</pre>    
+            </div></div><p><br class="example-break">  			
+			
+			and to find all senses of hypernyms of the synset above one may write
+            </p><div class="example"><a name="d4e415"></a><p class="title"><b>Example&nbsp;2.13.&nbsp;Another simple path</b></p><div class="example-contents">
+            
+            <pre class="programlisting">wquery&gt; {car:1:n}.hypernym.senses
+motor vehicle:1:n
+automotive vehicle:1:n</pre>    
+            </div></div><p><br class="example-break">             
+						
+			 </p>
+			 
+			 <p>
+                By surrounding chosen path steps with <code class="code">&lt;</code> and <code class="code">&gt;</code> signs one may retrieve results of intermediate transitions. 
+                The result of applying selectors to the chosen <span class="emphasis"><em>k</em></span> steps consists of
+                <span class="emphasis"><em>k</em></span>-element tuples such that the <span class="emphasis"><em>i</em></span>-th element 
+                (<span class="emphasis"><em>1 &lt;= i &lt;= k</em></span>) of a tuple belongs to the dataset generated by 
+                a subpath defined by all steps of the path that precede the i-th <code class="code">&gt;</code> sign on the path.
+             
+	            For example to find all triples that consist of a synset that contains the word form <em class="wordasword">car</em>
+	            followed by its identifier and an identifier its hypernym one may write
+	            	            
+	            </p><div class="example"><a name="d4e427"></a><p class="title"><b>Example&nbsp;2.14.&nbsp;Selectors</b></p><div class="example-contents">
+	            
+	            <pre class="programlisting">wquery&gt; &lt;{car}&gt;.&lt;id&gt;..hypernym.&lt;id&gt;
+{ cable car:1:n car:5:n } 102934451 103079741
+{ car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n } 102958343 103791235
+{ car:2:n railcar:1:n railway car:1:n railroad car:1:n } 102959942 104576211
+{ car:4:n elevator car:1:n } 102960352 103079741
+{ car:3:n gondola:3:n } 102960501 103079741</pre>    
+	            </div></div><p><br class="example-break">    
+	            
+	            As shown in the example above consecutive tuple elements are separated in the output with single spaces.	            
+			 </p>			 
+		</div>
+		
+		<div class="sect1" title="Relational expressions"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d4e430"></a>Relational expressions</h2></div></div></div>
+            
+            <p>A relational expression consists of one or more relations combined 
+                 together with operators shown in <a class="xref" href="#relationaloperators" title="Table&nbsp;2.2.&nbsp;Relational operators.">Table&nbsp;2.2, &#8220;Relational operators.&#8221;</a>.
+                 The relational expression may be used in a transition instead of a single relation.                     
+            </p>
+            
+            <p>                      
+                 In order to find all transitive hypernyms of synsets that contain the word form <em class="wordasword">person</em>
+                 one may write
+                </p><div class="example"><a name="d4e436"></a><p class="title"><b>Example&nbsp;2.15.&nbsp;A transitive closure</b></p><div class="example-contents">
+                
+                <pre class="programlisting">wquery&gt; {person}.hypernym!
+{ entity:1:n }
+{ physical entity:1:n }
+{ organism:1:n being:2:n }
+{ causal agent:1:n cause:4:n causal agency:1:n }
+{ human body:1:n physical body:1:n material body:1:n soma:3:n build:2:n 
+    figure:2:n physique:2:n anatomy:2:n shape:3:n bod:1:n chassis:1:n 
+    frame:3:n form:5:n flesh:2:n }
+{ grammatical category:1:n syntactic category:1:n }</pre>    
+                </div></div><p><br class="example-break">               
+                        
+                </p><div class="table"><a name="relationaloperators"></a><p class="title"><b>Table&nbsp;2.2.&nbsp;Relational operators.</b></p><div class="table-contents">
+                    
+                    <table summary="Relational operators." border="1"><colgroup><col width="80" align="center"><col width="90" align="center"><col align="left"></colgroup><thead><tr><th align="center">Operator</th><th align="center">Expression</th><th align="center">Result</th></tr></thead><tbody><tr valign="middle"><td align="center" valign="middle">inversion</td><td align="center" valign="middle"><code class="code">^r</code></td><td align="left" valign="middle">
+                                    <span class="emphasis"><em>(b,a)</em></span> such that <span class="emphasis"><em>(a,b)</em></span> belongs to <code class="code">r</code>  
+                                </td></tr><tr valign="middle"><td align="center" valign="middle">transitive closure</td><td align="center" valign="middle"><code class="code">r!</code></td><td align="left" valign="middle">
+                                    <span class="emphasis"><em>(a,b)</em></span> such that <span class="emphasis"><em>(a,b)</em></span> belongs to <code class="code">r</code>
+                                    or there exist <span class="emphasis"><em>a<sub>1</sub></em></span>, ..., 
+                                    <span class="emphasis"><em>a<sub>k</sub></em></span> such that
+                                    <span class="emphasis"><em>(a,a<sub>1</sub>)</em></span>, 
+                                    <span class="emphasis"><em>(a<sub>1</sub>,a<sub>2</sub>)</em></span>, 
+                                    ...
+                                    <span class="emphasis"><em>(a<sub>k</sub>, b)</em></span> 
+                                    belong to <code class="code">r</code>
+                                </td></tr><tr valign="middle"><td align="center" valign="middle">union</td><td align="center" valign="middle"><code class="code">r|q</code></td><td align="left" valign="middle">
+                                    <span class="emphasis"><em>t</em></span> such that <span class="emphasis"><em>t</em></span> belongs to <code class="code">r</code> or <code class="code">q</code>
+                                </td></tr><tr valign="middle"><td align="center" valign="middle">intersection</td><td align="center" valign="middle"><code class="code">r&amp;q</code></td><td align="left" valign="middle">
+                                    <span class="emphasis"><em>t</em></span> such that <span class="emphasis"><em>t</em></span> belongs to <code class="code">r</code> and <code class="code">q</code>
+                                </td></tr></tbody></table>                    
+                </div></div><p><br class="table-break">            
+            </p>            
+
+            <p>
+                By using <code class="code">=</code> operator one may assign a name to a relational expression and use it in the following queries.
+                For example one may define an alias for transitive hypernymy
+
+                </p><pre class="programlisting">thyper=hypernym!</pre><p>
+                
+                and use it as shown in the query below
+                
+                </p><div class="example"><a name="d4e500"></a><p class="title"><b>Example&nbsp;2.16.&nbsp;A transitive closure alias</b></p><div class="example-contents">
+                
+                <pre class="programlisting">wquery&gt; {person}.thyper
+{ entity:1:n }
+{ physical entity:1:n }
+{ organism:1:n being:2:n }
+{ causal agent:1:n cause:4:n causal agency:1:n }
+{ human body:1:n physical body:1:n material body:1:n soma:3:n build:2:n 
+    figure:2:n physique:2:n anatomy:2:n shape:3:n bod:1:n chassis:1:n 
+    frame:3:n form:5:n flesh:2:n }
+{ grammatical category:1:n syntactic category:1:n }</pre>    
+                </div></div><p><br class="example-break">               
+            </p>                                                   
+        </div>
+		
+		<div class="sect1" title="Filters"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d4e503"></a>Filters</h2></div></div></div>
+			
+			<p>A filter is an expression placed after a path step to select some elements from the generated dataset.
+			The filter consists of a conditional expression surrounded with <code class="code">[</code> and <code class="code">]</code> signs. 
+			Each element of the dataset being filtered is passed separately to the filter and may be referenced inside it by using <code class="code">#</code> sign.
+			</p>
+			
+			<p>			
+			To find all synsets that contain the word form <em class="wordasword">person</em> except the one that contains that
+			word form in its thirdh noun sense one may write
+            </p><div class="example"><a name="d4e511"></a><p class="title"><b>Example&nbsp;2.17.&nbsp;A simple filter</b></p><div class="example-contents">
+            
+            <pre class="programlisting">wquery&gt; {person}[# != {person:3:n}]
+{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n }
+{ person:2:n }</pre>    
+            </div></div><p><br class="example-break">      					
+			</p>
+			
+			<p>Objects that precede on the path the element that is analyzed in the current pass may be referenced by 
+			repeating <code class="code">#</code> sign. 
+			</p>
+			
+			<p>.....................................			
+			The following query returns all hyponyms of synsets that contain the word form <em class="wordasword">person</em>
+			having the same number of words as their hypernyms one may wrtie
+            </p><div class="example"><a name="d4e518"></a><p class="title"><b>Example&nbsp;2.18.&nbsp;Backward reference</b></p><div class="example-contents">
+            
+            <pre class="programlisting">wquery&gt; {person}.hypernym[count(#.words)&lt;count(##.words)]
+{ organism:1:n being:2:n }
+{ causal agent:1:n cause:4:n causal agency:1:n }</pre>    
+            </div></div><p><br class="example-break"> 					
+            
+            A reference may be omitted if it consists of exactly one <code class="code">#</code> sign and is followed by at least one step.
+            The expression written above may be rephrased as follows
+            </p><div class="example"><a name="d4e522"></a><p class="title"><b>Example&nbsp;2.19.&nbsp;Implicit reference</b></p><div class="example-contents">
+            
+            <pre class="programlisting">wquery&gt; {person}.hyponyms[count(words) = count(##.words)]
+{ organism:1:n being:2:n }
+{ causal agent:1:n cause:4:n causal agency:1:n }</pre>    
+            </div></div><p><br class="example-break">                                	
+			</p>
+			
+			<p>A filter may also be used independently as a boolean generator.</p>
+            <div class="example"><a name="d4e526"></a><p class="title"><b>Example&nbsp;2.20.&nbsp;Filter generator</b></p><div class="example-contents">
+            
+            <pre class="programlisting">wquery&gt; [1 &lt; 2]
+true</pre>    
+            </div></div><br class="example-break"> 			
+			
+            <p>
+                The following subsections describe three types of operators that are allowed in filters.
+            </p>
+            
+            <div class="sect2" title="Dataset-oriented conditional operators"><div class="titlepage"><div><div><h3 class="title"><a name="d4e530"></a>Dataset-oriented conditional operators</h3></div></div></div>
+                
+                <p>
+                    The operators listed in <a class="xref" href="#datasetconditionaloperators" title="Table&nbsp;2.3.&nbsp;Dataset-oriented conditional operators.">Table&nbsp;2.3, &#8220;Dataset-oriented conditional operators.&#8221;</a>  
+                    are binary operators that compare pairs of datasets. 
+                    
+		            </p><div class="table"><a name="datasetconditionaloperators"></a><p class="title"><b>Table&nbsp;2.3.&nbsp;Dataset-oriented conditional operators.</b></p><div class="table-contents">
+		                
+		                <table summary="Dataset-oriented conditional operators." border="1"><colgroup><col width="80" align="center"><col width="90" align="center"><col align="left"></colgroup><thead><tr><th align="center">Operator</th><th align="center">Expression</th><th align="center">Result</th></tr></thead><tbody><tr valign="middle"><td align="center" valign="middle">dataset equality</td><td align="center" valign="middle"><code class="code">x = y</code></td><td align="left" valign="middle">true iff datasets generated by <code class="code">x</code> and <code class="code">y</code> are equal</td></tr><tr valign="middle"><td align="center" valign="middle">dataset inequality</td><td align="center" valign="middle"><code class="code">x != y</code></td><td align="left" valign="middle">true iff datasets generated by <code class="code">x</code> and <code class="code">y</code> are not equal</td></tr><tr valign="middle"><td align="center" valign="middle">dataset inclusion</td><td align="center" valign="middle"><code class="code">x in y</code></td><td align="left" valign="middle">true iff the dataset generated by <code class="code">x</code> is a subset of the one generated by <code class="code">y</code></td></tr><tr valign="middle"><td align="center" valign="middle">dataset proper inclusion</td><td align="center" valign="middle"><code class="code">x pin y</code></td><td align="left" valign="middle">true iff the dataset generated by <code class="code">x</code> is a proper subset of the one generated by <code class="code">y</code></td></tr></tbody></table>                    
+		            </div></div><p><br class="table-break">                    
+                </p>
+                <p>
+                    <a class="xref" href="#exampledatasetcomparisons" title="Example&nbsp;2.21.&nbsp;Dataset comparisons">Example&nbsp;2.21, &#8220;Dataset comparisons&#8221;</a> consists of queries that involve dataset-oriented conditional operators.
+		            </p><div class="example"><a name="exampledatasetcomparisons"></a><p class="title"><b>Example&nbsp;2.21.&nbsp;Dataset comparisons</b></p><div class="example-contents">
+		            
+		            <pre class="programlisting">wquery&gt; [{person:1:n} = {person}]
+false
+wquery&gt; [{person:1:n} in {person}]
+true
+wquery&gt; [{person:1:n} pin {person}]
+true
+wquery&gt; [{person} != {person}]
+false
+</pre>    
+		            </div></div><p><br class="example-break">                                        
+                </p>
+            </div>
+            
+            <div class="sect2" title="Value-oriented conditional operators"><div class="titlepage"><div><div><h3 class="title"><a name="d4e579"></a>Value-oriented conditional operators</h3></div></div></div>
+                
+                <p>
+                    The operators listed in <a class="xref" href="#valueconditionaloperators" title="Table&nbsp;2.4.&nbsp;Value-oriented conditional operators.">Table&nbsp;2.4, &#8220;Value-oriented conditional operators.&#8221;</a>  
+                    are binary operators that are able to compare only those datasets that contain at most one element.
+                    Compared elements have to belong to the same data type.
+                </p>
+                    
+                <p>
+                   The following rules hold while comparing two values:
+                   
+                   </p><div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
+                            <p>Numbers are compared using natural ordering.</p>
+                        </li><li class="listitem">
+                            <p>Strings are compared by assuming lexicographical order.</p>
+                        </li><li class="listitem">
+                            <p>
+                                The boolean value <code class="code">false</code> is assumed to be lesser than <code class="code">true</code>.
+                            </p>
+                        </li><li class="listitem">
+                            <p>
+                                The result of comparing synsets or word senses is undefined.<sup>[<a name="d4e595" href="#ftn.d4e595" class="footnote">4</a>]</sup>
+                            </p>
+                        </li></ul></div><p>
+                </p>
+            
+                <p>    
+		            </p><div class="table"><a name="valueconditionaloperators"></a><p class="title"><b>Table&nbsp;2.4.&nbsp;Value-oriented conditional operators.</b></p><div class="table-contents">
+		                
+		                <table summary="Value-oriented conditional operators." border="1"><colgroup><col width="80" align="center"><col width="90" align="center"><col align="left"></colgroup><thead><tr><th align="center">Operator</th><th align="center">Expression</th><th align="center">Result</th></tr></thead><tbody><tr valign="middle"><td align="center" valign="middle">lesser than</td><td align="center" valign="middle"><code class="code">x &lt; y</code></td><td align="left" valign="middle">
+		                                true iff <code class="code">x</code> and <code class="code">y</code> contain exactly one element 
+		                                and the element in <code class="code">x</code> is lesser than the one in <code class="code">y</code>
+		                            </td></tr><tr valign="middle"><td align="center" valign="middle">lesser than or equal</td><td align="center" valign="middle"><code class="code">x &lt;= y</code></td><td align="left" valign="middle">
+		                                true iff <code class="code">x</code> and <code class="code">y</code> contain exactly one element 
+		                                and the element in <code class="code">x</code> is lesser than or equal to the one in <code class="code">y</code>
+		                            </td></tr><tr valign="middle"><td align="center" valign="middle">greater than</td><td align="center" valign="middle"><code class="code">x &gt; y</code></td><td align="left" valign="middle">
+		                                true iff <code class="code">x</code> and <code class="code">y</code> contain exactly one element 
+		                                and the element in <code class="code">x</code> is greater than the one in <code class="code">y</code>
+		                            </td></tr><tr valign="middle"><td align="center" valign="middle">greater than or equal</td><td align="center" valign="middle"><code class="code">x &gt;= y</code></td><td align="left" valign="middle">
+		                                true iff <code class="code">x</code> and <code class="code">y</code> contain exactly one element 
+		                                and the element in <code class="code">x</code> is greater than or equal to the one in <code class="code">y</code>
+		                            </td></tr></tbody></table>                    
+		            </div></div><p><br class="table-break">                        
+                </p>
+                
+                <p>
+                    <a class="xref" href="#examplevaluecomparisons" title="Example&nbsp;2.22.&nbsp;Value comparisons">Example&nbsp;2.22, &#8220;Value comparisons&#8221;</a> consists of queries that involve some of value-oriented conditional operators.
+                    </p><div class="example"><a name="examplevaluecomparisons"></a><p class="title"><b>Example&nbsp;2.22.&nbsp;Value comparisons</b></p><div class="example-contents">
+			            
+			            <pre class="programlisting">wquery&gt; [person &lt; individual]
+false
+wquery&gt; [1 &lt;= 1]
+true
+wquery&gt; [true &gt; false]
+true</pre>    
+                    </div></div><p><br class="example-break">                                         
+                </p>
+            </div>
+
+            <div class="sect2" title="Logic operators"><div class="titlepage"><div><div><h3 class="title"><a name="d4e651"></a>Logic operators</h3></div></div></div>
+                
+                
+                <p>
+                    The operators listed in <a class="xref" href="#logicoperators" title="Table&nbsp;2.5.&nbsp;Value-oriented conditional operators.">Table&nbsp;2.5, &#8220;Value-oriented conditional operators.&#8221;</a> may be used to combine conditional expressions.
+                    
+                    </p><div class="table"><a name="logicoperators"></a><p class="title"><b>Table&nbsp;2.5.&nbsp;Value-oriented conditional operators.</b></p><div class="table-contents">
+                        
+                        <table summary="Value-oriented conditional operators." border="1"><colgroup><col width="80" align="center"><col width="90" align="center"><col align="left"></colgroup><thead><tr><th align="center">Operator</th><th align="center">Expression</th><th align="center">Result</th></tr></thead><tbody><tr valign="middle"><td align="center" valign="middle">conjunction</td><td align="center" valign="middle"><code class="code">x and y</code></td><td align="left" valign="middle">
+                                        true iff both <code class="code">x</code> and <code class="code">y</code> are true
+                                    </td></tr><tr valign="middle"><td align="center" valign="middle">disjunction</td><td align="center" valign="middle"><code class="code">x or y</code></td><td align="left" valign="middle">
+                                        true iff <code class="code">x</code> or <code class="code">y</code> is true
+                                    </td></tr><tr valign="middle"><td align="center" valign="middle">negation</td><td align="center" valign="middle"><code class="code">not x</code></td><td align="left" valign="middle">
+                                        true iff <code class="code">x</code> is not true
+                                    </td></tr></tbody></table>                    
+                    </div></div><p><br class="table-break">                                                            
+                </p>
+                
+                <p>
+                    <a class="xref" href="#examplelogicoperators" title="Example&nbsp;2.23.&nbsp;Logic operations">Example&nbsp;2.23, &#8220;Logic operations&#8221;</a> presents expressions that involve logic operators.
+		            </p><div class="example"><a name="examplelogicoperators"></a><p class="title"><b>Example&nbsp;2.23.&nbsp;Logic operations</b></p><div class="example-contents">
+		            
+		            <pre class="programlisting">wquery&gt; {}[car in words and gondola in words]
+{ car:3:n gondola:3:n }
+wquery&gt; {}[car in words or gondola in words]
+{ cable car:1:n car:5:n }
+{ car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n }
+{ car:2:n railcar:1:n railway car:1:n railroad car:1:n }
+{ car:4:n elevator car:1:n }
+{ car:3:n gondola:3:n }
+wquery&gt; {}[car in words and not gondola in words]
+{ cable car:1:n car:5:n }
+{ auto:1:n automobile:1:n }
+{ car:2:n railcar:1:n railway car:1:n railroad car:1:n }
+{ car:4:n elevator car:1:n }</pre>    
+		            </div></div><p><br class="example-break">                
+                </p>
+            </div>
+		</div>
+		
+		<div class="sect1" title="Functions"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d4e692"></a>Functions</h2></div></div></div>
+			
+			
+            <p>
+                A call to a function consists of a function name followed by an expression surrounded with parentheses. 
+                WQuery functions fall into two categories:
+                </p><div class="variablelist"><dl><dt><span class="term">aggregate functions</span></dt><dd>
+                            <p>
+                                These functions are invoked directly on a dataset returned by the expression between parentheses.
+                            </p>
+                        </dd><dt><span class="term">scalar functions</span></dt><dd>
+                            <p>
+                                These functions are invoked separately for every tuple that belongs to a dataset returned by 
+                                the expression between parentheses and the result is a sum of results returned by all invocations.
+                            </p>
+                        </dd></dl></div><p>
+			</p>
+			
+            <p>The list of all built-in functions may be found in <a class="xref" href="#builtinfunctions" title="Appendix&nbsp;B.&nbsp;Built-in functions">Appendix&nbsp;B, <i>Built-in functions</i></a>.</p>
+			
+			<div class="example"><a name="d4e706"></a><p class="title"><b>Example&nbsp;2.24.&nbsp;Sample scalar functions</b></p><div class="example-contents">
+            
+            <pre class="programlisting">wquery&gt; upper({car:1}.words)
+AUTO
+AUTOMOBILE
+CAR
+MACHINE
+MOTORCAR
+wquery&gt; length({car:1}.words)
+3
+4
+7
+8
+10</pre>    
+            </div></div><br class="example-break">			
+			
+            <div class="example"><a name="d4e709"></a><p class="title"><b>Example&nbsp;2.25.&nbsp;Sample aggregate functions</b></p><div class="example-contents">
+            
+            <pre class="programlisting">wquery&gt; count({car:1}.words)
+5
+wquery&gt; max({car:1}.words)
+motorcar</pre>    
+            </div></div><br class="example-break">      		
+
+
+
+
+
+
+
+		</div>
+		<div class="sect1" title="Arithmetics"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d4e712"></a>Arithmetics</h2></div></div></div>
+			
+			<p>
+			    Arithmetic expressions in WQuery utilize paths and functions that return integers and floats.
+			    
+	            </p><div class="example"><a name="d4e715"></a><p class="title"><b>Example&nbsp;2.26.&nbsp;Sample arithmetic operations</b></p><div class="example-contents">
+	            
+	            <pre class="programlisting">wquery&gt; 2 + 3
+5
+wquery&gt; count({car:1}.words) + count({car:3}.words)
+7
+wquery&gt; max(length({car}.words)) - min(length({car}.words))
+9</pre>    
+	            </div></div><p><br class="example-break"> 			    
+			</p>
+			
+			<p> 
+	            Operators available in arithmetic expressions are shown in <a class="xref" href="#arithmeticoperators" title="Table&nbsp;2.6.&nbsp;Arithmetic operators.">Table&nbsp;2.6, &#8220;Arithmetic operators.&#8221;</a>.
+	            
+	            </p><div class="table"><a name="arithmeticoperators"></a><p class="title"><b>Table&nbsp;2.6.&nbsp;Arithmetic operators.</b></p><div class="table-contents">
+	                
+	                <table summary="Arithmetic operators." border="1"><colgroup><col align="center"><col align="center"><col align="left"></colgroup><thead><tr><th align="center">Operator</th><th align="center">Expression</th><th align="center">Result</th></tr></thead><tbody><tr valign="middle"><td align="center" valign="middle">unary minus</td><td align="center" valign="middle"><code class="code">-x</code></td><td align="left" valign="middle">negation of <code class="code">x</code></td></tr><tr valign="middle"><td align="center" valign="middle">unary plus</td><td align="center" valign="middle"><code class="code">+x</code></td><td align="left" valign="middle">unchanged value of <code class="code">x</code></td></tr><tr valign="middle"><td align="center" valign="middle">addition</td><td align="center" valign="middle"><code class="code">x + y</code></td><td align="left" valign="middle">sum of <code class="code">x</code> and <code class="code">y</code></td></tr><tr valign="middle"><td align="center" valign="middle">subtraction</td><td align="center" valign="middle"><code class="code">x - y</code></td><td align="left" valign="middle">difference of <code class="code">x</code> and <code class="code">y</code></td></tr><tr valign="middle"><td align="center" valign="middle">multiplication</td><td align="center" valign="middle"><code class="code">x * y</code></td><td align="left" valign="middle">product of <code class="code">x</code> and <code class="code">y</code></td></tr><tr valign="middle"><td align="center" valign="middle">division</td><td align="center" valign="middle"><code class="code">x / y</code></td><td align="left" valign="middle">quotient of <code class="code">x</code> and <code class="code">y</code></td></tr><tr valign="middle"><td align="center" valign="middle">modulo</td><td align="center" valign="middle"><code class="code">x % y</code></td><td align="left" valign="middle">remainder from division of <code class="code">x</code> by <code class="code">y</code></td></tr></tbody></table>                    
+	            </div></div><p><br class="table-break">
+            </p>
+		</div>
+		
+		<div class="sect1" title="Path expressions"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d4e779"></a>Path expressions</h2></div></div></div>
+			
+			<p>A path expression consists of one or more paths combined 
+			     together using operators shown in <a class="xref" href="#pathoperators" title="Table&nbsp;2.7.&nbsp;Path operators">Table&nbsp;2.7, &#8220;Path operators&#8221;</a>.
+						
+                </p><div class="table"><a name="pathoperators"></a><p class="title"><b>Table&nbsp;2.7.&nbsp;Path operators</b></p><div class="table-contents">
+                    
+                    <table summary="Path operators" border="1"><colgroup><col width="80" align="center"><col width="90" align="center"><col align="left"></colgroup><thead><tr><th align="center">Operator</th><th align="center">Expression</th><th align="center">Result</th></tr></thead><tbody><tr valign="middle"><td align="center" valign="middle">path union</td><td align="center" valign="middle"><code class="code">x union y</code></td><td align="left" valign="middle">union of datasets generated by <code class="code">x</code> and <code class="code">y</code></td></tr><tr valign="middle"><td align="center" valign="middle">path intersection</td><td align="center" valign="middle"><code class="code">x intersect y</code></td><td align="left" valign="middle">intersection of datasets generated by <code class="code">x</code> and <code class="code">y</code></td></tr><tr valign="middle"><td align="center" valign="middle">path difference</td><td align="center" valign="middle"><code class="code">x except y</code></td><td align="left" valign="middle">difference of datasets generated by <code class="code">x</code> and <code class="code">y</code></td></tr><tr valign="middle"><td align="center" valign="middle">path product</td><td align="center" valign="middle"><code class="code">x, y</code></td><td align="left" valign="middle">
+                                    a dataset that consists of all tuples (a<sub>1</sub>, ..., a<sub>
+	                                k</sub>, b<sub>1</sub>, ..., b<sub>n</sub>) such that
+	                                (a<sub>1</sub>, ..., a<sub>k</sub>) 
+	                                belongs to a dataset generated by <code class="code">x</code>
+	                                and (b<sub>1</sub>, ..., b<sub>n</sub>) 
+	                                belongs to a dataset generated by <code class="code">y</code>
+                                </td></tr></tbody></table>                    
+                </div></div><p><br class="table-break">			
+						
+	            </p><div class="example"><a name="d4e831"></a><p class="title"><b>Example&nbsp;2.27.&nbsp;Path expressions</b></p><div class="example-contents">
+                
+                <pre class="programlisting">wquery&gt; {car:1:n} union {car:3:n}
+{ car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n }
+{ car:3:n gondola:3:n }
+wquery&gt; {car} intersect {car:1:n}
+{ car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n }
+wquery&gt; {car} except {car:2:n}
+{ cable car:1:n car:5:n }
+{ car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n }
+{ car:4:n elevator car:1:n }
+{ car:3:n gondola:3:n }
+wquery&gt; {apple}, {set}
+{ apple:1:n } { set:2:n }
+{ apple:1:n } { determine:3:v set:2:v }
+{ apple:1:n } { fixed:2:s set:2:s rigid:5:s }
+{ apple:2:n orchard apple tree:1:n Malus pumila:1:n } { set:2:n }
+{ apple:2:n orchard apple tree:1:n Malus pumila:1:n } { determine:3:v 
+    set:2:v }
+{ apple:2:n orchard apple tree:1:n Malus pumila:1:n } { fixed:2:s 
+    set:2:s rigid:5:s }</pre>    
+                </div></div><p><br class="example-break">  
+			</p>
+		</div>
+		<div class="sect1" title="Imperative expressions"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="s1imperativeexpressions"></a>Imperative expressions</h2></div></div></div>
+			
+			<p>
+			     Path expressions described in the previous section may be used to construct five types of imperative expressions: 
+				 <span class="emphasis"><em>emissions</em></span>, <span class="emphasis"><em>iterators</em></span>, <span class="emphasis"><em>conditionals</em></span>, 
+				 <span class="emphasis"><em>blocks</em></span> and <span class="emphasis"><em>assignments</em></span>.
+            </p>
+            
+            <div class="sect2" title="Emissions"><div class="titlepage"><div><div><h3 class="title"><a name="d4e842"></a>Emissions</h3></div></div></div>
+                
+
+                <p><code class="code">emit path_expr</code></p>
+                                            
+                <p>An emission passes tuples generated by the path expression <code class="code">path_expr</code> to the output.</p>
+                        
+                <div class="example"><a name="d4e848"></a><p class="title"><b>Example&nbsp;2.28.&nbsp;An emission</b></p><div class="example-contents">
+                
+                <pre class="programlisting">wquery&gt; emit {person:1:n}.words
+soul
+individual
+somebody
+someone
+mortal
+person</pre>    
+                </div></div><br class="example-break">              
+            </div>
+
+            <div class="sect2" title="Iterators"><div class="titlepage"><div><div><h3 class="title"><a name="d4e851"></a>Iterators</h3></div></div></div>
+                
+                
+                <p>
+                    <code class="code">from var_decls in path_expr imp_expr</code>
+                </p>
+                                            
+                <p>
+                    An iterator executes the imperative expression <code class="code">imp_expr</code> 
+                    for every tuple generated by the path expression <code class="code">path_expr</code>.
+                    Variables from the comma separated list <code class="code">var_decls</code> are substituted with consecutive elements of
+                    a tuple processed in the current pass. Those variables may be used as generators in <code class="code">imp_expr</code>.                     
+                    <sup>[<a name="d4e860" href="#ftn.d4e860" class="footnote">5</a>]</sup>
+                </p>
+                        
+                <div class="example"><a name="d4e863"></a><p class="title"><b>Example&nbsp;2.29.&nbsp;An iterator</b></p><div class="example-contents">
+                
+                <pre class="programlisting">wquery&gt; from $a in {person}.words emit $a
+person
+soul
+individual
+somebody
+someone
+mortal
+person
+person</pre>    
+                </div></div><br class="example-break">  
+                
+                <p>
+                    In the example above the imperative expression built from an iterator and an emission returns a dataset that
+                    is not sorted and contains duplicated elements. 
+                    In order to sort a dataset one have to use the <code class="code">sort</code> function.                    
+                </p>                               
+                    
+                <div class="example"><a name="d4e868"></a><p class="title"><b>Example&nbsp;2.30.&nbsp;The <code class="code">sort</code> function</b></p><div class="example-contents">
+                
+                <pre class="programlisting">wquery&gt; from $a in sort({person}.words) emit $a
+individual
+mortal
+person
+person
+person
+somebody
+someone
+soul</pre>    
+                </div></div><br class="example-break">
+                
+                <p>Duplicates may be removed from a dataset by the <code class="code">distinct</code> function.</p>
+                
+                <div class="example"><a name="d4e874"></a><p class="title"><b>Example&nbsp;2.31.&nbsp;The <code class="code">distinct</code> function</b></p><div class="example-contents">
+                
+                <pre class="programlisting">wquery&gt; from $a in distinct(sort({person}.words)) emit $a
+individual
+mortal
+person
+somebody
+someone
+soul</pre>    
+                </div></div><br class="example-break">
+            </div>
+            
+            <div class="sect2" title="Conditionals"><div class="titlepage"><div><div><h3 class="title"><a name="d4e878"></a>Conditionals</h3></div></div></div>
+                
+                <p><code class="code">if path_expr imp_expr</code></p>
+                
+                <p>A conditional executes the imperative expression <code class="code">imp_expr</code> if the path expression <code class="code">path_expr</code>
+                is <span class="emphasis"><em>true</em></span>.</p>
+                <div class="note" title="Note: Truth in WQuery" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note: Truth in WQuery</h3>
+                    
+                    <p>
+                        A path expression is considered to be false if it generates a dataset that is either empty 
+                        or includes exactly one tuple that consists entirely of boolean elements and at least one of 
+                        those elements is <span class="emphasis"><em>false</em></span>.
+                        Otherwise the expression is considered to be <span class="emphasis"><em>true</em></span>.
+                    </p>
+                </div>
+                
+                <div class="example"><a name="d4e891"></a><p class="title"><b>Example&nbsp;2.32.&nbsp;A conditional</b></p><div class="example-contents">
+                
+                <pre class="programlisting">wquery&gt; if [2 + 2 = 4] emit `ufff...`
+ufff...</pre>    
+                </div></div><br class="example-break">   
+                
+                <p>
+                    A conditional may have also an optional else block which is executed 
+                    if <code class="code">path_expr</code> is not <span class="emphasis"><em>true</em></span>.
+                    The resulting conditional looks as follows
+                </p>
+                
+                <p><code class="code">if path_expr imp_expr else else_expr</code></p>
+                
+                <div class="example"><a name="d4e899"></a><p class="title"><b>Example&nbsp;2.33.&nbsp;An else block</b></p><div class="example-contents">
+                
+                <pre class="programlisting">wquery&gt; 
+    if [bus in {car}.words] 
+        emit {bus} 
+    else 
+        emit `no "bus" word found in "{car}.words"`
+               
+no "bus" word found in "{car}.words"</pre>    
+                </div></div><br class="example-break">                  
+            </div>
+            
+            <div class="sect2" title="Blocks"><div class="titlepage"><div><div><h3 class="title"><a name="d4e902"></a>Blocks</h3></div></div></div>
+                
+                
+                <p>
+                    <code class="code">do imp_expr_1 ... impr_expr_n end</code>
+                </p>
+
+                <p>A block executes sequentially imperative expressions <code class="code">imp_expr_1</code> to <code class="code">imp_expr_n</code>.</p>
+
+                <div class="example"><a name="d4e909"></a><p class="title"><b>Example&nbsp;2.34.&nbsp;A block</b></p><div class="example-contents">
+                
+                <pre class="programlisting">wquery&gt; 
+do 
+    emit {person:3:n}  
+    emit car:2:n
+    emit apple
+end
+
+{ person:3:n }
+car:2:n
+apple</pre>    
+                </div></div><br class="example-break"> 
+            </div>
+            
+            <div class="sect2" title="Assignments"><div class="titlepage"><div><div><h3 class="title"><a name="d4e912"></a>Assignments</h3></div></div></div>
+                
+                
+                <p>
+                    <code class="code">var_decls = path_expr</code>
+                </p>
+                
+                <p>
+                    An assignment binds variables from the comma separated list <code class="code">var_decls</code> to consecutive values of a tuple
+                    generated by the path expression <code class="code">path_expr</code>.  The <code class="code">path_expr</code> expression shall return exactly 
+                    one tuple.
+                </p>
+                
+                <div class="example"><a name="d4e920"></a><p class="title"><b>Example&nbsp;2.35.&nbsp;An assignment</b></p><div class="example-contents">
+                
+                <pre class="programlisting">wquery&gt; 
+do
+    $a, $b = &lt;{car:1:n}&gt;.&lt;desc&gt;
+    if [$b =~ `engine`]
+            emit $a.words
+end
+
+machine
+motorcar
+automobile
+auto
+car</pre>    
+                </div></div><br class="example-break">
+                
+                <p>
+                    Variable bindings are accessible in all expressions that follow the assignment and are placed in the scope of the block which surrounds it. 
+                    Bindings in the inner block hide the ones defined in the outer blocks.                
+                </p>                 
+                
+                <div class="example"><a name="d4e924"></a><p class="title"><b>Example&nbsp;2.36.&nbsp;Hidden binding</b></p><div class="example-contents">
+                
+                <pre class="programlisting">wquery&gt; 
+do
+    $a, $b = 1, 2
+    
+    do
+        $b = 3
+        emit $a
+        emit $b
+    end
+     
+    emit $a
+    emit $b 
+end
+
+1
+3
+1
+2</pre>    
+                </div></div><br class="example-break">                            
+            </div>
+		</div>
+	<div class="footnotes"><br><hr width="100" align="left"><div class="footnote">
+                                    <p><sup>[<a name="ftn.d4e595" href="#d4e595" class="para">4</a>] </sup>Present implementation of WQuery compares synset and word sense identifiers to determine ordering between synsets and wordsenses.</p>
+                                </div><div class="footnote"><p><sup>[<a name="ftn.d4e860" href="#d4e860" class="para">5</a>] </sup>Variable names are prefixed with <code class="code">$</code> sign.</p></div></div></div>
+	<div class="chapter" title="Chapter&nbsp;3.&nbsp;Advanced topics"><div class="titlepage"><div><div><h2 class="title"><a name="chadvancedtopics"></a>Chapter&nbsp;3.&nbsp;Advanced topics</h2></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="sect1"><a href="#d4e930">Embedding the interpreter</a></span></dt><dt><span class="sect1"><a href="#scregisteringcustomloaders">Registering custom wordnet loaders</a></span></dt><dt><span class="sect1"><a href="#scwrittingcustomfunctions">Registering custom functions</a></span></dt><dt><span class="sect1"><a href="#scusingcustomemitters">Using custom emitters</a></span></dt></dl></div>
+		
+		<p>This chapter covers topics important only in specific WQuery use cases.</p>        		
+		<div class="sect1" title="Embedding the interpreter"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d4e930"></a>Embedding the interpreter</h2></div></div></div>
+			
+            <p>
+                WQuery may be easily embedded into your own application. The following libraries must be added 
+                to the application classpath if you want to use WQuery:
+	            </p><div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
+	                    <p><code class="code">wquery-VERSION.jar</code></p>
+	                </li><li class="listitem">
+	                    <p><code class="code">scala-library-2.7.5.jar</code></p>
+	                </li><li class="listitem">
+	                    <p><code class="code">slf4j-api-1.5.8.jar</code></p>
+	                </li><li class="listitem">
+                        <p><code class="code">slf4j-log4j12-1.5.8.jar</code> (or another logging framework facade)</p>
+                    </li><li class="listitem">
+                        <p><code class="code">log4j-1.2.14.jar</code> (or another logging framework)</p>
+                    </li></ul></div><p>
+            </p> 
+            
+            <p>
+                In order to access WQuery programmatically you have to instantiate an object of the class <code class="classname">org.wquery.WQuery</code>
+                by invoking its static method <code class="methodname">getInstance</code>.
+                After obtaining <code class="classname">WQuery</code> instance you may execute queries by calling the <code class="methodname">execute</code> method.
+             </p>   
+
+                <span class="emphasis"><em>Example: To be written</em></span>            
+		</div>
+        <div class="sect1" title="Registering custom wordnet loaders"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="scregisteringcustomloaders"></a>Registering custom wordnet loaders</h2></div></div></div>
+            
+            <p><span class="emphasis"><em>To be written...</em></span></p>
+        </div>		
+        <div class="sect1" title="Registering custom functions"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="scwrittingcustomfunctions"></a>Registering custom functions</h2></div></div></div>
+            
+            <p><span class="emphasis"><em>To be written...</em></span></p>
+        </div>		
+        <div class="sect1" title="Using custom emitters"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="scusingcustomemitters"></a>Using custom emitters</h2></div></div></div>
+            
+            <p><span class="emphasis"><em>To be written...</em></span></p>
+        </div>        
+		
+		
+	</div>
+	<div class="appendix" title="Appendix&nbsp;A.&nbsp;Tools reference"><div class="titlepage"><div><div><h2 class="title"><a name="aptoolsreference"></a>Appendix&nbsp;A.&nbsp;Tools reference</h2></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="sect1"><a href="#d4e969">WGUIConsole</a></span></dt><dt><span class="sect1"><a href="#d4e973">WConsole</a></span></dt></dl></div>
+	   	  
+	   <div class="sect1" title="WGUIConsole"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d4e969"></a>WGUIConsole</h2></div></div></div><p><span class="emphasis"><em>To be written...</em></span></p></div>
+       <div class="sect1" title="WConsole"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d4e973"></a>WConsole</h2></div></div></div><p><span class="emphasis"><em>To be written...</em></span></p></div>
+	</div>
+    <div class="appendix" title="Appendix&nbsp;B.&nbsp;Built-in functions"><div class="titlepage"><div><div><h2 class="title"><a name="builtinfunctions"></a>Appendix&nbsp;B.&nbsp;Built-in functions</h2></div></div></div>
+       
+       <p>
+		</p><div class="table"><a name="scalarfunctions"></a><p class="title"><b>Table&nbsp;B.1.&nbsp;Scalar functions.</b></p><div class="table-contents">
+		     
+		     <table summary="Scalar functions." border="1"><colgroup><col align="center"><col align="left"><col align="left"></colgroup><thead><tr><th align="center">Function</th><th align="left">Argument</th><th align="left">Result</th></tr></thead><tbody><tr valign="middle"><td align="center" valign="middle"><span class="emphasis"><em>abs(x)</em></span></td><td align="left" valign="middle"><span class="emphasis"><em>x</em></span> - float or integer</td><td align="left" valign="middle">absolute value of <span class="emphasis"><em>x</em></span> - float or integer</td></tr><tr valign="middle"><td align="center" valign="middle"><span class="emphasis"><em>ceil(x)</em></span></td><td align="left" valign="middle"><span class="emphasis"><em>x</em></span> - float</td><td align="left" valign="middle">the smallest integer that is greater than or equal to <span class="emphasis"><em>x</em></span> - float</td></tr><tr valign="middle"><td align="center" valign="middle"><span class="emphasis"><em>floor(x)</em></span></td><td align="left" valign="middle"><span class="emphasis"><em>x</em></span> - float</td><td align="left" valign="middle">the largest integer that is lower than or equal to <span class="emphasis"><em>x</em></span> - float</td></tr><tr valign="middle"><td align="center" valign="middle"><span class="emphasis"><em>length(x)</em></span></td><td align="left" valign="middle"><span class="emphasis"><em>x</em></span> - string</td><td align="left" valign="middle">length of <span class="emphasis"><em>x</em></span> - integer</td></tr><tr valign="middle"><td align="center" valign="middle"><span class="emphasis"><em>log(x)</em></span></td><td align="left" valign="middle"><span class="emphasis"><em>x</em></span> - float</td><td align="left" valign="middle">the natural logarithm of <span class="emphasis"><em>x</em></span> - float</td></tr><tr valign="middle"><td align="center" valign="middle"><span class="emphasis"><em>lower(x)</em></span></td><td align="left" valign="middle"><span class="emphasis"><em>x</em></span> - string</td><td align="left" valign="middle">lowercased <span class="emphasis"><em>x</em></span> - string</td></tr><tr valign="middle"><td align="center" valign="middle"><span class="emphasis"><em>power(x,y)</em></span></td><td align="left" valign="middle"><span class="emphasis"><em>x</em></span> - float or integer, <span class="emphasis"><em>y</em></span> - float or integer</td><td align="left" valign="middle"><span class="emphasis"><em>x</em></span> raised to the power of <span class="emphasis"><em>y</em></span> - float or integer</td></tr><tr valign="middle"><td align="center" valign="middle"><span class="emphasis"><em>replace(x, y, z)</em></span></td><td align="left" valign="middle">
+		                     <span class="emphasis"><em>x</em></span> - string, 
+		                     <span class="emphasis"><em>y</em></span> - string, 
+		                     <span class="emphasis"><em>z</em></span> - string
+		                 </td><td align="left" valign="middle">replace substring of <span class="emphasis"><em>x</em></span> matching regular expression <span class="emphasis"><em>y</em></span>
+		                 with <span class="emphasis"><em>z</em></span> - string</td></tr><tr valign="middle"><td align="center" valign="middle"><span class="emphasis"><em>substring(x, y, z)</em></span></td><td align="left" valign="middle">
+		                     <span class="emphasis"><em>x</em></span> - string, 
+		                     <span class="emphasis"><em>y</em></span> - integer, 
+		                     <span class="emphasis"><em>z</em></span> - integer
+		                 </td><td align="left" valign="middle">substring of <span class="emphasis"><em>x</em></span> from <span class="emphasis"><em>y</em></span>
+		                 to <span class="emphasis"><em>z</em></span> - string</td></tr><tr valign="middle"><td align="center" valign="middle"><span class="emphasis"><em>upper(x)</em></span></td><td align="left" valign="middle"><span class="emphasis"><em>x</em></span> - string</td><td align="left" valign="middle">upercased <span class="emphasis"><em>x</em></span> - string</td></tr></tbody></table>                    
+		 </div></div><p><br class="table-break">            
+		         
+		
+		</p><div class="table"><a name="agregatefunctions"></a><p class="title"><b>Table&nbsp;B.2.&nbsp;Aggregate functions.</b></p><div class="table-contents">
+		     
+		     <table summary="Aggregate functions." border="1"><colgroup><col align="center"><col align="left"><col align="left"></colgroup><thead><tr><th align="center">Function</th><th align="left">Argument</th><th align="left">Result</th></tr></thead><tbody><tr valign="middle"><td align="center" valign="middle"><span class="emphasis"><em>avg(x)</em></span></td><td align="left" valign="middle"><span class="emphasis"><em>x</em></span> - string or float</td><td align="left" valign="middle">average value of <span class="emphasis"><em>x</em></span> - float</td></tr><tr valign="middle"><td align="center" valign="middle"><span class="emphasis"><em>count(x)</em></span></td><td align="left" valign="middle"><span class="emphasis"><em>x</em></span> - any</td><td align="left" valign="middle"><span class="emphasis"><em>x</em></span> count - integer</td></tr><tr valign="middle"><td align="center" valign="middle"><span class="emphasis"><em>distinct(x)</em></span></td><td align="left" valign="middle"><span class="emphasis"><em>x</em></span> - any</td><td align="left" valign="middle">set built from values of <span class="emphasis"><em>x</em></span></td></tr><tr valign="middle"><td align="center" valign="middle"><span class="emphasis"><em>max(x)</em></span></td><td align="left" valign="middle"><span class="emphasis"><em>x</em></span> - string, float or integer</td><td align="left" valign="middle">maximal value of <span class="emphasis"><em>x</em></span> - string, float or integer</td></tr><tr valign="middle"><td align="center" valign="middle"><span class="emphasis"><em>min(x)</em></span></td><td align="left" valign="middle"><span class="emphasis"><em>x</em></span> - string, float or integer</td><td align="left" valign="middle">minimal value of <span class="emphasis"><em>x</em></span> - string, float or integer</td></tr><tr valign="middle"><td align="center" valign="middle"><span class="emphasis"><em>size(x)</em></span></td><td align="left" valign="middle"><span class="emphasis"><em>x</em></span> - any</td><td align="left" valign="middle"><span class="emphasis"><em>x</em></span> tuples sizes</td></tr><tr valign="middle"><td align="center" valign="middle"><span class="emphasis"><em>sort(x)</em></span></td><td align="left" valign="middle"><span class="emphasis"><em>x</em></span> - any</td><td align="left" valign="middle">sorted <span class="emphasis"><em>x</em></span></td></tr><tr valign="middle"><td align="center" valign="middle"><span class="emphasis"><em>sum(x)</em></span></td><td align="left" valign="middle"><span class="emphasis"><em>x</em></span> - float or integer</td><td align="left" valign="middle">sum of <span class="emphasis"><em>x</em></span> - float or integer</td></tr></tbody></table>                    
+		 </div></div><p><br class="table-break">           
+       </p>     
+    </div>	
+</div></body></html>

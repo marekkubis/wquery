@@ -1,0 +1,443 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html>
+        <head>
+          <title>org.wquery.model</title>
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link type="text/css" media="screen" rel="stylesheet" href="../../../lib/template.css" />
+      <script type="text/javascript" src="../../../lib/jquery.js"></script>
+      <script type="text/javascript" src="../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../lib/tools.tooltip.js"></script>
+    
+        </head>
+        <body class="value">
+      <div id="definition">
+        <img src="../../../lib/package_big.png" />
+        <p id="owner"><a name="org" class="extype" href="../../package.html">org</a>.<a name="org.wquery" class="extype" href="../package.html">wquery</a></p>
+        <h1>model</h1>
+      </div>
+
+      <h4 class="signature" id="signature">
+      <span class="kind">package</span>
+      <span class="symbol"> 
+        <span class="name">model</span>
+        
+        
+      </span>
+      </h4>
+      
+          <div class="fullcommenttop" id="comment"></div>
+        
+
+      <div id="template">
+
+        <div id="mbrsel">
+          <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
+          
+          
+          <div id="visbl">
+              <span class="filtertype">Visibility</span>
+              <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+            </div>
+        </div>
+
+        
+
+        <div class="types members" id="types">
+              <h3>Type Members</h3>
+              <ol><li visbl="pub" name="org.wquery.model.Arc" data-isabs="false">
+      <a id="Arc:Arc"></a>
+      <h4 class="signature">
+      <span class="kind">case class</span>
+      <span class="symbol"> 
+        <a href="Arc.html"><span class="name">Arc</span></a>
+        
+        <span class="params">(<span name="relation">relation: Relation</span>, <span name="from">from: String</span>, <span name="to">to: String</span>)</span><span class="result"> extends Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="org.wquery.model.Argument" data-isabs="false">
+      <a id="Argument:Argument"></a>
+      <h4 class="signature">
+      <span class="kind">case class</span>
+      <span class="symbol"> 
+        <a href="Argument.html"><span class="name">Argument</span></a>
+        
+        <span class="params">(<span name="name">name: String</span>, <span name="nodeType">nodeType: NodeType</span>)</span><span class="result"> extends Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="org.wquery.model.DataSet" data-isabs="false">
+      <a id="DataSet:DataSet"></a>
+      <h4 class="signature">
+      <span class="kind">class</span>
+      <span class="symbol"> 
+        <a href="DataSet.html"><span class="name">DataSet</span></a>
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="org.wquery.model.DataSetBuffer" data-isabs="false">
+      <a id="DataSetBuffer:DataSetBuffer"></a>
+      <h4 class="signature">
+      <span class="kind">class</span>
+      <span class="symbol"> 
+        <a href="DataSetBuffer.html"><span class="name">DataSetBuffer</span></a>
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="org.wquery.model.DataType" data-isabs="true">
+      <a id="DataType:DataType"></a>
+      <h4 class="signature">
+      <span class="kind">class</span>
+      <span class="symbol"> 
+        <a href="DataType.html"><span class="name">DataType</span></a>
+        
+        <span class="result"> extends Ordered[DataType]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>sealed abstract </dd></dl></div>
+    </li><li visbl="pub" name="org.wquery.model.NodeType" data-isabs="true">
+      <a id="NodeType:NodeType"></a>
+      <h4 class="signature">
+      <span class="kind">class</span>
+      <span class="symbol"> 
+        <a href="NodeType.html"><span class="name">NodeType</span></a>
+        
+        <span class="result"> extends DataType</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>sealed abstract </dd></dl></div>
+    </li><li visbl="pub" name="org.wquery.model.PropertyAssignment" data-isabs="false">
+      <a id="PropertyAssignment:PropertyAssignment"></a>
+      <h4 class="signature">
+      <span class="kind">case class</span>
+      <span class="symbol"> 
+        <a href="PropertyAssignment.html"><span class="name">PropertyAssignment</span></a>
+        
+        <span class="params">(<span name="pattern">pattern: ArcPattern</span>, <span name="op">op: String</span>, <span name="values">values: DataSet</span>)</span><span class="result"> extends Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="org.wquery.model.Relation" data-isabs="false">
+      <a id="Relation:Relation"></a>
+      <h4 class="signature">
+      <span class="kind">case class</span>
+      <span class="symbol"> 
+        <a href="Relation.html"><span class="name">Relation</span></a>
+        
+        <span class="params">(<span name="name">name: String</span>, <span name="arguments">arguments: Set[Argument]</span>)</span><span class="result"> extends Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="org.wquery.model.Sense" data-isabs="false">
+      <a id="Sense:Sense"></a>
+      <h4 class="signature">
+      <span class="kind">case class</span>
+      <span class="symbol"> 
+        <a href="Sense.html"><span class="name">Sense</span></a>
+        
+        <span class="params">(<span name="wordForm">wordForm: String</span>, <span name="senseNumber">senseNumber: Int</span>, <span name="pos">pos: String</span>)</span><span class="result"> extends Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="org.wquery.model.Symmetry" data-isabs="true">
+      <a id="Symmetry:Symmetry"></a>
+      <h4 class="signature">
+      <span class="kind">class</span>
+      <span class="symbol"> 
+        <a href="Symmetry.html"><span class="name">Symmetry</span></a>
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>sealed abstract </dd></dl></div>
+    </li><li visbl="pub" name="org.wquery.model.Synset" data-isabs="false">
+      <a id="Synset:Synset"></a>
+      <h4 class="signature">
+      <span class="kind">case class</span>
+      <span class="symbol"> 
+        <a href="Synset.html"><span class="name">Synset</span></a>
+        
+        <span class="params">(<span name="id">id: String</span>)</span><span class="result"> extends Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="org.wquery.model.WordNet" data-isabs="false">
+      <a id="WordNet:WordNet"></a>
+      <h4 class="signature">
+      <span class="kind">class</span>
+      <span class="symbol"> 
+        <a href="WordNet.html"><span class="name">WordNet</span></a>
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="org.wquery.model.WordNetSchema" data-isabs="false">
+      <a id="WordNetSchema:WordNetSchema"></a>
+      <h4 class="signature">
+      <span class="kind">class</span>
+      <span class="symbol"> 
+        <a href="WordNetSchema.html"><span class="name">WordNetSchema</span></a>
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="org.wquery.model.WordNetStore" data-isabs="true">
+      <a id="WordNetStore:WordNetStore"></a>
+      <h4 class="signature">
+      <span class="kind">trait</span>
+      <span class="symbol"> 
+        <a href="WordNetStore.html"><span class="name">WordNetStore</span></a>
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li></ol>
+            </div>
+        
+        
+
+        <div class="values members" id="values">
+              <h3>Value Members</h3>
+              <ol><li visbl="pub" name="org.wquery.model.Antisymmetric" data-isabs="false">
+      <a id="Antisymmetric:Antisymmetric"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="Antisymmetric$.html"><span class="name">Antisymmetric</span></a>
+        
+        <span class="result"> extends Symmetry with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="org.wquery.model.ArcType" data-isabs="false">
+      <a id="ArcType:ArcType"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="ArcType$.html"><span class="name">ArcType</span></a>
+        
+        <span class="result"> extends DataType with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="org.wquery.model.BooleanType" data-isabs="false">
+      <a id="BooleanType:BooleanType"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="BooleanType$.html"><span class="name">BooleanType</span></a>
+        
+        <span class="result"> extends NodeType with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="org.wquery.model.DataSet" data-isabs="false">
+      <a id="DataSet:DataSet"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="DataSet$.html"><span class="name">DataSet</span></a>
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="org.wquery.model.DataSetBuffers" data-isabs="false">
+      <a id="DataSetBuffers:DataSetBuffers"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="DataSetBuffers$.html"><span class="name">DataSetBuffers</span></a>
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="org.wquery.model.DataType" data-isabs="false">
+      <a id="DataType:DataType"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="DataType$.html"><span class="name">DataType</span></a>
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="org.wquery.model.FloatType" data-isabs="false">
+      <a id="FloatType:FloatType"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="FloatType$.html"><span class="name">FloatType</span></a>
+        
+        <span class="result"> extends NodeType with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="org.wquery.model.IntegerType" data-isabs="false">
+      <a id="IntegerType:IntegerType"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="IntegerType$.html"><span class="name">IntegerType</span></a>
+        
+        <span class="result"> extends NodeType with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="org.wquery.model.NodeType" data-isabs="false">
+      <a id="NodeType:NodeType"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="NodeType$.html"><span class="name">NodeType</span></a>
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="org.wquery.model.NonSymmetric" data-isabs="false">
+      <a id="NonSymmetric:NonSymmetric"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="NonSymmetric$.html"><span class="name">NonSymmetric</span></a>
+        
+        <span class="result"> extends Symmetry with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="org.wquery.model.POSType" data-isabs="false">
+      <a id="POSType:POSType"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="POSType$.html"><span class="name">POSType</span></a>
+        
+        <span class="result"> extends NodeType with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="org.wquery.model.Relation" data-isabs="false">
+      <a id="Relation:Relation"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="Relation$.html"><span class="name">Relation</span></a>
+        
+        <span class="result"> extends Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="org.wquery.model.SenseType" data-isabs="false">
+      <a id="SenseType:SenseType"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="SenseType$.html"><span class="name">SenseType</span></a>
+        
+        <span class="result"> extends NodeType with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="org.wquery.model.StringType" data-isabs="false">
+      <a id="StringType:StringType"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="StringType$.html"><span class="name">StringType</span></a>
+        
+        <span class="result"> extends NodeType with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="org.wquery.model.Symmetric" data-isabs="false">
+      <a id="Symmetric:Symmetric"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="Symmetric$.html"><span class="name">Symmetric</span></a>
+        
+        <span class="result"> extends Symmetry with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="org.wquery.model.SynsetType" data-isabs="false">
+      <a id="SynsetType:SynsetType"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="SynsetType$.html"><span class="name">SynsetType</span></a>
+        
+        <span class="result"> extends NodeType with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="org.wquery.model.WQueryListOrdering" data-isabs="false">
+      <a id="WQueryListOrdering:WQueryListOrdering"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="WQueryListOrdering$.html"><span class="name">WQueryListOrdering</span></a>
+        
+        <span class="result"> extends Ordering[List[Any]]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="org.wquery.model.WQueryOrdering" data-isabs="false">
+      <a id="WQueryOrdering:WQueryOrdering"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="WQueryOrdering$.html"><span class="name">WQueryOrdering</span></a>
+        
+        <span class="result"> extends Ordering[Any]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="org.wquery.model.WordNet" data-isabs="false">
+      <a id="WordNet:WordNet"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="WordNet$.html"><span class="name">WordNet</span></a>
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="org.wquery.model.impl" data-isabs="false">
+      <a id="impl:impl"></a>
+      <h4 class="signature">
+      <span class="kind">package</span>
+      <span class="symbol"> 
+        <a href="impl/package.html"><span class="name">impl</span></a>
+        
+        
+      </span>
+      </h4>
+      
+    </li></ol>
+            </div>
+
+        
+
+        
+
+      </div>
+      
+      <div id="tooltip"></div>
+      
+    </body>
+      </html>
