@@ -252,6 +252,7 @@
 						<descriptor>src/main/assembly/bin.xml</descriptor>
 					</descriptors>
                     <attach>false</attach>
+                    <appendAssemblyId>false</appendAssemblyId>
 				</configuration>
 				<executions>
 					<execution>
@@ -312,7 +313,7 @@
 					<description>${project.name} ${project.version} release</description>
 					<override>true</override>
                     <includes>
-                        <include>wquery-*-bin.zip</include>
+                        <include>wquery-*.zip</include>
                     </includes>
 				</configuration>
 				<executions>
