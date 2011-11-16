@@ -10,9 +10,6 @@
 			<outputDirectory>/libs</outputDirectory>
 			<excludes>
 				<exclude>org.wquery:wquery</exclude>
-                <exclude>org.mortbay.jetty:jetty</exclude>
-                <exclude>org.mortbay.jetty:jetty-util</exclude>
-                <exclude>org.mortbay.jetty:servlet-api</exclude>
 			</excludes>
 		</dependencySet>
 	</dependencySets>
@@ -26,7 +23,12 @@
             <source>src/main/assembly/template/wguiconsole</source>
             <outputDirectory>/</outputDirectory>
             <filtered>true</filtered>
-        </file>                    
+        </file>
+        <file>
+            <source>src/main/assembly/template/wservice</source>
+            <outputDirectory>/</outputDirectory>
+            <filtered>true</filtered>
+        </file>
         <file>
             <source>src/main/assembly/template/wconsole.bat</source>
             <outputDirectory>/</outputDirectory>
@@ -38,7 +40,13 @@
             <outputDirectory>/</outputDirectory>
             <filtered>true</filtered>
             <lineEnding>crlf</lineEnding>            
-        </file>            
+        </file>
+        <file>
+            <source>src/main/assembly/template/wservice.bat</source>
+            <outputDirectory>/</outputDirectory>
+            <filtered>true</filtered>
+            <lineEnding>crlf</lineEnding>
+        </file>
 
         <!-- README -->
         <file>
@@ -87,11 +95,6 @@
             <directory>src/main/assembly/template/docs/licenses</directory>
             <outputDirectory>/docs/licenses/</outputDirectory>
             <lineEnding>crlf</lineEnding>
-            <excludes>
-                <exclude>jetty-LICENSE.txt</exclude>
-                <exclude>jetty-NOTICE.txt</exclude>
-                <exclude>servlet-api-LICENSE.txt</exclude>
-            </excludes>
         </fileSet>
     </fileSets>
 </component>
