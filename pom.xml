@@ -101,7 +101,7 @@
 		<repository>
 			<id>wquery-repository</id>
 			<name>WQuery Repository</name>
-			<url>https://github.com/marekkubis/wquery/downloads</url>
+			<url>file:${project.build.directory}/site/repo</url>
 		</repository>
 
 		<site>
@@ -251,6 +251,7 @@
 					<descriptors>
 						<descriptor>src/main/assembly/bin.xml</descriptor>
 					</descriptors>
+                    <attach>false</attach>
 				</configuration>
 				<executions>
 					<execution>
@@ -266,9 +267,6 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-deploy-plugin</artifactId>
                 <version>2.5</version>
-                <configuration>
-                    <skip>true</skip>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
