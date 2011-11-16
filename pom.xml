@@ -311,7 +311,9 @@
 				<configuration>
 					<description>${project.name} ${project.version} release</description>
 					<override>true</override>
-					<includeAttached>true</includeAttached>
+                    <includes>
+                        <include>wquery-*-bin.zip</include>
+                    </includes>
 				</configuration>
 				<executions>
 					<execution>
