@@ -103,6 +103,12 @@
 			<name>WQuery Repository</name>
 			<url>https://github.com/marekkubis/wquery/downloads</url>
 		</repository>
+
+		<site>
+			<id>wquery-site</id>
+			<name>WQuery Website</name>
+			<url>file:${project.build.directory}/site-deploy</url>
+		</site>
 	</distributionManagement>
 
 	<dependencies>
@@ -332,7 +338,7 @@
 						<goals>
 							<goal>site</goal>
 						</goals>
-						<phase>deploy</phase>
+						<phase>site-deploy</phase>
 					</execution>
 				</executions>
 			</plugin>
