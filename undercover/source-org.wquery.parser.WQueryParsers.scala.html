@@ -1,0 +1,3482 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+	<head>
+		<title>org/wquery/parser/WQueryParsers.scala</title>
+		<link href="style.css" rel="stylesheet" type="text/css">
+		</link>
+		<script src="jquery.min.js" type="text/javascript">
+		</script>
+		<!--[if IE]><script src="excanvas.min.js" type="text/javascript"></script><![endif]-->
+		<script src="jquery.flot.min.js" type="text/javascript">
+		</script>
+		<script src="undercover.js" type="text/javascript">
+		</script>
+	</head>
+	<body>
+		<div>
+			<a href="project-dashboard.html">Dashboard</a>
+			<a href="project-summary.html">Overview</a>
+			<a href="index.html" target="_top">Frames</a>
+			<a href="#" target="_top">No Frames</a>
+		</div>
+		<div>
+			<h1>org/wquery/parser/WQueryParsers.scala</h1>
+			<div class="rounded-box">
+				<div class="round4">
+				</div>
+				<div class="round2">
+				</div>
+				<div class="round1">
+				</div>
+				<div class="box-inner">
+					<table class="item-statistics">
+						<colgroup>
+							<col width="300">
+							</col>
+							<col width="*">
+							</col>
+						</colgroup>
+						<tbody>
+							<tr>
+								<td>
+									<table width="100%">
+										<colgroup>
+											<col width="80">
+											</col>
+											<col width="*">
+											</col>
+										</colgroup>
+										<tbody>
+											<tr>
+												<th>Complexity</th>
+												<td>1438</td>
+											</tr>
+											<tr>
+												<th>Coverage</th>
+												<td>85.2% (1361/1598)</td>
+											</tr>
+											<tr>
+												<td colspan="2">
+													<div class="coverage-bar">
+														<div class="negative">
+															<div class="positive" style="width: 85.2%;">
+															</div>
+														</div>
+													</div>
+												</td>
+											</tr>
+										</tbody>
+									</table>
+								</td>
+								<td class="vertical-separator">
+								</td>
+								<td>
+									<table>
+										<tbody>
+											<tr>
+												<th>
+												</th>
+												<th>Count</th>
+												<th>Avg. Complexity</th>
+												<th>Max. Complexity</th>
+												<th>S.D. of Complexity</th>
+											</tr>
+											<tr>
+												<th>Classes</th>
+												<td class="number">2</td>
+												<td class="complexity">719.00</td>
+												<td class="complexity">1363</td>
+												<td class="complexity">644.00</td>
+											</tr>
+											<tr>
+												<th>Methods</th>
+												<td class="number">143</td>
+												<td class="complexity">10.06</td>
+												<td class="complexity">106</td>
+												<td class="complexity">16.49</td>
+											</tr>
+										</tbody>
+									</table>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+				<div class="round1">
+				</div>
+				<div class="round2">
+				</div>
+				<div class="round4">
+				</div>
+			</div>
+		</div>
+		<h3>Classes</h3>
+		<table class="item-children">
+			<colgroup>
+				<col width="*">
+				</col>
+				<col width="70">
+				</col>
+				<col width="60">
+				</col>
+				<col width="60">
+				</col>
+				<col width="80">
+				</col>
+				<col width="120">
+				</col>
+				<col width="150">
+				</col>
+			</colgroup>
+			<thead>
+				<tr>
+					<th>Class</th>
+					<th>Methods</th>
+					<th colspan="2">Method Complexity (Avg.,Max.)</th>
+					<th>Complexity</th>
+					<th colspan="2">Coverage</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<th>WQueryParsers</th>
+					<td class="number">71</td>
+					<td class="complexity">19.20</td>
+					<td class="complexity">106</td>
+					<td class="complexity">1363</td>
+					<td class="coverage">84.7% (1288/1520)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 84.7%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">parse(String) : EvaluableExpr</td>
+					<td class="complexity">1</td>
+					<td class="coverage">N/A</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="not-available">
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">query() : Parsers$Parser</td>
+					<td class="complexity">10</td>
+					<td class="coverage">90% (9/10)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 90.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">expr() : Parsers$Parser</td>
+					<td class="complexity">6</td>
+					<td class="coverage">83.3% (5/6)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 83.3%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">imp_expr() : Parsers$Parser</td>
+					<td class="complexity">26</td>
+					<td class="coverage">86.2% (25/29)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 86.2%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">statement() : Parsers$Parser</td>
+					<td class="complexity">31</td>
+					<td class="coverage">83.3% (30/36)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 83.3%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">iterator() : Parsers$Parser</td>
+					<td class="complexity">16</td>
+					<td class="coverage">83.3% (15/18)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 83.3%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">emission() : Parsers$Parser</td>
+					<td class="complexity">10</td>
+					<td class="coverage">90% (9/10)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 90.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">merge() : Parsers$Parser</td>
+					<td class="complexity">22</td>
+					<td class="coverage">84% (21/25)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 84.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">split() : Parsers$Parser</td>
+					<td class="complexity">22</td>
+					<td class="coverage">84% (21/25)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 84.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">assignment() : Parsers$Parser</td>
+					<td class="complexity">106</td>
+					<td class="coverage">80.8% (105/130)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 80.8%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">assignment_op() : Parsers$Parser</td>
+					<td class="complexity">11</td>
+					<td class="coverage">83.3% (10/12)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 83.3%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">with_clause() : Parsers$Parser</td>
+					<td class="complexity">6</td>
+					<td class="coverage">83.3% (5/6)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 83.3%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">property_assignment() : Parsers$Parser</td>
+					<td class="complexity">17</td>
+					<td class="coverage">80% (16/20)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 80.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">ifelse() : Parsers$Parser</td>
+					<td class="complexity">34</td>
+					<td class="coverage">82.5% (33/40)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 82.5%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">whiledo() : Parsers$Parser</td>
+					<td class="complexity">16</td>
+					<td class="coverage">83.3% (15/18)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 83.3%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">multipath_expr() : Parsers$Parser</td>
+					<td class="complexity">25</td>
+					<td class="coverage">88.9% (24/27)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 88.9%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">intersect_expr() : Parsers$Parser</td>
+					<td class="complexity">19</td>
+					<td class="coverage">90% (18/20)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 90.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">with_expr() : Parsers$Parser</td>
+					<td class="complexity">23</td>
+					<td class="coverage">91.7% (22/24)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 91.7%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">add_expr() : Parsers$Parser</td>
+					<td class="complexity">25</td>
+					<td class="coverage">88.9% (24/27)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 88.9%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">mul_expr() : Parsers$Parser</td>
+					<td class="complexity">35</td>
+					<td class="coverage">87.2% (34/39)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 87.2%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">unary_expr() : Parsers$Parser</td>
+					<td class="complexity">26</td>
+					<td class="coverage">75.9% (22/29)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 75.9%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">path() : Parsers$Parser</td>
+					<td class="complexity">17</td>
+					<td class="coverage">84.2% (16/19)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 84.2%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">generator_step() : Parsers$Parser</td>
+					<td class="complexity">21</td>
+					<td class="coverage">87% (20/23)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 87.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">step() : Parsers$Parser</td>
+					<td class="complexity">36</td>
+					<td class="coverage">85.4% (35/41)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 85.4%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">relation_trans() : Parsers$Parser</td>
+					<td class="complexity">11</td>
+					<td class="coverage">83.3% (10/12)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 83.3%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">dots() : Parsers$Parser</td>
+					<td class="complexity">10</td>
+					<td class="coverage">90% (9/10)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 90.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">relation_composition_expr() : Parsers$Parser</td>
+					<td class="complexity">15</td>
+					<td class="coverage">87.5% (14/16)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 87.5%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">relation_union_expr() : Parsers$Parser</td>
+					<td class="complexity">15</td>
+					<td class="coverage">87.5% (14/16)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 87.5%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">quantified_relation_expr() : Parsers$Parser</td>
+					<td class="complexity">11</td>
+					<td class="coverage">83.3% (10/12)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 83.3%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">simple_relation_expr() : Parsers$Parser</td>
+					<td class="complexity">31</td>
+					<td class="coverage">85.7% (30/35)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 85.7%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">arc_expr() : Parsers$Parser</td>
+					<td class="complexity">34</td>
+					<td class="coverage">89.2% (33/37)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 89.2%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">arc_expr_arg() : Parsers$Parser</td>
+					<td class="complexity">23</td>
+					<td class="coverage">84.6% (22/26)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 84.6%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">quantifier() : Parsers$Parser</td>
+					<td class="complexity">105</td>
+					<td class="coverage">81.7% (103/126)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 81.7%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">filter_trans() : Parsers$Parser</td>
+					<td class="complexity">5</td>
+					<td class="coverage">100% (4/4)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 100.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">filter() : Parsers$Parser</td>
+					<td class="complexity">11</td>
+					<td class="coverage">83.3% (10/12)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 83.3%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">or_condition() : Parsers$Parser</td>
+					<td class="complexity">15</td>
+					<td class="coverage">87.5% (14/16)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 87.5%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">and_condition() : Parsers$Parser</td>
+					<td class="complexity">15</td>
+					<td class="coverage">87.5% (14/16)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 87.5%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">not_condition() : Parsers$Parser</td>
+					<td class="complexity">15</td>
+					<td class="coverage">87.5% (14/16)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 87.5%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">condition() : Parsers$Parser</td>
+					<td class="complexity">25</td>
+					<td class="coverage">71.4% (20/28)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 71.4%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">comparison() : Parsers$Parser</td>
+					<td class="complexity">58</td>
+					<td class="coverage">82.6% (57/69)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 82.6%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">node_trans() : Parsers$Parser</td>
+					<td class="complexity">10</td>
+					<td class="coverage">90% (9/10)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 90.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">projection_trans() : Parsers$Parser</td>
+					<td class="complexity">5</td>
+					<td class="coverage">100% (4/4)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 100.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">projection() : Parsers$Parser</td>
+					<td class="complexity">11</td>
+					<td class="coverage">83.3% (10/12)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 83.3%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">generator() : Parsers$Parser</td>
+					<td class="complexity">6</td>
+					<td class="coverage">83.3% (5/6)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 83.3%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">non_rel_expr_generator() : Parsers$Parser</td>
+					<td class="complexity">66</td>
+					<td class="coverage">83.3% (65/78)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 83.3%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">rel_expr_generator() : Parsers$Parser</td>
+					<td class="complexity">5</td>
+					<td class="coverage">100% (4/4)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 100.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">boolean_generator() : Parsers$Parser</td>
+					<td class="complexity">14</td>
+					<td class="coverage">92.9% (13/14)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 92.9%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">synset_generator() : Parsers$Parser</td>
+					<td class="complexity">25</td>
+					<td class="coverage">88.9% (24/27)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 88.9%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">sense_generator() : Parsers$Parser</td>
+					<td class="complexity">61</td>
+					<td class="coverage">81.1% (60/74)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 81.1%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">function_call_generator() : Parsers$Parser</td>
+					<td class="complexity">22</td>
+					<td class="coverage">84% (21/25)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 84.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">quoted_word_generator() : Parsers$Parser</td>
+					<td class="complexity">26</td>
+					<td class="coverage">86.7% (26/30)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 86.7%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">float_generator() : Parsers$Parser</td>
+					<td class="complexity">5</td>
+					<td class="coverage">100% (4/4)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 100.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">sequence_generator() : Parsers$Parser</td>
+					<td class="complexity">17</td>
+					<td class="coverage">80% (16/20)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 80.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">integer_generator() : Parsers$Parser</td>
+					<td class="complexity">5</td>
+					<td class="coverage">100% (4/4)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 100.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">back_generator() : Parsers$Parser</td>
+					<td class="complexity">10</td>
+					<td class="coverage">90% (9/10)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 90.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">filter_generator() : Parsers$Parser</td>
+					<td class="complexity">5</td>
+					<td class="coverage">100% (4/4)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 100.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">empty_set_generator() : Parsers$Parser</td>
+					<td class="complexity">5</td>
+					<td class="coverage">100% (4/4)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 100.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">expr_generator() : Parsers$Parser</td>
+					<td class="complexity">11</td>
+					<td class="coverage">83.3% (10/12)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 83.3%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">variable_generator() : Parsers$Parser</td>
+					<td class="complexity">5</td>
+					<td class="coverage">100% (4/4)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 100.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">arc_generator() : Parsers$Parser</td>
+					<td class="complexity">10</td>
+					<td class="coverage">90% (9/10)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 90.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">var_decls() : Parsers$Parser</td>
+					<td class="complexity">6</td>
+					<td class="coverage">83.3% (5/6)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 83.3%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">var_decl() : Parsers$Parser</td>
+					<td class="complexity">6</td>
+					<td class="coverage">83.3% (5/6)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 83.3%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">step_var_decl() : Parsers$Parser</td>
+					<td class="complexity">10</td>
+					<td class="coverage">90% (9/10)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 90.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">path_var_decl() : Parsers$Parser</td>
+					<td class="complexity">10</td>
+					<td class="coverage">90% (9/10)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 90.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">alphaLit() : Parsers$Parser</td>
+					<td class="complexity">11</td>
+					<td class="coverage">83.3% (10/12)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 83.3%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">floatNum() : Parsers$Parser</td>
+					<td class="complexity">5</td>
+					<td class="coverage">100% (4/4)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 100.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">integerNum() : Parsers$Parser</td>
+					<td class="complexity">5</td>
+					<td class="coverage">100% (4/4)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 100.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">doubleQuotedString() : Parsers$Parser</td>
+					<td class="complexity">5</td>
+					<td class="coverage">100% (4/4)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 100.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">backQuotedString() : Parsers$Parser</td>
+					<td class="complexity">5</td>
+					<td class="coverage">100% (4/4)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 100.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">quotedString() : Parsers$Parser</td>
+					<td class="complexity">5</td>
+					<td class="coverage">100% (4/4)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 100.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">notQuotedString() : Parsers$Parser</td>
+					<td class="complexity">11</td>
+					<td class="coverage">86.7% (13/15)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 86.7%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<th>WQueryParsers$class</th>
+					<td class="number">72</td>
+					<td class="complexity">1.04</td>
+					<td class="complexity">4</td>
+					<td class="complexity">75</td>
+					<td class="coverage">93.6% (73/78)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 93.6%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">parse(WQueryParsers, String) : EvaluableExpr</td>
+					<td class="complexity">4</td>
+					<td class="coverage">28.6% (2/7)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 28.6%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">query(WQueryParsers) : Parsers$Parser</td>
+					<td class="complexity">1</td>
+					<td class="coverage">100% (1/1)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 100.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">expr(WQueryParsers) : Parsers$Parser</td>
+					<td class="complexity">1</td>
+					<td class="coverage">100% (1/1)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 100.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">imp_expr(WQueryParsers) : Parsers$Parser</td>
+					<td class="complexity">1</td>
+					<td class="coverage">100% (1/1)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 100.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">statement(WQueryParsers) : Parsers$Parser</td>
+					<td class="complexity">1</td>
+					<td class="coverage">100% (1/1)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 100.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">iterator(WQueryParsers) : Parsers$Parser</td>
+					<td class="complexity">1</td>
+					<td class="coverage">100% (1/1)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 100.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">emission(WQueryParsers) : Parsers$Parser</td>
+					<td class="complexity">1</td>
+					<td class="coverage">100% (1/1)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 100.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">merge(WQueryParsers) : Parsers$Parser</td>
+					<td class="complexity">1</td>
+					<td class="coverage">100% (1/1)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 100.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">split(WQueryParsers) : Parsers$Parser</td>
+					<td class="complexity">1</td>
+					<td class="coverage">100% (1/1)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 100.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">assignment(WQueryParsers) : Parsers$Parser</td>
+					<td class="complexity">1</td>
+					<td class="coverage">100% (1/1)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 100.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">assignment_op(WQueryParsers) : Parsers$Parser</td>
+					<td class="complexity">1</td>
+					<td class="coverage">100% (1/1)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 100.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">with_clause(WQueryParsers) : Parsers$Parser</td>
+					<td class="complexity">1</td>
+					<td class="coverage">100% (1/1)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 100.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">property_assignment(WQueryParsers) : Parsers$Parser</td>
+					<td class="complexity">1</td>
+					<td class="coverage">100% (1/1)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 100.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">ifelse(WQueryParsers) : Parsers$Parser</td>
+					<td class="complexity">1</td>
+					<td class="coverage">100% (1/1)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 100.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">whiledo(WQueryParsers) : Parsers$Parser</td>
+					<td class="complexity">1</td>
+					<td class="coverage">100% (1/1)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 100.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">multipath_expr(WQueryParsers) : Parsers$Parser</td>
+					<td class="complexity">1</td>
+					<td class="coverage">100% (1/1)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 100.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">intersect_expr(WQueryParsers) : Parsers$Parser</td>
+					<td class="complexity">1</td>
+					<td class="coverage">100% (1/1)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 100.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">with_expr(WQueryParsers) : Parsers$Parser</td>
+					<td class="complexity">1</td>
+					<td class="coverage">100% (1/1)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 100.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">add_expr(WQueryParsers) : Parsers$Parser</td>
+					<td class="complexity">1</td>
+					<td class="coverage">100% (1/1)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 100.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">mul_expr(WQueryParsers) : Parsers$Parser</td>
+					<td class="complexity">1</td>
+					<td class="coverage">100% (1/1)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 100.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">unary_expr(WQueryParsers) : Parsers$Parser</td>
+					<td class="complexity">1</td>
+					<td class="coverage">100% (1/1)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 100.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">path(WQueryParsers) : Parsers$Parser</td>
+					<td class="complexity">1</td>
+					<td class="coverage">100% (1/1)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 100.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">generator_step(WQueryParsers) : Parsers$Parser</td>
+					<td class="complexity">1</td>
+					<td class="coverage">100% (1/1)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 100.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">step(WQueryParsers) : Parsers$Parser</td>
+					<td class="complexity">1</td>
+					<td class="coverage">100% (1/1)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 100.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">relation_trans(WQueryParsers) : Parsers$Parser</td>
+					<td class="complexity">1</td>
+					<td class="coverage">100% (1/1)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 100.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">dots(WQueryParsers) : Parsers$Parser</td>
+					<td class="complexity">1</td>
+					<td class="coverage">100% (1/1)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 100.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">relation_composition_expr(WQueryParsers) : Parsers$Parser</td>
+					<td class="complexity">1</td>
+					<td class="coverage">100% (1/1)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 100.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">relation_union_expr(WQueryParsers) : Parsers$Parser</td>
+					<td class="complexity">1</td>
+					<td class="coverage">100% (1/1)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 100.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">quantified_relation_expr(WQueryParsers) : Parsers$Parser</td>
+					<td class="complexity">1</td>
+					<td class="coverage">100% (1/1)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 100.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">simple_relation_expr(WQueryParsers) : Parsers$Parser</td>
+					<td class="complexity">1</td>
+					<td class="coverage">100% (1/1)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 100.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">arc_expr(WQueryParsers) : Parsers$Parser</td>
+					<td class="complexity">1</td>
+					<td class="coverage">100% (1/1)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 100.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">arc_expr_arg(WQueryParsers) : Parsers$Parser</td>
+					<td class="complexity">1</td>
+					<td class="coverage">100% (1/1)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 100.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">quantifier(WQueryParsers) : Parsers$Parser</td>
+					<td class="complexity">1</td>
+					<td class="coverage">100% (1/1)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 100.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">filter_trans(WQueryParsers) : Parsers$Parser</td>
+					<td class="complexity">1</td>
+					<td class="coverage">100% (1/1)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 100.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">filter(WQueryParsers) : Parsers$Parser</td>
+					<td class="complexity">1</td>
+					<td class="coverage">100% (1/1)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 100.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">or_condition(WQueryParsers) : Parsers$Parser</td>
+					<td class="complexity">1</td>
+					<td class="coverage">100% (1/1)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 100.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">and_condition(WQueryParsers) : Parsers$Parser</td>
+					<td class="complexity">1</td>
+					<td class="coverage">100% (1/1)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 100.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">not_condition(WQueryParsers) : Parsers$Parser</td>
+					<td class="complexity">1</td>
+					<td class="coverage">100% (1/1)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 100.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">condition(WQueryParsers) : Parsers$Parser</td>
+					<td class="complexity">1</td>
+					<td class="coverage">100% (1/1)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 100.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">comparison(WQueryParsers) : Parsers$Parser</td>
+					<td class="complexity">1</td>
+					<td class="coverage">100% (1/1)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 100.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">node_trans(WQueryParsers) : Parsers$Parser</td>
+					<td class="complexity">1</td>
+					<td class="coverage">100% (1/1)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 100.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">projection_trans(WQueryParsers) : Parsers$Parser</td>
+					<td class="complexity">1</td>
+					<td class="coverage">100% (1/1)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 100.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">projection(WQueryParsers) : Parsers$Parser</td>
+					<td class="complexity">1</td>
+					<td class="coverage">100% (1/1)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 100.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">generator(WQueryParsers) : Parsers$Parser</td>
+					<td class="complexity">1</td>
+					<td class="coverage">100% (1/1)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 100.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">non_rel_expr_generator(WQueryParsers) : Parsers$Parser</td>
+					<td class="complexity">1</td>
+					<td class="coverage">100% (1/1)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 100.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">rel_expr_generator(WQueryParsers) : Parsers$Parser</td>
+					<td class="complexity">1</td>
+					<td class="coverage">100% (1/1)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 100.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">boolean_generator(WQueryParsers) : Parsers$Parser</td>
+					<td class="complexity">1</td>
+					<td class="coverage">100% (1/1)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 100.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">synset_generator(WQueryParsers) : Parsers$Parser</td>
+					<td class="complexity">1</td>
+					<td class="coverage">100% (1/1)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 100.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">sense_generator(WQueryParsers) : Parsers$Parser</td>
+					<td class="complexity">1</td>
+					<td class="coverage">100% (1/1)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 100.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">function_call_generator(WQueryParsers) : Parsers$Parser</td>
+					<td class="complexity">1</td>
+					<td class="coverage">100% (1/1)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 100.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">quoted_word_generator(WQueryParsers) : Parsers$Parser</td>
+					<td class="complexity">1</td>
+					<td class="coverage">100% (1/1)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 100.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">float_generator(WQueryParsers) : Parsers$Parser</td>
+					<td class="complexity">1</td>
+					<td class="coverage">100% (1/1)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 100.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">sequence_generator(WQueryParsers) : Parsers$Parser</td>
+					<td class="complexity">1</td>
+					<td class="coverage">100% (1/1)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 100.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">integer_generator(WQueryParsers) : Parsers$Parser</td>
+					<td class="complexity">1</td>
+					<td class="coverage">100% (1/1)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 100.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">back_generator(WQueryParsers) : Parsers$Parser</td>
+					<td class="complexity">1</td>
+					<td class="coverage">100% (1/1)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 100.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">filter_generator(WQueryParsers) : Parsers$Parser</td>
+					<td class="complexity">1</td>
+					<td class="coverage">100% (1/1)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 100.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">empty_set_generator(WQueryParsers) : Parsers$Parser</td>
+					<td class="complexity">1</td>
+					<td class="coverage">100% (1/1)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 100.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">expr_generator(WQueryParsers) : Parsers$Parser</td>
+					<td class="complexity">1</td>
+					<td class="coverage">100% (1/1)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 100.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">variable_generator(WQueryParsers) : Parsers$Parser</td>
+					<td class="complexity">1</td>
+					<td class="coverage">100% (1/1)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 100.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">arc_generator(WQueryParsers) : Parsers$Parser</td>
+					<td class="complexity">1</td>
+					<td class="coverage">100% (1/1)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 100.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">var_decls(WQueryParsers) : Parsers$Parser</td>
+					<td class="complexity">1</td>
+					<td class="coverage">100% (1/1)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 100.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">var_decl(WQueryParsers) : Parsers$Parser</td>
+					<td class="complexity">1</td>
+					<td class="coverage">100% (1/1)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 100.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">step_var_decl(WQueryParsers) : Parsers$Parser</td>
+					<td class="complexity">1</td>
+					<td class="coverage">100% (1/1)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 100.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">path_var_decl(WQueryParsers) : Parsers$Parser</td>
+					<td class="complexity">1</td>
+					<td class="coverage">100% (1/1)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 100.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">alphaLit(WQueryParsers) : Parsers$Parser</td>
+					<td class="complexity">1</td>
+					<td class="coverage">100% (1/1)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 100.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">floatNum(WQueryParsers) : Parsers$Parser</td>
+					<td class="complexity">1</td>
+					<td class="coverage">100% (1/1)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 100.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">integerNum(WQueryParsers) : Parsers$Parser</td>
+					<td class="complexity">1</td>
+					<td class="coverage">100% (1/1)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 100.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">doubleQuotedString(WQueryParsers) : Parsers$Parser</td>
+					<td class="complexity">1</td>
+					<td class="coverage">100% (1/1)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 100.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">backQuotedString(WQueryParsers) : Parsers$Parser</td>
+					<td class="complexity">1</td>
+					<td class="coverage">100% (1/1)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 100.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">quotedString(WQueryParsers) : Parsers$Parser</td>
+					<td class="complexity">1</td>
+					<td class="coverage">100% (1/1)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 100.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">notQuotedString(WQueryParsers) : Parsers$Parser</td>
+					<td class="complexity">1</td>
+					<td class="coverage">100% (1/1)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 100.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">$init$(WQueryParsers) : void</td>
+					<td class="complexity">1</td>
+					<td class="coverage">100% (1/1)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 100.0%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+		<h3>Source</h3>
+		<table class="source">
+			<colgroup>
+				<col width="60">
+				</col>
+				<col width="40">
+				</col>
+				<col width="*">
+				</col>
+			</colgroup>
+			<tbody>
+				<tr>
+					<td class="line-number">1</td>
+					<td class="line-touch"></td>
+					<td class="line-text">package org.wquery.parser</td>
+				</tr>
+				<tr>
+					<td class="line-number">2</td>
+					<td class="line-touch"></td>
+					<td class="line-text">import org.wquery.{WQueryParsingErrorException, WQueryParsingFailureException}</td>
+				</tr>
+				<tr>
+					<td class="line-number">3</td>
+					<td class="line-touch"></td>
+					<td class="line-text">import scala.util.parsing.combinator.RegexParsers</td>
+				</tr>
+				<tr>
+					<td class="line-number">4</td>
+					<td class="line-touch"></td>
+					<td class="line-text">import org.wquery.engine._</td>
+				</tr>
+				<tr>
+					<td class="line-number">5</td>
+					<td class="line-touch"></td>
+					<td class="line-text">import org.wquery.model.DataSet</td>
+				</tr>
+				<tr>
+					<td class="line-number">6</td>
+					<td class="line-touch"></td>
+					<td class="line-text"></td>
+				</tr>
+				<tr class="completely-covered">
+					<td class="line-number">7</td>
+					<td class="line-touch">2</td>
+					<td class="line-text">trait WQueryParsers extends RegexParsers {</td>
+				</tr>
+				<tr>
+					<td class="line-number">8</td>
+					<td class="line-touch"></td>
+					<td class="line-text"></td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">9</td>
+					<td class="line-touch">425</td>
+					<td class="line-text">  def parse(input: String): EvaluableExpr = {</td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">10</td>
+					<td class="line-touch">425</td>
+					<td class="line-text">    parseAll(query, input) match {</td>
+				</tr>
+				<tr>
+					<td class="line-number">11</td>
+					<td class="line-touch"></td>
+					<td class="line-text">      case Success(expr, _) =&gt;</td>
+				</tr>
+				<tr>
+					<td class="line-number">12</td>
+					<td class="line-touch"></td>
+					<td class="line-text">        expr</td>
+				</tr>
+				<tr>
+					<td class="line-number">13</td>
+					<td class="line-touch"></td>
+					<td class="line-text">      case Failure(message, _) =&gt;</td>
+				</tr>
+				<tr class="not-covered">
+					<td class="line-number">14</td>
+					<td class="line-touch">0</td>
+					<td class="line-text">        throw new WQueryParsingFailureException(message)</td>
+				</tr>
+				<tr>
+					<td class="line-number">15</td>
+					<td class="line-touch"></td>
+					<td class="line-text">      case Error(message, _) =&gt;</td>
+				</tr>
+				<tr class="not-covered">
+					<td class="line-number">16</td>
+					<td class="line-touch">0</td>
+					<td class="line-text">        throw new WQueryParsingErrorException(message)</td>
+				</tr>
+				<tr>
+					<td class="line-number">17</td>
+					<td class="line-touch"></td>
+					<td class="line-text">    }</td>
+				</tr>
+				<tr>
+					<td class="line-number">18</td>
+					<td class="line-touch"></td>
+					<td class="line-text">  }</td>
+				</tr>
+				<tr>
+					<td class="line-number">19</td>
+					<td class="line-touch"></td>
+					<td class="line-text"></td>
+				</tr>
+				<tr>
+					<td class="line-number">20</td>
+					<td class="line-touch"></td>
+					<td class="line-text">  // parsers</td>
+				</tr>
+				<tr>
+					<td class="line-number">21</td>
+					<td class="line-touch"></td>
+					<td class="line-text"></td>
+				</tr>
+				<tr>
+					<td class="line-number">22</td>
+					<td class="line-touch"></td>
+					<td class="line-text">  def query = (</td>
+				</tr>
+				<tr class="completely-covered">
+					<td class="line-number">23</td>
+					<td class="line-touch">427</td>
+					<td class="line-text">    imp_expr</td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">24</td>
+					<td class="line-touch">427</td>
+					<td class="line-text">    | multipath_expr ^^ { x =&gt; FunctionExpr(SortFunction.name, FunctionExpr(DistinctFunction.name, x)) }</td>
+				</tr>
+				<tr>
+					<td class="line-number">25</td>
+					<td class="line-touch"></td>
+					<td class="line-text">  )</td>
+				</tr>
+				<tr>
+					<td class="line-number">26</td>
+					<td class="line-touch"></td>
+					<td class="line-text"></td>
+				</tr>
+				<tr>
+					<td class="line-number">27</td>
+					<td class="line-touch"></td>
+					<td class="line-text">  def expr = (</td>
+				</tr>
+				<tr class="completely-covered">
+					<td class="line-number">28</td>
+					<td class="line-touch">1357</td>
+					<td class="line-text">    imp_expr</td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">29</td>
+					<td class="line-touch">1357</td>
+					<td class="line-text">    | multipath_expr</td>
+				</tr>
+				<tr>
+					<td class="line-number">30</td>
+					<td class="line-touch"></td>
+					<td class="line-text">  )</td>
+				</tr>
+				<tr>
+					<td class="line-number">31</td>
+					<td class="line-touch"></td>
+					<td class="line-text"></td>
+				</tr>
+				<tr>
+					<td class="line-number">32</td>
+					<td class="line-touch"></td>
+					<td class="line-text">  // imperative exprs</td>
+				</tr>
+				<tr>
+					<td class="line-number">33</td>
+					<td class="line-touch"></td>
+					<td class="line-text"></td>
+				</tr>
+				<tr>
+					<td class="line-number">34</td>
+					<td class="line-touch"></td>
+					<td class="line-text">  def imp_expr: Parser[EvaluableExpr] = (</td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">35</td>
+					<td class="line-touch">1792</td>
+					<td class="line-text">    &quot;do&quot; ~&gt; rep(statement) &lt;~ &quot;end&quot; ^^ { BlockExpr(_) }</td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">36</td>
+					<td class="line-touch">1792</td>
+					<td class="line-text">    | statement</td>
+				</tr>
+				<tr>
+					<td class="line-number">37</td>
+					<td class="line-touch"></td>
+					<td class="line-text">  )</td>
+				</tr>
+				<tr>
+					<td class="line-number">38</td>
+					<td class="line-touch"></td>
+					<td class="line-text"></td>
+				</tr>
+				<tr>
+					<td class="line-number">39</td>
+					<td class="line-touch"></td>
+					<td class="line-text">  def statement = (</td>
+				</tr>
+				<tr class="completely-covered">
+					<td class="line-number">40</td>
+					<td class="line-touch">1795</td>
+					<td class="line-text">    iterator</td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">41</td>
+					<td class="line-touch">1795</td>
+					<td class="line-text">    | emission</td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">42</td>
+					<td class="line-touch">1795</td>
+					<td class="line-text">    | merge</td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">43</td>
+					<td class="line-touch">1795</td>
+					<td class="line-text">    | split</td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">44</td>
+					<td class="line-touch">1795</td>
+					<td class="line-text">    | assignment</td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">45</td>
+					<td class="line-touch">1795</td>
+					<td class="line-text">    | ifelse</td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">46</td>
+					<td class="line-touch">1795</td>
+					<td class="line-text">    | whiledo</td>
+				</tr>
+				<tr>
+					<td class="line-number">47</td>
+					<td class="line-touch"></td>
+					<td class="line-text">  )</td>
+				</tr>
+				<tr>
+					<td class="line-number">48</td>
+					<td class="line-touch"></td>
+					<td class="line-text"></td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">49</td>
+					<td class="line-touch">1795</td>
+					<td class="line-text">  def iterator = &quot;from&quot; ~&gt; multipath_expr ~ imp_expr ^^ { case mexpr~iexpr =&gt; IteratorExpr(mexpr, iexpr) }</td>
+				</tr>
+				<tr>
+					<td class="line-number">50</td>
+					<td class="line-touch"></td>
+					<td class="line-text"></td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">51</td>
+					<td class="line-touch">1792</td>
+					<td class="line-text">  def emission = &quot;emit&quot; ~&gt; multipath_expr ^^ { EmissionExpr(_) }</td>
+				</tr>
+				<tr>
+					<td class="line-number">52</td>
+					<td class="line-touch"></td>
+					<td class="line-text"></td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">53</td>
+					<td class="line-touch">1787</td>
+					<td class="line-text">  def merge = &quot;merge&quot; ~&gt; expr ~ rep(with_clause) ^^ { case expr~withs =&gt; MergeExpr(expr, withs) }</td>
+				</tr>
+				<tr>
+					<td class="line-number">54</td>
+					<td class="line-touch"></td>
+					<td class="line-text"></td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">55</td>
+					<td class="line-touch">1781</td>
+					<td class="line-text">  def split = &quot;split&quot; ~&gt; expr ~ rep(with_clause) ^^ { case expr~withs =&gt; SplitExpr(expr, withs) }</td>
+				</tr>
+				<tr>
+					<td class="line-number">56</td>
+					<td class="line-touch"></td>
+					<td class="line-text"></td>
+				</tr>
+				<tr>
+					<td class="line-number">57</td>
+					<td class="line-touch"></td>
+					<td class="line-text">  def assignment = (</td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">58</td>
+					<td class="line-touch">1780</td>
+					<td class="line-text">     var_decls ~ &quot;:=&quot; ~ multipath_expr ^^ { case vdecls~_~mexpr =&gt; VariableAssignmentExpr(vdecls, mexpr) }</td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">59</td>
+					<td class="line-touch">1780</td>
+					<td class="line-text">     | &quot;wordnet&quot; ~&gt; notQuotedString ~ assignment_op ~ multipath_expr ~ rep(with_clause) ^^ { case prop~op~rexpr~withs =&gt; WordNetUpdateExpr(prop, op, rexpr, withs) }</td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">60</td>
+					<td class="line-touch">1780</td>
+					<td class="line-text">     | notQuotedString ~ &quot;:=&quot; ~ relation_union_expr  ^^ { case name~_~rexpr =&gt; RelationAssignmentExpr(name, rexpr) }</td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">61</td>
+					<td class="line-touch">1859</td>
+					<td class="line-text">     | multipath_expr ~ arc_expr ~ assignment_op ~ multipath_expr ^^ { case lexpr~prop~op~rexpr =&gt; UpdateExpr(lexpr, prop, op, rexpr) }</td>
+				</tr>
+				<tr>
+					<td class="line-number">62</td>
+					<td class="line-touch"></td>
+					<td class="line-text">  )</td>
+				</tr>
+				<tr>
+					<td class="line-number">63</td>
+					<td class="line-touch"></td>
+					<td class="line-text"></td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">64</td>
+					<td class="line-touch">135</td>
+					<td class="line-text">  def assignment_op = (&quot;+=&quot;|&quot;-=&quot;|&quot;:=&quot;)</td>
+				</tr>
+				<tr>
+					<td class="line-number">65</td>
+					<td class="line-touch"></td>
+					<td class="line-text"></td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">66</td>
+					<td class="line-touch">49</td>
+					<td class="line-text">  def with_clause = &quot;with&quot; ~&gt; property_assignment</td>
+				</tr>
+				<tr>
+					<td class="line-number">67</td>
+					<td class="line-touch"></td>
+					<td class="line-text"></td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">68</td>
+					<td class="line-touch">12</td>
+					<td class="line-text">  def property_assignment = arc_expr ~ assignment_op ~ multipath_expr ^^ { case arc~op~expr =&gt; PropertyAssignmentExpr(arc, op, expr) }</td>
+				</tr>
+				<tr>
+					<td class="line-number">69</td>
+					<td class="line-touch"></td>
+					<td class="line-text"></td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">70</td>
+					<td class="line-touch">1713</td>
+					<td class="line-text">  def ifelse = &quot;if&quot; ~&gt; multipath_expr ~ imp_expr ~ opt(&quot;else&quot; ~&gt; imp_expr) ^^ {</td>
+				</tr>
+				<tr class="completely-covered">
+					<td class="line-number">71</td>
+					<td class="line-touch">2</td>
+					<td class="line-text">    case cexpr ~ iexpr ~ eexpr =&gt; IfElseExpr(cexpr, iexpr, eexpr)</td>
+				</tr>
+				<tr>
+					<td class="line-number">72</td>
+					<td class="line-touch"></td>
+					<td class="line-text">  }</td>
+				</tr>
+				<tr>
+					<td class="line-number">73</td>
+					<td class="line-touch"></td>
+					<td class="line-text"></td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">74</td>
+					<td class="line-touch">1711</td>
+					<td class="line-text">  def whiledo = &quot;while&quot; ~&gt; multipath_expr ~ imp_expr ^^ { case cexpr~iexpr =&gt; WhileDoExpr(cexpr, iexpr) }</td>
+				</tr>
+				<tr>
+					<td class="line-number">75</td>
+					<td class="line-touch"></td>
+					<td class="line-text"></td>
+				</tr>
+				<tr>
+					<td class="line-number">76</td>
+					<td class="line-touch"></td>
+					<td class="line-text">  // mutlipath exprs</td>
+				</tr>
+				<tr>
+					<td class="line-number">77</td>
+					<td class="line-touch"></td>
+					<td class="line-text"></td>
+				</tr>
+				<tr>
+					<td class="line-number">78</td>
+					<td class="line-touch"></td>
+					<td class="line-text">  def multipath_expr: Parser[EvaluableExpr]</td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">79</td>
+					<td class="line-touch">3595</td>
+					<td class="line-text">    = chainl1(intersect_expr,</td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">80</td>
+					<td class="line-touch">3622</td>
+					<td class="line-text">              (&quot;union&quot;|&quot;except&quot;) ^^ { x =&gt; ((l:EvaluableExpr, r:EvaluableExpr) =&gt; BinarySetExpr(x, l , r)) })</td>
+				</tr>
+				<tr>
+					<td class="line-number">81</td>
+					<td class="line-touch"></td>
+					<td class="line-text"></td>
+				</tr>
+				<tr>
+					<td class="line-number">82</td>
+					<td class="line-touch"></td>
+					<td class="line-text">  def intersect_expr</td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">83</td>
+					<td class="line-touch">3597</td>
+					<td class="line-text">    = chainl1(with_expr,</td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">84</td>
+					<td class="line-touch">3628</td>
+					<td class="line-text">              &quot;intersect&quot; ^^ { x =&gt; ((l:EvaluableExpr, r:EvaluableExpr) =&gt; BinarySetExpr(x, l , r)) })</td>
+				</tr>
+				<tr>
+					<td class="line-number">85</td>
+					<td class="line-touch"></td>
+					<td class="line-text"></td>
+				</tr>
+				<tr>
+					<td class="line-number">86</td>
+					<td class="line-touch"></td>
+					<td class="line-text">  def with_expr</td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">87</td>
+					<td class="line-touch">3712</td>
+					<td class="line-text">    = chainl1(add_expr, &quot;,&quot; ^^ { x =&gt; ((l:EvaluableExpr, r:EvaluableExpr) =&gt; BinarySetExpr(x, l , r)) }) ^^ { ConjunctiveExpr(_) }</td>
+				</tr>
+				<tr>
+					<td class="line-number">88</td>
+					<td class="line-touch"></td>
+					<td class="line-text"></td>
+				</tr>
+				<tr>
+					<td class="line-number">89</td>
+					<td class="line-touch"></td>
+					<td class="line-text">  // arithmetics</td>
+				</tr>
+				<tr>
+					<td class="line-number">90</td>
+					<td class="line-touch"></td>
+					<td class="line-text"></td>
+				</tr>
+				<tr>
+					<td class="line-number">91</td>
+					<td class="line-touch"></td>
+					<td class="line-text">  def add_expr</td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">92</td>
+					<td class="line-touch">3743</td>
+					<td class="line-text">    = chainl1(mul_expr, (&quot;+&quot;|&quot;-&quot;) ^^ { x =&gt; ((l:EvaluableExpr, r:EvaluableExpr) =&gt; BinaryArithmeticExpr(x, l , r)) })</td>
+				</tr>
+				<tr>
+					<td class="line-number">93</td>
+					<td class="line-touch"></td>
+					<td class="line-text"></td>
+				</tr>
+				<tr>
+					<td class="line-number">94</td>
+					<td class="line-touch"></td>
+					<td class="line-text">  def mul_expr</td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">95</td>
+					<td class="line-touch">11249</td>
+					<td class="line-text">    = chainl1(unary_expr, (&quot;*&quot;|&quot;/&quot;|&quot;%&quot;|&quot;div&quot;) ^^ { x =&gt; ((l:EvaluableExpr, r:EvaluableExpr) =&gt; BinaryArithmeticExpr(x, l , r)) })</td>
+				</tr>
+				<tr>
+					<td class="line-number">96</td>
+					<td class="line-touch"></td>
+					<td class="line-text"></td>
+				</tr>
+				<tr>
+					<td class="line-number">97</td>
+					<td class="line-touch"></td>
+					<td class="line-text">  def unary_expr = (</td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">98</td>
+					<td class="line-touch">3736</td>
+					<td class="line-text">    &quot;-&quot; ~&gt; path ^^ { MinusExpr(_) }</td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">99</td>
+					<td class="line-touch">3736</td>
+					<td class="line-text">    | &quot;+&quot; ~&gt; path</td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">100</td>
+					<td class="line-touch">3736</td>
+					<td class="line-text">    | path</td>
+				</tr>
+				<tr>
+					<td class="line-number">101</td>
+					<td class="line-touch"></td>
+					<td class="line-text">  )</td>
+				</tr>
+				<tr>
+					<td class="line-number">102</td>
+					<td class="line-touch"></td>
+					<td class="line-text"></td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">103</td>
+					<td class="line-touch">4285</td>
+					<td class="line-text">  def path = generator_step ~ rep(step) ^^ { case gen~steps =&gt; PathExpr(gen::steps) }</td>
+				</tr>
+				<tr>
+					<td class="line-number">104</td>
+					<td class="line-touch"></td>
+					<td class="line-text"></td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">105</td>
+					<td class="line-touch">3775</td>
+					<td class="line-text">  def generator_step = generator ~ opt(var_decls) ^^ { case gen~decls =&gt; StepExpr(NodeTransformationExpr(gen), decls.getOrElse(Nil)) }</td>
+				</tr>
+				<tr>
+					<td class="line-number">106</td>
+					<td class="line-touch"></td>
+					<td class="line-text"></td>
+				</tr>
+				<tr>
+					<td class="line-number">107</td>
+					<td class="line-touch"></td>
+					<td class="line-text">  def step = (</td>
+				</tr>
+				<tr class="completely-covered">
+					<td class="line-number">108</td>
+					<td class="line-touch">4285</td>
+					<td class="line-text">    relation_trans</td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">109</td>
+					<td class="line-touch">4285</td>
+					<td class="line-text">    | node_trans</td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">110</td>
+					<td class="line-touch">4285</td>
+					<td class="line-text">    | filter_trans</td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">111</td>
+					<td class="line-touch">4285</td>
+					<td class="line-text">    | projection_trans</td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">112</td>
+					<td class="line-touch">4285</td>
+					<td class="line-text">  ) ~ opt(var_decls) ^^ { case trans~decls =&gt; StepExpr(trans, decls.getOrElse(Nil)) }</td>
+				</tr>
+				<tr>
+					<td class="line-number">113</td>
+					<td class="line-touch"></td>
+					<td class="line-text"></td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">114</td>
+					<td class="line-touch">4285</td>
+					<td class="line-text">  def relation_trans = dots ~ relation_union_expr ^^ { case pos~expr =&gt; RelationTransformationExpr(pos, expr) }</td>
+				</tr>
+				<tr>
+					<td class="line-number">115</td>
+					<td class="line-touch"></td>
+					<td class="line-text"></td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">116</td>
+					<td class="line-touch">5014</td>
+					<td class="line-text">  def dots = rep1(&quot;.&quot;) ^^ { _.size - 1 }</td>
+				</tr>
+				<tr>
+					<td class="line-number">117</td>
+					<td class="line-touch"></td>
+					<td class="line-text"></td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">118</td>
+					<td class="line-touch">14</td>
+					<td class="line-text">  def relation_composition_expr = rep1sep(relation_union_expr, &quot;.&quot;) ^^ { RelationCompositionExpr(_) }</td>
+				</tr>
+				<tr>
+					<td class="line-number">119</td>
+					<td class="line-touch"></td>
+					<td class="line-text"></td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">120</td>
+					<td class="line-touch">1356</td>
+					<td class="line-text">  def relation_union_expr: Parser[RelationalExpr] = rep1sep(quantified_relation_expr, &quot;|&quot;) ^^ { RelationUnionExpr(_) }</td>
+				</tr>
+				<tr>
+					<td class="line-number">121</td>
+					<td class="line-touch"></td>
+					<td class="line-text"></td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">122</td>
+					<td class="line-touch">1356</td>
+					<td class="line-text">  def quantified_relation_expr = simple_relation_expr ~ quantifier ^^ { case expr~quant =&gt; QuantifiedRelationExpr(expr, quant) }</td>
+				</tr>
+				<tr>
+					<td class="line-number">123</td>
+					<td class="line-touch"></td>
+					<td class="line-text"></td>
+				</tr>
+				<tr>
+					<td class="line-number">124</td>
+					<td class="line-touch"></td>
+					<td class="line-text">  def simple_relation_expr = (</td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">125</td>
+					<td class="line-touch">1356</td>
+					<td class="line-text">    &quot;(&quot; ~&gt; relation_composition_expr &lt;~ &quot;)&quot;</td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">126</td>
+					<td class="line-touch">1356</td>
+					<td class="line-text">    | arc_expr</td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">127</td>
+					<td class="line-touch">1356</td>
+					<td class="line-text">    | &quot;\\&quot; ~&gt; step_var_decl ^^ { VariableRelationalExpr(_) }</td>
+				</tr>
+				<tr>
+					<td class="line-number">128</td>
+					<td class="line-touch"></td>
+					<td class="line-text">  )</td>
+				</tr>
+				<tr>
+					<td class="line-number">129</td>
+					<td class="line-touch"></td>
+					<td class="line-text"></td>
+				</tr>
+				<tr>
+					<td class="line-number">130</td>
+					<td class="line-touch"></td>
+					<td class="line-text">  def arc_expr = (</td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">131</td>
+					<td class="line-touch">3171</td>
+					<td class="line-text">    (&quot;^&quot; ~&gt; notQuotedString) ^^ { id =&gt; ArcExpr(List(&quot;destination&quot;, id, &quot;source&quot;).map(ArcExprArgument(_, None))) } // syntactic sugar</td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">132</td>
+					<td class="line-touch">4843</td>
+					<td class="line-text">    | rep1sep(arc_expr_arg, &quot;^&quot;) ^^ { ArcExpr(_) }</td>
+				</tr>
+				<tr>
+					<td class="line-number">133</td>
+					<td class="line-touch"></td>
+					<td class="line-text">  )</td>
+				</tr>
+				<tr>
+					<td class="line-number">134</td>
+					<td class="line-touch"></td>
+					<td class="line-text"></td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">135</td>
+					<td class="line-touch">3287</td>
+					<td class="line-text">  def arc_expr_arg = notQuotedString ~ opt((&quot;&amp;&quot; ~&gt; notQuotedString)) ^^ { case name~dtype =&gt; ArcExprArgument(name, dtype) }</td>
+				</tr>
+				<tr>
+					<td class="line-number">136</td>
+					<td class="line-touch"></td>
+					<td class="line-text"></td>
+				</tr>
+				<tr>
+					<td class="line-number">137</td>
+					<td class="line-touch"></td>
+					<td class="line-text">  def quantifier = (</td>
+				</tr>
+				<tr class="completely-covered">
+					<td class="line-number">138</td>
+					<td class="line-touch">1336</td>
+					<td class="line-text">    &quot;+&quot; ^^^ { Quantifier(1, None) }</td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">139</td>
+					<td class="line-touch">1336</td>
+					<td class="line-text">    | &quot;*&quot; ^^^ { Quantifier(0, None) }</td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">140</td>
+					<td class="line-touch">1336</td>
+					<td class="line-text">    | &quot;?&quot; ^^^ { Quantifier(0, Some(1)) }</td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">141</td>
+					<td class="line-touch">1336</td>
+					<td class="line-text">    | &quot;{&quot; ~&gt; &quot;,&quot; ~&gt; integerNum &lt;~ &quot;}&quot; ^^ { x =&gt; Quantifier(0, Some(x)) }</td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">142</td>
+					<td class="line-touch">1336</td>
+					<td class="line-text">    | &quot;{&quot; ~&gt; integerNum ~ opt(&quot;,&quot; ~&gt; opt(integerNum)) &lt;~ &quot;}&quot; ^^ {</td>
+				</tr>
+				<tr class="completely-covered">
+					<td class="line-number">143</td>
+					<td class="line-touch">6</td>
+					<td class="line-text">      case x~None =&gt; Quantifier(x, Some(x))</td>
+				</tr>
+				<tr class="completely-covered">
+					<td class="line-number">144</td>
+					<td class="line-touch">6</td>
+					<td class="line-text">      case x~Some(None) =&gt; Quantifier(x, None)</td>
+				</tr>
+				<tr class="completely-covered">
+					<td class="line-number">145</td>
+					<td class="line-touch">6</td>
+					<td class="line-text">      case x~Some(Some(y)) =&gt; Quantifier(x, Some(y))</td>
+				</tr>
+				<tr>
+					<td class="line-number">146</td>
+					<td class="line-touch"></td>
+					<td class="line-text">    }</td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">147</td>
+					<td class="line-touch">1336</td>
+					<td class="line-text">    | success(Quantifier(1, Some(1)))</td>
+				</tr>
+				<tr>
+					<td class="line-number">148</td>
+					<td class="line-touch"></td>
+					<td class="line-text">  )</td>
+				</tr>
+				<tr>
+					<td class="line-number">149</td>
+					<td class="line-touch"></td>
+					<td class="line-text"></td>
+				</tr>
+				<tr class="completely-covered">
+					<td class="line-number">150</td>
+					<td class="line-touch">3824</td>
+					<td class="line-text">  def filter_trans = filter ^^ { FilterTransformationExpr(_) }</td>
+				</tr>
+				<tr>
+					<td class="line-number">151</td>
+					<td class="line-touch"></td>
+					<td class="line-text"></td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">152</td>
+					<td class="line-touch">5144</td>
+					<td class="line-text">  def filter = &quot;[&quot; ~&gt; or_condition &lt;~ &quot;]&quot;</td>
+				</tr>
+				<tr>
+					<td class="line-number">153</td>
+					<td class="line-touch"></td>
+					<td class="line-text"></td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">154</td>
+					<td class="line-touch">199</td>
+					<td class="line-text">  def or_condition: Parser[OrExpr] = repsep(and_condition, &quot;or&quot;) ^^ { OrExpr(_) }</td>
+				</tr>
+				<tr>
+					<td class="line-number">155</td>
+					<td class="line-touch"></td>
+					<td class="line-text"></td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">156</td>
+					<td class="line-touch">211</td>
+					<td class="line-text">  def and_condition = repsep(not_condition, &quot;and&quot;) ^^ { AndExpr(_) }</td>
+				</tr>
+				<tr>
+					<td class="line-number">157</td>
+					<td class="line-touch"></td>
+					<td class="line-text"></td>
+				</tr>
+				<tr>
+					<td class="line-number">158</td>
+					<td class="line-touch"></td>
+					<td class="line-text">  def not_condition = (</td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">159</td>
+					<td class="line-touch">203</td>
+					<td class="line-text">    &quot;not&quot; ~&gt; condition ^^ { NotExpr(_) }</td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">160</td>
+					<td class="line-touch">203</td>
+					<td class="line-text">    | condition</td>
+				</tr>
+				<tr>
+					<td class="line-number">161</td>
+					<td class="line-touch"></td>
+					<td class="line-text">  )</td>
+				</tr>
+				<tr>
+					<td class="line-number">162</td>
+					<td class="line-touch"></td>
+					<td class="line-text"></td>
+				</tr>
+				<tr>
+					<td class="line-number">163</td>
+					<td class="line-touch"></td>
+					<td class="line-text">  def condition = (</td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">164</td>
+					<td class="line-touch">203</td>
+					<td class="line-text">    &quot;(&quot; ~&gt; or_condition &lt;~ &quot;)&quot;</td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">165</td>
+					<td class="line-touch">203</td>
+					<td class="line-text">    | comparison</td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">166</td>
+					<td class="line-touch">203</td>
+					<td class="line-text">    | path ^^ { PathConditionExpr(_) }</td>
+				</tr>
+				<tr>
+					<td class="line-number">167</td>
+					<td class="line-touch"></td>
+					<td class="line-text">  )</td>
+				</tr>
+				<tr>
+					<td class="line-number">168</td>
+					<td class="line-touch"></td>
+					<td class="line-text"></td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">169</td>
+					<td class="line-touch">834</td>
+					<td class="line-text">  def comparison = expr ~ (&quot;&lt;=&quot;|&quot;&lt;&quot;|&quot;&gt;=&quot;|&quot;&gt;&quot;|&quot;=~&quot;|&quot;=&quot;|&quot;!=&quot;|&quot;in&quot;|&quot;pin&quot;) ~ expr ^^ {</td>
+				</tr>
+				<tr class="completely-covered">
+					<td class="line-number">170</td>
+					<td class="line-touch">205</td>
+					<td class="line-text">    case lexpr~op~rexpr =&gt; BinaryConditionalExpr(op, lexpr, rexpr)</td>
+				</tr>
+				<tr>
+					<td class="line-number">171</td>
+					<td class="line-touch"></td>
+					<td class="line-text">  }</td>
+				</tr>
+				<tr>
+					<td class="line-number">172</td>
+					<td class="line-touch"></td>
+					<td class="line-text"></td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">173</td>
+					<td class="line-touch">3824</td>
+					<td class="line-text">  def node_trans = &quot;.&quot; ~&gt; non_rel_expr_generator ^^ { NodeTransformationExpr(_) }</td>
+				</tr>
+				<tr>
+					<td class="line-number">174</td>
+					<td class="line-touch"></td>
+					<td class="line-text"></td>
+				</tr>
+				<tr class="completely-covered">
+					<td class="line-number">175</td>
+					<td class="line-touch">3773</td>
+					<td class="line-text">  def projection_trans = projection  ^^ { ProjectionTransformationExpr(_) }</td>
+				</tr>
+				<tr>
+					<td class="line-number">176</td>
+					<td class="line-touch"></td>
+					<td class="line-text"></td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">177</td>
+					<td class="line-touch">3773</td>
+					<td class="line-text">  def projection = &quot;&lt;&quot; ~&gt; expr &lt;~ &quot;&gt;&quot;</td>
+				</tr>
+				<tr>
+					<td class="line-number">178</td>
+					<td class="line-touch"></td>
+					<td class="line-text"></td>
+				</tr>
+				<tr>
+					<td class="line-number">179</td>
+					<td class="line-touch"></td>
+					<td class="line-text">  // generators</td>
+				</tr>
+				<tr>
+					<td class="line-number">180</td>
+					<td class="line-touch"></td>
+					<td class="line-text">  def generator = (</td>
+				</tr>
+				<tr class="completely-covered">
+					<td class="line-number">181</td>
+					<td class="line-touch">3742</td>
+					<td class="line-text">    non_rel_expr_generator</td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">182</td>
+					<td class="line-touch">3742</td>
+					<td class="line-text">    | rel_expr_generator</td>
+				</tr>
+				<tr>
+					<td class="line-number">183</td>
+					<td class="line-touch"></td>
+					<td class="line-text">  )</td>
+				</tr>
+				<tr>
+					<td class="line-number">184</td>
+					<td class="line-touch"></td>
+					<td class="line-text"></td>
+				</tr>
+				<tr>
+					<td class="line-number">185</td>
+					<td class="line-touch"></td>
+					<td class="line-text">  def non_rel_expr_generator = (</td>
+				</tr>
+				<tr class="completely-covered">
+					<td class="line-number">186</td>
+					<td class="line-touch">3772</td>
+					<td class="line-text">    boolean_generator</td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">187</td>
+					<td class="line-touch">3772</td>
+					<td class="line-text">    | synset_generator</td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">188</td>
+					<td class="line-touch">3772</td>
+					<td class="line-text">    | sense_generator</td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">189</td>
+					<td class="line-touch">3772</td>
+					<td class="line-text">    | function_call_generator</td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">190</td>
+					<td class="line-touch">3772</td>
+					<td class="line-text">    | float_generator</td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">191</td>
+					<td class="line-touch">3772</td>
+					<td class="line-text">    | sequence_generator</td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">192</td>
+					<td class="line-touch">3772</td>
+					<td class="line-text">    | integer_generator</td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">193</td>
+					<td class="line-touch">3772</td>
+					<td class="line-text">    | back_generator</td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">194</td>
+					<td class="line-touch">3772</td>
+					<td class="line-text">    | filter_generator</td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">195</td>
+					<td class="line-touch">3772</td>
+					<td class="line-text">    | empty_set_generator</td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">196</td>
+					<td class="line-touch">3772</td>
+					<td class="line-text">    | expr_generator</td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">197</td>
+					<td class="line-touch">3772</td>
+					<td class="line-text">    | variable_generator</td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">198</td>
+					<td class="line-touch">3772</td>
+					<td class="line-text">    | arc_generator</td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">199</td>
+					<td class="line-touch">3772</td>
+					<td class="line-text">    | quoted_word_generator</td>
+				</tr>
+				<tr>
+					<td class="line-number">200</td>
+					<td class="line-touch"></td>
+					<td class="line-text">  )</td>
+				</tr>
+				<tr>
+					<td class="line-number">201</td>
+					<td class="line-touch"></td>
+					<td class="line-text"></td>
+				</tr>
+				<tr class="completely-covered">
+					<td class="line-number">202</td>
+					<td class="line-touch">781</td>
+					<td class="line-text">  def rel_expr_generator = relation_union_expr ^^ { ContextByRelationalExprReq(_) }</td>
+				</tr>
+				<tr>
+					<td class="line-number">203</td>
+					<td class="line-touch"></td>
+					<td class="line-text"></td>
+				</tr>
+				<tr>
+					<td class="line-number">204</td>
+					<td class="line-touch"></td>
+					<td class="line-text">  def boolean_generator = (</td>
+				</tr>
+				<tr class="completely-covered">
+					<td class="line-number">205</td>
+					<td class="line-touch">3772</td>
+					<td class="line-text">    &quot;true&quot; ^^^ { AlgebraExpr(ConstantOp.fromValue(true)) }</td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">206</td>
+					<td class="line-touch">3772</td>
+					<td class="line-text">    | &quot;false&quot; ^^^ { AlgebraExpr(ConstantOp.fromValue(false)) }</td>
+				</tr>
+				<tr>
+					<td class="line-number">207</td>
+					<td class="line-touch"></td>
+					<td class="line-text">  )</td>
+				</tr>
+				<tr>
+					<td class="line-number">208</td>
+					<td class="line-touch"></td>
+					<td class="line-text"></td>
+				</tr>
+				<tr>
+					<td class="line-number">209</td>
+					<td class="line-touch"></td>
+					<td class="line-text">  def synset_generator = (</td>
+				</tr>
+				<tr class="completely-covered">
+					<td class="line-number">210</td>
+					<td class="line-touch">3718</td>
+					<td class="line-text">    &quot;{}&quot; ^^ { _ =&gt; AlgebraExpr(FetchOp.synsets) }</td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">211</td>
+					<td class="line-touch">3718</td>
+					<td class="line-text">    | &quot;{&quot; ~&gt; expr &lt;~ &quot;}&quot; ^^ { SynsetByExprReq(_) }</td>
+				</tr>
+				<tr>
+					<td class="line-number">212</td>
+					<td class="line-touch"></td>
+					<td class="line-text">  )</td>
+				</tr>
+				<tr>
+					<td class="line-number">213</td>
+					<td class="line-touch"></td>
+					<td class="line-text"></td>
+				</tr>
+				<tr>
+					<td class="line-number">214</td>
+					<td class="line-touch"></td>
+					<td class="line-text">  def sense_generator = (</td>
+				</tr>
+				<tr class="completely-covered">
+					<td class="line-number">215</td>
+					<td class="line-touch">3074</td>
+					<td class="line-text">    &quot;::&quot; ^^ { _ =&gt; AlgebraExpr(FetchOp.senses) }</td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">216</td>
+					<td class="line-touch">4387</td>
+					<td class="line-text">    | alphaLit ~ &quot;:&quot; ~ integerNum ~ &quot;:&quot; ~ alphaLit ^^ {</td>
+				</tr>
+				<tr class="completely-covered">
+					<td class="line-number">217</td>
+					<td class="line-touch">703</td>
+					<td class="line-text">      case word~_~num~_~pos =&gt; SenseByWordFormAndSenseNumberAndPosReq(word, num, pos)</td>
+				</tr>
+				<tr>
+					<td class="line-number">218</td>
+					<td class="line-touch"></td>
+					<td class="line-text">    }</td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">219</td>
+					<td class="line-touch">3074</td>
+					<td class="line-text">    | alphaLit ~ &quot;:&quot; ~ integerNum ^^ {</td>
+				</tr>
+				<tr class="completely-covered">
+					<td class="line-number">220</td>
+					<td class="line-touch">170</td>
+					<td class="line-text">      case word~_~num =&gt; AlgebraExpr(FetchOp.sensesByWordFormAndSenseNumber(word, num))</td>
+				</tr>
+				<tr>
+					<td class="line-number">221</td>
+					<td class="line-touch"></td>
+					<td class="line-text">    }</td>
+				</tr>
+				<tr>
+					<td class="line-number">222</td>
+					<td class="line-touch"></td>
+					<td class="line-text">  )</td>
+				</tr>
+				<tr>
+					<td class="line-number">223</td>
+					<td class="line-touch"></td>
+					<td class="line-text"></td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">224</td>
+					<td class="line-touch">2212</td>
+					<td class="line-text">  def function_call_generator = notQuotedString ~ (&quot;(&quot; ~&gt; expr &lt;~ &quot;)&quot;) ^^ { case name~y =&gt; FunctionExpr(name, y) }</td>
+				</tr>
+				<tr>
+					<td class="line-number">225</td>
+					<td class="line-touch"></td>
+					<td class="line-text"></td>
+				</tr>
+				<tr>
+					<td class="line-number">226</td>
+					<td class="line-touch"></td>
+					<td class="line-text">  def quoted_word_generator = (</td>
+				</tr>
+				<tr class="completely-covered">
+					<td class="line-number">227</td>
+					<td class="line-touch">902</td>
+					<td class="line-text">    backQuotedString ^^ { value =&gt; AlgebraExpr(ConstantOp.fromValue(value)) }</td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">228</td>
+					<td class="line-touch">902</td>
+					<td class="line-text">    | quotedString ^^ { value =&gt; AlgebraExpr(if (value == &quot;&quot;) FetchOp.words else FetchOp.wordByValue(value)) }</td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">229</td>
+					<td class="line-touch">902</td>
+					<td class="line-text">    | doubleQuotedString ^^ { WordFormByRegexReq(_) }</td>
+				</tr>
+				<tr>
+					<td class="line-number">230</td>
+					<td class="line-touch"></td>
+					<td class="line-text">  )</td>
+				</tr>
+				<tr>
+					<td class="line-number">231</td>
+					<td class="line-touch"></td>
+					<td class="line-text"></td>
+				</tr>
+				<tr class="completely-covered">
+					<td class="line-number">232</td>
+					<td class="line-touch">2027</td>
+					<td class="line-text">  def float_generator = floatNum ^^ { value =&gt; AlgebraExpr(ConstantOp.fromValue(value)) }</td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">233</td>
+					<td class="line-touch">1889</td>
+					<td class="line-text">  def sequence_generator = integerNum ~ &quot;..&quot; ~ integerNum ^^ { case left~_~right =&gt; AlgebraExpr(ConstantOp(DataSet.fromList((left to right).toList))) }</td>
+				</tr>
+				<tr class="completely-covered">
+					<td class="line-number">234</td>
+					<td class="line-touch">1841</td>
+					<td class="line-text">  def integer_generator = integerNum ^^ { value =&gt; AlgebraExpr(ConstantOp.fromValue(value)) }</td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">235</td>
+					<td class="line-touch">1533</td>
+					<td class="line-text">  def back_generator = rep1(&quot;#&quot;) ^^ { x =&gt; ContextReferenceReq(x.size - 1) }</td>
+				</tr>
+				<tr class="completely-covered">
+					<td class="line-number">236</td>
+					<td class="line-touch">1320</td>
+					<td class="line-text">  def filter_generator = filter ^^ { BooleanByFilterReq(_) }</td>
+				</tr>
+				<tr class="completely-covered">
+					<td class="line-number">237</td>
+					<td class="line-touch">1226</td>
+					<td class="line-text">  def empty_set_generator = &quot;&lt;&gt;&quot; ^^ { _ =&gt; AlgebraExpr(ConstantOp.empty) }</td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">238</td>
+					<td class="line-touch">1223</td>
+					<td class="line-text">  def expr_generator = &quot;(&quot; ~&gt; expr &lt;~ &quot;)&quot;</td>
+				</tr>
+				<tr class="completely-covered">
+					<td class="line-number">239</td>
+					<td class="line-touch">1184</td>
+					<td class="line-text">  def variable_generator = var_decl ^^ { ContextByVariableReq(_) }</td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">240</td>
+					<td class="line-touch">969</td>
+					<td class="line-text">  def arc_generator = &quot;\\&quot; ~&gt; arc_expr ^^ { ArcByArcExprReq(_) }</td>
+				</tr>
+				<tr>
+					<td class="line-number">241</td>
+					<td class="line-touch"></td>
+					<td class="line-text"></td>
+				</tr>
+				<tr>
+					<td class="line-number">242</td>
+					<td class="line-touch"></td>
+					<td class="line-text">  // variables</td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">243</td>
+					<td class="line-touch">6507</td>
+					<td class="line-text">  def var_decls = rep1(var_decl)</td>
+				</tr>
+				<tr>
+					<td class="line-number">244</td>
+					<td class="line-touch"></td>
+					<td class="line-text"></td>
+				</tr>
+				<tr>
+					<td class="line-number">245</td>
+					<td class="line-touch"></td>
+					<td class="line-text">  def var_decl = (</td>
+				</tr>
+				<tr class="completely-covered">
+					<td class="line-number">246</td>
+					<td class="line-touch">7691</td>
+					<td class="line-text">    step_var_decl</td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">247</td>
+					<td class="line-touch">7691</td>
+					<td class="line-text">    | path_var_decl</td>
+				</tr>
+				<tr>
+					<td class="line-number">248</td>
+					<td class="line-touch"></td>
+					<td class="line-text">  )</td>
+				</tr>
+				<tr>
+					<td class="line-number">249</td>
+					<td class="line-touch"></td>
+					<td class="line-text"></td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">250</td>
+					<td class="line-touch">7695</td>
+					<td class="line-text">  def step_var_decl = &quot;$&quot; ~&gt; notQuotedString ^^ { StepVariable(_) }</td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">251</td>
+					<td class="line-touch">7286</td>
+					<td class="line-text">  def path_var_decl = &quot;@&quot; ~&gt; notQuotedString ^^ { PathVariable(_) }</td>
+				</tr>
+				<tr>
+					<td class="line-number">252</td>
+					<td class="line-touch"></td>
+					<td class="line-text"></td>
+				</tr>
+				<tr>
+					<td class="line-number">253</td>
+					<td class="line-touch"></td>
+					<td class="line-text">  // literals</td>
+				</tr>
+				<tr>
+					<td class="line-number">254</td>
+					<td class="line-touch"></td>
+					<td class="line-text">  def alphaLit = (</td>
+				</tr>
+				<tr class="completely-covered">
+					<td class="line-number">255</td>
+					<td class="line-touch">6154</td>
+					<td class="line-text">    backQuotedString</td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">256</td>
+					<td class="line-touch">6154</td>
+					<td class="line-text">    | quotedString</td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">257</td>
+					<td class="line-touch">6154</td>
+					<td class="line-text">    | notQuotedString</td>
+				</tr>
+				<tr>
+					<td class="line-number">258</td>
+					<td class="line-touch"></td>
+					<td class="line-text">  )</td>
+				</tr>
+				<tr>
+					<td class="line-number">259</td>
+					<td class="line-touch"></td>
+					<td class="line-text"></td>
+				</tr>
+				<tr class="completely-covered">
+					<td class="line-number">260</td>
+					<td class="line-touch">2027</td>
+					<td class="line-text">  def floatNum: Parser[Double] = &quot;([0-9]+(([eE][+-]?[0-9]+)|\\.(([0-9]+[eE][+-]?[0-9]+)|([eE][+-]?[0-9]+)|([0-9]+))))|(\\.[0-9]+([eE][+-]?[0-9]+)?)&quot;.r ^^ { _.toDouble }</td>
+				</tr>
+				<tr class="completely-covered">
+					<td class="line-number">261</td>
+					<td class="line-touch">4857</td>
+					<td class="line-text">  def integerNum: Parser[Int] = &quot;[0-9]+&quot;.r ^^ { _.toInt }</td>
+				</tr>
+				<tr class="completely-covered">
+					<td class="line-number">262</td>
+					<td class="line-touch">782</td>
+					<td class="line-text">  def doubleQuotedString: Parser[String] = &quot;\&quot;(\\\\\&quot;|[^\&quot;])*?\&quot;&quot;.r ^^ { x =&gt; x.substring(1, x.length - 1).replaceAll(&quot;\\\&quot;&quot;,&quot;\&quot;&quot;) }</td>
+				</tr>
+				<tr class="completely-covered">
+					<td class="line-number">263</td>
+					<td class="line-touch">7056</td>
+					<td class="line-text">  def backQuotedString: Parser[String] = &quot;`(\\\\`|[^`])*?`&quot;.r ^^ { x =&gt; x.substring(1, x.length - 1).replaceAll(&quot;\\`&quot;,&quot;`&quot;) }</td>
+				</tr>
+				<tr class="completely-covered">
+					<td class="line-number">264</td>
+					<td class="line-touch">6819</td>
+					<td class="line-text">  def quotedString: Parser[String] = &quot;'(\\\\'|[^'])*?'&quot;.r ^^ { x =&gt; x.substring(1, x.length - 1).replaceAll(&quot;\\'&quot;,&quot;'&quot;) }</td>
+				</tr>
+				<tr>
+					<td class="line-number">265</td>
+					<td class="line-touch"></td>
+					<td class="line-text"></td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">266</td>
+					<td class="line-touch">13775</td>
+					<td class="line-text">  def notQuotedString: Parser[String] = new Parser[String] {</td>
+				</tr>
+				<tr class="completely-covered">
+					<td class="line-number">267</td>
+					<td class="line-touch">13949</td>
+					<td class="line-text">    def apply(in: Input) = {</td>
+				</tr>
+				<tr class="completely-covered">
+					<td class="line-number">268</td>
+					<td class="line-touch">13949</td>
+					<td class="line-text">      val source = in.source</td>
+				</tr>
+				<tr class="completely-covered">
+					<td class="line-number">269</td>
+					<td class="line-touch">13949</td>
+					<td class="line-text">      val offset = in.offset</td>
+				</tr>
+				<tr class="completely-covered">
+					<td class="line-number">270</td>
+					<td class="line-touch">13949</td>
+					<td class="line-text">      val start = handleWhiteSpace(source, offset)</td>
+				</tr>
+				<tr class="completely-covered">
+					<td class="line-number">271</td>
+					<td class="line-touch">13949</td>
+					<td class="line-text">      var i = start</td>
+				</tr>
+				<tr>
+					<td class="line-number">272</td>
+					<td class="line-touch"></td>
+					<td class="line-text"></td>
+				</tr>
+				<tr class="completely-covered">
+					<td class="line-number">273</td>
+					<td class="line-touch">13949</td>
+					<td class="line-text">      if (i &lt; source.length &amp;&amp; (source.charAt(i).isLetter || source.charAt(i) == '_')) {</td>
+				</tr>
+				<tr class="completely-covered">
+					<td class="line-number">274</td>
+					<td class="line-touch">7842</td>
+					<td class="line-text">        i += 1</td>
+				</tr>
+				<tr>
+					<td class="line-number">275</td>
+					<td class="line-touch"></td>
+					<td class="line-text"></td>
+				</tr>
+				<tr class="completely-covered">
+					<td class="line-number">276</td>
+					<td class="line-touch">34939</td>
+					<td class="line-text">        while (i &lt; source.length &amp;&amp; (source.charAt(i).isLetterOrDigit || source.charAt(i) == '_')) {</td>
+				</tr>
+				<tr class="completely-covered">
+					<td class="line-number">277</td>
+					<td class="line-touch">27097</td>
+					<td class="line-text">          i += 1</td>
+				</tr>
+				<tr>
+					<td class="line-number">278</td>
+					<td class="line-touch"></td>
+					<td class="line-text">        }</td>
+				</tr>
+				<tr>
+					<td class="line-number">279</td>
+					<td class="line-touch"></td>
+					<td class="line-text"></td>
+				</tr>
+				<tr class="completely-covered">
+					<td class="line-number">280</td>
+					<td class="line-touch">7842</td>
+					<td class="line-text">        Success(source.subSequence(start, i).toString, in.drop(i - offset))</td>
+				</tr>
+				<tr>
+					<td class="line-number">281</td>
+					<td class="line-touch"></td>
+					<td class="line-text">      } else {</td>
+				</tr>
+				<tr class="completely-covered">
+					<td class="line-number">282</td>
+					<td class="line-touch">6107</td>
+					<td class="line-text">        Failure(&quot;a letter expected but `&quot; + in.first + &quot;' found&quot;, in.drop(start - offset))</td>
+				</tr>
+				<tr>
+					<td class="line-number">283</td>
+					<td class="line-touch"></td>
+					<td class="line-text">      }</td>
+				</tr>
+				<tr>
+					<td class="line-number">284</td>
+					<td class="line-touch"></td>
+					<td class="line-text">    }</td>
+				</tr>
+				<tr>
+					<td class="line-number">285</td>
+					<td class="line-touch"></td>
+					<td class="line-text">  }</td>
+				</tr>
+				<tr>
+					<td class="line-number">286</td>
+					<td class="line-touch"></td>
+					<td class="line-text">}</td>
+				</tr>
+			</tbody>
+		</table>
+		<div class="copyright">
+			<p>
+				<a href="http://code.google.com/p/undercover/" target="_top">Undercover</a> | Copyright � 2009 Eung-ju PARK. All rights reserved. Licensed under the <a href="http://www.apache.org/licenses/LICENSE-2.0" target="_top">Apache License, Version 2.0</a>
+			</p>
+		</div>
+	</body>
+</html>
