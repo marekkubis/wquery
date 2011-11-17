@@ -82,8 +82,8 @@
 			<url>http://scala-tools.org/repo-releases</url>
 		</pluginRepository>
 		<pluginRepository>
-			<id>undercover</id>
-			<url>http://undercover.googlecode.com/svn/maven/repository</url>
+            <id>undercover</id>
+            <url>http://zact.googlecode.com/svn/maven/repository</url>
 		</pluginRepository>
 	</pluginRepositories>
 
