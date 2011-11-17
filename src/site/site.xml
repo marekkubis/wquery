@@ -27,8 +27,8 @@
 		</menu>
 		<menu name="Contributing">
 			<item name="Issue Tracking" href="issue-tracking.html" />
-			<item name="Mailing Lists" href="mail-lists.html" />			
 			<item name="Source Repository" href="source-repository.html" />
+            <item name="GitHub" href="https://github.com/marekkubis/wquery" />
 		</menu>
 		<menu name="Reports">
 			<item name="Summary" href="project-summary.html" />
@@ -36,7 +36,6 @@
 			<item name="Plugin Management" href="plugin-management.html" />
 			<item name="Project Plugins" href="plugins.html" />
             <item name="Code Coverage" href="undercover/index.html" />
-            <item name="GitHub" href="https://github.com/marekkubis/wquery" />
 		</menu>
 	</body>
 </project>

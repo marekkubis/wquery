@@ -38,16 +38,6 @@
 		<url>https://github.com/marekkubis/wquery/issues</url>
     </issueManagement>
 
-	<mailingLists>	
-        <mailingList>
-            <name>WQuery Users list</name>
-            <subscribe>http://lists.sourceforge.net/mailman/listinfo/wquery-users</subscribe>
-            <unsubscribe>http://lists.sourceforge.net/mailman/listinfo/wquery-users</unsubscribe>
-            <archive>https://sourceforge.net/mailarchive/forum.php?forum_name=wquery-users</archive>
-            <post>wquery-users@lists.sourceforge.net</post>
-        </mailingList>
-	</mailingLists>
-
 	<scm>
 		<connection>scm:git:git://github.com/marekkubis/wquery.git</connection>
         <developerConnection>scm:git:git@github.com:marekkubis/wquery.git</developerConnection>
