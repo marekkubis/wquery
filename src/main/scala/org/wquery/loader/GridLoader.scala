@@ -159,6 +159,8 @@ class GridHandler(wordnet: WordNet) extends DefaultHandler with Logging {
         // skip
       case "word" =>
         // skip
+      case "valency" =>
+        //  skip
       case relName =>
         synsetGenericRelationsTuples += ((relName, content))
     }
