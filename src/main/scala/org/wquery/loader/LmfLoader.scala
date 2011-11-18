@@ -93,7 +93,7 @@ class LmfHandler(wordNet: WordNet) extends DefaultHandler with Logging {
 
   private def createSynsets {
     for ((synsetId, senses) <- sensesBySynsetId) {
-      synsetsById(synsetId) = wordNet.store.addSynset(Some(synsetId), senses.toList, Nil)
+      synsetsById(synsetId) = wordNet.store.addSynset(Some(synsetId), senses.toList, Nil, moveSenses = false)
     }
     info("Synsets loaded")
   }

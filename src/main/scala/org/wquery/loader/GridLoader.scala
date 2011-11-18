@@ -136,7 +136,7 @@ class GridHandler(wordnet: WordNet) extends DefaultHandler with Logging {
         }
       }
 
-      val synset = wordnet.store.addSynset(Some(synsetId), senses.toList, Nil)
+      val synset = wordnet.store.addSynset(Some(synsetId), senses.toList, Nil, moveSenses = false)
       synsetsById(synset.id) = synset
       
       for ((ilrType, content) <- synsetIlrRelationsTuples) {

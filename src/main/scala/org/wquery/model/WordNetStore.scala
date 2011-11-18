@@ -19,7 +19,7 @@ trait WordNetStore {
   // updating nodes
   def addSense(sense: Sense, assignments: List[PropertyAssignment])
 
-  def addSynset(synsetId: Option[String], senses: List[Sense], assignments: List[PropertyAssignment]): Synset
+  def addSynset(synsetId: Option[String], senses: List[Sense], assignments: List[PropertyAssignment], moveSenses: Boolean = true): Synset
 
   def addWord(word: String, patterns: List[PropertyAssignment])
 

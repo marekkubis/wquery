@@ -177,7 +177,7 @@ class InMemoryWordNetStore extends WordNetStore {
     addSynset(None, List(sense), assignments)
   }
 
-  def addSynset(synsetId: Option[String], senses: List[Sense], assignments: List[PropertyAssignment]) = {
+  def addSynset(synsetId: Option[String], senses: List[Sense], assignments: List[PropertyAssignment], moveSenses: Boolean = true) = {
     val synset = new Synset(synsetId.getOrElse("synset#" + senses.head))
 
     addNode(SynsetType, synset, assignments)
@@ -185,9 +185,13 @@ class InMemoryWordNetStore extends WordNetStore {
     addSuccessor(synset, WordNet.SynsetToId, synset.id)
 
     for (sense <- senses) {
-      getSynset(sense)
-        .map(synsetSense => moveSense(sense, synsetSense, synset))
-        .getOrElse(createSense(sense, synset, assignments))
+      if (moveSenses) {
+        getSynset(sense)
+          .map(synsetSense => moveSense(sense, synsetSense, synset))
+          .getOrElse(createSense(sense, synset, assignments))
+      } else {
+        createSense(sense, synset, assignments)
+      }
     }
 
     synset
