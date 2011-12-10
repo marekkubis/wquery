@@ -245,12 +245,6 @@ class GridHandler(wordnet: WordNet) extends DefaultHandler with Logging {
     for ((relname, dtype) <- genericRelationsDestTypes) {
       val relation = Relation.binary(relname, SynsetType, dtype)
       wordnet.store.addRelation(relation)
-
-      if (relname == "desc") {
-        wordnet.store.requiredBys(relation) = scala.collection.immutable.Set(Relation.Source)
-        wordnet.store.functionalFor(relation) = scala.collection.immutable.Set(Relation.Source)
-        wordnet.store.functionalForActions((relation, Relation.Source)) = Relation.Preserve
-      }
     }
     
     // create successors

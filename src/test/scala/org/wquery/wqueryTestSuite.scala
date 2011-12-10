@@ -8,7 +8,14 @@ object WQueryRuntime {
   val wquery = createWQuery
   val emitter = new PlainWQueryEmitter
 
-  def createWQuery = WQuery.createInstance("src/main/assembly/template/samplenet.xml")
+  def createWQuery = {
+    val wquery = WQuery.createInstance("src/main/assembly/template/samplenet.xml")
+
+    wquery.execute("\\desc^source required_by := true")
+    wquery.execute("\\desc^source functional := true")
+    wquery.execute("\\desc^source functional_action := `preserve`")
+    wquery
+  }
 }
 
 abstract class WQueryTestSuite extends TestNGSuite with ShouldMatchers {  
