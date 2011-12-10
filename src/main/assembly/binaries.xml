@@ -81,12 +81,6 @@
             <source>src/main/assembly/template/samplenet.xml</source>
             <outputDirectory>/</outputDirectory>
             <lineEnding>crlf</lineEnding>            
-        </file>          
-            
-        <!-- template/docs -->     
-        <file>
-            <source>target/site/user-guide.pdf</source>
-            <outputDirectory>/docs</outputDirectory>
         </file>
 	</files>
     <fileSets>

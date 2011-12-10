@@ -21,7 +21,7 @@
 			<item name="Download" href="https://github.com/marekkubis/wquery/downloads" />
 		</menu>
 		<menu name="Documentation">
-			<item name="User Guide" href="user-guide.pdf" />
+			<item name="User Guide" href="https://github.com/marekkubis/wquery/wiki" />
             <item name="ScalaDocs" href="scaladocs/index.html" />			
 			<item name="License" href="license.html" />
 		</menu>

@@ -284,15 +284,14 @@
 					</dependency>
 				</dependencies>
 		        <executions>
-					<execution>
-						<goals>
-							<goal>generate-html</goal>
-							<goal>generate-pdf</goal>
-						</goals>
-						<phase>prepare-package</phase>
-					</execution>        							          
-		        </executions>				
-			</plugin>
+                    <execution>
+                        <goals>
+                            <goal>generate-pdf</goal>
+                        </goals>
+                        <phase>pre-site</phase>
+                    </execution>
+		        </executions>
+            </plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-site-plugin</artifactId>
