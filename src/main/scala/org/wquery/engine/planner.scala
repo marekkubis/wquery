@@ -37,16 +37,12 @@ case class RelationStep(pos: Int, pattern: RelationalPattern, variables: List[Va
 
 case class FilterStep(condition: Condition, variables: List[Variable]) extends Step(variables) {
   def planForward(wordNet: WordNetSchema, bindings: BindingsSchema, op: AlgebraOp) = {
-    val filterBindings = BindingsSchema(bindings, false)
-    filterBindings.bindContextOp(op)
     bind(wordNet, bindings, SelectOp(op, condition))
   }
 }
 
 case class NodeStep(generateOp: AlgebraOp, variables: List[Variable]) extends Step(variables) {
   def planForward(wordNet: WordNetSchema, bindings: BindingsSchema, op: AlgebraOp) = {
-    val filterBindings = BindingsSchema(bindings, false)
-    filterBindings.bindContextOp(op)
     bind(wordNet, bindings, SelectOp(op, BinaryCondition("in", ContextRefOp(0, op.rightType(0)), generateOp)))
   }
 }
