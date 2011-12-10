@@ -50,17 +50,17 @@
 										<tbody>
 											<tr>
 												<th>Complexity</th>
-												<td>114</td>
+												<td>116</td>
 											</tr>
 											<tr>
 												<th>Coverage</th>
-												<td>27.3% (21/77)</td>
+												<td>26.9% (21/78)</td>
 											</tr>
 											<tr>
 												<td colspan="2">
 													<div class="coverage-bar">
 														<div class="negative">
-															<div class="positive" style="width: 27.3%;">
+															<div class="positive" style="width: 26.9%;">
 															</div>
 														</div>
 													</div>
@@ -85,16 +85,16 @@
 											<tr>
 												<th>Classes</th>
 												<td class="number">4</td>
-												<td class="complexity">28.50</td>
-												<td class="complexity">52</td>
-												<td class="complexity">21.08</td>
+												<td class="complexity">29.00</td>
+												<td class="complexity">53</td>
+												<td class="complexity">21.11</td>
 											</tr>
 											<tr>
 												<th>Methods</th>
-												<td class="number">88</td>
-												<td class="complexity">1.30</td>
+												<td class="number">90</td>
+												<td class="complexity">1.29</td>
 												<td class="complexity">10</td>
-												<td class="complexity">1.43</td>
+												<td class="complexity">1.42</td>
 											</tr>
 										</tbody>
 									</table>
@@ -550,10 +550,10 @@
 				</tr>
 				<tr>
 					<th>WordNetStore</th>
-					<td class="number">52</td>
+					<td class="number">53</td>
 					<td class="complexity">1.00</td>
 					<td class="complexity">1</td>
-					<td class="complexity">52</td>
+					<td class="complexity">53</td>
 					<td class="coverage">N/A</td>
 					<td class="coverage">
 						<div class="coverage-bar">
@@ -739,7 +739,18 @@
 					</td>
 				</tr>
 				<tr>
-					<td colspan="4">addSynset(Option, List, List) : Synset</td>
+					<td colspan="4">addSynset(Option, List, List, boolean) : Synset</td>
+					<td class="complexity">1</td>
+					<td class="coverage">N/A</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="not-available">
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">addSynset$default$4() : boolean</td>
 					<td class="complexity">1</td>
 					<td class="coverage">N/A</td>
 					<td class="coverage">
@@ -1136,15 +1147,28 @@
 				</tr>
 				<tr>
 					<th>WordNetStore$class</th>
-					<td class="number">7</td>
+					<td class="number">8</td>
 					<td class="complexity">1.00</td>
 					<td class="complexity">1</td>
-					<td class="complexity">7</td>
-					<td class="coverage">100% (7/7)</td>
+					<td class="complexity">8</td>
+					<td class="coverage">87.5% (7/8)</td>
 					<td class="coverage">
 						<div class="coverage-bar">
 							<div class="negative">
-								<div class="positive" style="width: 100.0%;">
+								<div class="positive" style="width: 87.5%;">
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">addSynset$default$4(WordNetStore) : boolean</td>
+					<td class="complexity">1</td>
+					<td class="coverage">0% (0/1)</td>
+					<td class="coverage">
+						<div class="coverage-bar">
+							<div class="negative">
+								<div class="positive" style="width: 0.0%;">
 								</div>
 							</div>
 						</div>
@@ -1359,10 +1383,10 @@
 					<td class="line-touch"></td>
 					<td class="line-text"></td>
 				</tr>
-				<tr>
+				<tr class="not-covered">
 					<td class="line-number">22</td>
-					<td class="line-touch"></td>
-					<td class="line-text">  def addSynset(synsetId: Option[String], senses: List[Sense], assignments: List[PropertyAssignment]): Synset</td>
+					<td class="line-touch">0</td>
+					<td class="line-text">  def addSynset(synsetId: Option[String], senses: List[Sense], assignments: List[PropertyAssignment], moveSenses: Boolean = true): Synset</td>
 				</tr>
 				<tr>
 					<td class="line-number">23</td>

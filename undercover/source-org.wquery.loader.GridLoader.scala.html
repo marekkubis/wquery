@@ -50,17 +50,17 @@
 										<tbody>
 											<tr>
 												<th>Complexity</th>
-												<td>313</td>
+												<td>316</td>
 											</tr>
 											<tr>
 												<th>Coverage</th>
-												<td>67.9% (288/424)</td>
+												<td>67.8% (290/428)</td>
 											</tr>
 											<tr>
 												<td colspan="2">
 													<div class="coverage-bar">
 														<div class="negative">
-															<div class="positive" style="width: 67.9%;">
+															<div class="positive" style="width: 67.8%;">
 															</div>
 														</div>
 													</div>
@@ -85,16 +85,16 @@
 											<tr>
 												<th>Classes</th>
 												<td class="number">2</td>
-												<td class="complexity">156.50</td>
-												<td class="complexity">299</td>
-												<td class="complexity">142.50</td>
+												<td class="complexity">158.00</td>
+												<td class="complexity">302</td>
+												<td class="complexity">144.00</td>
 											</tr>
 											<tr>
 												<th>Methods</th>
 												<td class="number">56</td>
-												<td class="complexity">5.59</td>
+												<td class="complexity">5.64</td>
 												<td class="complexity">72</td>
-												<td class="complexity">13.94</td>
+												<td class="complexity">13.95</td>
 											</tr>
 										</tbody>
 									</table>
@@ -142,14 +142,14 @@
 				<tr>
 					<th>GridHandler</th>
 					<td class="number">46</td>
-					<td class="complexity">6.50</td>
+					<td class="complexity">6.57</td>
 					<td class="complexity">72</td>
-					<td class="complexity">299</td>
-					<td class="coverage">67.8% (278/410)</td>
+					<td class="complexity">302</td>
+					<td class="coverage">67.6% (280/414)</td>
 					<td class="coverage">
 						<div class="coverage-bar">
 							<div class="negative">
-								<div class="positive" style="width: 67.8%;">
+								<div class="positive" style="width: 67.6%;">
 								</div>
 							</div>
 						</div>
@@ -638,12 +638,12 @@
 				</tr>
 				<tr>
 					<td colspan="4">endGenericTag(String, String) : void</td>
-					<td class="complexity">7</td>
-					<td class="coverage">60% (6/10)</td>
+					<td class="complexity">10</td>
+					<td class="coverage">57.1% (8/14)</td>
 					<td class="coverage">
 						<div class="coverage-bar">
 							<div class="negative">
-								<div class="positive" style="width: 60.0%;">
+								<div class="positive" style="width: 57.1%;">
 								</div>
 							</div>
 						</div>
@@ -1605,7 +1605,7 @@
 				<tr class="completely-covered">
 					<td class="line-number">139</td>
 					<td class="line-touch">180</td>
-					<td class="line-text">      val synset = wordnet.store.addSynset(Some(synsetId), senses.toList, Nil)</td>
+					<td class="line-text">      val synset = wordnet.store.addSynset(Some(synsetId), senses.toList, Nil, moveSenses = false)</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">140</td>
@@ -1717,793 +1717,803 @@
 					<td class="line-touch"></td>
 					<td class="line-text">        // skip</td>
 				</tr>
-				<tr class="completely-covered">
+				<tr>
 					<td class="line-number">162</td>
+					<td class="line-touch"></td>
+					<td class="line-text">      case &quot;valency&quot; =&gt;</td>
+				</tr>
+				<tr>
+					<td class="line-number">163</td>
+					<td class="line-touch"></td>
+					<td class="line-text">        //  skip</td>
+				</tr>
+				<tr class="completely-covered">
+					<td class="line-number">164</td>
 					<td class="line-touch">398</td>
 					<td class="line-text">      case relName =&gt;</td>
 				</tr>
 				<tr class="completely-covered">
-					<td class="line-number">163</td>
+					<td class="line-number">165</td>
 					<td class="line-touch">398</td>
 					<td class="line-text">        synsetGenericRelationsTuples += ((relName, content))</td>
 				</tr>
 				<tr>
-					<td class="line-number">164</td>
-					<td class="line-touch"></td>
-					<td class="line-text">    }</td>
-				</tr>
-				<tr>
-					<td class="line-number">165</td>
-					<td class="line-touch"></td>
-					<td class="line-text">  }</td>
-				</tr>
-				<tr>
 					<td class="line-number">166</td>
 					<td class="line-touch"></td>
-					<td class="line-text">    </td>
+					<td class="line-text">    }</td>
 				</tr>
 				<tr>
 					<td class="line-number">167</td>
 					<td class="line-touch"></td>
-					<td class="line-text">  override def endDocument {</td>
+					<td class="line-text">  }</td>
 				</tr>
-				<tr class="completely-covered">
+				<tr>
 					<td class="line-number">168</td>
-					<td class="line-touch">2</td>
-					<td class="line-text">    info(&quot;Synsets loaded&quot;) </td>
+					<td class="line-touch"></td>
+					<td class="line-text">    </td>
 				</tr>
-				<tr class="completely-covered">
+				<tr>
 					<td class="line-number">169</td>
-					<td class="line-touch">2</td>
-					<td class="line-text">    createIlrRelations    </td>
+					<td class="line-touch"></td>
+					<td class="line-text">  override def endDocument {</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">170</td>
 					<td class="line-touch">2</td>
-					<td class="line-text">    createGenericRelations </td>
+					<td class="line-text">    info(&quot;Synsets loaded&quot;) </td>
 				</tr>
-				<tr>
+				<tr class="completely-covered">
 					<td class="line-number">171</td>
-					<td class="line-touch"></td>
-					<td class="line-text">  }</td>
+					<td class="line-touch">2</td>
+					<td class="line-text">    createIlrRelations    </td>
 				</tr>
-				<tr>
+				<tr class="completely-covered">
 					<td class="line-number">172</td>
-					<td class="line-touch"></td>
-					<td class="line-text">    </td>
+					<td class="line-touch">2</td>
+					<td class="line-text">    createGenericRelations </td>
 				</tr>
 				<tr>
 					<td class="line-number">173</td>
 					<td class="line-touch"></td>
-					<td class="line-text">  private def createIlrRelations {</td>
+					<td class="line-text">  }</td>
 				</tr>
 				<tr>
 					<td class="line-number">174</td>
 					<td class="line-touch"></td>
-					<td class="line-text">    // create semantic relations names</td>
+					<td class="line-text">    </td>
 				</tr>
-				<tr class="completely-covered">
+				<tr>
 					<td class="line-number">175</td>
-					<td class="line-touch">2</td>
-					<td class="line-text">    val ilrRelationsNames = Set[String]()</td>
+					<td class="line-touch"></td>
+					<td class="line-text">  private def createIlrRelations {</td>
 				</tr>
 				<tr>
 					<td class="line-number">176</td>
 					<td class="line-touch"></td>
+					<td class="line-text">    // create semantic relations names</td>
+				</tr>
+				<tr class="completely-covered">
+					<td class="line-number">177</td>
+					<td class="line-touch">2</td>
+					<td class="line-text">    val ilrRelationsNames = Set[String]()</td>
+				</tr>
+				<tr>
+					<td class="line-number">178</td>
+					<td class="line-touch"></td>
 					<td class="line-text">    </td>
 				</tr>
 				<tr class="partialy-covered">
-					<td class="line-number">177</td>
+					<td class="line-number">179</td>
 					<td class="line-touch">282</td>
 					<td class="line-text">    for ((synset, relname, reldest) &lt;- ilrRelationsTuples) {</td>
 				</tr>
 				<tr class="completely-covered">
-					<td class="line-number">178</td>
+					<td class="line-number">180</td>
 					<td class="line-touch">282</td>
 					<td class="line-text">      ilrRelationsNames += relname</td>
 				</tr>
 				<tr>
-					<td class="line-number">179</td>
+					<td class="line-number">181</td>
 					<td class="line-touch"></td>
 					<td class="line-text">    }</td>
 				</tr>
 				<tr>
-					<td class="line-number">180</td>
+					<td class="line-number">182</td>
 					<td class="line-touch"></td>
 					<td class="line-text"></td>
 				</tr>
 				<tr>
-					<td class="line-number">181</td>
+					<td class="line-number">183</td>
 					<td class="line-touch"></td>
 					<td class="line-text">    // create semantic relations</td>
 				</tr>
 				<tr class="partialy-covered">
-					<td class="line-number">182</td>
+					<td class="line-number">184</td>
 					<td class="line-touch">18</td>
 					<td class="line-text">    for (name &lt;- ilrRelationsNames) {</td>
 				</tr>
 				<tr class="completely-covered">
-					<td class="line-number">183</td>
+					<td class="line-number">185</td>
 					<td class="line-touch">18</td>
 					<td class="line-text">      val relation = Relation.binary(name, SynsetType, SynsetType)</td>
 				</tr>
 				<tr class="completely-covered">
-					<td class="line-number">184</td>
+					<td class="line-number">186</td>
 					<td class="line-touch">18</td>
 					<td class="line-text">      wordnet.store.addRelation(relation)</td>
-				</tr>
-				<tr>
-					<td class="line-number">185</td>
-					<td class="line-touch"></td>
-					<td class="line-text"></td>
-				</tr>
-				<tr>
-					<td class="line-number">186</td>
-					<td class="line-touch"></td>
-					<td class="line-text">      //TODO move to configuration</td>
 				</tr>
 				<tr>
 					<td class="line-number">187</td>
 					<td class="line-touch"></td>
 					<td class="line-text"></td>
 				</tr>
-				<tr class="completely-covered">
+				<tr>
 					<td class="line-number">188</td>
+					<td class="line-touch"></td>
+					<td class="line-text">      //TODO move to configuration</td>
+				</tr>
+				<tr>
+					<td class="line-number">189</td>
+					<td class="line-touch"></td>
+					<td class="line-text"></td>
+				</tr>
+				<tr class="completely-covered">
+					<td class="line-number">190</td>
 					<td class="line-touch">18</td>
 					<td class="line-text">      if (Set(&quot;hypernym&quot;, &quot;partial_meronym&quot;, &quot;member_meronym&quot;).contains(name)) {</td>
 				</tr>
 				<tr class="completely-covered">
-					<td class="line-number">189</td>
+					<td class="line-number">191</td>
 					<td class="line-touch">2</td>
 					<td class="line-text">        wordnet.store.transitives(relation) = true</td>
 				</tr>
 				<tr class="completely-covered">
-					<td class="line-number">190</td>
+					<td class="line-number">192</td>
 					<td class="line-touch">2</td>
 					<td class="line-text">        wordnet.store.transitivesActions(relation) = Relation.Restore</td>
 				</tr>
 				<tr>
-					<td class="line-number">191</td>
+					<td class="line-number">193</td>
 					<td class="line-touch"></td>
 					<td class="line-text">      }</td>
 				</tr>
 				<tr>
-					<td class="line-number">192</td>
+					<td class="line-number">194</td>
 					<td class="line-touch"></td>
 					<td class="line-text"></td>
 				</tr>
 				<tr class="completely-covered">
-					<td class="line-number">193</td>
+					<td class="line-number">195</td>
 					<td class="line-touch">18</td>
 					<td class="line-text">      if (Set(&quot;hypernym&quot;).contains(name)) {</td>
 				</tr>
 				<tr class="completely-covered">
-					<td class="line-number">194</td>
+					<td class="line-number">196</td>
 					<td class="line-touch">2</td>
 					<td class="line-text">        wordnet.store.symmetry(relation) = Antisymmetric</td>
 				</tr>
 				<tr class="completely-covered">
-					<td class="line-number">195</td>
+					<td class="line-number">197</td>
 					<td class="line-touch">2</td>
 					<td class="line-text">        wordnet.store.symmetryActions(relation) = Relation.Preserve</td>
 				</tr>
 				<tr>
-					<td class="line-number">196</td>
+					<td class="line-number">198</td>
 					<td class="line-touch"></td>
 					<td class="line-text">      }</td>
 				</tr>
 				<tr>
-					<td class="line-number">197</td>
+					<td class="line-number">199</td>
 					<td class="line-touch"></td>
 					<td class="line-text"></td>
 				</tr>
 				<tr class="completely-covered">
-					<td class="line-number">198</td>
+					<td class="line-number">200</td>
 					<td class="line-touch">18</td>
 					<td class="line-text">      if (Set(&quot;similar&quot;).contains(name)) {</td>
 				</tr>
 				<tr class="completely-covered">
-					<td class="line-number">199</td>
+					<td class="line-number">201</td>
 					<td class="line-touch">2</td>
 					<td class="line-text">        wordnet.store.symmetry(relation) = Symmetric</td>
 				</tr>
 				<tr class="completely-covered">
-					<td class="line-number">200</td>
+					<td class="line-number">202</td>
 					<td class="line-touch">2</td>
 					<td class="line-text">        wordnet.store.symmetryActions(relation) = Relation.Restore</td>
 				</tr>
 				<tr>
-					<td class="line-number">201</td>
-					<td class="line-touch"></td>
-					<td class="line-text">      }</td>
-				</tr>
-				<tr>
-					<td class="line-number">202</td>
-					<td class="line-touch"></td>
-					<td class="line-text">    }</td>
-				</tr>
-				<tr>
 					<td class="line-number">203</td>
 					<td class="line-touch"></td>
-					<td class="line-text"></td>
+					<td class="line-text">      }</td>
 				</tr>
 				<tr>
 					<td class="line-number">204</td>
 					<td class="line-touch"></td>
+					<td class="line-text">    }</td>
+				</tr>
+				<tr>
+					<td class="line-number">205</td>
+					<td class="line-touch"></td>
+					<td class="line-text"></td>
+				</tr>
+				<tr>
+					<td class="line-number">206</td>
+					<td class="line-touch"></td>
 					<td class="line-text">    // create semantic relations successors       </td>
 				</tr>
 				<tr class="partialy-covered">
-					<td class="line-number">205</td>
+					<td class="line-number">207</td>
 					<td class="line-touch">564</td>
 					<td class="line-text">    for ((synset, relname, reldest) &lt;- ilrRelationsTuples) {      </td>
 				</tr>
 				<tr class="completely-covered">
-					<td class="line-number">206</td>
+					<td class="line-number">208</td>
 					<td class="line-touch">282</td>
 					<td class="line-text">      val relation = wordnet.schema.demandRelation(relname, scala.collection.immutable.Map((Relation.Source, scala.collection.immutable.Set[DataType](SynsetType))))</td>
 				</tr>
 				<tr>
-					<td class="line-number">207</td>
+					<td class="line-number">209</td>
 					<td class="line-touch"></td>
 					<td class="line-text"></td>
 				</tr>
 				<tr class="partialy-covered">
-					<td class="line-number">208</td>
+					<td class="line-number">210</td>
 					<td class="line-touch">282</td>
 					<td class="line-text">      relation.destinationType.map { dt =&gt;</td>
-				</tr>
-				<tr class="partialy-covered">
-					<td class="line-number">209</td>
-					<td class="line-touch">282</td>
-					<td class="line-text">        dt match {</td>
-				</tr>
-				<tr>
-					<td class="line-number">210</td>
-					<td class="line-touch"></td>
-					<td class="line-text">          case SynsetType =&gt;</td>
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">211</td>
 					<td class="line-touch">282</td>
+					<td class="line-text">        dt match {</td>
+				</tr>
+				<tr>
+					<td class="line-number">212</td>
+					<td class="line-touch"></td>
+					<td class="line-text">          case SynsetType =&gt;</td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">213</td>
+					<td class="line-touch">282</td>
 					<td class="line-text">            synsetsById.get(reldest).map { destination =&gt;</td>
 				</tr>
 				<tr class="completely-covered">
-					<td class="line-number">212</td>
+					<td class="line-number">214</td>
 					<td class="line-touch">156</td>
 					<td class="line-text">              try {</td>
 				</tr>
 				<tr class="completely-covered">
-					<td class="line-number">213</td>
+					<td class="line-number">215</td>
 					<td class="line-touch">156</td>
 					<td class="line-text">                wordnet.store.addSuccessor(synset, relation, destination)</td>
 				</tr>
 				<tr>
-					<td class="line-number">214</td>
+					<td class="line-number">216</td>
 					<td class="line-touch"></td>
 					<td class="line-text">              } catch {</td>
 				</tr>
 				<tr class="not-covered">
-					<td class="line-number">215</td>
+					<td class="line-number">217</td>
 					<td class="line-touch">0</td>
 					<td class="line-text">                case e: WQueryUpdateBreaksRelationPropertyException =&gt;</td>
 				</tr>
 				<tr class="not-covered">
-					<td class="line-number">216</td>
+					<td class="line-number">218</td>
 					<td class="line-touch">0</td>
 					<td class="line-text">                  warn(&quot;ILR tag with type '&quot; + relname + &quot;' found in synset '&quot; + synset.id + &quot;' that points to synset '&quot; + reldest + &quot;' breaks property '&quot; + e.property + &quot;' of relation '&quot; + e.relation.name + &quot;'&quot;)</td>
 				</tr>
 				<tr>
-					<td class="line-number">217</td>
+					<td class="line-number">219</td>
 					<td class="line-touch"></td>
 					<td class="line-text">              }</td>
 				</tr>
 				<tr class="partialy-covered">
-					<td class="line-number">218</td>
+					<td class="line-number">220</td>
 					<td class="line-touch">378</td>
 					<td class="line-text">            }.getOrElse(warn(&quot;ILR tag with type '&quot; + relname + &quot;' found in synset '&quot; + synset.id + &quot;' points to unknown synset '&quot; + reldest + &quot;'&quot;))</td>
 				</tr>
 				<tr class="not-covered">
-					<td class="line-number">219</td>
+					<td class="line-number">221</td>
 					<td class="line-touch">0</td>
 					<td class="line-text">          case dtype =&gt;</td>
 				</tr>
 				<tr class="not-covered">
-					<td class="line-number">220</td>
+					<td class="line-number">222</td>
 					<td class="line-touch">0</td>
 					<td class="line-text">            throw new RuntimeException(&quot;ILR tag points to relation &quot; + relation + &quot; that has incorrect destination type &quot; + dtype)</td>
 				</tr>
 				<tr>
-					<td class="line-number">221</td>
+					<td class="line-number">223</td>
 					<td class="line-touch"></td>
 					<td class="line-text">        }</td>
 				</tr>
 				<tr class="partialy-covered">
-					<td class="line-number">222</td>
+					<td class="line-number">224</td>
 					<td class="line-touch">282</td>
 					<td class="line-text">      }.getOrElse(throw new RuntimeException(&quot;Relation '&quot; + relname + &quot;' has no destination type&quot;))</td>
 				</tr>
 				<tr>
-					<td class="line-number">223</td>
+					<td class="line-number">225</td>
 					<td class="line-touch"></td>
 					<td class="line-text"></td>
 				</tr>
 				<tr>
-					<td class="line-number">224</td>
+					<td class="line-number">226</td>
 					<td class="line-touch"></td>
 					<td class="line-text">    }</td>
-				</tr>
-				<tr>
-					<td class="line-number">225</td>
-					<td class="line-touch"></td>
-					<td class="line-text">    </td>
-				</tr>
-				<tr class="completely-covered">
-					<td class="line-number">226</td>
-					<td class="line-touch">2</td>
-					<td class="line-text">    info(&quot;ILR relations loaded&quot;)    </td>
 				</tr>
 				<tr>
 					<td class="line-number">227</td>
 					<td class="line-touch"></td>
-					<td class="line-text">  }</td>
+					<td class="line-text">    </td>
 				</tr>
-				<tr>
+				<tr class="completely-covered">
 					<td class="line-number">228</td>
-					<td class="line-touch"></td>
-					<td class="line-text">  </td>
+					<td class="line-touch">2</td>
+					<td class="line-text">    info(&quot;ILR relations loaded&quot;)    </td>
 				</tr>
 				<tr>
 					<td class="line-number">229</td>
 					<td class="line-touch"></td>
-					<td class="line-text">  private def createGenericRelations {    </td>
+					<td class="line-text">  }</td>
 				</tr>
 				<tr>
 					<td class="line-number">230</td>
 					<td class="line-touch"></td>
-					<td class="line-text">    // create relations datatypes</td>
+					<td class="line-text">  </td>
 				</tr>
-				<tr class="completely-covered">
+				<tr>
 					<td class="line-number">231</td>
-					<td class="line-touch">2</td>
-					<td class="line-text">    val genericRelationsDestTypes = Map[String, NodeType]()    </td>
+					<td class="line-touch"></td>
+					<td class="line-text">  private def createGenericRelations {    </td>
 				</tr>
 				<tr>
 					<td class="line-number">232</td>
 					<td class="line-touch"></td>
+					<td class="line-text">    // create relations datatypes</td>
+				</tr>
+				<tr class="completely-covered">
+					<td class="line-number">233</td>
+					<td class="line-touch">2</td>
+					<td class="line-text">    val genericRelationsDestTypes = Map[String, NodeType]()    </td>
+				</tr>
+				<tr>
+					<td class="line-number">234</td>
+					<td class="line-touch"></td>
 					<td class="line-text">    </td>
 				</tr>
 				<tr class="partialy-covered">
-					<td class="line-number">233</td>
+					<td class="line-number">235</td>
 					<td class="line-touch">396</td>
 					<td class="line-text">    for ((synset, relname, reldest) &lt;- genericRelationsTuples) {</td>
-				</tr>
-				<tr class="completely-covered">
-					<td class="line-number">234</td>
-					<td class="line-touch">396</td>
-					<td class="line-text">      val dtype = getType(reldest)</td>
-				</tr>
-				<tr>
-					<td class="line-number">235</td>
-					<td class="line-touch"></td>
-					<td class="line-text">      </td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">236</td>
 					<td class="line-touch">396</td>
+					<td class="line-text">      val dtype = getType(reldest)</td>
+				</tr>
+				<tr>
+					<td class="line-number">237</td>
+					<td class="line-touch"></td>
+					<td class="line-text">      </td>
+				</tr>
+				<tr class="completely-covered">
+					<td class="line-number">238</td>
+					<td class="line-touch">396</td>
 					<td class="line-text">      if (!genericRelationsDestTypes.contains(relname) || </td>
 				</tr>
 				<tr class="completely-covered">
-					<td class="line-number">237</td>
+					<td class="line-number">239</td>
 					<td class="line-touch">390</td>
 					<td class="line-text">            rankType(genericRelationsDestTypes(relname)) &lt; rankType(dtype)) {</td>
 				</tr>
 				<tr class="completely-covered">
-					<td class="line-number">238</td>
+					<td class="line-number">240</td>
 					<td class="line-touch">6</td>
 					<td class="line-text">        genericRelationsDestTypes(relname) = dtype          </td>
 				</tr>
 				<tr>
-					<td class="line-number">239</td>
+					<td class="line-number">241</td>
 					<td class="line-touch"></td>
 					<td class="line-text">      }      </td>
 				</tr>
 				<tr>
-					<td class="line-number">240</td>
+					<td class="line-number">242</td>
 					<td class="line-touch"></td>
 					<td class="line-text">    }    </td>
 				</tr>
 				<tr>
-					<td class="line-number">241</td>
+					<td class="line-number">243</td>
 					<td class="line-touch"></td>
 					<td class="line-text"></td>
 				</tr>
 				<tr>
-					<td class="line-number">242</td>
+					<td class="line-number">244</td>
 					<td class="line-touch"></td>
 					<td class="line-text">    // create relations</td>
 				</tr>
 				<tr class="partialy-covered">
-					<td class="line-number">243</td>
+					<td class="line-number">245</td>
 					<td class="line-touch">6</td>
 					<td class="line-text">    for ((relname, dtype) &lt;- genericRelationsDestTypes) {</td>
 				</tr>
 				<tr class="completely-covered">
-					<td class="line-number">244</td>
+					<td class="line-number">246</td>
 					<td class="line-touch">6</td>
 					<td class="line-text">      val relation = Relation.binary(relname, SynsetType, dtype)</td>
 				</tr>
 				<tr class="completely-covered">
-					<td class="line-number">245</td>
+					<td class="line-number">247</td>
 					<td class="line-touch">6</td>
 					<td class="line-text">      wordnet.store.addRelation(relation)</td>
 				</tr>
 				<tr>
-					<td class="line-number">246</td>
+					<td class="line-number">248</td>
 					<td class="line-touch"></td>
 					<td class="line-text"></td>
 				</tr>
 				<tr class="partialy-covered">
-					<td class="line-number">247</td>
+					<td class="line-number">249</td>
 					<td class="line-touch">6</td>
 					<td class="line-text">      if (relname == &quot;desc&quot;) {</td>
 				</tr>
 				<tr class="completely-covered">
-					<td class="line-number">248</td>
+					<td class="line-number">250</td>
 					<td class="line-touch">2</td>
 					<td class="line-text">        wordnet.store.requiredBys(relation) = scala.collection.immutable.Set(Relation.Source)</td>
 				</tr>
 				<tr class="completely-covered">
-					<td class="line-number">249</td>
+					<td class="line-number">251</td>
 					<td class="line-touch">2</td>
 					<td class="line-text">        wordnet.store.functionalFor(relation) = scala.collection.immutable.Set(Relation.Source)</td>
 				</tr>
 				<tr class="completely-covered">
-					<td class="line-number">250</td>
+					<td class="line-number">252</td>
 					<td class="line-touch">2</td>
 					<td class="line-text">        wordnet.store.functionalForActions((relation, Relation.Source)) = Relation.Preserve</td>
 				</tr>
 				<tr>
-					<td class="line-number">251</td>
-					<td class="line-touch"></td>
-					<td class="line-text">      }</td>
-				</tr>
-				<tr>
-					<td class="line-number">252</td>
-					<td class="line-touch"></td>
-					<td class="line-text">    }</td>
-				</tr>
-				<tr>
 					<td class="line-number">253</td>
 					<td class="line-touch"></td>
-					<td class="line-text">    </td>
+					<td class="line-text">      }</td>
 				</tr>
 				<tr>
 					<td class="line-number">254</td>
 					<td class="line-touch"></td>
+					<td class="line-text">    }</td>
+				</tr>
+				<tr>
+					<td class="line-number">255</td>
+					<td class="line-touch"></td>
+					<td class="line-text">    </td>
+				</tr>
+				<tr>
+					<td class="line-number">256</td>
+					<td class="line-touch"></td>
 					<td class="line-text">    // create successors</td>
 				</tr>
 				<tr class="partialy-covered">
-					<td class="line-number">255</td>
+					<td class="line-number">257</td>
 					<td class="line-touch">396</td>
 					<td class="line-text">    for ((synset, relname, reldest) &lt;- genericRelationsTuples) {</td>
 				</tr>
 				<tr class="completely-covered">
-					<td class="line-number">256</td>
+					<td class="line-number">258</td>
 					<td class="line-touch">396</td>
 					<td class="line-text">      val relation = wordnet.schema.demandRelation(relname, scala.collection.immutable.Map((Relation.Source, scala.collection.immutable.Set[DataType](SynsetType))))</td>
 				</tr>
 				<tr>
-					<td class="line-number">257</td>
+					<td class="line-number">259</td>
 					<td class="line-touch"></td>
 					<td class="line-text"></td>
 				</tr>
 				<tr class="partialy-covered">
-					<td class="line-number">258</td>
+					<td class="line-number">260</td>
 					<td class="line-touch">396</td>
 					<td class="line-text">      relation.destinationType.map { dt =&gt;</td>
 				</tr>
 				<tr class="partialy-covered">
-					<td class="line-number">259</td>
+					<td class="line-number">261</td>
 					<td class="line-touch">396</td>
 					<td class="line-text">        dt match {</td>
 				</tr>
 				<tr>
-					<td class="line-number">260</td>
+					<td class="line-number">262</td>
 					<td class="line-touch"></td>
 					<td class="line-text">          case SynsetType =&gt;</td>
 				</tr>
 				<tr class="not-covered">
-					<td class="line-number">261</td>
+					<td class="line-number">263</td>
 					<td class="line-touch">0</td>
 					<td class="line-text">            wordnet.store.addSuccessor(synset, relation, synsetsById(reldest))</td>
 				</tr>
 				<tr>
-					<td class="line-number">262</td>
+					<td class="line-number">264</td>
 					<td class="line-touch"></td>
 					<td class="line-text">          case BooleanType =&gt;</td>
 				</tr>
 				<tr class="completely-covered">
-					<td class="line-number">263</td>
+					<td class="line-number">265</td>
 					<td class="line-touch">36</td>
 					<td class="line-text">            wordnet.store.addSuccessor(synset, relation, reldest.toBoolean)</td>
 				</tr>
 				<tr>
-					<td class="line-number">264</td>
+					<td class="line-number">266</td>
 					<td class="line-touch"></td>
 					<td class="line-text">          case IntegerType =&gt;</td>
 				</tr>
 				<tr class="not-covered">
-					<td class="line-number">265</td>
+					<td class="line-number">267</td>
 					<td class="line-touch">0</td>
 					<td class="line-text">            wordnet.store.addSuccessor(synset, relation, reldest.toInt)</td>
 				</tr>
 				<tr>
-					<td class="line-number">266</td>
+					<td class="line-number">268</td>
 					<td class="line-touch"></td>
 					<td class="line-text">          case FloatType =&gt;</td>
 				</tr>
 				<tr class="not-covered">
-					<td class="line-number">267</td>
+					<td class="line-number">269</td>
 					<td class="line-touch">0</td>
 					<td class="line-text">            wordnet.store.addSuccessor(synset, relation, reldest.toFloat)</td>
 				</tr>
 				<tr>
-					<td class="line-number">268</td>
+					<td class="line-number">270</td>
 					<td class="line-touch"></td>
 					<td class="line-text">          case StringType =&gt;</td>
 				</tr>
 				<tr class="completely-covered">
-					<td class="line-number">269</td>
+					<td class="line-number">271</td>
 					<td class="line-touch">360</td>
 					<td class="line-text">            wordnet.store.addSuccessor(synset, relation, reldest)</td>
 				</tr>
 				<tr class="not-covered">
-					<td class="line-number">270</td>
+					<td class="line-number">272</td>
 					<td class="line-touch">0</td>
 					<td class="line-text">          case dtype =&gt;</td>
 				</tr>
 				<tr class="not-covered">
-					<td class="line-number">271</td>
+					<td class="line-number">273</td>
 					<td class="line-touch">0</td>
 					<td class="line-text">            throw new RuntimeException(&quot;Incorrect destination type &quot; + dtype + &quot; as a successor of relation '&quot; + relation + &quot;'&quot;)</td>
 				</tr>
 				<tr>
-					<td class="line-number">272</td>
+					<td class="line-number">274</td>
 					<td class="line-touch"></td>
 					<td class="line-text">        }</td>
 				</tr>
 				<tr class="partialy-covered">
-					<td class="line-number">273</td>
+					<td class="line-number">275</td>
 					<td class="line-touch">396</td>
 					<td class="line-text">      }.getOrElse(throw new RuntimeException(&quot;Relation '&quot; + relname + &quot;' has no destination type&quot;))</td>
 				</tr>
 				<tr>
-					<td class="line-number">274</td>
+					<td class="line-number">276</td>
 					<td class="line-touch"></td>
 					<td class="line-text">    }</td>
 				</tr>
 				<tr>
-					<td class="line-number">275</td>
+					<td class="line-number">277</td>
 					<td class="line-touch"></td>
 					<td class="line-text"></td>
 				</tr>
 				<tr class="completely-covered">
-					<td class="line-number">276</td>
+					<td class="line-number">278</td>
 					<td class="line-touch">2</td>
 					<td class="line-text">    info(&quot;non-ILR relations loaded&quot;)    </td>
 				</tr>
 				<tr>
-					<td class="line-number">277</td>
+					<td class="line-number">279</td>
 					<td class="line-touch"></td>
 					<td class="line-text">  }</td>
 				</tr>
 				<tr>
-					<td class="line-number">278</td>
+					<td class="line-number">280</td>
 					<td class="line-touch"></td>
 					<td class="line-text">    </td>
 				</tr>
 				<tr>
-					<td class="line-number">279</td>
+					<td class="line-number">281</td>
 					<td class="line-touch"></td>
 					<td class="line-text">  private def getType(destination: String): NodeType = {</td>
 				</tr>
 				<tr class="partialy-covered">
-					<td class="line-number">280</td>
+					<td class="line-number">282</td>
 					<td class="line-touch">396</td>
 					<td class="line-text">    synsetsById.get(destination).map(_ =&gt; SynsetType).getOrElse(</td>
 				</tr>
 				<tr class="completely-covered">
-					<td class="line-number">281</td>
+					<td class="line-number">283</td>
 					<td class="line-touch">396</td>
 					<td class="line-text">      try {</td>
 				</tr>
 				<tr class="completely-covered">
-					<td class="line-number">282</td>
+					<td class="line-number">284</td>
 					<td class="line-touch">36</td>
 					<td class="line-text">        destination.toBoolean</td>
 				</tr>
 				<tr class="completely-covered">
-					<td class="line-number">283</td>
+					<td class="line-number">285</td>
 					<td class="line-touch">36</td>
 					<td class="line-text">        BooleanType</td>
 				</tr>
 				<tr>
-					<td class="line-number">284</td>
+					<td class="line-number">286</td>
 					<td class="line-touch"></td>
 					<td class="line-text">      } catch {</td>
 				</tr>
 				<tr>
-					<td class="line-number">285</td>
+					<td class="line-number">287</td>
 					<td class="line-touch"></td>
 					<td class="line-text">        case _:NumberFormatException =&gt;</td>
 				</tr>
 				<tr class="partialy-covered">
-					<td class="line-number">286</td>
+					<td class="line-number">288</td>
 					<td class="line-touch">360</td>
 					<td class="line-text">          try {</td>
 				</tr>
 				<tr class="not-covered">
-					<td class="line-number">287</td>
+					<td class="line-number">289</td>
 					<td class="line-touch">0</td>
 					<td class="line-text">            destination.toInt</td>
 				</tr>
 				<tr class="not-covered">
-					<td class="line-number">288</td>
+					<td class="line-number">290</td>
 					<td class="line-touch">0</td>
 					<td class="line-text">            IntegerType</td>
 				</tr>
 				<tr>
-					<td class="line-number">289</td>
+					<td class="line-number">291</td>
 					<td class="line-touch"></td>
 					<td class="line-text">          } catch {</td>
 				</tr>
 				<tr>
-					<td class="line-number">290</td>
+					<td class="line-number">292</td>
 					<td class="line-touch"></td>
 					<td class="line-text">            case _:NumberFormatException =&gt;</td>
 				</tr>
 				<tr class="partialy-covered">
-					<td class="line-number">291</td>
+					<td class="line-number">293</td>
 					<td class="line-touch">360</td>
 					<td class="line-text">              try {</td>
 				</tr>
 				<tr class="not-covered">
-					<td class="line-number">292</td>
+					<td class="line-number">294</td>
 					<td class="line-touch">0</td>
 					<td class="line-text">                destination.toDouble</td>
 				</tr>
 				<tr class="not-covered">
-					<td class="line-number">293</td>
+					<td class="line-number">295</td>
 					<td class="line-touch">0</td>
 					<td class="line-text">                FloatType</td>
 				</tr>
 				<tr>
-					<td class="line-number">294</td>
+					<td class="line-number">296</td>
 					<td class="line-touch"></td>
 					<td class="line-text">              } catch {</td>
 				</tr>
 				<tr class="completely-covered">
-					<td class="line-number">295</td>
+					<td class="line-number">297</td>
 					<td class="line-touch">360</td>
 					<td class="line-text">                case _:NumberFormatException =&gt; StringType</td>
 				</tr>
 				<tr>
-					<td class="line-number">296</td>
+					<td class="line-number">298</td>
 					<td class="line-touch"></td>
 					<td class="line-text">              }</td>
 				</tr>
 				<tr>
-					<td class="line-number">297</td>
+					<td class="line-number">299</td>
 					<td class="line-touch"></td>
 					<td class="line-text">          }</td>
 				</tr>
 				<tr>
-					<td class="line-number">298</td>
+					<td class="line-number">300</td>
 					<td class="line-touch"></td>
 					<td class="line-text">      }</td>
 				</tr>
 				<tr>
-					<td class="line-number">299</td>
+					<td class="line-number">301</td>
 					<td class="line-touch"></td>
 					<td class="line-text">    )</td>
 				</tr>
 				<tr>
-					<td class="line-number">300</td>
+					<td class="line-number">302</td>
 					<td class="line-touch"></td>
 					<td class="line-text">  }</td>
 				</tr>
 				<tr>
-					<td class="line-number">301</td>
+					<td class="line-number">303</td>
 					<td class="line-touch"></td>
 					<td class="line-text"></td>
 				</tr>
 				<tr class="partialy-covered">
-					<td class="line-number">302</td>
+					<td class="line-number">304</td>
 					<td class="line-touch">780</td>
 					<td class="line-text">  private def rankType(dtype: NodeType) = dtype match {</td>
 				</tr>
 				<tr class="not-covered">
-					<td class="line-number">303</td>
+					<td class="line-number">305</td>
 					<td class="line-touch">0</td>
 					<td class="line-text">    case SynsetType =&gt; 0</td>
 				</tr>
 				<tr class="not-covered">
-					<td class="line-number">304</td>
+					<td class="line-number">306</td>
 					<td class="line-touch">0</td>
 					<td class="line-text">    case SenseType =&gt; 1</td>
 				</tr>
 				<tr class="completely-covered">
-					<td class="line-number">305</td>
+					<td class="line-number">307</td>
 					<td class="line-touch">68</td>
 					<td class="line-text">    case BooleanType =&gt; 2</td>
 				</tr>
 				<tr class="not-covered">
-					<td class="line-number">306</td>
+					<td class="line-number">308</td>
 					<td class="line-touch">0</td>
 					<td class="line-text">    case IntegerType =&gt; 3</td>
 				</tr>
 				<tr class="not-covered">
-					<td class="line-number">307</td>
+					<td class="line-number">309</td>
 					<td class="line-touch">0</td>
 					<td class="line-text">    case FloatType =&gt; 4</td>
 				</tr>
 				<tr class="not-covered">
-					<td class="line-number">308</td>
+					<td class="line-number">310</td>
 					<td class="line-touch">0</td>
 					<td class="line-text">    case POSType =&gt; 5</td>
 				</tr>
 				<tr class="completely-covered">
-					<td class="line-number">309</td>
+					<td class="line-number">311</td>
 					<td class="line-touch">712</td>
 					<td class="line-text">    case StringType =&gt; 6</td>
 				</tr>
 				<tr>
-					<td class="line-number">310</td>
+					<td class="line-number">312</td>
 					<td class="line-touch"></td>
 					<td class="line-text">  } </td>
 				</tr>
 				<tr>
-					<td class="line-number">311</td>
+					<td class="line-number">313</td>
 					<td class="line-touch"></td>
 					<td class="line-text">  </td>
 				</tr>
 				<tr>
-					<td class="line-number">312</td>
+					<td class="line-number">314</td>
 					<td class="line-touch"></td>
 					<td class="line-text">  private def warnInvalidSubtag(tag: String, content: String, attr: String) </td>
 				</tr>
 				<tr class="not-covered">
-					<td class="line-number">313</td>
+					<td class="line-number">315</td>
 					<td class="line-touch">0</td>
 					<td class="line-text">    = locatedWarn(tag + &quot; tag with content '&quot; + content + &quot;' found in synset '&quot; + synsetId + </td>
 				</tr>
 				<tr class="not-covered">
-					<td class="line-number">314</td>
+					<td class="line-number">316</td>
 					<td class="line-touch">0</td>
 					<td class="line-text">                    &quot;' does not have valid &quot; + attr.toUpperCase + &quot; subtag&quot; +</td>
 				</tr>
 				<tr class="not-covered">
-					<td class="line-number">315</td>
+					<td class="line-number">317</td>
 					<td class="line-touch">0</td>
 					<td class="line-text">                    &quot; nor '&quot; + attr.toUpperCase + &quot;' attribute&quot;)</td>
 				</tr>
 				<tr>
-					<td class="line-number">316</td>
+					<td class="line-number">318</td>
 					<td class="line-touch"></td>
 					<td class="line-text">    </td>
 				</tr>
 				<tr>
-					<td class="line-number">317</td>
+					<td class="line-number">319</td>
 					<td class="line-touch"></td>
 					<td class="line-text">  private def locatedWarn(message: String) </td>
 				</tr>
 				<tr class="not-covered">
-					<td class="line-number">318</td>
+					<td class="line-number">320</td>
 					<td class="line-touch">0</td>
 					<td class="line-text">    = warn(&quot;(&quot; + locator.getLineNumber + &quot;, &quot; + locator.getColumnNumber + &quot;) &quot; + message)</td>
 				</tr>
 				<tr>
-					<td class="line-number">319</td>
+					<td class="line-number">321</td>
 					<td class="line-touch"></td>
 					<td class="line-text">}</td>
 				</tr>
