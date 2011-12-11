@@ -441,11 +441,9 @@ case class NodeTransformationExpr(generator: EvaluableExpr) extends Transformati
       val filterBindings = BindingsSchema(bindings, false)
       filterBindings.bindContextOp(op)
       val generateOp = generator.evaluationPlan(wordNet, filterBindings, context)
-
       (bind(wordNet, bindings, SelectOp(op, BinaryCondition("in", ContextRefOp(0, op.rightType(0)), generateOp)), variables), NodeStep(generateOp, variables))
     } else {
       val generateOp = bind(wordNet, bindings, generator.evaluationPlan(wordNet, bindings, context), variables)
-
       (generateOp, NodeStep(generateOp, variables))
     }
   }
@@ -453,7 +451,9 @@ case class NodeTransformationExpr(generator: EvaluableExpr) extends Transformati
 
 case class ProjectionTransformationExpr(expr: EvaluableExpr) extends TransformationExpr {
   def step(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context, op: AlgebraOp, variables: List[Variable]) = {
-    val projectOp = expr.evaluationPlan(wordNet, bindings, context)
+    val projectionBindings = BindingsSchema(bindings, false)
+    projectionBindings.bindContextOp(op)
+    val projectOp = expr.evaluationPlan(wordNet, projectionBindings, context.copy(creation = false))
     (bind(wordNet, bindings, ProjectOp(op, projectOp), variables), ProjectStep(projectOp, variables))
   }
 }

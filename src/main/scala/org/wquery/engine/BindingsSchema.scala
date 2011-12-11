@@ -25,11 +25,15 @@ class BindingsSchema(val parent: Option[BindingsSchema], updatesParent: Boolean)
   def bindContextOp(op: AlgebraOp) = contextOp = Some(op)
 
   override def lookupStepVariableType(name: String): Option[Set[DataType]] = {
-    super.lookupStepVariableType(name).orElse(parent.flatMap(_.lookupStepVariableType(name)))
+    super.lookupStepVariableType(name)
+      .orElse(parent.flatMap(_.lookupStepVariableType(name)))
+      .orElse(contextOp.map(op => op.bindingsPattern.lookupStepVariableType(name)).getOrElse(None))
   }
 
   override def lookupPathVariableType(name: String): Option[(AlgebraOp, Int, Int)] = {
-    super.lookupPathVariableType(name).orElse(parent.flatMap(_.lookupPathVariableType(name)))
+    super.lookupPathVariableType(name)
+      .orElse(parent.flatMap(_.lookupPathVariableType(name)))
+      .orElse(contextOp.map(op => op.bindingsPattern.lookupPathVariableType(name)).getOrElse(None))
   }
 
   def lookupContextVariableType(pos: Int): Set[DataType] = {
