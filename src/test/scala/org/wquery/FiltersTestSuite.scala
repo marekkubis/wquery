@@ -167,4 +167,12 @@ class FiltersTestSuite extends WQueryTestSuite {
 
   @Test def testBooleanPathFilterIsFalse()  = result of ("{person}[not nl]") should equal ("{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n }\n{ person:2:n }\n{ person:3:n }\n")
 
+  @Test def testMultisetEqualityTrue()  = result of ("[car union car = car union car]") should equal ("true\n")
+
+  @Test def testMultisetEqualityFalse()  = result of ("[car = car union car]") should equal ("false\n")
+
+  @Test def testMultisetInequalityTrue()  = result of ("[car != car union car]") should equal ("true\n")
+
+  @Test def testMultisetInequalityFalse()  = result of ("[car union car != car union car]") should equal ("false\n")
+
 }

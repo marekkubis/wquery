@@ -23,24 +23,28 @@ case class BinaryCondition(op: String, leftOp: AlgebraOp, rightOp: AlgebraOp) ex
   def satisfied(wordNet: WordNet, bindings: Bindings) = {
     val leftResult = leftOp.evaluate(wordNet, bindings).paths.map(_.last)
     val rightResult = rightOp.evaluate(wordNet, bindings).paths.map(_.last)
+    val leftGroup = leftResult.groupBy(x => x)
+    val rightGroup = rightResult.groupBy(x => x)
 
     op match {
       case "=" =>
-        leftResult.forall(rightResult.contains) && rightResult.forall(leftResult.contains)
+        leftGroup.forall{ case (left, leftValues) => rightGroup.get(left).map(rightValues => rightValues.size == leftValues.size).getOrElse(false) } &&
+          rightGroup.forall{ case (right, rightValues) => leftGroup.get(right).map(leftValues => leftValues.size == rightValues.size).getOrElse(false) }
       case "!=" =>
-        !(leftResult.forall(rightResult.contains) && rightResult.forall(leftResult.contains))
+        !(leftGroup.forall{ case (left, leftValues) => rightGroup.get(left).map(rightValues => rightValues.size == leftValues.size).getOrElse(false) } &&
+            rightGroup.forall{ case (right, rightValues) => leftGroup.get(right).map(leftValues => leftValues.size == rightValues.size).getOrElse(false) })
       case "in" =>
-        leftResult.forall(rightResult.contains)
+        leftGroup.forall{ case (left, leftValues) => rightGroup.get(left).map(rightValues => leftValues.size <= rightValues.size).getOrElse(false) }
       case "pin" =>
-        leftResult.forall(rightResult.contains) && leftResult.size < rightResult.size
+        leftGroup.forall{ case (left, leftValues) => rightGroup.get(left).map(rightValues => leftValues.size <= rightValues.size).getOrElse(false) } && leftResult.size < rightResult.size
       case "=~" =>
         if (rightResult.size == 1 ) {
           // element context
           if (DataType.fromValue(rightResult.head) == StringType) {
             val regex = rightResult.head.asInstanceOf[String].r
 
-            leftResult.forall {
-              case elem: String =>
+            leftGroup.forall {
+              case (elem: String, _) =>
                 regex.findFirstIn(elem).map(_ => true).getOrElse(false)
             }
           } else {
