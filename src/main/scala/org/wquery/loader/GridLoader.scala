@@ -57,7 +57,7 @@ class GridHandler(wordnet: WordNet) extends DefaultHandler with Logging {
       case "LITERAL" =>
         literalSense = attributes.getValue("sense")
       case "ILR" =>
-      ilrType = attributes.getValue("type")
+        ilrType = attributes.getValue("type")
       case _ =>
         // skip
     }    
@@ -97,6 +97,8 @@ class GridHandler(wordnet: WordNet) extends DefaultHandler with Logging {
       
     tagName match {
       case "SENSE" =>
+        popText
+      case "TYPE" =>
         popText
       case _ =>
         pushText
