@@ -140,11 +140,14 @@ class GridHandler(wordnet: WordNet) extends DefaultHandler with Logging {
       synsetsById(synset.id) = synset
       
       for ((ilrType, content) <- synsetIlrRelationsTuples) {
-        if (ilrType == null || ilrType.trim.isEmpty) {
-          warnInvalidSubtag("ILR", content, "type")      
+        val ilrName = if (ilrType == null || ilrType.trim.isEmpty) {
+          warnInvalidSubtag("ILR", content, "type")
+          "related"
         } else {
-          ilrRelationsTuples += ((synset, ilrType.trim, content))
-        }        
+          ilrType
+        }
+
+        ilrRelationsTuples += ((synset, ilrName, content))
       }
       
       for ((tagName, content) <- synsetGenericRelationsTuples) {
