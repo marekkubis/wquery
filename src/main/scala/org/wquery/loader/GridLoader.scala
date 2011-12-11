@@ -184,23 +184,6 @@ class GridHandler(wordnet: WordNet) extends DefaultHandler with Logging {
     for (name <- ilrRelationsNames) {
       val relation = Relation.binary(name, SynsetType, SynsetType)
       wordnet.store.addRelation(relation)
-
-      //TODO move to configuration
-
-      if (Set("hypernym", "partial_meronym", "member_meronym").contains(name)) {
-        wordnet.store.transitives(relation) = true
-        wordnet.store.transitivesActions(relation) = Relation.Restore
-      }
-
-      if (Set("hypernym").contains(name)) {
-        wordnet.store.symmetry(relation) = Antisymmetric
-        wordnet.store.symmetryActions(relation) = Relation.Preserve
-      }
-
-      if (Set("similar").contains(name)) {
-        wordnet.store.symmetry(relation) = Symmetric
-        wordnet.store.symmetryActions(relation) = Relation.Restore
-      }
     }
 
     // create semantic relations successors       

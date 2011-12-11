@@ -11,9 +11,20 @@ object WQueryRuntime {
   def createWQuery = {
     val wquery = WQuery.createInstance("src/main/assembly/template/samplenet.xml")
 
+    wquery.execute("\\hypernym transitivity := true")
+    wquery.execute("\\partial_meronym transitivity := true")
+    wquery.execute("\\member_meronym transitivity := true")
+    wquery.execute("\\hypernym transitivity_action := `restore`")
+    wquery.execute("\\partial_meronym transitivity_action := `restore`")
+    wquery.execute("\\member_meronym transitivity_action := `restore`")
+    wquery.execute("\\hypernym symmetry := `antisymmetric`")
+    wquery.execute("\\hypernym symmetry_action := `preserve`")
+    wquery.execute("\\similar symmetry := `symmetric`")
+    wquery.execute("\\similar symmetry_action := `restore`")
     wquery.execute("\\desc^source required_by := true")
     wquery.execute("\\desc^source functional := true")
     wquery.execute("\\desc^source functional_action := `preserve`")
+
     wquery
   }
 }
