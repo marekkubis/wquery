@@ -86,7 +86,7 @@ class GridHandler(wordnet: WordNet) extends DefaultHandler with Logging {
           case "SENSE" =>
             literalSense = content
           case "ILR" =>
-            synsetIlrRelationsTuples += ((ilrType, content))    
+            synsetIlrRelationsTuples += ((ilrType.replace(' ','_').replace('-','_'), content))
             ilrType = null
           case "TYPE" =>
             ilrType = content
