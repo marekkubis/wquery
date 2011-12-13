@@ -50,17 +50,17 @@
 										<tbody>
 											<tr>
 												<th>Complexity</th>
-												<td>134</td>
+												<td>162</td>
 											</tr>
 											<tr>
 												<th>Coverage</th>
-												<td>77.5% (124/160)</td>
+												<td>73.4% (141/192)</td>
 											</tr>
 											<tr>
 												<td colspan="2">
 													<div class="coverage-bar">
 														<div class="negative">
-															<div class="positive" style="width: 77.5%;">
+															<div class="positive" style="width: 73.4%;">
 															</div>
 														</div>
 													</div>
@@ -85,16 +85,16 @@
 											<tr>
 												<th>Classes</th>
 												<td class="number">2</td>
-												<td class="complexity">67.00</td>
-												<td class="complexity">130</td>
-												<td class="complexity">63.00</td>
+												<td class="complexity">81.00</td>
+												<td class="complexity">158</td>
+												<td class="complexity">77.00</td>
 											</tr>
 											<tr>
 												<th>Methods</th>
 												<td class="number">19</td>
-												<td class="complexity">7.05</td>
+												<td class="complexity">8.53</td>
 												<td class="complexity">45</td>
-												<td class="complexity">10.58</td>
+												<td class="complexity">11.92</td>
 											</tr>
 										</tbody>
 									</table>
@@ -142,14 +142,14 @@
 				<tr>
 					<th>BindingsSchema</th>
 					<td class="number">15</td>
-					<td class="complexity">8.67</td>
+					<td class="complexity">10.53</td>
 					<td class="complexity">45</td>
-					<td class="complexity">130</td>
-					<td class="coverage">76.9% (120/156)</td>
+					<td class="complexity">158</td>
+					<td class="coverage">72.9% (137/188)</td>
 					<td class="coverage">
 						<div class="coverage-bar">
 							<div class="negative">
-								<div class="positive" style="width: 76.9%;">
+								<div class="positive" style="width: 72.9%;">
 								</div>
 							</div>
 						</div>
@@ -195,7 +195,7 @@
 					</td>
 				</tr>
 				<tr>
-					<td colspan="4">contextOp() : Option</td>
+					<td colspan="4">org$wquery$engine$BindingsSchema$$contextOp() : Option</td>
 					<td class="complexity">1</td>
 					<td class="coverage">100% (1/1)</td>
 					<td class="coverage">
@@ -208,7 +208,7 @@
 					</td>
 				</tr>
 				<tr>
-					<td colspan="4">contextOp_$eq(Option) : void</td>
+					<td colspan="4">org$wquery$engine$BindingsSchema$$contextOp_$eq(Option) : void</td>
 					<td class="complexity">1</td>
 					<td class="coverage">100% (1/1)</td>
 					<td class="coverage">
@@ -261,12 +261,12 @@
 				</tr>
 				<tr>
 					<td colspan="4">lookupStepVariableType(String) : Option</td>
-					<td class="complexity">11</td>
-					<td class="coverage">84.6% (11/13)</td>
+					<td class="complexity">25</td>
+					<td class="coverage">86.2% (25/29)</td>
 					<td class="coverage">
 						<div class="coverage-bar">
 							<div class="negative">
-								<div class="positive" style="width: 84.6%;">
+								<div class="positive" style="width: 86.2%;">
 								</div>
 							</div>
 						</div>
@@ -274,12 +274,12 @@
 				</tr>
 				<tr>
 					<td colspan="4">lookupPathVariableType(String) : Option</td>
-					<td class="complexity">11</td>
-					<td class="coverage">84.6% (11/13)</td>
+					<td class="complexity">25</td>
+					<td class="coverage">48.3% (14/29)</td>
 					<td class="coverage">
 						<div class="coverage-bar">
 							<div class="negative">
-								<div class="positive" style="width: 84.6%;">
+								<div class="positive" style="width: 48.3%;">
 								</div>
 							</div>
 						</div>
@@ -458,12 +458,12 @@
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">6</td>
-					<td class="line-touch">1148</td>
+					<td class="line-touch">1185</td>
 					<td class="line-text">class BindingsSchema(val parent: Option[BindingsSchema], updatesParent: Boolean) extends BindingsPattern {</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">7</td>
-					<td class="line-touch">1148</td>
+					<td class="line-touch">1185</td>
 					<td class="line-text">  private var contextOp: Option[AlgebraOp] = None</td>
 				</tr>
 				<tr>
@@ -478,7 +478,7 @@
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">10</td>
-					<td class="line-touch">150</td>
+					<td class="line-touch">152</td>
 					<td class="line-text">    if (updatesParent &amp;&amp; parent.map(_.lookupStepVariableType(name).isDefined).getOrElse(false)) {</td>
 				</tr>
 				<tr class="completely-covered">
@@ -493,7 +493,7 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">13</td>
-					<td class="line-touch">149</td>
+					<td class="line-touch">151</td>
 					<td class="line-text">      super.bindStepVariableType(name, types)</td>
 				</tr>
 				<tr>
@@ -553,7 +553,7 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">25</td>
-					<td class="line-touch">98</td>
+					<td class="line-touch">66</td>
 					<td class="line-text">  def bindContextOp(op: AlgebraOp) = contextOp = Some(op)</td>
 				</tr>
 				<tr>
@@ -566,170 +566,170 @@
 					<td class="line-touch"></td>
 					<td class="line-text">  override def lookupStepVariableType(name: String): Option[Set[DataType]] = {</td>
 				</tr>
-				<tr class="partialy-covered">
+				<tr class="completely-covered">
 					<td class="line-number">28</td>
-					<td class="line-touch">119</td>
-					<td class="line-text">    super.lookupStepVariableType(name).orElse(parent.flatMap(_.lookupStepVariableType(name)))</td>
+					<td class="line-touch">152</td>
+					<td class="line-text">    super.lookupStepVariableType(name)</td>
 				</tr>
-				<tr>
+				<tr class="partialy-covered">
 					<td class="line-number">29</td>
-					<td class="line-touch"></td>
-					<td class="line-text">  }</td>
+					<td class="line-touch">152</td>
+					<td class="line-text">      .orElse(parent.flatMap(_.lookupStepVariableType(name)))</td>
 				</tr>
-				<tr>
+				<tr class="partialy-covered">
 					<td class="line-number">30</td>
-					<td class="line-touch"></td>
-					<td class="line-text"></td>
+					<td class="line-touch">152</td>
+					<td class="line-text">      .orElse(contextOp.map(op =&gt; op.bindingsPattern.lookupStepVariableType(name)).getOrElse(None))</td>
 				</tr>
 				<tr>
 					<td class="line-number">31</td>
 					<td class="line-touch"></td>
-					<td class="line-text">  override def lookupPathVariableType(name: String): Option[(AlgebraOp, Int, Int)] = {</td>
+					<td class="line-text">  }</td>
 				</tr>
-				<tr class="partialy-covered">
+				<tr>
 					<td class="line-number">32</td>
-					<td class="line-touch">20</td>
-					<td class="line-text">    super.lookupPathVariableType(name).orElse(parent.flatMap(_.lookupPathVariableType(name)))</td>
+					<td class="line-touch"></td>
+					<td class="line-text"></td>
 				</tr>
 				<tr>
 					<td class="line-number">33</td>
 					<td class="line-touch"></td>
+					<td class="line-text">  override def lookupPathVariableType(name: String): Option[(AlgebraOp, Int, Int)] = {</td>
+				</tr>
+				<tr class="completely-covered">
+					<td class="line-number">34</td>
+					<td class="line-touch">23</td>
+					<td class="line-text">    super.lookupPathVariableType(name)</td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">35</td>
+					<td class="line-touch">23</td>
+					<td class="line-text">      .orElse(parent.flatMap(_.lookupPathVariableType(name)))</td>
+				</tr>
+				<tr class="partialy-covered">
+					<td class="line-number">36</td>
+					<td class="line-touch">23</td>
+					<td class="line-text">      .orElse(contextOp.map(op =&gt; op.bindingsPattern.lookupPathVariableType(name)).getOrElse(None))</td>
+				</tr>
+				<tr>
+					<td class="line-number">37</td>
+					<td class="line-touch"></td>
 					<td class="line-text">  }</td>
 				</tr>
 				<tr>
-					<td class="line-number">34</td>
+					<td class="line-number">38</td>
 					<td class="line-touch"></td>
 					<td class="line-text"></td>
-				</tr>
-				<tr>
-					<td class="line-number">35</td>
-					<td class="line-touch"></td>
-					<td class="line-text">  def lookupContextVariableType(pos: Int): Set[DataType] = {</td>
-				</tr>
-				<tr class="completely-covered">
-					<td class="line-number">36</td>
-					<td class="line-touch">88</td>
-					<td class="line-text">    contextOp.map(_.rightType(pos))</td>
-				</tr>
-				<tr class="partialy-covered">
-					<td class="line-number">37</td>
-					<td class="line-touch">88</td>
-					<td class="line-text">      .getOrElse(parent.map(_.lookupContextVariableType(pos))</td>
-				</tr>
-				<tr class="partialy-covered">
-					<td class="line-number">38</td>
-					<td class="line-touch">88</td>
-					<td class="line-text">        .getOrElse{throw new WQueryEvaluationException(&quot;Operator # placed outside of a filter&quot;)})</td>
 				</tr>
 				<tr>
 					<td class="line-number">39</td>
 					<td class="line-touch"></td>
-					<td class="line-text">  }</td>
-				</tr>
-				<tr>
-					<td class="line-number">40</td>
-					<td class="line-touch"></td>
-					<td class="line-text"></td>
+					<td class="line-text">  def lookupContextVariableType(pos: Int): Set[DataType] = {</td>
 				</tr>
 				<tr class="completely-covered">
-					<td class="line-number">41</td>
-					<td class="line-touch">558</td>
-					<td class="line-text">  def areContextVariablesBound: Boolean = contextOp.isDefined || parent.map(_.areContextVariablesBound).getOrElse(false)</td>
+					<td class="line-number">40</td>
+					<td class="line-touch">90</td>
+					<td class="line-text">    contextOp.map(_.rightType(pos))</td>
 				</tr>
-				<tr>
+				<tr class="partialy-covered">
+					<td class="line-number">41</td>
+					<td class="line-touch">90</td>
+					<td class="line-text">      .getOrElse(parent.map(_.lookupContextVariableType(pos))</td>
+				</tr>
+				<tr class="partialy-covered">
 					<td class="line-number">42</td>
-					<td class="line-touch"></td>
-					<td class="line-text"></td>
+					<td class="line-touch">90</td>
+					<td class="line-text">        .getOrElse{throw new WQueryEvaluationException(&quot;Operator # placed outside of a filter&quot;)})</td>
 				</tr>
 				<tr>
 					<td class="line-number">43</td>
 					<td class="line-touch"></td>
+					<td class="line-text">  }</td>
+				</tr>
+				<tr>
+					<td class="line-number">44</td>
+					<td class="line-touch"></td>
+					<td class="line-text"></td>
+				</tr>
+				<tr class="completely-covered">
+					<td class="line-number">45</td>
+					<td class="line-touch">608</td>
+					<td class="line-text">  def areContextVariablesBound: Boolean = contextOp.isDefined || parent.map(_.areContextVariablesBound).getOrElse(false)</td>
+				</tr>
+				<tr>
+					<td class="line-number">46</td>
+					<td class="line-touch"></td>
+					<td class="line-text"></td>
+				</tr>
+				<tr>
+					<td class="line-number">47</td>
+					<td class="line-touch"></td>
 					<td class="line-text">  override def union(pattern: BindingsPattern) = {</td>
 				</tr>
 				<tr class="completely-covered">
-					<td class="line-number">44</td>
+					<td class="line-number">48</td>
 					<td class="line-touch">3</td>
 					<td class="line-text">    val sum = new BindingsSchema(parent, false)</td>
 				</tr>
 				<tr>
-					<td class="line-number">45</td>
+					<td class="line-number">49</td>
 					<td class="line-touch"></td>
 					<td class="line-text"></td>
 				</tr>
 				<tr class="partialy-covered">
-					<td class="line-number">46</td>
+					<td class="line-number">50</td>
 					<td class="line-touch">3</td>
 					<td class="line-text">    for ((name, types) &lt;- stepVariablesTypes)</td>
 				</tr>
 				<tr class="completely-covered">
-					<td class="line-number">47</td>
+					<td class="line-number">51</td>
 					<td class="line-touch">3</td>
 					<td class="line-text">      sum.bindStepVariableType(name, types)</td>
 				</tr>
 				<tr>
-					<td class="line-number">48</td>
+					<td class="line-number">52</td>
 					<td class="line-touch"></td>
 					<td class="line-text"></td>
 				</tr>
 				<tr class="partialy-covered">
-					<td class="line-number">49</td>
+					<td class="line-number">53</td>
 					<td class="line-touch">3</td>
 					<td class="line-text">    for ((name, types) &lt;- pattern.stepVariablesTypes)</td>
 				</tr>
 				<tr class="completely-covered">
-					<td class="line-number">50</td>
+					<td class="line-number">54</td>
 					<td class="line-touch">3</td>
 					<td class="line-text">      sum.bindStepVariableType(name, types)</td>
 				</tr>
 				<tr>
-					<td class="line-number">51</td>
+					<td class="line-number">55</td>
 					<td class="line-touch"></td>
 					<td class="line-text"></td>
 				</tr>
 				<tr class="partialy-covered">
-					<td class="line-number">52</td>
+					<td class="line-number">56</td>
 					<td class="line-touch">3</td>
 					<td class="line-text">    for ((name, (op, left, right)) &lt;- pathVariablesTypes)</td>
 				</tr>
 				<tr class="not-covered">
-					<td class="line-number">53</td>
+					<td class="line-number">57</td>
 					<td class="line-touch">0</td>
 					<td class="line-text">      sum.bindPathVariableType(name, op, left, right)</td>
 				</tr>
 				<tr>
-					<td class="line-number">54</td>
+					<td class="line-number">58</td>
 					<td class="line-touch"></td>
 					<td class="line-text"></td>
 				</tr>
 				<tr class="partialy-covered">
-					<td class="line-number">55</td>
+					<td class="line-number">59</td>
 					<td class="line-touch">3</td>
 					<td class="line-text">    for ((name, (op, left, right)) &lt;- pattern.pathVariablesTypes)</td>
 				</tr>
 				<tr class="completely-covered">
-					<td class="line-number">56</td>
+					<td class="line-number">60</td>
 					<td class="line-touch">1</td>
 					<td class="line-text">      sum.bindPathVariableType(name, op, left, right)</td>
-				</tr>
-				<tr>
-					<td class="line-number">57</td>
-					<td class="line-touch"></td>
-					<td class="line-text"></td>
-				</tr>
-				<tr class="completely-covered">
-					<td class="line-number">58</td>
-					<td class="line-touch">3</td>
-					<td class="line-text">    sum</td>
-				</tr>
-				<tr>
-					<td class="line-number">59</td>
-					<td class="line-touch"></td>
-					<td class="line-text">  }</td>
-				</tr>
-				<tr>
-					<td class="line-number">60</td>
-					<td class="line-touch"></td>
-					<td class="line-text">}</td>
 				</tr>
 				<tr>
 					<td class="line-number">61</td>
@@ -738,26 +738,46 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">62</td>
-					<td class="line-touch">1</td>
-					<td class="line-text">object BindingsSchema {</td>
+					<td class="line-touch">3</td>
+					<td class="line-text">    sum</td>
 				</tr>
-				<tr class="completely-covered">
+				<tr>
 					<td class="line-number">63</td>
-					<td class="line-touch">2</td>
-					<td class="line-text">  def apply() = new BindingsSchema(None, false)</td>
+					<td class="line-touch"></td>
+					<td class="line-text">  }</td>
 				</tr>
 				<tr>
 					<td class="line-number">64</td>
 					<td class="line-touch"></td>
+					<td class="line-text">}</td>
+				</tr>
+				<tr>
+					<td class="line-number">65</td>
+					<td class="line-touch"></td>
+					<td class="line-text"></td>
+				</tr>
+				<tr class="completely-covered">
+					<td class="line-number">66</td>
+					<td class="line-touch">1</td>
+					<td class="line-text">object BindingsSchema {</td>
+				</tr>
+				<tr class="completely-covered">
+					<td class="line-number">67</td>
+					<td class="line-touch">2</td>
+					<td class="line-text">  def apply() = new BindingsSchema(None, false)</td>
+				</tr>
+				<tr>
+					<td class="line-number">68</td>
+					<td class="line-touch"></td>
 					<td class="line-text">  </td>
 				</tr>
 				<tr class="completely-covered">
-					<td class="line-number">65</td>
-					<td class="line-touch">1143</td>
+					<td class="line-number">69</td>
+					<td class="line-touch">1180</td>
 					<td class="line-text">  def apply(parent: BindingsSchema, updatesParent: Boolean) = new BindingsSchema(Some(parent), updatesParent)</td>
 				</tr>
 				<tr>
-					<td class="line-number">66</td>
+					<td class="line-number">70</td>
 					<td class="line-touch"></td>
 					<td class="line-text">}</td>
 				</tr>

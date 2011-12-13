@@ -2095,17 +2095,17 @@
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">3</td>
-					<td class="line-touch">8605</td>
+					<td class="line-touch">8597</td>
 					<td class="line-text"></td>
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">4</td>
-					<td class="line-touch">116644</td>
+					<td class="line-touch">166822</td>
 					<td class="line-text">case class Relation(name: String, arguments: Set[Argument]) {</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">5</td>
-					<td class="line-touch">11423</td>
+					<td class="line-touch">11447</td>
 					<td class="line-text">  private val argumentsByName = arguments.map(arg =&gt; (arg.name, arg)).toMap</td>
 				</tr>
 				<tr>
@@ -2115,7 +2115,7 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">7</td>
-					<td class="line-touch">5121</td>
+					<td class="line-touch">5139</td>
 					<td class="line-text">  val sourceType = argumentsByName(Relation.Source).nodeType</td>
 				</tr>
 				<tr>
@@ -2125,7 +2125,7 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">9</td>
-					<td class="line-touch">5545</td>
+					<td class="line-touch">5557</td>
 					<td class="line-text">  val destinationType = argumentsByName.get(Relation.Destination).map(_.nodeType)</td>
 				</tr>
 				<tr>
@@ -2150,7 +2150,7 @@
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">14</td>
-					<td class="line-touch">10186</td>
+					<td class="line-touch">10192</td>
 					<td class="line-text">    argumentsByName.getOrElse(argument, throw new WQueryModelException(&quot;Relation '&quot; + name + &quot;' does not have argument '&quot; + argument + &quot;'&quot;))</td>
 				</tr>
 				<tr>
@@ -2165,7 +2165,7 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">17</td>
-					<td class="line-touch">1065</td>
+					<td class="line-touch">1083</td>
 					<td class="line-text">  def getArgument(argument: String) = argumentsByName.get(argument)</td>
 				</tr>
 				<tr>
@@ -2175,7 +2175,7 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">19</td>
-					<td class="line-touch">451</td>
+					<td class="line-touch">468</td>
 					<td class="line-text">  override def toString = name</td>
 				</tr>
 				<tr>
@@ -2205,7 +2205,7 @@
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">25</td>
-					<td class="line-touch">227376</td>
+					<td class="line-touch">327698</td>
 					<td class="line-text">case class Argument(name: String, nodeType: NodeType)</td>
 				</tr>
 				<tr>
@@ -2225,12 +2225,12 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">29</td>
-					<td class="line-touch">12649</td>
+					<td class="line-touch">12216</td>
 					<td class="line-text">  val Source = &quot;source&quot;</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">30</td>
-					<td class="line-touch">9360</td>
+					<td class="line-touch">8850</td>
 					<td class="line-text">  val Destination = &quot;destination&quot;</td>
 				</tr>
 				<tr>
@@ -2245,27 +2245,27 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">33</td>
-					<td class="line-touch">8</td>
+					<td class="line-touch">26</td>
 					<td class="line-text">  val Transitivity = &quot;transitivity&quot;</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">34</td>
-					<td class="line-touch">11</td>
+					<td class="line-touch">43</td>
 					<td class="line-text">  val Symmetry = &quot;symmetry&quot;</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">35</td>
-					<td class="line-touch">3</td>
+					<td class="line-touch">7</td>
 					<td class="line-text">  val RequiredBy = &quot;required_by&quot;</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">36</td>
-					<td class="line-touch">6</td>
+					<td class="line-touch">10</td>
 					<td class="line-text">  val Functional = &quot;functional&quot;</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">37</td>
-					<td class="line-touch">6</td>
+					<td class="line-touch">24</td>
 					<td class="line-text">  val Properties = List(Transitivity, Symmetry, RequiredBy, Functional)</td>
 				</tr>
 				<tr>
@@ -2280,17 +2280,17 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">40</td>
-					<td class="line-touch">166</td>
+					<td class="line-touch">158</td>
 					<td class="line-text">  val Restore = &quot;restore&quot;</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">41</td>
-					<td class="line-touch">11</td>
+					<td class="line-touch">7</td>
 					<td class="line-text">  val Preserve = &quot;preserve&quot;</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">42</td>
-					<td class="line-touch">6</td>
+					<td class="line-touch">14</td>
 					<td class="line-text">  val PropertyActions = List(Restore, Preserve)</td>
 				</tr>
 				<tr>

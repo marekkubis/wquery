@@ -54,13 +54,13 @@
 											</tr>
 											<tr>
 												<th>Coverage</th>
-												<td>28.1% (482/1716)</td>
+												<td>30.9% (531/1716)</td>
 											</tr>
 											<tr>
 												<td colspan="2">
 													<div class="coverage-bar">
 														<div class="negative">
-															<div class="positive" style="width: 28.1%;">
+															<div class="positive" style="width: 30.9%;">
 															</div>
 														</div>
 													</div>
@@ -4199,11 +4199,11 @@
 					<td class="complexity">6.13</td>
 					<td class="complexity">32</td>
 					<td class="complexity">190</td>
-					<td class="coverage">21.6% (57/264)</td>
+					<td class="coverage">40.2% (106/264)</td>
 					<td class="coverage">
 						<div class="coverage-bar">
 							<div class="negative">
-								<div class="positive" style="width: 21.6%;">
+								<div class="positive" style="width: 40.2%;">
 								</div>
 							</div>
 						</div>
@@ -4342,11 +4342,11 @@
 				<tr>
 					<td colspan="4">update(WordNet, Bindings) : void</td>
 					<td class="complexity">32</td>
-					<td class="coverage">40.8% (20/49)</td>
+					<td class="coverage">65.3% (32/49)</td>
 					<td class="coverage">
 						<div class="coverage-bar">
 							<div class="negative">
-								<div class="positive" style="width: 40.8%;">
+								<div class="positive" style="width: 65.3%;">
 								</div>
 							</div>
 						</div>
@@ -4355,11 +4355,11 @@
 				<tr>
 					<td colspan="4">updateTransitivityProperty(WordNetStore, List, Object) : void</td>
 					<td class="complexity">17</td>
-					<td class="coverage">0% (0/24)</td>
+					<td class="coverage">41.7% (10/24)</td>
 					<td class="coverage">
 						<div class="coverage-bar">
 							<div class="negative">
-								<div class="positive" style="width: 0.0%;">
+								<div class="positive" style="width: 41.7%;">
 								</div>
 							</div>
 						</div>
@@ -4368,11 +4368,11 @@
 				<tr>
 					<td colspan="4">updateSymmetryProperty(WordNetStore, List, Object) : void</td>
 					<td class="complexity">27</td>
-					<td class="coverage">0% (0/40)</td>
+					<td class="coverage">40% (16/40)</td>
 					<td class="coverage">
 						<div class="coverage-bar">
 							<div class="negative">
-								<div class="positive" style="width: 0.0%;">
+								<div class="positive" style="width: 40.0%;">
 								</div>
 							</div>
 						</div>
@@ -4381,11 +4381,11 @@
 				<tr>
 					<td colspan="4">updateRelationArgumentProperty(Map, List, Object) : void</td>
 					<td class="complexity">25</td>
-					<td class="coverage">0% (0/31)</td>
+					<td class="coverage">35.5% (11/31)</td>
 					<td class="coverage">
 						<div class="coverage-bar">
 							<div class="negative">
-								<div class="positive" style="width: 0.0%;">
+								<div class="positive" style="width: 35.5%;">
 								</div>
 							</div>
 						</div>
@@ -10236,7 +10236,7 @@
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">6</td>
-					<td class="line-touch">57</td>
+					<td class="line-touch">75</td>
 					<td class="line-text">sealed abstract class UpdateOp extends AlgebraOp {</td>
 				</tr>
 				<tr>
@@ -10256,12 +10256,12 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">10</td>
-					<td class="line-touch">48</td>
+					<td class="line-touch">66</td>
 					<td class="line-text">    update(wordNet, bindings)</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">11</td>
-					<td class="line-touch">48</td>
+					<td class="line-touch">66</td>
 					<td class="line-text">    DataSet.empty</td>
 				</tr>
 				<tr>
@@ -11421,22 +11421,22 @@
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">243</td>
-					<td class="line-touch">30</td>
+					<td class="line-touch">120</td>
 					<td class="line-text">case class RelationUpdateOp(arcsOp: AlgebraOp, op: String, property: String, action: Boolean, valuesOp: AlgebraOp) extends UpdateOp {</td>
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">244</td>
-					<td class="line-touch">6</td>
+					<td class="line-touch">24</td>
 					<td class="line-text">  def update(wordNet: WordNet, bindings: Bindings) = {</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">245</td>
-					<td class="line-touch">6</td>
+					<td class="line-touch">24</td>
 					<td class="line-text">    val arcs = arcsOp.evaluate(wordNet, bindings).paths.map(_.last.asInstanceOf[Arc])</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">246</td>
-					<td class="line-touch">6</td>
+					<td class="line-touch">24</td>
 					<td class="line-text">    val value = valuesOp.evaluate(wordNet, bindings).paths.map(_.last).head</td>
 				</tr>
 				<tr>
@@ -11446,17 +11446,17 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">248</td>
-					<td class="line-touch">6</td>
+					<td class="line-touch">24</td>
 					<td class="line-text">    if (action) {</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">249</td>
-					<td class="line-touch">6</td>
+					<td class="line-touch">14</td>
 					<td class="line-text">      if (Relation.PropertyActions.contains(value)) {</td>
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">250</td>
-					<td class="line-touch">6</td>
+					<td class="line-touch">14</td>
 					<td class="line-text">        property match {</td>
 				</tr>
 				<tr>
@@ -11466,7 +11466,7 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">252</td>
-					<td class="line-touch">2</td>
+					<td class="line-touch">4</td>
 					<td class="line-text">            updateRelationPropertyAction(wordNet.store.transitivesActions, arcs, value)</td>
 				</tr>
 				<tr>
@@ -11476,7 +11476,7 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">254</td>
-					<td class="line-touch">2</td>
+					<td class="line-touch">6</td>
 					<td class="line-text">            updateRelationPropertyAction(wordNet.store.symmetryActions, arcs, value)</td>
 				</tr>
 				<tr>
@@ -11486,7 +11486,7 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">256</td>
-					<td class="line-touch">2</td>
+					<td class="line-touch">4</td>
 					<td class="line-text">            updateRelationArgumentPropertyAction(wordNet.store.functionalForActions, arcs, value)</td>
 				</tr>
 				<tr>
@@ -11514,9 +11514,9 @@
 					<td class="line-touch"></td>
 					<td class="line-text">    } else {</td>
 				</tr>
-				<tr class="not-covered">
+				<tr class="partialy-covered">
 					<td class="line-number">262</td>
-					<td class="line-touch">0</td>
+					<td class="line-touch">10</td>
 					<td class="line-text">      property match {</td>
 				</tr>
 				<tr>
@@ -11524,9 +11524,9 @@
 					<td class="line-touch"></td>
 					<td class="line-text">        case Relation.Transitivity =&gt;</td>
 				</tr>
-				<tr class="not-covered">
+				<tr class="completely-covered">
 					<td class="line-number">264</td>
-					<td class="line-touch">0</td>
+					<td class="line-touch">2</td>
 					<td class="line-text">          updateTransitivityProperty(wordNet.store, arcs, value)</td>
 				</tr>
 				<tr>
@@ -11534,9 +11534,9 @@
 					<td class="line-touch"></td>
 					<td class="line-text">        case Relation.Symmetry =&gt;</td>
 				</tr>
-				<tr class="not-covered">
+				<tr class="completely-covered">
 					<td class="line-number">266</td>
-					<td class="line-touch">0</td>
+					<td class="line-touch">4</td>
 					<td class="line-text">          updateSymmetryProperty(wordNet.store, arcs, value)</td>
 				</tr>
 				<tr>
@@ -11544,9 +11544,9 @@
 					<td class="line-touch"></td>
 					<td class="line-text">        case Relation.RequiredBy =&gt;</td>
 				</tr>
-				<tr class="not-covered">
+				<tr class="completely-covered">
 					<td class="line-number">268</td>
-					<td class="line-touch">0</td>
+					<td class="line-touch">2</td>
 					<td class="line-text">          updateRelationArgumentProperty(wordNet.store.requiredBys, arcs, value)</td>
 				</tr>
 				<tr>
@@ -11554,9 +11554,9 @@
 					<td class="line-touch"></td>
 					<td class="line-text">        case Relation.Functional =&gt;</td>
 				</tr>
-				<tr class="not-covered">
+				<tr class="completely-covered">
 					<td class="line-number">270</td>
-					<td class="line-touch">0</td>
+					<td class="line-touch">2</td>
 					<td class="line-text">          updateRelationArgumentProperty(wordNet.store.functionalFor, arcs, value)</td>
 				</tr>
 				<tr>
@@ -11579,14 +11579,14 @@
 					<td class="line-touch"></td>
 					<td class="line-text"></td>
 				</tr>
-				<tr class="not-covered">
+				<tr class="completely-covered">
 					<td class="line-number">275</td>
-					<td class="line-touch">0</td>
+					<td class="line-touch">2</td>
 					<td class="line-text">  private def updateTransitivityProperty(store: WordNetStore, arcs: List[Arc], value: Any) {</td>
 				</tr>
-				<tr class="not-covered">
+				<tr class="completely-covered">
 					<td class="line-number">276</td>
-					<td class="line-touch">0</td>
+					<td class="line-touch">2</td>
 					<td class="line-text">    val logicValue = value.asInstanceOf[Boolean]</td>
 				</tr>
 				<tr>
@@ -11594,19 +11594,19 @@
 					<td class="line-touch"></td>
 					<td class="line-text"></td>
 				</tr>
-				<tr class="not-covered">
+				<tr class="partialy-covered">
 					<td class="line-number">278</td>
-					<td class="line-touch">0</td>
+					<td class="line-touch">2</td>
 					<td class="line-text">    if (op == &quot;+=&quot; || op == &quot;:=&quot;) {</td>
 				</tr>
-				<tr class="not-covered">
+				<tr class="completely-covered">
 					<td class="line-number">279</td>
-					<td class="line-touch">0</td>
+					<td class="line-touch">2</td>
 					<td class="line-text">      for (arc &lt;- arcs)</td>
 				</tr>
-				<tr class="not-covered">
+				<tr class="completely-covered">
 					<td class="line-number">280</td>
-					<td class="line-touch">0</td>
+					<td class="line-touch">2</td>
 					<td class="line-text">        store.transitives(arc.relation) = logicValue</td>
 				</tr>
 				<tr>
@@ -11649,14 +11649,14 @@
 					<td class="line-touch"></td>
 					<td class="line-text"></td>
 				</tr>
-				<tr class="not-covered">
+				<tr class="completely-covered">
 					<td class="line-number">289</td>
-					<td class="line-touch">0</td>
+					<td class="line-touch">4</td>
 					<td class="line-text">  private def updateSymmetryProperty(store: WordNetStore, arcs: List[Arc], value: Any) {</td>
 				</tr>
-				<tr class="not-covered">
+				<tr class="partialy-covered">
 					<td class="line-number">290</td>
-					<td class="line-touch">0</td>
+					<td class="line-touch">4</td>
 					<td class="line-text">    val symmetry = value.asInstanceOf[String] match {</td>
 				</tr>
 				<tr>
@@ -11664,9 +11664,9 @@
 					<td class="line-touch"></td>
 					<td class="line-text">      case &quot;antisymmetric&quot; =&gt;</td>
 				</tr>
-				<tr class="not-covered">
+				<tr class="completely-covered">
 					<td class="line-number">292</td>
-					<td class="line-touch">0</td>
+					<td class="line-touch">2</td>
 					<td class="line-text">        Antisymmetric</td>
 				</tr>
 				<tr>
@@ -11674,9 +11674,9 @@
 					<td class="line-touch"></td>
 					<td class="line-text">      case &quot;symmetric&quot; =&gt;</td>
 				</tr>
-				<tr class="not-covered">
+				<tr class="completely-covered">
 					<td class="line-number">294</td>
-					<td class="line-touch">0</td>
+					<td class="line-touch">2</td>
 					<td class="line-text">        Symmetric</td>
 				</tr>
 				<tr>
@@ -11709,19 +11709,19 @@
 					<td class="line-touch"></td>
 					<td class="line-text"></td>
 				</tr>
-				<tr class="not-covered">
+				<tr class="partialy-covered">
 					<td class="line-number">301</td>
-					<td class="line-touch">0</td>
+					<td class="line-touch">4</td>
 					<td class="line-text">    if (op == &quot;+=&quot; || op == &quot;:=&quot;) {</td>
 				</tr>
-				<tr class="not-covered">
+				<tr class="completely-covered">
 					<td class="line-number">302</td>
-					<td class="line-touch">0</td>
+					<td class="line-touch">4</td>
 					<td class="line-text">      for (arc &lt;- arcs)</td>
 				</tr>
-				<tr class="not-covered">
+				<tr class="completely-covered">
 					<td class="line-number">303</td>
-					<td class="line-touch">0</td>
+					<td class="line-touch">4</td>
 					<td class="line-text">        store.symmetry(arc.relation) = symmetry</td>
 				</tr>
 				<tr>
@@ -11764,14 +11764,14 @@
 					<td class="line-touch"></td>
 					<td class="line-text"></td>
 				</tr>
-				<tr class="not-covered">
+				<tr class="completely-covered">
 					<td class="line-number">312</td>
-					<td class="line-touch">0</td>
+					<td class="line-touch">4</td>
 					<td class="line-text">  private def updateRelationArgumentProperty(propertyCollection: scala.collection.mutable.Map[Relation, Set[String]], arcs: List[Arc], value: Any) {</td>
 				</tr>
-				<tr class="not-covered">
+				<tr class="completely-covered">
 					<td class="line-number">313</td>
-					<td class="line-touch">0</td>
+					<td class="line-touch">4</td>
 					<td class="line-text">    val logicValue = value.asInstanceOf[Boolean]</td>
 				</tr>
 				<tr>
@@ -11779,24 +11779,24 @@
 					<td class="line-touch"></td>
 					<td class="line-text"></td>
 				</tr>
-				<tr class="not-covered">
+				<tr class="partialy-covered">
 					<td class="line-number">315</td>
-					<td class="line-touch">0</td>
+					<td class="line-touch">4</td>
 					<td class="line-text">    if (op == &quot;+=&quot; || op == &quot;:=&quot;) {</td>
 				</tr>
-				<tr class="not-covered">
+				<tr class="completely-covered">
 					<td class="line-number">316</td>
-					<td class="line-touch">0</td>
+					<td class="line-touch">4</td>
 					<td class="line-text">      if (logicValue) {</td>
 				</tr>
-				<tr class="not-covered">
+				<tr class="completely-covered">
 					<td class="line-number">317</td>
-					<td class="line-touch">0</td>
+					<td class="line-touch">4</td>
 					<td class="line-text">        for (arc &lt;- arcs)</td>
 				</tr>
-				<tr class="not-covered">
+				<tr class="completely-covered">
 					<td class="line-number">318</td>
-					<td class="line-touch">0</td>
+					<td class="line-touch">4</td>
 					<td class="line-text">          propertyCollection(arc.relation) = propertyCollection(arc.relation) + arc.to</td>
 				</tr>
 				<tr>
@@ -11876,12 +11876,12 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">334</td>
-					<td class="line-touch">4</td>
+					<td class="line-touch">10</td>
 					<td class="line-text">  private def updateRelationPropertyAction(actionCollection: scala.collection.mutable.Map[Relation, String], arcs: List[Arc], value: Any) {</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">335</td>
-					<td class="line-touch">4</td>
+					<td class="line-touch">10</td>
 					<td class="line-text">    val action = value.asInstanceOf[String]</td>
 				</tr>
 				<tr>
@@ -11891,17 +11891,17 @@
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">337</td>
-					<td class="line-touch">4</td>
+					<td class="line-touch">10</td>
 					<td class="line-text">    if (op == &quot;+=&quot; || op == &quot;:=&quot;) {</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">338</td>
-					<td class="line-touch">4</td>
+					<td class="line-touch">10</td>
 					<td class="line-text">      for (arc &lt;- arcs)</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">339</td>
-					<td class="line-touch">4</td>
+					<td class="line-touch">10</td>
 					<td class="line-text">        actionCollection(arc.relation) = action</td>
 				</tr>
 				<tr>
@@ -11946,12 +11946,12 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">348</td>
-					<td class="line-touch">2</td>
+					<td class="line-touch">4</td>
 					<td class="line-text">  private def updateRelationArgumentPropertyAction(actionCollection: scala.collection.mutable.Map[(Relation, String), String], arcs: List[Arc], value: Any) {</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">349</td>
-					<td class="line-touch">2</td>
+					<td class="line-touch">4</td>
 					<td class="line-text">    val action = value.asInstanceOf[String]</td>
 				</tr>
 				<tr>
@@ -11961,17 +11961,17 @@
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">351</td>
-					<td class="line-touch">2</td>
+					<td class="line-touch">4</td>
 					<td class="line-text">    if (op == &quot;+=&quot; || op == &quot;:=&quot;) {</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">352</td>
-					<td class="line-touch">2</td>
+					<td class="line-touch">4</td>
 					<td class="line-text">      for (arc &lt;- arcs)</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">353</td>
-					<td class="line-touch">2</td>
+					<td class="line-touch">4</td>
 					<td class="line-text">        actionCollection((arc.relation, arc.to)) = action</td>
 				</tr>
 				<tr>

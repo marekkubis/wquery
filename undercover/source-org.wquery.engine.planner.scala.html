@@ -1944,7 +1944,7 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">9</td>
-					<td class="line-touch">1079</td>
+					<td class="line-touch">1140</td>
 					<td class="line-text">    planForward(steps, wordNet, bindings)</td>
 				</tr>
 				<tr>
@@ -1964,7 +1964,7 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">13</td>
-					<td class="line-touch">1079</td>
+					<td class="line-touch">1140</td>
 					<td class="line-text">    steps.tail.foldLeft(steps.head.asInstanceOf[NodeStep].generateOp)((op, step) =&gt; step.planForward(wordNet, bindings, op))</td>
 				</tr>
 				<tr>
@@ -1994,7 +1994,7 @@
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">19</td>
-					<td class="line-touch">1349</td>
+					<td class="line-touch">1412</td>
 					<td class="line-text">sealed abstract class Step(variables: List[Variable]) extends  VariableTypeBindings {</td>
 				</tr>
 				<tr>
@@ -2004,12 +2004,12 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">21</td>
-					<td class="line-touch">258</td>
+					<td class="line-touch">260</td>
 					<td class="line-text">    if (variables.isEmpty) {</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">22</td>
-					<td class="line-touch">216</td>
+					<td class="line-touch">218</td>
 					<td class="line-text">      op</td>
 				</tr>
 				<tr>
@@ -2089,7 +2089,7 @@
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">38</td>
-					<td class="line-touch">34</td>
+					<td class="line-touch">35</td>
 					<td class="line-text">case class FilterStep(condition: Condition, variables: List[Variable]) extends Step(variables) {</td>
 				</tr>
 				<tr>
@@ -2099,96 +2099,76 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">40</td>
-					<td class="line-touch">34</td>
-					<td class="line-text">    val filterBindings = BindingsSchema(bindings, false)</td>
-				</tr>
-				<tr class="completely-covered">
-					<td class="line-number">41</td>
-					<td class="line-touch">34</td>
-					<td class="line-text">    filterBindings.bindContextOp(op)</td>
-				</tr>
-				<tr class="completely-covered">
-					<td class="line-number">42</td>
-					<td class="line-touch">34</td>
+					<td class="line-touch">35</td>
 					<td class="line-text">    bind(wordNet, bindings, SelectOp(op, condition))</td>
+				</tr>
+				<tr>
+					<td class="line-number">41</td>
+					<td class="line-touch"></td>
+					<td class="line-text">  }</td>
+				</tr>
+				<tr>
+					<td class="line-number">42</td>
+					<td class="line-touch"></td>
+					<td class="line-text">}</td>
 				</tr>
 				<tr>
 					<td class="line-number">43</td>
 					<td class="line-touch"></td>
-					<td class="line-text">  }</td>
+					<td class="line-text"></td>
 				</tr>
-				<tr>
+				<tr class="partialy-covered">
 					<td class="line-number">44</td>
-					<td class="line-touch"></td>
-					<td class="line-text">}</td>
+					<td class="line-touch">1164</td>
+					<td class="line-text">case class NodeStep(generateOp: AlgebraOp, variables: List[Variable]) extends Step(variables) {</td>
 				</tr>
 				<tr>
 					<td class="line-number">45</td>
 					<td class="line-touch"></td>
-					<td class="line-text"></td>
-				</tr>
-				<tr class="partialy-covered">
-					<td class="line-number">46</td>
-					<td class="line-touch">1103</td>
-					<td class="line-text">case class NodeStep(generateOp: AlgebraOp, variables: List[Variable]) extends Step(variables) {</td>
-				</tr>
-				<tr>
-					<td class="line-number">47</td>
-					<td class="line-touch"></td>
 					<td class="line-text">  def planForward(wordNet: WordNetSchema, bindings: BindingsSchema, op: AlgebraOp) = {</td>
 				</tr>
 				<tr class="completely-covered">
-					<td class="line-number">48</td>
-					<td class="line-touch">15</td>
-					<td class="line-text">    val filterBindings = BindingsSchema(bindings, false)</td>
-				</tr>
-				<tr class="completely-covered">
-					<td class="line-number">49</td>
-					<td class="line-touch">15</td>
-					<td class="line-text">    filterBindings.bindContextOp(op)</td>
-				</tr>
-				<tr class="completely-covered">
-					<td class="line-number">50</td>
+					<td class="line-number">46</td>
 					<td class="line-touch">15</td>
 					<td class="line-text">    bind(wordNet, bindings, SelectOp(op, BinaryCondition(&quot;in&quot;, ContextRefOp(0, op.rightType(0)), generateOp)))</td>
 				</tr>
 				<tr>
-					<td class="line-number">51</td>
+					<td class="line-number">47</td>
 					<td class="line-touch"></td>
 					<td class="line-text">  }</td>
 				</tr>
 				<tr>
-					<td class="line-number">52</td>
+					<td class="line-number">48</td>
 					<td class="line-touch"></td>
 					<td class="line-text">}</td>
 				</tr>
 				<tr>
-					<td class="line-number">53</td>
+					<td class="line-number">49</td>
 					<td class="line-touch"></td>
 					<td class="line-text"></td>
 				</tr>
 				<tr class="partialy-covered">
-					<td class="line-number">54</td>
-					<td class="line-touch">14</td>
+					<td class="line-number">50</td>
+					<td class="line-touch">15</td>
 					<td class="line-text">case class ProjectStep(projectOp: AlgebraOp, variables: List[Variable]) extends Step(variables) {</td>
 				</tr>
 				<tr>
-					<td class="line-number">55</td>
+					<td class="line-number">51</td>
 					<td class="line-touch"></td>
 					<td class="line-text">  def planForward(wordNet: WordNetSchema, bindings: BindingsSchema, op: AlgebraOp) = {</td>
 				</tr>
 				<tr class="completely-covered">
-					<td class="line-number">56</td>
-					<td class="line-touch">14</td>
+					<td class="line-number">52</td>
+					<td class="line-touch">15</td>
 					<td class="line-text">    bind(wordNet, bindings, ProjectOp(op, projectOp))</td>
 				</tr>
 				<tr>
-					<td class="line-number">57</td>
+					<td class="line-number">53</td>
 					<td class="line-touch"></td>
 					<td class="line-text">  }</td>
 				</tr>
 				<tr>
-					<td class="line-number">58</td>
+					<td class="line-number">54</td>
 					<td class="line-touch"></td>
 					<td class="line-text">}</td>
 				</tr>

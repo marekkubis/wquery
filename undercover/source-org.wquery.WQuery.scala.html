@@ -587,17 +587,17 @@
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">11</td>
-					<td class="line-touch">2436</td>
+					<td class="line-touch">2596</td>
 					<td class="line-text">class WQuery(val wordNet: WordNet) extends Logging {</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">12</td>
-					<td class="line-touch">425</td>
+					<td class="line-touch">457</td>
 					<td class="line-text">  val bindingsSchema = BindingsSchema()</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">13</td>
-					<td class="line-touch">401</td>
+					<td class="line-touch">425</td>
 					<td class="line-text">  val bindings = Bindings()</td>
 				</tr>
 				<tr>
@@ -607,7 +607,7 @@
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">15</td>
-					<td class="line-touch">708525</td>
+					<td class="line-touch">738119</td>
 					<td class="line-text">  private val parser = new Object with WQueryParsers  </td>
 				</tr>
 				<tr>
@@ -622,17 +622,17 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">18</td>
-					<td class="line-touch">427</td>
+					<td class="line-touch">459</td>
 					<td class="line-text">    try {</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">19</td>
-					<td class="line-touch">392</td>
+					<td class="line-touch">416</td>
 					<td class="line-text">      val expr = parser parse input    </td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">20</td>
-					<td class="line-touch">425</td>
+					<td class="line-touch">457</td>
 					<td class="line-text">      debug(&quot;Expr: &quot; + expr)</td>
 				</tr>
 				<tr>
@@ -642,12 +642,12 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">22</td>
-					<td class="line-touch">392</td>
+					<td class="line-touch">416</td>
 					<td class="line-text">      val plan = expr.evaluationPlan(wordNet.schema, bindingsSchema, Context())</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">23</td>
-					<td class="line-touch">401</td>
+					<td class="line-touch">425</td>
 					<td class="line-text">      debug(&quot;Plan: &quot; + plan)</td>
 				</tr>
 				<tr>
@@ -657,12 +657,12 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">25</td>
-					<td class="line-touch">392</td>
+					<td class="line-touch">416</td>
 					<td class="line-text">      val dataSet = plan.evaluate(wordNet, bindings)</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">26</td>
-					<td class="line-touch">392</td>
+					<td class="line-touch">416</td>
 					<td class="line-text">      debug(&quot;Eval: &quot; + dataSet.pathCount + &quot; tuple(s) found&quot;)</td>
 				</tr>
 				<tr>
@@ -672,7 +672,7 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">28</td>
-					<td class="line-touch">392</td>
+					<td class="line-touch">416</td>
 					<td class="line-text">      Answer(wordNet, dataSet)</td>
 				</tr>
 				<tr>
@@ -682,7 +682,7 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">30</td>
-					<td class="line-touch">35</td>
+					<td class="line-touch">43</td>
 					<td class="line-text">      case e: WQueryException =&gt; Error(e)</td>
 				</tr>
 				<tr>

@@ -275,12 +275,12 @@
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">9</td>
-					<td class="line-touch">1257</td>
+					<td class="line-touch">1300</td>
 					<td class="line-text">    val extendedArguments = arguments.map { case (name, types) =&gt; if (types.contains(StringType)) (name, types + POSType) else (name, types) }</td>
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">10</td>
-					<td class="line-touch">13984</td>
+					<td class="line-touch">14843</td>
 					<td class="line-text">    store.relations.find(r =&gt; r.name == name &amp;&amp; extendedArguments.forall{ case (name, types) =&gt; r.getArgument(name).map(arg =&gt; types.contains(arg.nodeType)).getOrElse(false) })</td>
 				</tr>
 				<tr>
@@ -315,7 +315,7 @@
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">17</td>
-					<td class="line-touch">180</td>
+					<td class="line-touch">197</td>
 					<td class="line-text">  def containsRelation(name: String, arguments: Map[String, Set[DataType]]) = getRelation(name, arguments) != None</td>
 				</tr>
 				<tr>

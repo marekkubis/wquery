@@ -917,22 +917,22 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">5</td>
-					<td class="line-touch">42445</td>
+					<td class="line-touch">42640</td>
 					<td class="line-text">class DataSet(val paths: List[List[Any]], val pathVars: Map[String, List[(Int, Int)]], val stepVars: Map[String, List[Int]]) {</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">6</td>
-					<td class="line-touch">42726</td>
+					<td class="line-touch">42912</td>
 					<td class="line-text">  private val minAndMaxTupleSizes = {</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">7</td>
-					<td class="line-touch">46246</td>
+					<td class="line-touch">46335</td>
 					<td class="line-text">    val sizes = paths.map(_.size)</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">8</td>
-					<td class="line-touch">21363</td>
+					<td class="line-touch">21456</td>
 					<td class="line-text">    (if (sizes.isEmpty) 0 else sizes.min, if (sizes.isEmpty) 0 else sizes.max)</td>
 				</tr>
 				<tr>
@@ -947,7 +947,7 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">11</td>
-					<td class="line-touch">21363</td>
+					<td class="line-touch">21456</td>
 					<td class="line-text">  val minTupleSize = minAndMaxTupleSizes._1</td>
 				</tr>
 				<tr>
@@ -957,7 +957,7 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">13</td>
-					<td class="line-touch">21363</td>
+					<td class="line-touch">21456</td>
 					<td class="line-text">  val maxTupleSize = minAndMaxTupleSizes._2</td>
 				</tr>
 				<tr>
@@ -967,7 +967,7 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">15</td>
-					<td class="line-touch">27140</td>
+					<td class="line-touch">27263</td>
 					<td class="line-text">  val pathCount = paths.size</td>
 				</tr>
 				<tr>
@@ -977,7 +977,7 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">17</td>
-					<td class="line-touch">21363</td>
+					<td class="line-touch">21456</td>
 					<td class="line-text">  val isEmpty = pathCount == 0</td>
 				</tr>
 				<tr>
@@ -992,12 +992,12 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">20</td>
-					<td class="line-touch">91</td>
+					<td class="line-touch">95</td>
 					<td class="line-text">    if (paths.isEmpty) {</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">21</td>
-					<td class="line-touch">26</td>
+					<td class="line-touch">28</td>
 					<td class="line-text">      false</td>
 				</tr>
 				<tr>
@@ -1007,22 +1007,22 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">23</td>
-					<td class="line-touch">65</td>
+					<td class="line-touch">67</td>
 					<td class="line-text">      if (maxTupleSize == 1) {</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">24</td>
-					<td class="line-touch">65</td>
+					<td class="line-touch">67</td>
 					<td class="line-text">        val booleans = paths.map { x =&gt; </td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">25</td>
-					<td class="line-touch">65</td>
+					<td class="line-touch">67</td>
 					<td class="line-text">          if (x.head.isInstanceOf[Boolean]) </td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">26</td>
-					<td class="line-touch">65</td>
+					<td class="line-touch">67</td>
 					<td class="line-text">            x.head.asInstanceOf[Boolean] </td>
 				</tr>
 				<tr>
@@ -1047,7 +1047,7 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">31</td>
-					<td class="line-touch">65</td>
+					<td class="line-touch">67</td>
 					<td class="line-text">        booleans.forall(x =&gt; x)</td>
 				</tr>
 				<tr>
@@ -1092,7 +1092,7 @@
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">40</td>
-					<td class="line-touch">171</td>
+					<td class="line-touch">207</td>
 					<td class="line-text">  def rightType(pos: Int): Set[DataType] = paths.filter(pos &lt; _.size).map(tuple =&gt; DataType.fromValue(tuple(tuple.size - 1 - pos))).toSet</td>
 				</tr>
 				<tr>
@@ -1117,17 +1117,17 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">45</td>
-					<td class="line-touch">678</td>
+					<td class="line-touch">690</td>
 					<td class="line-text">    val buffer = new ListBuffer[(List[Any], Map[String, (Int, Int)], Map[String, Int])]</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">46</td>
-					<td class="line-touch">678</td>
+					<td class="line-touch">690</td>
 					<td class="line-text">    val pathVarNames = pathVars.keys</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">47</td>
-					<td class="line-touch">678</td>
+					<td class="line-touch">690</td>
 					<td class="line-text">    val stepVarNames = stepVars.keys</td>
 				</tr>
 				<tr>
@@ -1137,22 +1137,22 @@
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">49</td>
-					<td class="line-touch">678</td>
+					<td class="line-touch">690</td>
 					<td class="line-text">    for (i &lt;- 0 until paths.size) {</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">50</td>
-					<td class="line-touch">5261</td>
+					<td class="line-touch">5273</td>
 					<td class="line-text">      val path = paths(i)</td>
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">51</td>
-					<td class="line-touch">5261</td>
+					<td class="line-touch">5273</td>
 					<td class="line-text">      val pathVarsMap = Map(pathVarNames.map(v =&gt; (v, pathVars(v)(i))).toSeq: _*)</td>
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">52</td>
-					<td class="line-touch">5261</td>
+					<td class="line-touch">5273</td>
 					<td class="line-text">      val stepVarsMap = Map(stepVarNames.map(v =&gt; (v, stepVars(v)(i))).toSeq: _*)</td>
 				</tr>
 				<tr>
@@ -1162,7 +1162,7 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">54</td>
-					<td class="line-touch">5261</td>
+					<td class="line-touch">5273</td>
 					<td class="line-text">      buffer.append((path, pathVarsMap, stepVarsMap))</td>
 				</tr>
 				<tr>
@@ -1177,7 +1177,7 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">57</td>
-					<td class="line-touch">678</td>
+					<td class="line-touch">690</td>
 					<td class="line-text">    buffer.toList</td>
 				</tr>
 				<tr>
@@ -1192,7 +1192,7 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">60</td>
-					<td class="line-touch">581</td>
+					<td class="line-touch">655</td>
 					<td class="line-text">  override def toString = paths.toString</td>
 				</tr>
 				<tr>
@@ -1212,7 +1212,7 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">64</td>
-					<td class="line-touch">75</td>
+					<td class="line-touch">93</td>
 					<td class="line-text">  val empty = new DataSet(Nil, Map(), Map())</td>
 				</tr>
 				<tr>
@@ -1222,7 +1222,7 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">66</td>
-					<td class="line-touch">1091</td>
+					<td class="line-touch">1132</td>
 					<td class="line-text">  def apply(paths: List[List[Any]]) = new DataSet(paths, Map(), Map())</td>
 				</tr>
 				<tr>
@@ -1232,7 +1232,7 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">68</td>
-					<td class="line-touch">96</td>
+					<td class="line-touch">98</td>
 					<td class="line-text">  def apply(paths: List[List[Any]], pathVars: Map[String, List[(Int, Int)]], stepVars: Map[String, List[Int]]) = new DataSet(paths, pathVars, stepVars)</td>
 				</tr>
 				<tr>
@@ -1247,27 +1247,27 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">71</td>
-					<td class="line-touch">678</td>
+					<td class="line-touch">690</td>
 					<td class="line-text">    val pathVarNames = if (boundPaths.isEmpty) Nil else boundPaths.head._2.keys.toSeq </td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">72</td>
-					<td class="line-touch">678</td>
+					<td class="line-touch">690</td>
 					<td class="line-text">    val stepVarNames = if (boundPaths.isEmpty) Nil else boundPaths.head._3.keys.toSeq</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">73</td>
-					<td class="line-touch">678</td>
+					<td class="line-touch">690</td>
 					<td class="line-text">    val pathBuffer = DataSetBuffers.createPathBuffer</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">74</td>
-					<td class="line-touch">678</td>
+					<td class="line-touch">690</td>
 					<td class="line-text">    val pathVarBuffers = DataSetBuffers.createPathVarBuffers(pathVarNames)</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">75</td>
-					<td class="line-touch">678</td>
+					<td class="line-touch">690</td>
 					<td class="line-text">    val stepVarBuffers = DataSetBuffers.createStepVarBuffers(stepVarNames)    </td>
 				</tr>
 				<tr>
@@ -1277,12 +1277,12 @@
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">77</td>
-					<td class="line-touch">1789</td>
+					<td class="line-touch">1801</td>
 					<td class="line-text">    for ((path, pathVars, stepVars) &lt;- boundPaths) {</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">78</td>
-					<td class="line-touch">1789</td>
+					<td class="line-touch">1801</td>
 					<td class="line-text">      pathBuffer.append(path)</td>
 				</tr>
 				<tr>
@@ -1292,7 +1292,7 @@
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">80</td>
-					<td class="line-touch">1789</td>
+					<td class="line-touch">1801</td>
 					<td class="line-text">      for ((v, pos) &lt;- pathVars)</td>
 				</tr>
 				<tr class="completely-covered">
@@ -1307,12 +1307,12 @@
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">83</td>
-					<td class="line-touch">1789</td>
+					<td class="line-touch">1801</td>
 					<td class="line-text">      for ((v, pos) &lt;- stepVars)</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">84</td>
-					<td class="line-touch">358</td>
+					<td class="line-touch">360</td>
 					<td class="line-text">        stepVarBuffers(v).append(pos)</td>
 				</tr>
 				<tr>
@@ -1327,7 +1327,7 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">87</td>
-					<td class="line-touch">678</td>
+					<td class="line-touch">690</td>
 					<td class="line-text">    fromBuffers(pathBuffer, pathVarBuffers, stepVarBuffers)</td>
 				</tr>
 				<tr>
@@ -1347,7 +1347,7 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">91</td>
-					<td class="line-touch">10872</td>
+					<td class="line-touch">10890</td>
 					<td class="line-text">      new DataSet(pathBuffer.toList, pathVarBuffers.mapValues(_.toList), stepVarBuffers.mapValues(_.toList)) </td>
 				</tr>
 				<tr>
@@ -1382,7 +1382,7 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">98</td>
-					<td class="line-touch">5490</td>
+					<td class="line-touch">5522</td>
 					<td class="line-text">  def fromValue(value: Any) = new DataSet(List(List(value)), Map(), Map())</td>
 				</tr>
 				<tr>
@@ -1412,7 +1412,7 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">104</td>
-					<td class="line-touch">11811</td>
+					<td class="line-touch">11846</td>
 					<td class="line-text">  def createPathBuffer = new ListBuffer[List[Any]]  </td>
 				</tr>
 				<tr>
@@ -1427,7 +1427,7 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">107</td>
-					<td class="line-touch">10997</td>
+					<td class="line-touch">11017</td>
 					<td class="line-text">    Map[String, ListBuffer[(Int, Int)]](pathVarNames.map(x =&gt; (x, new ListBuffer[(Int, Int)])): _*)</td>
 				</tr>
 				<tr>
@@ -1447,7 +1447,7 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">111</td>
-					<td class="line-touch">10997</td>
+					<td class="line-touch">11017</td>
 					<td class="line-text">    Map[String, ListBuffer[Int]](stepVarNames.map(x =&gt; (x, new ListBuffer[Int])): _*)</td>
 				</tr>
 				<tr>
@@ -1467,22 +1467,22 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">115</td>
-					<td class="line-touch">5303</td>
+					<td class="line-touch">5304</td>
 					<td class="line-text">class DataSetBuffer {</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">116</td>
-					<td class="line-touch">16851</td>
+					<td class="line-touch">16854</td>
 					<td class="line-text">  val pathBuffer = DataSetBuffers.createPathBuffer</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">117</td>
-					<td class="line-touch">16858</td>
+					<td class="line-touch">16861</td>
 					<td class="line-text">  var pathVarBuffers = Map[String, ListBuffer[(Int, Int)]]()</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">118</td>
-					<td class="line-touch">16878</td>
+					<td class="line-touch">16881</td>
 					<td class="line-text">  var stepVarBuffers = Map[String, ListBuffer[Int]]()</td>
 				</tr>
 				<tr>
@@ -1497,17 +1497,17 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">121</td>
-					<td class="line-touch">5774</td>
+					<td class="line-touch">5775</td>
 					<td class="line-text">    if (pathBuffer.isEmpty) {</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">122</td>
-					<td class="line-touch">5332</td>
+					<td class="line-touch">5333</td>
 					<td class="line-text">      pathVarBuffers = DataSetBuffers.createPathVarBuffers(result.pathVars.keys.toSeq)</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">123</td>
-					<td class="line-touch">5332</td>
+					<td class="line-touch">5333</td>
 					<td class="line-text">      stepVarBuffers = DataSetBuffers.createStepVarBuffers(result.stepVars.keys.toSeq)</td>
 				</tr>
 				<tr>
@@ -1522,7 +1522,7 @@
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">126</td>
-					<td class="line-touch">5774</td>
+					<td class="line-touch">5775</td>
 					<td class="line-text">    if (result.pathVars.keySet != pathVarBuffers.keySet)</td>
 				</tr>
 				<tr class="not-covered">
@@ -1537,7 +1537,7 @@
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">129</td>
-					<td class="line-touch">5774</td>
+					<td class="line-touch">5775</td>
 					<td class="line-text">    if (result.stepVars.keySet != stepVarBuffers.keySet)</td>
 				</tr>
 				<tr class="not-covered">
@@ -1552,17 +1552,17 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">132</td>
-					<td class="line-touch">5774</td>
+					<td class="line-touch">5775</td>
 					<td class="line-text">    pathBuffer.appendAll(result.paths)</td>
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">133</td>
-					<td class="line-touch">5774</td>
+					<td class="line-touch">5775</td>
 					<td class="line-text">    pathVarBuffers.keys.foreach(key =&gt; pathVarBuffers(key).appendAll(result.pathVars(key)))</td>
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">134</td>
-					<td class="line-touch">5774</td>
+					<td class="line-touch">5775</td>
 					<td class="line-text">    stepVarBuffers.keys.foreach(key =&gt; stepVarBuffers(key).appendAll(result.stepVars(key)))</td>
 				</tr>
 				<tr>
@@ -1577,7 +1577,7 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">137</td>
-					<td class="line-touch">5303</td>
+					<td class="line-touch">5304</td>
 					<td class="line-text">  def toDataSet = DataSet.fromBuffers(pathBuffer, pathVarBuffers, stepVarBuffers)</td>
 				</tr>
 				<tr>

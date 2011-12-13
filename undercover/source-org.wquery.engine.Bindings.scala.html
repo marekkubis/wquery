@@ -427,22 +427,22 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">5</td>
-					<td class="line-touch">527</td>
+					<td class="line-touch">533</td>
 					<td class="line-text">class Bindings(parent: Option[Bindings], updatesParent: Boolean) {</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">6</td>
-					<td class="line-touch">527</td>
+					<td class="line-touch">533</td>
 					<td class="line-text">  val pathVariables = Map[String, List[Any]]()</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">7</td>
-					<td class="line-touch">527</td>
+					<td class="line-touch">533</td>
 					<td class="line-text">  val stepVariables = Map[String, Any]()  </td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">8</td>
-					<td class="line-touch">12825</td>
+					<td class="line-touch">12801</td>
 					<td class="line-text">  private var contextVars = List[Any]()</td>
 				</tr>
 				<tr>
@@ -457,7 +457,7 @@
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">11</td>
-					<td class="line-touch">179</td>
+					<td class="line-touch">181</td>
 					<td class="line-text">    if (updatesParent &amp;&amp; parent.map(_.lookupStepVariable(name).isDefined).getOrElse(false)) {</td>
 				</tr>
 				<tr class="completely-covered">
@@ -472,7 +472,7 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">14</td>
-					<td class="line-touch">169</td>
+					<td class="line-touch">171</td>
 					<td class="line-text">      stepVariables(name) = value</td>
 				</tr>
 				<tr>
@@ -532,7 +532,7 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">26</td>
-					<td class="line-touch">3164</td>
+					<td class="line-touch">3166</td>
 					<td class="line-text">  def bindContextVariables(vars: List[Any]) = contextVars = vars</td>
 				</tr>
 				<tr>
@@ -552,7 +552,7 @@
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">30</td>
-					<td class="line-touch">237</td>
+					<td class="line-touch">239</td>
 					<td class="line-text">  def lookupStepVariable(name: String): Option[Any] = stepVariables.get(name).orElse(parent.flatMap(_.lookupStepVariable(name)))</td>
 				</tr>
 				<tr>
@@ -562,7 +562,7 @@
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">32</td>
-					<td class="line-touch">4275</td>
+					<td class="line-touch">4267</td>
 					<td class="line-text">  def lookupContextVariable(pos: Int): Option[Any] = if (contextVars.size - 1 - pos &gt;= 0) Some(contextVars(contextVars.size - 1 - pos)) else parent.flatMap(_.lookupContextVariable(pos))</td>
 				</tr>
 				<tr>
@@ -592,7 +592,7 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">38</td>
-					<td class="line-touch">524</td>
+					<td class="line-touch">530</td>
 					<td class="line-text">  def apply(parent: Bindings, updatesParent: Boolean) = new Bindings(Some(parent), updatesParent)</td>
 				</tr>
 				<tr>

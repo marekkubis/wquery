@@ -288,12 +288,12 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">9</td>
-					<td class="line-touch">392</td>
+					<td class="line-touch">398</td>
 					<td class="line-text">  def emit(result: Result):String = {</td>
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">10</td>
-					<td class="line-touch">427</td>
+					<td class="line-touch">433</td>
 					<td class="line-text">    result match {</td>
 				</tr>
 				<tr>
@@ -303,7 +303,7 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">12</td>
-					<td class="line-touch">392</td>
+					<td class="line-touch">398</td>
 					<td class="line-text">        emitDataSet(wordNet, dataSet)</td>
 				</tr>
 				<tr>
@@ -338,17 +338,17 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">19</td>
-					<td class="line-touch">392</td>
+					<td class="line-touch">398</td>
 					<td class="line-text">    val content = dataSet.paths</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">20</td>
-					<td class="line-touch">392</td>
+					<td class="line-touch">398</td>
 					<td class="line-text">    val pathVarNames = dataSet.pathVars.keys.toSeq.filterNot(_.startsWith(&quot;_&quot;)).sortWith((x, y) =&gt; x &lt; y)</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">21</td>
-					<td class="line-touch">392</td>
+					<td class="line-touch">398</td>
 					<td class="line-text">    val stepVarNames = dataSet.stepVars.keys.toSeq.filterNot(_.startsWith(&quot;_&quot;)).sortWith((x, y) =&gt; x &lt; y)</td>
 				</tr>
 				<tr>
@@ -358,12 +358,12 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">23</td>
-					<td class="line-touch">392</td>
+					<td class="line-touch">398</td>
 					<td class="line-text">    if (!content.isEmpty) {</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">24</td>
-					<td class="line-touch">311</td>
+					<td class="line-touch">317</td>
 					<td class="line-text">      val builder = new StringBuilder </td>
 				</tr>
 				<tr>
@@ -373,12 +373,12 @@
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">26</td>
-					<td class="line-touch">809</td>
+					<td class="line-touch">815</td>
 					<td class="line-text">      for (i &lt;- 0 until content.size) {</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">27</td>
-					<td class="line-touch">809</td>
+					<td class="line-touch">815</td>
 					<td class="line-text">          val tuple = content(i)  </td>
 				</tr>
 				<tr>
@@ -388,7 +388,7 @@
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">29</td>
-					<td class="line-touch">809</td>
+					<td class="line-touch">815</td>
 					<td class="line-text">        for (pathVarName &lt;- pathVarNames) {</td>
 				</tr>
 				<tr class="completely-covered">
@@ -448,32 +448,32 @@
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">41</td>
-					<td class="line-touch">809</td>
+					<td class="line-touch">815</td>
 					<td class="line-text">        for (stepVarName &lt;- stepVarNames) {</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">42</td>
-					<td class="line-touch">175</td>
+					<td class="line-touch">176</td>
 					<td class="line-text">          builder append &quot;$&quot;</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">43</td>
-					<td class="line-touch">175</td>
+					<td class="line-touch">176</td>
 					<td class="line-text">          builder append stepVarName</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">44</td>
-					<td class="line-touch">175</td>
+					<td class="line-touch">176</td>
 					<td class="line-text">          builder append &quot;=&quot;</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">45</td>
-					<td class="line-touch">175</td>
+					<td class="line-touch">176</td>
 					<td class="line-text">          emitElement(wordNet, tuple(dataSet.stepVars(stepVarName)(i)), builder)</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">46</td>
-					<td class="line-touch">175</td>
+					<td class="line-touch">176</td>
 					<td class="line-text">          builder append &quot; &quot;</td>
 				</tr>
 				<tr>
@@ -488,12 +488,12 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">49</td>
-					<td class="line-touch">809</td>
+					<td class="line-touch">815</td>
 					<td class="line-text">        emitTuple(wordNet, tuple, builder)</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">50</td>
-					<td class="line-touch">809</td>
+					<td class="line-touch">815</td>
 					<td class="line-text">        builder append &quot;\n&quot;</td>
 				</tr>
 				<tr>
@@ -508,7 +508,7 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">53</td>
-					<td class="line-touch">311</td>
+					<td class="line-touch">317</td>
 					<td class="line-text">      return builder toString</td>
 				</tr>
 				<tr>
@@ -543,12 +543,12 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">60</td>
-					<td class="line-touch">878</td>
+					<td class="line-touch">884</td>
 					<td class="line-text">    if (!tuple.isEmpty) {</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">61</td>
-					<td class="line-touch">868</td>
+					<td class="line-touch">874</td>
 					<td class="line-text">        emitElement(wordNet, tuple.head, builder)</td>
 				</tr>
 				<tr>
@@ -558,7 +558,7 @@
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">63</td>
-					<td class="line-touch">868</td>
+					<td class="line-touch">874</td>
 					<td class="line-text">        for (i &lt;- (1 until tuple.size)) {</td>
 				</tr>
 				<tr class="completely-covered">
@@ -598,7 +598,7 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">71</td>
-					<td class="line-touch">2465</td>
+					<td class="line-touch">2472</td>
 					<td class="line-text">    element match {</td>
 				</tr>
 				<tr>
@@ -723,12 +723,12 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">96</td>
-					<td class="line-touch">113</td>
+					<td class="line-touch">116</td>
 					<td class="line-text">      case element: String =&gt;</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">97</td>
-					<td class="line-touch">113</td>
+					<td class="line-touch">116</td>
 					<td class="line-text">        if (element.indexOf(' ') != -1) {</td>
 				</tr>
 				<tr class="completely-covered">
@@ -753,7 +753,7 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">102</td>
-					<td class="line-touch">105</td>
+					<td class="line-touch">108</td>
 					<td class="line-text">          builder append element</td>
 				</tr>
 				<tr>
@@ -763,12 +763,12 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">104</td>
-					<td class="line-touch">219</td>
+					<td class="line-touch">223</td>
 					<td class="line-text">      case element =&gt; </td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">105</td>
-					<td class="line-touch">219</td>
+					<td class="line-touch">223</td>
 					<td class="line-text">        builder append element      </td>
 				</tr>
 				<tr>

@@ -1346,7 +1346,7 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">10</td>
-					<td class="line-touch">22408</td>
+					<td class="line-touch">22043</td>
 					<td class="line-text">  private val successors = TransactionalMap[Relation, TransactionalMap[(String, Any), IndexedSeq[Map[String, Any]]]]()</td>
 				</tr>
 				<tr class="completely-covered">
@@ -1356,7 +1356,7 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">12</td>
-					<td class="line-touch">2400</td>
+					<td class="line-touch">2443</td>
 					<td class="line-text">  private var relationsList = List[Relation]()</td>
 				</tr>
 				<tr>
@@ -1366,7 +1366,7 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">14</td>
-					<td class="line-touch">2339</td>
+					<td class="line-touch">2382</td>
 					<td class="line-text">  def relations = relationsList</td>
 				</tr>
 				<tr>
@@ -1546,7 +1546,7 @@
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">50</td>
-					<td class="line-touch">4114</td>
+					<td class="line-touch">3872</td>
 					<td class="line-text">    successors(relation).get((from, through)).map(_.map(succ =&gt; succ(to))).getOrElse(IndexedSeq.empty)</td>
 				</tr>
 				<tr>
@@ -1606,17 +1606,17 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">62</td>
-					<td class="line-touch">939</td>
+					<td class="line-touch">956</td>
 					<td class="line-text">    val buffer = DataSetBuffers.createPathBuffer</td>
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">63</td>
-					<td class="line-touch">939</td>
+					<td class="line-touch">956</td>
 					<td class="line-text">    val (sourceName, sourceValues) = from.head</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">64</td>
-					<td class="line-touch">939</td>
+					<td class="line-touch">956</td>
 					<td class="line-text">    val destinations = from.tail</td>
 				</tr>
 				<tr>
@@ -1626,7 +1626,7 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">66</td>
-					<td class="line-touch">939</td>
+					<td class="line-touch">956</td>
 					<td class="line-text">    if (sourceValues.isEmpty) {</td>
 				</tr>
 				<tr class="partialy-covered">
@@ -1646,17 +1646,17 @@
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">70</td>
-					<td class="line-touch">899</td>
+					<td class="line-touch">916</td>
 					<td class="line-text">      for (sourceValue &lt;- sourceValues)</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">71</td>
-					<td class="line-touch">899</td>
+					<td class="line-touch">916</td>
 					<td class="line-text">        successors(relation).get((sourceName, sourceValue))</td>
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">72</td>
-					<td class="line-touch">899</td>
+					<td class="line-touch">916</td>
 					<td class="line-text">          .map(appendDestinationTuples(_, destinations, to, relation, buffer))</td>
 				</tr>
 				<tr>
@@ -1671,7 +1671,7 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">75</td>
-					<td class="line-touch">939</td>
+					<td class="line-touch">956</td>
 					<td class="line-text">    DataSet(buffer.toList)</td>
 				</tr>
 				<tr>
@@ -1691,17 +1691,17 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">79</td>
-					<td class="line-touch">5748</td>
+					<td class="line-touch">5765</td>
 					<td class="line-text">    for (destinationMap &lt;- destinationMaps) {</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">80</td>
-					<td class="line-touch">5748</td>
+					<td class="line-touch">5765</td>
 					<td class="line-text">      if (destinations.forall(dest =&gt; destinationMap.contains(dest._1) &amp;&amp; (dest._2.isEmpty || dest._2.contains(destinationMap(dest._1))))) {</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">81</td>
-					<td class="line-touch">5099</td>
+					<td class="line-touch">5116</td>
 					<td class="line-text">        val tupleBuffer = new ListBuffer[Any]</td>
 				</tr>
 				<tr>
@@ -1711,7 +1711,7 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">83</td>
-					<td class="line-touch">5099</td>
+					<td class="line-touch">5116</td>
 					<td class="line-text">        tupleBuffer.append(destinationMap(to.head))</td>
 				</tr>
 				<tr>
@@ -1721,7 +1721,7 @@
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">85</td>
-					<td class="line-touch">5099</td>
+					<td class="line-touch">5116</td>
 					<td class="line-text">        for (destinationName &lt;- to.tail) {</td>
 				</tr>
 				<tr class="not-covered">
@@ -1746,7 +1746,7 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">90</td>
-					<td class="line-touch">5099</td>
+					<td class="line-touch">5116</td>
 					<td class="line-text">        buffer.append(tupleBuffer.toList)</td>
 				</tr>
 				<tr>
@@ -1951,12 +1951,12 @@
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">131</td>
-					<td class="line-touch">61464</td>
+					<td class="line-touch">61436</td>
 					<td class="line-text">      for (relSuccs &lt;- relationSuccessors.get((through, source)); succs &lt;- relSuccs) {</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">132</td>
-					<td class="line-touch">8652</td>
+					<td class="line-touch">8648</td>
 					<td class="line-text">        val tupleBuffer = new ListBuffer[Any]</td>
 				</tr>
 				<tr>
@@ -1966,17 +1966,17 @@
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">134</td>
-					<td class="line-touch">9015</td>
+					<td class="line-touch">9011</td>
 					<td class="line-text">        for(destination &lt;- to if (succs.contains(destination))) {</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">135</td>
-					<td class="line-touch">9013</td>
+					<td class="line-touch">9009</td>
 					<td class="line-text">          tupleBuffer.append(Arc(relation, through, destination))</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">136</td>
-					<td class="line-touch">9013</td>
+					<td class="line-touch">9009</td>
 					<td class="line-text">          tupleBuffer.append(succs(destination))</td>
 				</tr>
 				<tr>
@@ -1991,17 +1991,17 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">139</td>
-					<td class="line-touch">8652</td>
+					<td class="line-touch">8648</td>
 					<td class="line-text">        if (tupleBuffer.size == 2 * to.size) {</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">140</td>
-					<td class="line-touch">8650</td>
+					<td class="line-touch">8646</td>
 					<td class="line-text">          tupleBuffer.prependAll(tuple)</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">141</td>
-					<td class="line-touch">8650</td>
+					<td class="line-touch">8646</td>
 					<td class="line-text">          pathBuffer.append(tupleBuffer.toList)</td>
 				</tr>
 				<tr>
@@ -2016,7 +2016,7 @@
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">144</td>
-					<td class="line-touch">8652</td>
+					<td class="line-touch">8648</td>
 					<td class="line-text">        for (pathVar &lt;- pathVarNames)</td>
 				</tr>
 				<tr class="completely-covered">
@@ -2031,7 +2031,7 @@
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">147</td>
-					<td class="line-touch">8652</td>
+					<td class="line-touch">8648</td>
 					<td class="line-text">        for (stepVar &lt;- stepVarNames)</td>
 				</tr>
 				<tr class="completely-covered">
@@ -2676,12 +2676,12 @@
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">276</td>
-					<td class="line-touch">5423</td>
+					<td class="line-touch">5419</td>
 					<td class="line-text">  private def addEdge(relation: Relation, tuple: Map[String, Any]) = atomic {</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">277</td>
-					<td class="line-touch">5421</td>
+					<td class="line-touch">5417</td>
 					<td class="line-text">    val relationSuccessors = successors(relation)</td>
 				</tr>
 				<tr>
@@ -2691,12 +2691,12 @@
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">279</td>
-					<td class="line-touch">10673</td>
+					<td class="line-touch">10665</td>
 					<td class="line-text">    for ((sourceName, sourceValue) &lt;- tuple) {</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">280</td>
-					<td class="line-touch">10673</td>
+					<td class="line-touch">10665</td>
 					<td class="line-text">      if (!(relationSuccessors.contains((sourceName, sourceValue)))) {</td>
 				</tr>
 				<tr class="completely-covered">
@@ -2716,7 +2716,7 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">284</td>
-					<td class="line-touch">10671</td>
+					<td class="line-touch">10663</td>
 					<td class="line-text">      relationSuccessors((sourceName, sourceValue)) = relationSuccessors((sourceName, sourceValue)) :+ tuple</td>
 				</tr>
 				<tr>
@@ -2776,7 +2776,7 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">296</td>
-					<td class="line-touch">212</td>
+					<td class="line-touch">32</td>
 					<td class="line-text">      val node = tuple(param)</td>
 				</tr>
 				<tr>
@@ -2786,7 +2786,7 @@
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">298</td>
-					<td class="line-touch">215</td>
+					<td class="line-touch">35</td>
 					<td class="line-text">      relationSuccessors.get((param, node)).map( successors =&gt;</td>
 				</tr>
 				<tr class="completely-covered">
@@ -2861,12 +2861,12 @@
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">313</td>
-					<td class="line-touch">7</td>
+					<td class="line-touch">3</td>
 					<td class="line-text">        if (symmetryActions(relation) == Relation.Restore)</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">314</td>
-					<td class="line-touch">6</td>
+					<td class="line-touch">2</td>
 					<td class="line-text">          addEdge(relation, Map((Relation.Source, tuple(Relation.Destination)),(Relation.Destination, tuple(Relation.Source))))</td>
 				</tr>
 				<tr class="partialy-covered">
@@ -2886,12 +2886,12 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">318</td>
-					<td class="line-touch">153</td>
+					<td class="line-touch">17</td>
 					<td class="line-text">        if (transitives(relation)) {</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">319</td>
-					<td class="line-touch">153</td>
+					<td class="line-touch">17</td>
 					<td class="line-text">          if (reaches(relation, tuple(Relation.Destination), tuple(Relation.Source), Nil))</td>
 				</tr>
 				<tr class="completely-covered">
@@ -2966,12 +2966,12 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">334</td>
-					<td class="line-touch">666</td>
+					<td class="line-touch">288</td>
 					<td class="line-text">  private def reaches(relation: Relation, source: Any, destination: Any, reached: List[Any]): Boolean = {</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">335</td>
-					<td class="line-touch">666</td>
+					<td class="line-touch">288</td>
 					<td class="line-text">    val fringe = follow(relation, Relation.Source, source, Relation.Destination).filterNot(reached.contains(_))</td>
 				</tr>
 				<tr>
@@ -2981,17 +2981,17 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">337</td>
-					<td class="line-touch">666</td>
+					<td class="line-touch">288</td>
 					<td class="line-text">    if (fringe.isEmpty) {</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">338</td>
-					<td class="line-touch">191</td>
+					<td class="line-touch">53</td>
 					<td class="line-text">      false</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">339</td>
-					<td class="line-touch">475</td>
+					<td class="line-touch">235</td>
 					<td class="line-text">    } else if (fringe.contains(destination)) {</td>
 				</tr>
 				<tr class="completely-covered">
@@ -3006,7 +3006,7 @@
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">342</td>
-					<td class="line-touch">513</td>
+					<td class="line-touch">271</td>
 					<td class="line-text">      fringe.exists(newSource =&gt; reaches(relation, newSource, destination, reached :+ newSource))</td>
 				</tr>
 				<tr>

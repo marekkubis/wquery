@@ -54,13 +54,13 @@
 											</tr>
 											<tr>
 												<th>Coverage</th>
-												<td>37.2% (1209/3247)</td>
+												<td>37.3% (1210/3247)</td>
 											</tr>
 											<tr>
 												<td colspan="2">
 													<div class="coverage-bar">
 														<div class="negative">
-															<div class="positive" style="width: 37.2%;">
+															<div class="positive" style="width: 37.3%;">
 															</div>
 														</div>
 													</div>
@@ -5483,11 +5483,11 @@
 					<td class="complexity">1.64</td>
 					<td class="complexity">10</td>
 					<td class="complexity">54</td>
-					<td class="coverage">38.2% (26/68)</td>
+					<td class="coverage">39.7% (27/68)</td>
 					<td class="coverage">
 						<div class="coverage-bar">
 							<div class="negative">
-								<div class="positive" style="width: 38.2%;">
+								<div class="positive" style="width: 39.7%;">
 								</div>
 							</div>
 						</div>
@@ -5730,11 +5730,11 @@
 				<tr>
 					<td colspan="4">bindingsPattern() : BindingsPattern</td>
 					<td class="complexity">1</td>
-					<td class="coverage">0% (0/1)</td>
+					<td class="coverage">100% (1/1)</td>
 					<td class="coverage">
 						<div class="coverage-bar">
 							<div class="negative">
-								<div class="positive" style="width: 0.0%;">
+								<div class="positive" style="width: 100.0%;">
 								</div>
 							</div>
 						</div>
@@ -15417,7 +15417,7 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">7</td>
-					<td class="line-touch">4007</td>
+					<td class="line-touch">4114</td>
 					<td class="line-text">sealed abstract class QueryOp extends AlgebraOp</td>
 				</tr>
 				<tr>
@@ -15677,7 +15677,7 @@
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">59</td>
-					<td class="line-touch">153</td>
+					<td class="line-touch">165</td>
 					<td class="line-text">case class IfElseOp(conditionOp: AlgebraOp, ifOp: AlgebraOp, elseOp: Option[AlgebraOp]) extends QueryOp {</td>
 				</tr>
 				<tr>
@@ -15687,12 +15687,12 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">61</td>
-					<td class="line-touch">70</td>
+					<td class="line-touch">74</td>
 					<td class="line-text">    if (conditionOp.evaluate(wordNet, bindings).isTrue)</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">62</td>
-					<td class="line-touch">43</td>
+					<td class="line-touch">45</td>
 					<td class="line-text">      ifOp.evaluate(wordNet, bindings)</td>
 				</tr>
 				<tr>
@@ -15702,7 +15702,7 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">64</td>
-					<td class="line-touch">27</td>
+					<td class="line-touch">29</td>
 					<td class="line-text">      elseOp.map(_.evaluate(wordNet, bindings)).getOrElse(DataSet.empty)</td>
 				</tr>
 				<tr>
@@ -16192,7 +16192,7 @@
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">162</td>
-					<td class="line-touch">90</td>
+					<td class="line-touch">102</td>
 					<td class="line-text">case class UnionOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends QueryOp {</td>
 				</tr>
 				<tr>
@@ -16202,7 +16202,7 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">164</td>
-					<td class="line-touch">34</td>
+					<td class="line-touch">40</td>
 					<td class="line-text">    DataSet(leftOp.evaluate(wordNet, bindings).paths union rightOp.evaluate(wordNet, bindings).paths)</td>
 				</tr>
 				<tr>
@@ -17442,12 +17442,12 @@
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">412</td>
-					<td class="line-touch">1635</td>
+					<td class="line-touch">1659</td>
 					<td class="line-text">case class FunctionOp(function: Function, args: AlgebraOp) extends QueryOp {</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">413</td>
-					<td class="line-touch">877</td>
+					<td class="line-touch">889</td>
 					<td class="line-text">  def evaluate(wordNet: WordNet, bindings: Bindings) = function.evaluate(args, wordNet, bindings)</td>
 				</tr>
 				<tr>
@@ -17527,7 +17527,7 @@
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">429</td>
-					<td class="line-touch">2619</td>
+					<td class="line-touch">2625</td>
 					<td class="line-text">case class SelectOp(op: AlgebraOp, condition: Condition) extends QueryOp {</td>
 				</tr>
 				<tr>
@@ -17537,37 +17537,37 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">431</td>
-					<td class="line-touch">122</td>
+					<td class="line-touch">127</td>
 					<td class="line-text">    val dataSet = op.evaluate(wordNet, bindings)</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">432</td>
-					<td class="line-touch">122</td>
+					<td class="line-touch">127</td>
 					<td class="line-text">    val pathVarNames = dataSet.pathVars.keys.toSeq</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">433</td>
-					<td class="line-touch">122</td>
+					<td class="line-touch">127</td>
 					<td class="line-text">    val stepVarNames = dataSet.stepVars.keys.toSeq</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">434</td>
-					<td class="line-touch">122</td>
+					<td class="line-touch">127</td>
 					<td class="line-text">    val pathBuffer = DataSetBuffers.createPathBuffer</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">435</td>
-					<td class="line-touch">122</td>
+					<td class="line-touch">127</td>
 					<td class="line-text">    val pathVarBuffers = DataSetBuffers.createPathVarBuffers(pathVarNames)</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">436</td>
-					<td class="line-touch">122</td>
+					<td class="line-touch">127</td>
 					<td class="line-text">    val stepVarBuffers = DataSetBuffers.createStepVarBuffers(stepVarNames)</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">437</td>
-					<td class="line-touch">122</td>
+					<td class="line-touch">127</td>
 					<td class="line-text">    val binds = Bindings(bindings, false)</td>
 				</tr>
 				<tr>
@@ -17587,12 +17587,12 @@
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">441</td>
-					<td class="line-touch">2520</td>
+					<td class="line-touch">2521</td>
 					<td class="line-text">    for (i &lt;- 0 until dataSet.pathCount) {</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">442</td>
-					<td class="line-touch">2520</td>
+					<td class="line-touch">2521</td>
 					<td class="line-text">      val tuple = dataSet.paths(i)</td>
 				</tr>
 				<tr>
@@ -17602,7 +17602,7 @@
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">444</td>
-					<td class="line-touch">2520</td>
+					<td class="line-touch">2521</td>
 					<td class="line-text">      for (pathVar &lt;- pathVarNames) {</td>
 				</tr>
 				<tr class="not-covered">
@@ -17627,17 +17627,17 @@
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">449</td>
-					<td class="line-touch">2520</td>
+					<td class="line-touch">2521</td>
 					<td class="line-text">      for (stepVar &lt;- stepVarNames) {</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">450</td>
-					<td class="line-touch">78</td>
+					<td class="line-touch">79</td>
 					<td class="line-text">        val varPos = dataSet.stepVars(stepVar)(i)</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">451</td>
-					<td class="line-touch">78</td>
+					<td class="line-touch">79</td>
 					<td class="line-text">        binds.bindStepVariable(stepVar, tuple(varPos))</td>
 				</tr>
 				<tr>
@@ -17652,7 +17652,7 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">454</td>
-					<td class="line-touch">2520</td>
+					<td class="line-touch">2521</td>
 					<td class="line-text">      binds.bindContextVariables(tuple)</td>
 				</tr>
 				<tr>
@@ -17662,22 +17662,22 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">456</td>
-					<td class="line-touch">2520</td>
+					<td class="line-touch">2521</td>
 					<td class="line-text">      if (condition.satisfied(wordNet, binds)) {</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">457</td>
-					<td class="line-touch">602</td>
+					<td class="line-touch">605</td>
 					<td class="line-text">        pathBuffer.append(tuple)</td>
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">458</td>
-					<td class="line-touch">602</td>
+					<td class="line-touch">605</td>
 					<td class="line-text">        pathVarNames.foreach(x =&gt; pathVarBuffers(x).append(dataSet.pathVars(x)(i)))</td>
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">459</td>
-					<td class="line-touch">602</td>
+					<td class="line-touch">605</td>
 					<td class="line-text">        stepVarNames.foreach(x =&gt; stepVarBuffers(x).append(dataSet.stepVars(x)(i)))</td>
 				</tr>
 				<tr>
@@ -17697,7 +17697,7 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">463</td>
-					<td class="line-touch">122</td>
+					<td class="line-touch">127</td>
 					<td class="line-text">    DataSet.fromBuffers(pathBuffer, pathVarBuffers, stepVarBuffers)</td>
 				</tr>
 				<tr>
@@ -17767,7 +17767,7 @@
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">477</td>
-					<td class="line-touch">1330</td>
+					<td class="line-touch">1334</td>
 					<td class="line-text">case class ProjectOp(op: AlgebraOp, projectOp: AlgebraOp) extends QueryOp {</td>
 				</tr>
 				<tr>
@@ -17777,27 +17777,27 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">479</td>
-					<td class="line-touch">382</td>
+					<td class="line-touch">383</td>
 					<td class="line-text">    val dataSet = op.evaluate(wordNet, bindings)</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">480</td>
-					<td class="line-touch">382</td>
+					<td class="line-touch">383</td>
 					<td class="line-text">    val buffer = new DataSetBuffer</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">481</td>
-					<td class="line-touch">382</td>
+					<td class="line-touch">383</td>
 					<td class="line-text">    val pathVarNames = dataSet.pathVars.keys</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">482</td>
-					<td class="line-touch">382</td>
+					<td class="line-touch">383</td>
 					<td class="line-text">    val stepVarNames = dataSet.stepVars.keys</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">483</td>
-					<td class="line-touch">382</td>
+					<td class="line-touch">383</td>
 					<td class="line-text">    val binds = Bindings(bindings, false)</td>
 				</tr>
 				<tr>
@@ -17817,12 +17817,12 @@
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">487</td>
-					<td class="line-touch">382</td>
+					<td class="line-touch">383</td>
 					<td class="line-text">    for (i &lt;- 0 until dataSet.pathCount) {</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">488</td>
-					<td class="line-touch">644</td>
+					<td class="line-touch">645</td>
 					<td class="line-text">      val tuple = dataSet.paths(i)</td>
 				</tr>
 				<tr>
@@ -17832,7 +17832,7 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">490</td>
-					<td class="line-touch">644</td>
+					<td class="line-touch">645</td>
 					<td class="line-text">      binds.bindContextVariables(tuple)</td>
 				</tr>
 				<tr>
@@ -17842,7 +17842,7 @@
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">492</td>
-					<td class="line-touch">644</td>
+					<td class="line-touch">645</td>
 					<td class="line-text">      for (pathVar &lt;- pathVarNames) {</td>
 				</tr>
 				<tr class="completely-covered">
@@ -17867,17 +17867,17 @@
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">497</td>
-					<td class="line-touch">644</td>
+					<td class="line-touch">645</td>
 					<td class="line-text">      for (stepVar &lt;- stepVarNames) {</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">498</td>
-					<td class="line-touch">72</td>
+					<td class="line-touch">73</td>
 					<td class="line-text">        val varPos = dataSet.stepVars(stepVar)(i)</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">499</td>
-					<td class="line-touch">72</td>
+					<td class="line-touch">73</td>
 					<td class="line-text">        binds.bindStepVariable(stepVar, tuple(varPos))</td>
 				</tr>
 				<tr>
@@ -17892,7 +17892,7 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">502</td>
-					<td class="line-touch">644</td>
+					<td class="line-touch">645</td>
 					<td class="line-text">      buffer.append(projectOp.evaluate(wordNet, binds))</td>
 				</tr>
 				<tr>
@@ -17907,7 +17907,7 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">505</td>
-					<td class="line-touch">382</td>
+					<td class="line-touch">383</td>
 					<td class="line-text">    buffer.toDataSet</td>
 				</tr>
 				<tr>
@@ -17952,7 +17952,7 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">514</td>
-					<td class="line-touch">156</td>
+					<td class="line-touch">157</td>
 					<td class="line-text">  def maxTupleSize = projectOp.maxTupleSize</td>
 				</tr>
 				<tr>
@@ -17962,7 +17962,7 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">516</td>
-					<td class="line-touch">4</td>
+					<td class="line-touch">5</td>
 					<td class="line-text">  def bindingsPattern = projectOp.bindingsPattern</td>
 				</tr>
 				<tr>
@@ -17977,7 +17977,7 @@
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">519</td>
-					<td class="line-touch">1758</td>
+					<td class="line-touch">1761</td>
 					<td class="line-text">case class ExtendOp(op: AlgebraOp, from: Int, pattern: RelationalPattern) extends QueryOp {</td>
 				</tr>
 				<tr>
@@ -18067,12 +18067,12 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">537</td>
-					<td class="line-touch">170</td>
+					<td class="line-touch">171</td>
 					<td class="line-text">    if (pos &lt; pattern.minSize) {</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">538</td>
-					<td class="line-touch">155</td>
+					<td class="line-touch">156</td>
 					<td class="line-text">      pattern.rightType(pos)</td>
 				</tr>
 				<tr class="partialy-covered">
@@ -18132,7 +18132,7 @@
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">550</td>
-					<td class="line-touch">125</td>
+					<td class="line-touch">126</td>
 					<td class="line-text">  def maxTupleSize = op.maxTupleSize.map(maxTupleSize =&gt; pattern.maxSize.map(maxSize =&gt; maxTupleSize + maxSize)).getOrElse(None)</td>
 				</tr>
 				<tr>
@@ -18142,7 +18142,7 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">552</td>
-					<td class="line-touch">1</td>
+					<td class="line-touch">2</td>
 					<td class="line-text">  def bindingsPattern = op.bindingsPattern</td>
 				</tr>
 				<tr>
@@ -18157,7 +18157,7 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">555</td>
-					<td class="line-touch">1027</td>
+					<td class="line-touch">1045</td>
 					<td class="line-text">sealed abstract class RelationalPattern {</td>
 				</tr>
 				<tr>
@@ -18557,7 +18557,7 @@
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">635</td>
-					<td class="line-touch">5441</td>
+					<td class="line-touch">5447</td>
 					<td class="line-text">case class QuantifiedRelationPattern(pattern: RelationalPattern, quantifier: Quantifier) extends RelationalPattern {</td>
 				</tr>
 				<tr class="completely-covered">
@@ -18852,7 +18852,7 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">694</td>
-					<td class="line-touch">204</td>
+					<td class="line-touch">205</td>
 					<td class="line-text">  def minSize = pattern.minSize * quantifier.lowerBound</td>
 				</tr>
 				<tr>
@@ -18862,7 +18862,7 @@
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">696</td>
-					<td class="line-touch">339</td>
+					<td class="line-touch">341</td>
 					<td class="line-text">  def maxSize = pattern.maxSize.map(maxSize =&gt; quantifier.upperBound.map(upperBound =&gt; maxSize * upperBound)).getOrElse(None)</td>
 				</tr>
 				<tr>
@@ -18917,17 +18917,17 @@
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">707</td>
-					<td class="line-touch">162</td>
+					<td class="line-touch">163</td>
 					<td class="line-text">  def rightType(pos: Int) = if (maxSize.map(pos &lt; _).getOrElse(true)) {</td>
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">708</td>
-					<td class="line-touch">162</td>
+					<td class="line-touch">163</td>
 					<td class="line-text">    (for (i &lt;- pattern.minSize to pattern.maxSize.getOrElse(pos + 1))</td>
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">709</td>
-					<td class="line-touch">162</td>
+					<td class="line-touch">163</td>
 					<td class="line-text">      yield pattern.rightType(if (i &gt; 0) pos % i else 0)).flatten.toSet</td>
 				</tr>
 				<tr>
@@ -18957,7 +18957,7 @@
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">715</td>
-					<td class="line-touch">1907</td>
+					<td class="line-touch">1942</td>
 					<td class="line-text">case class Quantifier(lowerBound: Int, upperBound: Option[Int])</td>
 				</tr>
 				<tr>
@@ -19152,7 +19152,7 @@
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">754</td>
-					<td class="line-touch">6493</td>
+					<td class="line-touch">6519</td>
 					<td class="line-text">case class ArcPattern(relation: Option[Relation], source: ArcPatternArgument, destinations: List[ArcPatternArgument]) extends RelationalPattern {</td>
 				</tr>
 				<tr>
@@ -19182,7 +19182,7 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">760</td>
-					<td class="line-touch">390</td>
+					<td class="line-touch">392</td>
 					<td class="line-text">  def minSize = 2*destinations.size</td>
 				</tr>
 				<tr>
@@ -19192,7 +19192,7 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">762</td>
-					<td class="line-touch">507</td>
+					<td class="line-touch">510</td>
 					<td class="line-text">  def maxSize = Some(2*destinations.size)</td>
 				</tr>
 				<tr>
@@ -19272,12 +19272,12 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">778</td>
-					<td class="line-touch">162</td>
+					<td class="line-touch">163</td>
 					<td class="line-text">    if (pos &lt; destinations.size)</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">779</td>
-					<td class="line-touch">143</td>
+					<td class="line-touch">144</td>
 					<td class="line-text">      if (pos % 2 == 1) {</td>
 				</tr>
 				<tr class="not-covered">
@@ -19292,7 +19292,7 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">782</td>
-					<td class="line-touch">143</td>
+					<td class="line-touch">144</td>
 					<td class="line-text">        demandArgumentType(destinations(destinations.size - 1 - pos/2))</td>
 				</tr>
 				<tr>
@@ -19337,12 +19337,12 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">791</td>
-					<td class="line-touch">172</td>
+					<td class="line-touch">173</td>
 					<td class="line-text">    relation.map(rel =&gt; Set(rel.demandArgument(argument.name).nodeType))</td>
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">792</td>
-					<td class="line-touch">172</td>
+					<td class="line-touch">173</td>
 					<td class="line-text">      .getOrElse(argument.nodeType.map(Set(_)).getOrElse(NodeType.all)).asInstanceOf[Set[DataType]]</td>
 				</tr>
 				<tr>
@@ -19362,7 +19362,7 @@
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">796</td>
-					<td class="line-touch">11001</td>
+					<td class="line-touch">11038</td>
 					<td class="line-text">case class ArcPatternArgument(name: String, nodeType: Option[NodeType])</td>
 				</tr>
 				<tr>
@@ -19372,7 +19372,7 @@
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">798</td>
-					<td class="line-touch">218</td>
+					<td class="line-touch">229</td>
 					<td class="line-text">case class BindOp(op: AlgebraOp, variables: List[Variable]) extends QueryOp with VariableBindings with VariableTypeBindings {</td>
 				</tr>
 				<tr>
@@ -19382,7 +19382,7 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">800</td>
-					<td class="line-touch">73</td>
+					<td class="line-touch">75</td>
 					<td class="line-text">    bind(op.evaluate(wordNet, bindings), variables)</td>
 				</tr>
 				<tr>
@@ -19407,7 +19407,7 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">805</td>
-					<td class="line-touch">27</td>
+					<td class="line-touch">28</td>
 					<td class="line-text">  def rightType(pos: Int) = op.rightType(pos)</td>
 				</tr>
 				<tr>
@@ -19442,17 +19442,17 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">812</td>
-					<td class="line-touch">4</td>
+					<td class="line-touch">7</td>
 					<td class="line-text">    val pattern = op.bindingsPattern</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">813</td>
-					<td class="line-touch">4</td>
+					<td class="line-touch">7</td>
 					<td class="line-text">    bindTypes(pattern, op, variables)</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">814</td>
-					<td class="line-touch">4</td>
+					<td class="line-touch">7</td>
 					<td class="line-text">    pattern</td>
 				</tr>
 				<tr>
@@ -19472,7 +19472,7 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">818</td>
-					<td class="line-touch">122</td>
+					<td class="line-touch">124</td>
 					<td class="line-text">trait VariableBindings {</td>
 				</tr>
 				<tr class="completely-covered">
@@ -19482,17 +19482,17 @@
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">820</td>
-					<td class="line-touch">96</td>
+					<td class="line-touch">98</td>
 					<td class="line-text">    if (variables != Nil) {</td>
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">821</td>
-					<td class="line-touch">123</td>
+					<td class="line-touch">125</td>
 					<td class="line-text">      val pathVarBuffers = DataSetBuffers.createPathVarBuffers(variables.filter(x =&gt; (x.isInstanceOf[PathVariable] &amp;&amp; x.name != &quot;_&quot;)).map(_.name))</td>
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">822</td>
-					<td class="line-touch">123</td>
+					<td class="line-touch">125</td>
 					<td class="line-text">      val stepVarBuffers = DataSetBuffers.createStepVarBuffers(variables.filterNot(x =&gt; (x.isInstanceOf[PathVariable] || x.name == &quot;_&quot;)).map(_.name))</td>
 				</tr>
 				<tr>
@@ -19502,7 +19502,7 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">824</td>
-					<td class="line-touch">96</td>
+					<td class="line-touch">98</td>
 					<td class="line-text">      demandUniqueVariableNames(variables)</td>
 				</tr>
 				<tr>
@@ -19512,7 +19512,7 @@
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">826</td>
-					<td class="line-touch">96</td>
+					<td class="line-touch">98</td>
 					<td class="line-text">      getPathVariablePosition(variables) match {</td>
 				</tr>
 				<tr class="completely-covered">
@@ -19582,12 +19582,12 @@
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">840</td>
-					<td class="line-touch">76</td>
+					<td class="line-touch">78</td>
 					<td class="line-text">          val rightVars = variables.map(_.name).reverse.zipWithIndex.filterNot{_._1 == &quot;_&quot;}.toMap</td>
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">841</td>
-					<td class="line-touch">201</td>
+					<td class="line-touch">203</td>
 					<td class="line-text">          dataSet.paths.foreach(tuple =&gt; bindVariablesFromRight(rightVars, stepVarBuffers, tuple.size))</td>
 				</tr>
 				<tr>
@@ -19602,7 +19602,7 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">844</td>
-					<td class="line-touch">96</td>
+					<td class="line-touch">98</td>
 					<td class="line-text">      DataSet(dataSet.paths, dataSet.pathVars ++ pathVarBuffers.mapValues(_.toList), dataSet.stepVars ++ stepVarBuffers.mapValues(_.toList))</td>
 				</tr>
 				<tr>
@@ -19632,12 +19632,12 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">850</td>
-					<td class="line-touch">96</td>
+					<td class="line-touch">98</td>
 					<td class="line-text">  private def demandUniqueVariableNames(variables: List[Variable]) {</td>
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">851</td>
-					<td class="line-touch">123</td>
+					<td class="line-touch">125</td>
 					<td class="line-text">    val variableNames = variables.filter(x =&gt; !x.isInstanceOf[PathVariable] &amp;&amp; x.name != &quot;_&quot;).map(_.name)</td>
 				</tr>
 				<tr>
@@ -19647,7 +19647,7 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">853</td>
-					<td class="line-touch">96</td>
+					<td class="line-touch">98</td>
 					<td class="line-text">    if (variableNames.size != variableNames.distinct.size)</td>
 				</tr>
 				<tr class="not-covered">
@@ -19667,12 +19667,12 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">857</td>
-					<td class="line-touch">96</td>
+					<td class="line-touch">98</td>
 					<td class="line-text">  private def getPathVariablePosition(variables: List[Variable]) = {</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">858</td>
-					<td class="line-touch">116</td>
+					<td class="line-touch">118</td>
 					<td class="line-text">    val pathVarPos = variables.indexWhere{_.isInstanceOf[PathVariable]}</td>
 				</tr>
 				<tr>
@@ -19682,7 +19682,7 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">860</td>
-					<td class="line-touch">123</td>
+					<td class="line-touch">125</td>
 					<td class="line-text">    if (pathVarPos != variables.lastIndexWhere{_.isInstanceOf[PathVariable]}) {</td>
 				</tr>
 				<tr class="not-covered">
@@ -19712,7 +19712,7 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">866</td>
-					<td class="line-touch">96</td>
+					<td class="line-touch">98</td>
 					<td class="line-text">      if (pathVarPos != -1)</td>
 				</tr>
 				<tr class="completely-covered">
@@ -19727,7 +19727,7 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">869</td>
-					<td class="line-touch">65</td>
+					<td class="line-touch">67</td>
 					<td class="line-text">        None</td>
 				</tr>
 				<tr>
@@ -19792,12 +19792,12 @@
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">882</td>
-					<td class="line-touch">612</td>
+					<td class="line-touch">614</td>
 					<td class="line-text">    for ((v, pos) &lt;- vars) {</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">883</td>
-					<td class="line-touch">407</td>
+					<td class="line-touch">409</td>
 					<td class="line-text">      val index = tupleSize - 1 - pos</td>
 				</tr>
 				<tr>
@@ -19807,12 +19807,12 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">885</td>
-					<td class="line-touch">407</td>
+					<td class="line-touch">409</td>
 					<td class="line-text">      if (index &gt;= 0)</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">886</td>
-					<td class="line-touch">407</td>
+					<td class="line-touch">409</td>
 					<td class="line-text">        varIndexes(v).append(index)</td>
 				</tr>
 				<tr>
@@ -19862,12 +19862,12 @@
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">896</td>
-					<td class="line-touch">2038</td>
+					<td class="line-touch">2086</td>
 					<td class="line-text">case class FetchOp(relation: Relation, from: List[(String, List[Any])], to: List[String]) extends QueryOp {</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">897</td>
-					<td class="line-touch">935</td>
+					<td class="line-touch">952</td>
 					<td class="line-text">  def evaluate(wordNet: WordNet, bindings: Bindings) = wordNet.store.fetch(relation, from, to)</td>
 				</tr>
 				<tr>
@@ -19887,7 +19887,7 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">901</td>
-					<td class="line-touch">307</td>
+					<td class="line-touch">312</td>
 					<td class="line-text">  def rightType(pos: Int) = typeAt(from.size + to.size - 1 - pos)</td>
 				</tr>
 				<tr>
@@ -19897,12 +19897,12 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">903</td>
-					<td class="line-touch">311</td>
+					<td class="line-touch">316</td>
 					<td class="line-text">  private def typeAt(pos: Int): Set[DataType] = {</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">904</td>
-					<td class="line-touch">566</td>
+					<td class="line-touch">571</td>
 					<td class="line-text">    val args = from.map(_._1) ++ to</td>
 				</tr>
 				<tr>
@@ -19912,12 +19912,12 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">906</td>
-					<td class="line-touch">311</td>
+					<td class="line-touch">316</td>
 					<td class="line-text">    if (args.isDefinedAt(pos))</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">907</td>
-					<td class="line-touch">311</td>
+					<td class="line-touch">316</td>
 					<td class="line-text">      Set(relation.demandArgument(args(pos)).nodeType)</td>
 				</tr>
 				<tr>
@@ -19952,7 +19952,7 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">914</td>
-					<td class="line-touch">18</td>
+					<td class="line-touch">22</td>
 					<td class="line-text">  def maxTupleSize = Some(to.size)</td>
 				</tr>
 				<tr>
@@ -19960,9 +19960,9 @@
 					<td class="line-touch"></td>
 					<td class="line-text"></td>
 				</tr>
-				<tr class="not-covered">
+				<tr class="completely-covered">
 					<td class="line-number">916</td>
-					<td class="line-touch">0</td>
+					<td class="line-touch">2</td>
 					<td class="line-text">  def bindingsPattern = BindingsPattern()</td>
 				</tr>
 				<tr>
@@ -20027,7 +20027,7 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">929</td>
-					<td class="line-touch">185</td>
+					<td class="line-touch">202</td>
 					<td class="line-text">    = FetchOp(WordNet.WordSet, List((Relation.Source, List(value))), List(Relation.Source))</td>
 				</tr>
 				<tr>
@@ -20092,12 +20092,12 @@
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">942</td>
-					<td class="line-touch">4228</td>
+					<td class="line-touch">4374</td>
 					<td class="line-text">case class ConstantOp(dataSet: DataSet) extends QueryOp {</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">943</td>
-					<td class="line-touch">3445</td>
+					<td class="line-touch">3481</td>
 					<td class="line-text">  def evaluate(wordNet: WordNet, bindings: Bindings) = dataSet</td>
 				</tr>
 				<tr>
@@ -20117,7 +20117,7 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">947</td>
-					<td class="line-touch">108</td>
+					<td class="line-touch">144</td>
 					<td class="line-text">  def rightType(pos: Int) = dataSet.rightType(pos)</td>
 				</tr>
 				<tr>
@@ -20167,7 +20167,7 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">957</td>
-					<td class="line-touch">875</td>
+					<td class="line-touch">913</td>
 					<td class="line-text">  def fromValue(value: Any) = ConstantOp(DataSet.fromValue(value))</td>
 				</tr>
 				<tr>
@@ -20177,7 +20177,7 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">959</td>
-					<td class="line-touch">2219</td>
+					<td class="line-touch">2357</td>
 					<td class="line-text">  val empty = ConstantOp(DataSet.empty)</td>
 				</tr>
 				<tr>
@@ -20207,7 +20207,7 @@
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">965</td>
-					<td class="line-touch">4561</td>
+					<td class="line-touch">4553</td>
 					<td class="line-text">case class ContextRefOp(ref: Int, types: Set[DataType]) extends QueryOp {</td>
 				</tr>
 				<tr>
@@ -20217,12 +20217,12 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">967</td>
-					<td class="line-touch">4275</td>
+					<td class="line-touch">4267</td>
 					<td class="line-text">    bindings.lookupContextVariable(ref).map(DataSet.fromValue(_))</td>
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">968</td>
-					<td class="line-touch">4275</td>
+					<td class="line-touch">4267</td>
 					<td class="line-text">      .getOrElse(throw new WQueryEvaluationException(&quot;Backward reference (&quot; + ref + &quot;) too far&quot;))</td>
 				</tr>
 				<tr>
@@ -20267,7 +20267,7 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">977</td>
-					<td class="line-touch">156</td>
+					<td class="line-touch">157</td>
 					<td class="line-text">  def maxTupleSize = Some(1)</td>
 				</tr>
 				<tr>
@@ -20277,7 +20277,7 @@
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">979</td>
-					<td class="line-touch">4</td>
+					<td class="line-touch">5</td>
 					<td class="line-text">  def bindingsPattern = BindingsPattern()</td>
 				</tr>
 				<tr>
@@ -20362,12 +20362,12 @@
 				</tr>
 				<tr class="partialy-covered">
 					<td class="line-number">996</td>
-					<td class="line-touch">232</td>
+					<td class="line-touch">236</td>
 					<td class="line-text">case class StepVariableRefOp(name: String, types: Set[DataType]) extends QueryOp {</td>
 				</tr>
 				<tr class="completely-covered">
 					<td class="line-number">997</td>
-					<td class="line-touch">186</td>
+					<td class="line-touch">188</td>
 					<td class="line-text">  def evaluate(wordNet: WordNet, bindings: Bindings) = bindings.lookupStepVariable(name).map(DataSet.fromValue(_)).get</td>
 				</tr>
 				<tr>
