@@ -3,7 +3,7 @@
 	<groupId>org.wquery</groupId>
 	<artifactId>wquery</artifactId>
 	<packaging>jar</packaging>
-	<version>0.5.2</version>
+	<version>0.6.0-SNAPSHOT</version>
 	<name>WQuery</name>
 	<description>WQuery is a domain-specific query language designed for WordNet-like lexical databases.
     The WQuery interpreter operates on platforms that provide Java Runtime Environment and works with wordnets stored in XML files.
