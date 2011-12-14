@@ -400,61 +400,58 @@ trait VariableTypeBindings {
   }
 }
 
-case class StepExpr(expr: TransformationExpr, variables: List[Variable]) extends Expr with VariableTypeBindings {
+case class StepExpr(expr: TransformationExpr) extends Expr {
   def step(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context, op: AlgebraOp) = {
-    expr.step(wordNet, bindings, context, op, variables)
+    expr.step(wordNet, bindings, context, op)
   }
 }
 
-sealed abstract class TransformationExpr extends Expr with VariableTypeBindings {
-  def step(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context, op: AlgebraOp, variables: List[Variable]): (AlgebraOp, Step)
-
-  def bind(wordNet: WordNetSchema, bindings: BindingsSchema, op: AlgebraOp, variables: List[Variable]) = {
-    if (variables.isEmpty) {
-      op
-    } else {
-      bindTypes(bindings, op, variables)
-      BindOp(op, variables)
-    }
-  }
+sealed abstract class TransformationExpr extends Expr {
+  def step(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context, op: AlgebraOp): (AlgebraOp, Step)
 }
 
 case class RelationTransformationExpr(pos: Int, expr: RelationalExpr) extends TransformationExpr {
-  def step(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context, op: AlgebraOp, variables: List[Variable]) = {
+  def step(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context, op: AlgebraOp) = {
     val pattern = expr.evaluationPattern(wordNet, op.rightType(pos))
-    (bind(wordNet, bindings, ExtendOp(op, pos, pattern), variables), RelationStep(pos, pattern, variables))
+    (ExtendOp(op, pos, pattern), RelationStep(pos, pattern))
   }
 }
 
 case class FilterTransformationExpr(conditionalExpr: ConditionalExpr) extends TransformationExpr {
-  def step(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context, op: AlgebraOp, variables: List[Variable]) = {
+  def step(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context, op: AlgebraOp) = {
     val filterBindings = BindingsSchema(bindings, false)
     filterBindings.bindContextOp(op)
     val condition = conditionalExpr.conditionPlan(wordNet, filterBindings, context.copy(creation = false))
-    (bind(wordNet, bindings, SelectOp(op, condition), variables), FilterStep(condition, variables))
+    (SelectOp(op, condition), FilterStep(condition))
   }
 }
 
 case class NodeTransformationExpr(generator: EvaluableExpr) extends TransformationExpr {
-  def step(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context, op: AlgebraOp, variables: List[Variable]) = {
+  def step(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context, op: AlgebraOp) = {
     if (op != ConstantOp.empty) {
       val filterBindings = BindingsSchema(bindings, false)
       filterBindings.bindContextOp(op)
       val generateOp = generator.evaluationPlan(wordNet, filterBindings, context)
-      (bind(wordNet, bindings, SelectOp(op, BinaryCondition("in", ContextRefOp(0, op.rightType(0)), generateOp)), variables), NodeStep(generateOp, variables))
+      (SelectOp(op, BinaryCondition("in", ContextRefOp(0, op.rightType(0)), generateOp)), NodeStep(generateOp))
     } else {
-      val generateOp = bind(wordNet, bindings, generator.evaluationPlan(wordNet, bindings, context), variables)
-      (generateOp, NodeStep(generateOp, variables))
+      val generateOp = generator.evaluationPlan(wordNet, bindings, context)
+      (generateOp, NodeStep(generateOp))
     }
   }
 }
 
 case class ProjectionTransformationExpr(expr: EvaluableExpr) extends TransformationExpr {
-  def step(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context, op: AlgebraOp, variables: List[Variable]) = {
+  def step(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context, op: AlgebraOp) = {
     val projectionBindings = BindingsSchema(bindings, false)
     projectionBindings.bindContextOp(op)
     val projectOp = expr.evaluationPlan(wordNet, projectionBindings, context.copy(creation = false))
-    (bind(wordNet, bindings, ProjectOp(op, projectOp), variables), ProjectStep(projectOp, variables))
+    (ProjectOp(op, projectOp), ProjectStep(projectOp))
+  }
+}
+
+case class BindTransformationExpr(variables: List[Variable]) extends TransformationExpr {
+  def step(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context, op: AlgebraOp) = {
+    (BindOp(op, variables), BindStep(variables))
   }
 }
 

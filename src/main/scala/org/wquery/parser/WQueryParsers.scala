@@ -102,14 +102,15 @@ trait WQueryParsers extends RegexParsers {
 
   def path = generator_step ~ rep(step) ^^ { case gen~steps => PathExpr(gen::steps) }
 
-  def generator_step = generator ~ opt(var_decls) ^^ { case gen~decls => StepExpr(NodeTransformationExpr(gen), decls.getOrElse(Nil)) }
+  def generator_step = generator  ^^ { gen => StepExpr(NodeTransformationExpr(gen)) }
 
   def step = (
     relation_trans
     | node_trans
     | filter_trans
     | projection_trans
-  ) ~ opt(var_decls) ^^ { case trans~decls => StepExpr(trans, decls.getOrElse(Nil)) }
+    | bind_trans
+  ) ^^ { StepExpr(_) }
 
   def relation_trans = dots ~ relation_union_expr ^^ { case pos~expr => RelationTransformationExpr(pos, expr) }
 
@@ -175,6 +176,8 @@ trait WQueryParsers extends RegexParsers {
   def projection_trans = projection  ^^ { ProjectionTransformationExpr(_) }
 
   def projection = "<" ~> expr <~ ">"
+
+  def bind_trans = var_decls ^^ { BindTransformationExpr(_) }
 
   // generators
   def generator = (
