@@ -577,9 +577,11 @@ case class PathExpr(exprs: List[StepExpr]) extends EvaluableExpr {
     val buffer = new ListBuffer[Step]
 
     exprs.foldLeft[AlgebraOp](ConstantOp.empty) { (contextOp, expr) =>
-      val stepTuple = expr.step(wordNet, bindings, context, contextOp)
-      buffer.append(stepTuple._2)
-      stepTuple._1
+      expr.step(wordNet, bindings, context, contextOp) match {
+        case (op, step) =>
+          buffer.append(step)
+          op
+      }
     }
 
     PathExprPlanner.plan(buffer.toList, wordNet, bindings)

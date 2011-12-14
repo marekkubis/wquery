@@ -5,7 +5,6 @@ import org.wquery.model.WordNetSchema
 object PathExprPlanner {
 
   def plan(steps: List[Step], wordNet: WordNetSchema, bindings: BindingsSchema) = {
-    // TODO infer node exprs
     planForward(steps, wordNet, bindings)
   }
 
