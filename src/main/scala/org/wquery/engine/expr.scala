@@ -400,12 +400,6 @@ trait VariableTypeBindings {
   }
 }
 
-case class StepExpr(expr: TransformationExpr) extends Expr {
-  def step(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context, op: AlgebraOp) = {
-    expr.step(wordNet, bindings, context, op)
-  }
-}
-
 sealed abstract class TransformationExpr extends Expr {
   def step(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context, op: AlgebraOp): (AlgebraOp, Step)
 }
@@ -569,11 +563,11 @@ case class ArcExprArgument(name: String, nodeTypeName: Option[String]) extends E
   override def toString = name + nodeTypeName.map("&" + _).getOrElse("")
 }
 
-case class PathExpr(exprs: List[StepExpr]) extends EvaluableExpr {
+case class PathExpr(exprs: List[TransformationExpr], projs: List[ProjectionTransformationExpr]) extends EvaluableExpr {
   def evaluationPlan(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context) = {
     val buffer = new ListBuffer[Step]
 
-    exprs.foldLeft[AlgebraOp](ConstantOp.empty) { (contextOp, expr) =>
+    (exprs ++ projs).foldLeft[AlgebraOp](ConstantOp.empty) { (contextOp, expr) =>
       expr.step(wordNet, bindings, context, contextOp) match {
         case (op, step) =>
           buffer.append(step)
@@ -634,7 +628,7 @@ case class BinaryConditionalExpr(op: String, leftExpr: EvaluableExpr, rightExpr:
   }
 }
 
-case class PathConditionExpr(expr: PathExpr) extends ConditionalExpr {
+case class PathConditionExpr(expr: EvaluableExpr) extends ConditionalExpr {
   def conditionPlan(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context) = RightFringeCondition(expr.evaluationPlan(wordNet, bindings, context))
 }
 

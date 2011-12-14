@@ -793,7 +793,9 @@ case class ArcPattern(relation: Option[Relation], source: ArcPatternArgument, de
   }
 }
 
-case class ArcPatternArgument(name: String, nodeType: Option[NodeType])
+case class ArcPatternArgument(name: String, nodeType: Option[NodeType]) {
+  override def toString = name + nodeType.map("&" + _).getOrElse("")
+}
 
 case class BindOp(op: AlgebraOp, variables: List[Variable]) extends QueryOp with VariableBindings with VariableTypeBindings {
   def evaluate(wordNet: WordNet, bindings: Bindings) = {

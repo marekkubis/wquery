@@ -4,7 +4,7 @@
 		<classes>
 			<class name="org.wquery.GeneratorsTestSuite" />
             <class name="org.wquery.TransformationsTestSuite" />
-            <class name="org.wquery.SelectorsTestSuite" />
+            <class name="org.wquery.ProjectionsTestSuite" />
             <class name="org.wquery.FunctionsTestSuite" />
             <class name="org.wquery.FiltersTestSuite" />            
             <class name="org.wquery.ArithmeticsTestSuite" />      

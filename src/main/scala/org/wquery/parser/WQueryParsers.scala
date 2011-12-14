@@ -100,17 +100,20 @@ trait WQueryParsers extends RegexParsers {
     | path
   )
 
-  def path = generator_step ~ rep(step) ^^ { case gen~steps => PathExpr(gen::steps) }
+  def path = generator_subpath ~ rep(subpath) ^^ { case gpath~paths => paths.foldLeft(gpath) { case (expr, steps~projs) => PathExpr(NodeTransformationExpr(expr)::steps, projs) }}
 
-  def generator_step = generator  ^^ { gen => StepExpr(NodeTransformationExpr(gen)) }
+  def generator_subpath = generator_step ~ rep(step) ~ rep(projection_trans) ^^ { case gstep~steps~projs => PathExpr(gstep::steps, projs) }
+
+  def subpath = rep1(step) ~ rep(projection_trans)
+  
+  def generator_step = generator  ^^ { NodeTransformationExpr(_) }
 
   def step = (
     relation_trans
     | node_trans
     | filter_trans
-    | projection_trans
     | bind_trans
-  ) ^^ { StepExpr(_) }
+  )
 
   def relation_trans = dots ~ relation_union_expr ^^ { case pos~expr => RelationTransformationExpr(pos, expr) }
 
