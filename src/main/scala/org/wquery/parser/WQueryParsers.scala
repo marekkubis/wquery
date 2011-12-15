@@ -102,10 +102,12 @@ trait WQueryParsers extends RegexParsers {
 
   def path = generator_subpath ~ rep(subpath) ^^ { case gpath~paths => paths.foldLeft(gpath) { case (expr, steps~projs) => PathExpr(NodeTransformationExpr(expr)::steps, projs) }}
 
-  def generator_subpath = generator_step ~ rep(step) ~ rep(projection_trans) ^^ { case gstep~steps~projs => PathExpr(gstep::steps, projs) }
+  def generator_subpath = generator_step ~ rep(step) ~ rep(projection) ^^ { case gstep~steps~projs => PathExpr(gstep::steps, projs) }
 
-  def subpath = rep1(step) ~ rep(projection_trans)
-  
+  def subpath = rep1(step) ~ rep(projection)
+
+  def projection = "<" ~> expr <~ ">" ^^ { ProjectionExpr(_) }
+
   def generator_step = generator  ^^ { NodeTransformationExpr(_) }
 
   def step = (
@@ -175,10 +177,6 @@ trait WQueryParsers extends RegexParsers {
   }
 
   def node_trans = "." ~> non_rel_expr_generator ^^ { NodeTransformationExpr(_) }
-
-  def projection_trans = projection  ^^ { ProjectionTransformationExpr(_) }
-
-  def projection = "<" ~> expr <~ ">"
 
   def bind_trans = var_decls ^^ { BindTransformationExpr(_) }
 

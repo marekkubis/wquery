@@ -37,12 +37,6 @@ case class NodeStep(generateOp: AlgebraOp) extends Step {
   }
 }
 
-case class ProjectStep(projectOp: AlgebraOp) extends Step {
-  def planForward(wordNet: WordNetSchema, bindings: BindingsSchema, op: AlgebraOp) = {
-    ProjectOp(op, projectOp)
-  }
-}
-
 case class BindStep(variables: List[Variable]) extends Step with VariableTypeBindings {
   def planForward(wordNet: WordNetSchema, bindings: BindingsSchema, op: AlgebraOp) = {
     if (variables.isEmpty) {
