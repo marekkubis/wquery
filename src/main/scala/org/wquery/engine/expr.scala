@@ -1,7 +1,7 @@
 package org.wquery.engine
-import scala.collection.mutable.ListBuffer
 import org.wquery.model._
 import org.wquery.{WQueryStaticCheckException, WQueryEvaluationException}
+import collection.mutable.{Stack, ListBuffer}
 
 sealed abstract class Expr
 
@@ -401,42 +401,47 @@ trait VariableTypeBindings {
 }
 
 sealed abstract class TransformationExpr extends Expr {
-  def step(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context, op: AlgebraOp): (AlgebraOp, Step)
+  def push(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context, op: AlgebraOp, steps: Stack[Step]): AlgebraOp
 }
 
 case class RelationTransformationExpr(pos: Int, expr: RelationalExpr) extends TransformationExpr {
-  def step(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context, op: AlgebraOp) = {
+  def push(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context, op: AlgebraOp, steps: Stack[Step]) = {
     val pattern = expr.evaluationPattern(wordNet, op.rightType(pos))
-    (ExtendOp(op, pos, pattern), RelationStep(pos, pattern))
+    steps.push(RelationStep(pos, pattern))
+    ExtendOp(op, pos, pattern)
   }
 }
 
 case class FilterTransformationExpr(conditionalExpr: ConditionalExpr) extends TransformationExpr {
-  def step(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context, op: AlgebraOp) = {
+  def push(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context, op: AlgebraOp, steps: Stack[Step]) = {
     val filterBindings = BindingsSchema(bindings, false)
     filterBindings.bindContextOp(op)
     val condition = conditionalExpr.conditionPlan(wordNet, filterBindings, context.copy(creation = false))
-    (SelectOp(op, condition), FilterStep(condition))
+    steps.push(FilterStep(condition))
+    SelectOp(op, condition)
   }
 }
 
 case class NodeTransformationExpr(generator: EvaluableExpr) extends TransformationExpr {
-  def step(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context, op: AlgebraOp) = {
+  def push(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context, op: AlgebraOp, steps: Stack[Step]) = {
     if (op != ConstantOp.empty) {
       val filterBindings = BindingsSchema(bindings, false)
       filterBindings.bindContextOp(op)
       val generateOp = generator.evaluationPlan(wordNet, filterBindings, context)
-      (SelectOp(op, BinaryCondition("in", ContextRefOp(0, op.rightType(0)), generateOp)), NodeStep(generateOp))
+      steps.push(NodeStep(generateOp))
+      SelectOp(op, BinaryCondition("in", ContextRefOp(0, op.rightType(0)), generateOp))
     } else {
       val generateOp = generator.evaluationPlan(wordNet, bindings, context)
-      (generateOp, NodeStep(generateOp))
+      steps.push(NodeStep(generateOp))
+      generateOp
     }
   }
 }
 
 case class BindTransformationExpr(variables: List[Variable]) extends TransformationExpr {
-  def step(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context, op: AlgebraOp) = {
-    (BindOp(op, variables), BindStep(variables))
+  def push(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context, op: AlgebraOp, steps: Stack[Step]) = {
+    steps.push(BindStep(variables))
+    BindOp(op, variables)
   }
 }
 
@@ -565,17 +570,13 @@ case class ProjectionExpr(expr: EvaluableExpr) extends Expr {
 
 case class PathExpr(exprs: List[TransformationExpr], projections: List[ProjectionExpr]) extends EvaluableExpr {
   def evaluationPlan(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context) = {
-    val buffer = new ListBuffer[Step]
+    val steps = new Stack[Step]
 
     exprs.foldLeft[AlgebraOp](ConstantOp.empty) { (contextOp, expr) =>
-      expr.step(wordNet, bindings, context, contextOp) match {
-        case (op, step) =>
-          buffer.append(step)
-          op
-      }
+      expr.push(wordNet, bindings, context, contextOp, steps)
     }
 
-    val plannedOp = PathExprPlanner.plan(buffer.toList, wordNet, bindings)
+    val plannedOp = PathExprPlanner.plan(steps.reverse.toList, wordNet, bindings)
 
     projections.foldLeft[AlgebraOp](plannedOp) { (contextOp, expr) =>
       expr.project(wordNet, bindings, context, contextOp)
