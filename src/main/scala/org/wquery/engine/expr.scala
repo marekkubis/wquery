@@ -434,15 +434,6 @@ case class NodeTransformationExpr(generator: EvaluableExpr) extends Transformati
   }
 }
 
-case class ProjectionExpr(expr: EvaluableExpr) extends Expr {
-  def project(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context, op: AlgebraOp) = {
-    val projectionBindings = BindingsSchema(bindings, false)
-    projectionBindings.bindContextOp(op)
-    val projectOp = expr.evaluationPlan(wordNet, projectionBindings, context.copy(creation = false))
-    ProjectOp(op, projectOp)
-  }
-}
-
 case class BindTransformationExpr(variables: List[Variable]) extends TransformationExpr {
   def step(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context, op: AlgebraOp) = {
     (BindOp(op, variables), BindStep(variables))
@@ -561,6 +552,15 @@ case class ArcExprArgument(name: String, nodeTypeName: Option[String]) extends E
   val nodeDescription = (name, nodeType.map(Set[DataType](_)).getOrElse(NodeType.all.toSet[DataType]))
 
   override def toString = name + nodeTypeName.map("&" + _).getOrElse("")
+}
+
+case class ProjectionExpr(expr: EvaluableExpr) extends Expr {
+  def project(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context, op: AlgebraOp) = {
+    val projectionBindings = BindingsSchema(bindings, false)
+    projectionBindings.bindContextOp(op)
+    val projectOp = expr.evaluationPlan(wordNet, projectionBindings, context.copy(creation = false))
+    ProjectOp(op, projectOp)
+  }
 }
 
 case class PathExpr(exprs: List[TransformationExpr], projections: List[ProjectionExpr]) extends EvaluableExpr {
