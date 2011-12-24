@@ -8,9 +8,9 @@ trait WordNetStore {
 
   def fetch(relation: Relation, from: List[(String, List[Any])], to: List[String]): DataSet
 
-  def extend(dataSet: DataSet, relation: Relation, from: Int, through: String, to: List[String]): DataSet
+  def extend(extensionSet: ExtensionSet, relation: Relation, from: Int, through: String, to: List[String]): ExtendedExtensionSet
 
-  def extend(dataSet: DataSet, from: Int, through: (String, Option[NodeType]), to: List[(String, Option[NodeType])]): DataSet
+  def extend(extensionSet: ExtensionSet, from: Int, through: (String, Option[NodeType]), to: List[(String, Option[NodeType])]): ExtendedExtensionSet
 
   def getSenses(synset: Synset): List[Sense]
 

@@ -408,7 +408,7 @@ case class RelationTransformationExpr(pos: Int, expr: RelationalExpr) extends Tr
   def push(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context, op: AlgebraOp, plan: LogicalPlanBuilder) = {
     val pattern = expr.evaluationPattern(wordNet, op.rightType(pos))
     plan.appendStep(pos, pattern)
-    ExtendOp(op, pos, pattern)
+    ExtendOp(op, pos, pattern, Nil) // TODO remove bindop
   }
 }
 
@@ -476,7 +476,12 @@ case class RelationCompositionExpr(exprs: List[RelationalExpr]) extends Relation
 
 case class QuantifiedRelationExpr(expr: RelationalExpr, quantifier: Quantifier) extends RelationalExpr {
   def evaluationPattern(wordNet: WordNetSchema, sourceTypes: Set[DataType]) = {
-    QuantifiedRelationPattern(expr.evaluationPattern(wordNet, sourceTypes), quantifier)
+    if (quantifier.lowerBound >= 0 && quantifier.upperBound
+      .map(upperBound => quantifier.lowerBound < upperBound || quantifier.lowerBound == upperBound && upperBound != 0)
+      .getOrElse(true))
+      QuantifiedRelationPattern(expr.evaluationPattern(wordNet, sourceTypes), quantifier)
+    else
+      throw new WQueryStaticCheckException("Invalid bound in quantifier " + quantifier)
   }
 }
 
@@ -657,7 +662,7 @@ case class SynsetByExprReq(expr: EvaluableExpr) extends EvaluableExpr {
               List(ArcPatternArgument(Relation.Destination, WordNet.SenseToSynset.destinationType)))
         }}.toList
 
-        ProjectOp(ExtendOp(op, 0, RelationUnionPattern(patterns)), ContextRefOp(0, Set(SynsetType)))
+        ProjectOp(ExtendOp(op, 0, RelationUnionPattern(patterns), Nil), ContextRefOp(0, Set(SynsetType)))
       } else {
         throw new WQueryStaticCheckException("{...} requires an expression that generates either senses or word forms")
       }
@@ -694,7 +699,7 @@ case class ContextByRelationalExprReq(expr: RelationalExpr) extends EvaluableExp
     if (bindings.areContextVariablesBound) {
       val contextType = bindings.lookupContextVariableType(0)
 
-      ExtendOp(ContextRefOp(0, contextType), 0, expr.evaluationPattern(wordNet, contextType))
+      ExtendOp(ContextRefOp(0, contextType), 0, expr.evaluationPattern(wordNet, contextType), Nil)
     } else {
       val pattern = expr.evaluationPattern(wordNet, DataType.all)
       val fetches = pattern.sourceType.collect {
@@ -709,7 +714,7 @@ case class ContextByRelationalExprReq(expr: RelationalExpr) extends EvaluableExp
       if (pattern.minSize == 0 && pattern.maxSize == Some(0))
         fetchOp
       else
-        ExtendOp(fetchOp , 0, pattern)
+        ExtendOp(fetchOp , 0, pattern, Nil)
     }
   }
 }

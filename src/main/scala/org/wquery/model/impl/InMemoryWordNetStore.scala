@@ -92,41 +92,36 @@ class InMemoryWordNetStore extends WordNetStore {
     }
   }
 
-  def extend(dataSet: DataSet, from: Int, through: (String, Option[NodeType]), to: List[(String, Option[NodeType])]): DataSet = {
-    val buffer = new DataSetBuffer
+  def extend(extensionSet: ExtensionSet, from: Int, through: (String, Option[NodeType]), to: List[(String, Option[NodeType])]): ExtendedExtensionSet = {
+    val buffer = new ExtensionSetBuffer(extensionSet)
     val toMap = to.toMap
 
     for (relation <- relations if relation.arguments.size > 1;
          source <- relation.argumentNames if (through._1 == "_" || through._1 == source) && through._2.map(_ == relation.demandArgument(source).nodeType).getOrElse(true);
          destination <- relation.argumentNames if toMap.isEmpty || toMap.get(destination).map(nodeTypeOption => nodeTypeOption.map(_ == relation.demandArgument(destination).nodeType).getOrElse(true)).getOrElse(false);
          if source != destination)
-      buffer.append(extendWithRelationTuples(dataSet, relation, from, source, List(destination)))
+      buffer.append(extendWithRelationTuples(extensionSet, relation, from, source, List(destination)))
 
-    buffer.toDataSet
+    buffer.toExtensionSet
   }
 
-  def extend(dataSet: DataSet, relation: Relation, from: Int, through: String, to: List[String]) = {
-    val buffer = new DataSetBuffer
+  def extend(extensionSet: ExtensionSet, relation: Relation, from: Int, through: String, to: List[String]) = {
+    val buffer = new ExtensionSetBuffer(extensionSet)
 
-    buffer.append(extendWithRelationTuples(dataSet, relation, from, through, to))
-    extendWithPatterns(dataSet, relation, from, through, to, buffer)
-    buffer.toDataSet
+    buffer.append(extendWithRelationTuples(extensionSet, relation, from, through, to))
+    extendWithPatterns(extensionSet, relation, from, through, to, buffer)
+    buffer.toExtensionSet
   }
 
-  private def extendWithRelationTuples(dataSet: DataSet, relation: Relation, from: Int, through: String, to: List[String]) = {
+  private def extendWithRelationTuples(extensionSet: ExtensionSet, relation: Relation, from: Int, through: String, to: List[String]) = {
     relation.demandArgument(through)
     to.foreach(relation.demandArgument)
 
     val relationSuccessors = successors(relation)
-    val pathBuffer = DataSetBuffers.createPathBuffer
-    val pathVarBuffers = DataSetBuffers.createPathVarBuffers(dataSet.pathVars.keys.toSeq)
-    val stepVarBuffers = DataSetBuffers.createStepVarBuffers(dataSet.stepVars.keys.toSeq)
-    val pathVarNames = dataSet.pathVars.keys
-    val stepVarNames = dataSet.stepVars.keys
+    val builder = new ExtensionSetBuilder(extensionSet)
 
-    for (i <- 0 until dataSet.pathCount) {
-      val tuple = dataSet.paths(i)
-      val source = tuple(tuple.size - 1 - from)
+    for (pathPos <- 0 until extensionSet.size) {
+      val source = extensionSet.right(pathPos, from)
 
       for (relSuccs <- relationSuccessors.get((through, source)); succs <- relSuccs) {
         val tupleBuffer = new ListBuffer[Any]
@@ -136,27 +131,18 @@ class InMemoryWordNetStore extends WordNetStore {
           tupleBuffer.append(succs(destination))
         }
 
-        if (tupleBuffer.size == 2 * to.size) {
-          tupleBuffer.prependAll(tuple)
-          pathBuffer.append(tupleBuffer.toList)
-        }
-
-        for (pathVar <- pathVarNames)
-            pathVarBuffers(pathVar).append(dataSet.pathVars(pathVar)(i))
-
-        for (stepVar <- stepVarNames)
-            stepVarBuffers(stepVar).append(dataSet.stepVars(stepVar)(i))
+        builder.extend(pathPos, tupleBuffer.toList)
       }
     }
 
-    DataSet.fromBuffers(pathBuffer, pathVarBuffers, stepVarBuffers)
+    builder.build
   }
 
-  private def extendWithPatterns(dataSet: DataSet, relation: Relation, from: Int, through: String, to: List[String], buffer: DataSetBuffer) {
+  private def extendWithPatterns(extensionSet: ExtensionSet, relation: Relation, from: Int, through: String, to: List[String], buffer: ExtensionSetBuffer) {
     if (patterns.contains(relation)) {
       if (through == Relation.Source && to.size == 1 && to.head == Relation.Destination) {
         patterns(relation).foreach( pattern =>
-          buffer.append(pattern.extend(this, Bindings(), dataSet, from))
+          buffer.append(pattern.extend(this, Bindings(), extensionSet, from))
         )
       } else {
         throw new WQueryEvaluationException("One cannot traverse the inferred relation "
