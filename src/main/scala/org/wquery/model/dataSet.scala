@@ -68,8 +68,8 @@ object DataSet {
   def apply(paths: List[List[Any]], pathVars: Map[String, List[(Int, Int)]], stepVars: Map[String, List[Int]]) = new DataSet(paths, pathVars, stepVars)
 
   def fromBoundPaths(boundPaths: List[(List[Any], Map[String, (Int, Int)], Map[String, Int])]) = {
-    val pathVarNames = if (boundPaths.isEmpty) Nil else boundPaths.head._2.keys.toSeq 
-    val stepVarNames = if (boundPaths.isEmpty) Nil else boundPaths.head._3.keys.toSeq
+    val pathVarNames = if (boundPaths.isEmpty) Set.empty[String] else boundPaths.head._2.keySet
+    val stepVarNames = if (boundPaths.isEmpty) Set.empty[String] else boundPaths.head._3.keySet
     val pathBuffer = DataSetBuffers.createPathBuffer
     val pathVarBuffers = DataSetBuffers.createPathVarBuffers(pathVarNames)
     val stepVarBuffers = DataSetBuffers.createStepVarBuffers(stepVarNames)    
@@ -103,12 +103,12 @@ object DataSet {
 object DataSetBuffers {
   def createPathBuffer = new ListBuffer[List[Any]]  
     
-  def createPathVarBuffers(pathVarNames: Seq[String]) = {
-    Map[String, ListBuffer[(Int, Int)]](pathVarNames.map(x => (x, new ListBuffer[(Int, Int)])): _*)
+  def createPathVarBuffers(pathVarNames: Set[String]) = {
+    Map[String, ListBuffer[(Int, Int)]](pathVarNames.toSeq.map(x => (x, new ListBuffer[(Int, Int)])): _*)
   }
   
-  def createStepVarBuffers(stepVarNames: Seq[String]) = {
-    Map[String, ListBuffer[Int]](stepVarNames.map(x => (x, new ListBuffer[Int])): _*)
+  def createStepVarBuffers(stepVarNames: Set[String]) = {
+    Map[String, ListBuffer[Int]](stepVarNames.toSeq.map(x => (x, new ListBuffer[Int])): _*)
   }
 }
 
@@ -119,8 +119,8 @@ class DataSetBuffer {
   
   def append(result: DataSet) {
     if (pathBuffer.isEmpty) {
-      pathVarBuffers = DataSetBuffers.createPathVarBuffers(result.pathVars.keys.toSeq)
-      stepVarBuffers = DataSetBuffers.createStepVarBuffers(result.stepVars.keys.toSeq)
+      pathVarBuffers = DataSetBuffers.createPathVarBuffers(result.pathVars.keySet)
+      stepVarBuffers = DataSetBuffers.createStepVarBuffers(result.stepVars.keySet)
     }
 
     if (result.pathVars.keySet != pathVarBuffers.keySet)

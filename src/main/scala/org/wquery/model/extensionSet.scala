@@ -20,7 +20,7 @@ class DataExtensionSet(dataSet: DataSet) extends ExtensionSet {
 
   def path(pathPos: Int) = dataSet.paths(pathPos)
 
-  def extension(pathPos: Int) = Nil
+  def extension(pathPos: Int) = List(pathPos)
 }
 
 class ExtendedExtensionSet(val parent: ExtensionSet, val extensionsList: List[(Int,  List[Any])]) extends ExtensionSet {

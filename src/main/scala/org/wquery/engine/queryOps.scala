@@ -214,13 +214,13 @@ case class JoinOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends QueryOp {
   def evaluate(wordNet: WordNet, bindings: Bindings) = {
     val leftSet = leftOp.evaluate(wordNet, bindings)
     val rightSet = rightOp.evaluate(wordNet, bindings)
-    val leftPathVarNames = leftSet.pathVars.keys.toSeq
-    val leftStepVarNames = leftSet.stepVars.keys.toSeq
-    val rightPathVarNames = rightSet.pathVars.keys.toSeq
-    val rightStepVarNames = rightSet.stepVars.keys.toSeq
+    val leftPathVarNames = leftSet.pathVars.keySet
+    val leftStepVarNames = leftSet.stepVars.keySet
+    val rightPathVarNames = rightSet.pathVars.keySet
+    val rightStepVarNames = rightSet.stepVars.keySet
     val pathBuffer = DataSetBuffers.createPathBuffer
-    val pathVarBuffers = DataSetBuffers.createPathVarBuffers(leftPathVarNames ++ rightPathVarNames)
-    val stepVarBuffers = DataSetBuffers.createStepVarBuffers(leftStepVarNames ++ rightStepVarNames)
+    val pathVarBuffers = DataSetBuffers.createPathVarBuffers(leftPathVarNames union rightPathVarNames)
+    val stepVarBuffers = DataSetBuffers.createStepVarBuffers(leftStepVarNames union rightStepVarNames)
 
     for (i <- 0 until leftSet.pathCount; j <- 0 until rightSet.pathCount) {
       val leftTuple = leftSet.paths(i)
@@ -429,8 +429,8 @@ case class FunctionOp(function: Function, args: AlgebraOp) extends QueryOp {
 case class SelectOp(op: AlgebraOp, condition: Condition) extends QueryOp {
   def evaluate(wordNet: WordNet, bindings: Bindings) = {
     val dataSet = op.evaluate(wordNet, bindings)
-    val pathVarNames = dataSet.pathVars.keys.toSeq
-    val stepVarNames = dataSet.stepVars.keys.toSeq
+    val pathVarNames = dataSet.pathVars.keySet
+    val stepVarNames = dataSet.stepVars.keySet
     val pathBuffer = DataSetBuffers.createPathBuffer
     val pathVarBuffers = DataSetBuffers.createPathVarBuffers(pathVarNames)
     val stepVarBuffers = DataSetBuffers.createStepVarBuffers(stepVarNames)
@@ -520,20 +520,35 @@ case class ExtendOp(op: AlgebraOp, from: Int, pattern: RelationalPattern, variab
   def evaluate(wordNet: WordNet, bindings: Bindings) = {
     val dataSet = op.evaluate(wordNet, bindings)
     val extensionSet = pattern.extend(wordNet.store, bindings, new DataExtensionSet(dataSet), from)
-    val pathVarNames = dataSet.pathVars.keys.toSeq
-    val stepVarNames = dataSet.stepVars.keys.toSeq
+    val template = new VariableTemplate(variables)
+    val dataSetPathVarNames = dataSet.pathVars.keySet
+    val dataSetStepVarNames = dataSet.stepVars.keySet
     val pathBuffer = DataSetBuffers.createPathBuffer
-    val pathVarBuffers = DataSetBuffers.createPathVarBuffers(pathVarNames)
-    val stepVarBuffers = DataSetBuffers.createStepVarBuffers(stepVarNames)
+    val pathVarBuffers = DataSetBuffers.createPathVarBuffers(template.pathVariableName.map(dataSetPathVarNames + _).getOrElse(dataSetPathVarNames))
+    val stepVarBuffers = DataSetBuffers.createStepVarBuffers(dataSetStepVarNames union template.stepVariableNames)
 
-    for ((pathPos, extension) <- extensionSet.extensionsList) {
-      pathBuffer.append(dataSet.paths(pathPos) ++ extension)
+    for (head::extension <- extensionSet.extensions) {
+      val pathPos = head.asInstanceOf[Int]
+      val path = dataSet.paths(pathPos)
+      val pathSize = path.size
+      val extensionSize = extension.size
+      
+      pathBuffer.append(path ++ extension)
 
-      for (pathVar <- pathVarNames)
+      for (pathVar <- dataSetPathVarNames)
         pathVarBuffers(pathVar).append(dataSet.pathVars(pathVar)(pathPos))
 
-      for (stepVar <- stepVarNames)
+      for (stepVar <- dataSetStepVarNames)
         stepVarBuffers(stepVar).append(dataSet.stepVars(stepVar)(pathPos))
+
+      for (pathVar <- template.pathVariableName)
+        pathVarBuffers(pathVar).append(template.pathVariableIndexes(extensionSize, pathSize))
+
+      for (stepVar <- template.leftVariablesNames)
+        stepVarBuffers(stepVar).append(template.leftIndex(stepVar, extensionSize, pathSize))
+
+      for (stepVar <- template.rightVariablesNames)
+        stepVarBuffers(stepVar).append(template.rightIndex(stepVar, extensionSize, pathSize))
     }
     
     DataSet.fromBuffers(pathBuffer, pathVarBuffers, stepVarBuffers)
@@ -667,17 +682,17 @@ case class QuantifiedRelationPattern(pattern: RelationalPattern, quantifier: Qua
       val source = extensionSet.right(i, from)
       builder.extend(i, Nil)
 
-      for (cnode <- closeTuple(wordNet, bindings, source, Set(source), limit))
+      for (cnode <- closeTuple(wordNet, bindings, List(source), Set(source), limit))
         builder.extend(i, cnode)
     }
 
     builder.build
   }
 
-  private def closeTuple(wordNet: WordNetStore, bindings: Bindings, source: Any, forbidden: Set[Any], limit: Option[Int]): Seq[List[Any]] = {
+  private def closeTuple(wordNet: WordNetStore, bindings: Bindings, source: List[Any], forbidden: Set[Any], limit: Option[Int]): Seq[List[Any]] = {
     if (limit.getOrElse(1) > 0) {
-      val transformed = pattern.extend(wordNet, bindings, new DataExtensionSet(DataSet.fromValue(source)), 0)
-      val filtered = transformed.extensions.filter { x => !forbidden.contains(x.last) }
+      val transformed = pattern.extend(wordNet, bindings, new DataExtensionSet(DataSet.fromList(source)), 0)
+      val filtered = transformed.extensions.filter(x => !forbidden.contains(x.last)).map(_.tail)
 
       if (filtered.isEmpty) {
         filtered
@@ -686,10 +701,11 @@ case class QuantifiedRelationPattern(pattern: RelationalPattern, quantifier: Qua
         val newForbidden = forbidden ++ filtered.map(_.last)
 	      val newLimit = limit.map(_ - 1)
 
-        result.appendAll(filtered)
+        for (extension <- filtered) {
+          val newSource = source ++ extension
 
-        filtered.foreach { x =>
-          result.appendAll(closeTuple(wordNet, bindings, x, newForbidden, newLimit))
+          result.append(newSource.tail)
+          result.appendAll(closeTuple(wordNet, bindings, newSource, newForbidden, newLimit))
         }
 
         result
@@ -721,7 +737,7 @@ case class QuantifiedRelationPattern(pattern: RelationalPattern, quantifier: Qua
 }
 
 case class Quantifier(lowerBound: Int, upperBound: Option[Int]) {
-  override def toString = "{" + lowerBound + upperBound.map("," + _ + "}").getOrElse("}")
+  override def toString = "{" + lowerBound + upperBound.map(ub => if (lowerBound == ub) "}" else "," + ub  + "}").getOrElse(",}")
 }
 
 case class VariableRelationalPattern(variable: StepVariable) extends RelationalPattern {
@@ -827,18 +843,79 @@ case class BindOp(op: AlgebraOp, variables: List[Variable]) extends QueryOp with
   }
 }
 
+class VariableTemplate(variables: List[Variable]) {
+  val pathVariablePosition = {
+    val pos = variables.indexWhere{_.isInstanceOf[PathVariable]}
+
+    if (pos != variables.lastIndexWhere{_.isInstanceOf[PathVariable]})
+      throw new WQueryEvaluationException("Variable list '" + variables.mkString + "' contains more than one path variable")
+    else if (pos != -1)
+      Some(pos)
+    else
+      None
+  }
+
+  val pathVariableName = {
+    val name = pathVariablePosition.map(variables(_).name)
+    if (name.map(_ != "_").getOrElse(false)) name else None
+  }
+
+  val stepVariableNames = {
+    val nameList = variables.filterNot(x => (x.isInstanceOf[PathVariable] || x.name == "_")).map(_.name)
+    val distinctNames = nameList.distinct
+
+    if (nameList != distinctNames)
+      throw new WQueryEvaluationException("Variable list contains duplicated variable names")
+    else
+      distinctNames.toSet
+  }
+
+  val (leftVariablesIndexes, rightVariablesIndexes) = pathVariablePosition match {
+    case Some(pathVarPos) =>
+      (variables.slice(0, pathVarPos).map(_.name).zipWithIndex.filterNot{_._1 == "_"}.toMap,
+        variables.slice(pathVarPos + 1, variables.size).map(_.name).reverse.zipWithIndex.filterNot{_._1 == "_"}.toMap)
+    case None =>
+      (Map[String, Int](), variables.map(_.name).reverse.zipWithIndex.filterNot{_._1 == "_"}.toMap)
+  }
+
+  val leftVariablesNames = leftVariablesIndexes.keySet
+  val rightVariablesNames = rightVariablesIndexes.keySet
+
+  def leftIndex(variable: String, tupleSize: Int, shift: Int) = {
+    val pos = leftVariablesIndexes(variable)
+
+    if (pos < tupleSize)
+      shift + pos
+    else
+      throw new WQueryEvaluationException("Variable $" + variable + " cannot be bound")
+  }
+
+  def rightIndex(variable: String, tupleSize: Int, shift: Int) = {
+    val pos = tupleSize - 1 - rightVariablesIndexes(variable)
+
+    if (pos >= 0)
+      shift + pos
+    else
+      throw new WQueryEvaluationException("Variable $" + variable + " cannot be bound")
+  }
+
+  private val leftSize = pathVariablePosition.getOrElse(0)
+  private val rightSize = pathVariablePosition.map(pos => variables.size - (pos + 1)).getOrElse(variables.size)
+
+  def pathVariableIndexes(tupleSize: Int, shift: Int) = (shift + leftSize, shift + tupleSize - rightSize)
+}
+
 trait VariableBindings {
   def bind(dataSet: DataSet, variables: List[Variable]) = {
     if (variables != Nil) {
-      val pathVarBuffers = DataSetBuffers.createPathVarBuffers(variables.filter(x => (x.isInstanceOf[PathVariable] && x.name != "_")).map(_.name))
-      val stepVarBuffers = DataSetBuffers.createStepVarBuffers(variables.filterNot(x => (x.isInstanceOf[PathVariable] || x.name == "_")).map(_.name))
+      val template = new VariableTemplate(variables)
+      val pathVarBuffers = DataSetBuffers.createPathVarBuffers(template.pathVariableName.map(p => Set(p)).getOrElse(Set.empty))
+      val stepVarBuffers = DataSetBuffers.createStepVarBuffers(template.stepVariableNames)
 
-      demandUniqueVariableNames(variables)
-
-      getPathVariablePosition(variables) match {
+      template.pathVariablePosition match {
         case Some(pathVarPos) =>
-          val leftVars = variables.slice(0, pathVarPos).map(_.name).zipWithIndex.filterNot{_._1 == "_"}.toMap
-          val rightVars = variables.slice(pathVarPos + 1, variables.size).map(_.name).reverse.zipWithIndex.filterNot{_._1 == "_"}.toMap
+          val leftVars = template.leftVariablesIndexes
+          val rightVars = template.rightVariablesIndexes
           val pathVarBuffer = if (variables(pathVarPos).name != "_") Some(pathVarBuffers(variables(pathVarPos).name)) else None
           val pathVarStart = leftVars.size
           val pathVarEnd = rightVars.size
@@ -849,36 +926,13 @@ trait VariableBindings {
             dataSet.paths.foreach(tuple => bindVariablesFromLeft(leftVars, stepVarBuffers, tuple.size))
           }
         case None =>
-          val rightVars = variables.map(_.name).reverse.zipWithIndex.filterNot{_._1 == "_"}.toMap
+          val rightVars = template.rightVariablesIndexes
           dataSet.paths.foreach(tuple => bindVariablesFromRight(rightVars, stepVarBuffers, tuple.size))
       }
 
       DataSet(dataSet.paths, dataSet.pathVars ++ pathVarBuffers.mapValues(_.toList), dataSet.stepVars ++ stepVarBuffers.mapValues(_.toList))
     } else {
       dataSet
-    }
-  }
-
-  private def demandUniqueVariableNames(variables: List[Variable]) {
-    val variableNames = variables.filter(x => !x.isInstanceOf[PathVariable] && x.name != "_").map(_.name)
-
-    if (variableNames.size != variableNames.distinct.size)
-      throw new WQueryEvaluationException("Variable list contains duplicated variable names")
-  }
-
-  private def getPathVariablePosition(variables: List[Variable]) = {
-    val pathVarPos = variables.indexWhere{_.isInstanceOf[PathVariable]}
-
-    if (pathVarPos != variables.lastIndexWhere{_.isInstanceOf[PathVariable]}) {
-      throw new WQueryEvaluationException("Variable list '" + variables.map {
-        case PathVariable(v) => "@" + v
-        case StepVariable(v) => "$" + v
-      }.mkString + "' contains more than one path variable")
-    } else {
-      if (pathVarPos != -1)
-        Some(pathVarPos)
-      else
-        None
     }
   }
 
