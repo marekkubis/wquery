@@ -5,7 +5,8 @@ import org.wquery.model.DataType
 
 class LogicalPlanBuilder {
   val steps = new ListBuffer[Step]
-  val bindings = Map[Step, List[Variable]]()
+  val bindings = Map[Step, VariableTemplate]()
+  val conditions = new ListBuffer[Condition]
   
   def createStep(generator: AlgebraOp) {
     steps.append(NodeStep(generator.rightType(0), Some(generator)))
@@ -16,18 +17,20 @@ class LogicalPlanBuilder {
     steps.append(NodeStep(pattern.rightType(0), None)) // TODO use None or Some depending on type
   }
 
-  def appendCondition(condition: Condition) {
+  def appendCondition(condition: Condition) {    
     // if the filter is context dependednt then check if there is a suiatble variable
     //    if yes then substitute
     //    if not then add $__poz variable
 
-    // build condition triggers
+    // build condition trigger
+    
+    conditions.append(condition)
   }
 
   def appendVariables(variables: List[Variable]) {
     // TODO distinguish left and right traverses for step variables
     val step = if (steps.size == 1) steps.last else steps(steps.size - 2)
-    bindings(step) = variables
+    bindings(step) = new VariableTemplate(variables)
   }
 
   def build = { // TODO return multiple plans - PlanEvaluator will choose one
@@ -38,50 +41,50 @@ class LogicalPlanBuilder {
 
   private def walkForward(leftPos: Int, rightPos: Int) = {
     val path = steps.slice(leftPos, rightPos + 1).toList
+    val applier = new ConditionApplier(conditions.toList)
 
-    var op = path.head.asInstanceOf[NodeStep].generator.get // TODO remove this cast and get
+    var op: AlgebraOp = BindOp(path.head.asInstanceOf[NodeStep].generator.get, bindings.get(path.head).map(_.variables).getOrElse(Nil)) // TODO remove this cast and get
 
     for (step <- path.tail) {
-      // bind variables
+      val stepBindings = bindings.get(step)
 
       step match {
         case LinkStep(pos, pattern) =>
-          op = ExtendOp(op, pos, pattern, bindings.get(step).getOrElse(Nil))
+          op = ExtendOp(op, pos, pattern, stepBindings.map(_.variables).getOrElse(Nil))
         case _ =>
           // do nothing
       }
 
-      // fetch triggers for variables bound in the current step
+      stepBindings.map(binds => op = applier.applyConditions(op, binds))
     }
 
     op
   }
+}
 
+class ConditionApplier(conditions: List[Condition]) {
+  val appliedConditions = scala.collection.mutable.Set[Condition]()
+  val alreadyBoundVariables = scala.collection.mutable.Set[Variable]()
+
+  def applyConditions(inputOp: AlgebraOp, template: VariableTemplate) = {
+    var op = inputOp
+
+    for (condition <- conditions.filterNot(appliedConditions.contains(_))) {
+      if (condition.referencedVariables.forall { variable =>
+        alreadyBoundVariables.contains(variable) || template.variables.contains(variable)
+      }) {
+        appliedConditions += condition
+        alreadyBoundVariables ++= condition.referencedVariables
+        op = SelectOp(op, condition)
+      }
+    }
+    
+    op
+  }
 }
 
 sealed abstract class Step
 
 case class NodeStep(types: Set[DataType], generator: Option[AlgebraOp]) extends Step
 
-case class LinkStep(pos: Int, pattern: RelationalPattern) extends Step {
-//  def planForward(wordNet: WordNetSchema, bindings: BindingsSchema, op: AlgebraOp) = {
-//    ExtendOp(op, pos, pattern)
-//  }
-}
-//
-//case class FilterStep(condition: Condition) extends Step {
-//  def planForward(wordNet: WordNetSchema, bindings: BindingsSchema, op: AlgebraOp) = {
-//    SelectOp(op, condition)
-//  }
-//}
-//
-//case class BindStep(variables: List[Variable]) extends Step with VariableTypeBindings {
-//  def planForward(wordNet: WordNetSchema, bindings: BindingsSchema, op: AlgebraOp) = {
-//    if (variables.isEmpty) {
-//      op
-//    } else {
-//      bindTypes(bindings, op, variables)
-//      BindOp(op, variables)
-//    }
-//  }
-//}
+case class LinkStep(pos: Int, pattern: RelationalPattern) extends Step

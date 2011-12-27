@@ -9,4 +9,5 @@ abstract class AlgebraOp {
   def minTupleSize: Int
   def maxTupleSize: Option[Int]
   def bindingsPattern: BindingsPattern
+  def referencedVariables: Set[Variable]
 }

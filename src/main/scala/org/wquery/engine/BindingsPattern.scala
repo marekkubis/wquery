@@ -7,6 +7,13 @@ class BindingsPattern {
   val stepVariablesTypes = Map[String, Set[DataType]]()
   val pathVariablesTypes = Map[String, (AlgebraOp, Int, Int)]()
 
+  def variables = {
+    val stepVariables = stepVariablesTypes.keySet.map(StepVariable(_)).asInstanceOf[Set[Variable]]
+    val pathVariables = pathVariablesTypes.keySet.map(PathVariable(_)).asInstanceOf[Set[Variable]]
+
+    stepVariables union pathVariables
+  }
+
   def bindStepVariableType(name: String, types: Set[DataType]) {
     stepVariablesTypes(name) = types
   }

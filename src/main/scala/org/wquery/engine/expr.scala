@@ -772,16 +772,3 @@ case class ArcByArcExprReq(expr: ArcExpr) extends EvaluableExpr {
 case class AlgebraExpr(op: AlgebraOp) extends EvaluableExpr {
   def evaluationPlan(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context) = op
 }
-
-/*
- * Variables
- */
-sealed abstract class Variable(val name: String) extends Expr
-
-case class StepVariable(override val name: String) extends Variable(name) {
-  override def toString = "$" + name
-}
-
-case class PathVariable(override val name: String) extends Variable(name) {
-  override def toString = "@" + name
-}

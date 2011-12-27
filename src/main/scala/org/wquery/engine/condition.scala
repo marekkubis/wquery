@@ -5,18 +5,25 @@ import org.wquery.model.{WQueryListOrdering, DataType, StringType, WordNet}
 
 sealed abstract class Condition {
   def satisfied(wordNet: WordNet, bindings: Bindings): Boolean
+  def referencedVariables: Set[Variable]
 }
 
 case class OrCondition(exprs: List[Condition]) extends Condition {
   def satisfied(wordNet: WordNet, bindings: Bindings) = exprs.exists(_.satisfied(wordNet, bindings))
+
+  def referencedVariables = exprs.tail.foldLeft(exprs.head.referencedVariables)((vars, expr) => vars union expr.referencedVariables)
 }
 
 case class AndCondition(exprs: List[Condition]) extends Condition {
   def satisfied(wordNet: WordNet, bindings: Bindings) = exprs.forall(_.satisfied(wordNet, bindings))
+
+  def referencedVariables = exprs.tail.foldLeft(exprs.head.referencedVariables)((vars, expr) => vars union expr.referencedVariables)
 }
 
 case class NotCondition(expr: Condition) extends Condition {
   def satisfied(wordNet: WordNet, bindings: Bindings) = !expr.satisfied(wordNet, bindings)
+
+  def referencedVariables = expr.referencedVariables
 }
 
 case class BinaryCondition(op: String, leftOp: AlgebraOp, rightOp: AlgebraOp) extends Condition {
@@ -84,6 +91,8 @@ case class BinaryCondition(op: String, leftOp: AlgebraOp, rightOp: AlgebraOp) ex
         }
     }
   }
+
+  def referencedVariables = leftOp.referencedVariables union rightOp.referencedVariables
 }
 
 case class RightFringeCondition(op: AlgebraOp) extends Condition {
@@ -92,4 +101,6 @@ case class RightFringeCondition(op: AlgebraOp) extends Condition {
 
     !lastSteps.isEmpty && lastSteps.forall(x => x.isInstanceOf[Boolean] && x.asInstanceOf[Boolean])
   }
+
+  def referencedVariables = op.referencedVariables
 }
