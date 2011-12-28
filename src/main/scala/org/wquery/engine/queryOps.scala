@@ -23,6 +23,8 @@ case class EmitOp(op: AlgebraOp) extends QueryOp {
   def bindingsPattern = op.bindingsPattern
 
   def referencedVariables = op.referencedVariables
+
+  def referencesContext = op.referencesContext
 }
 
 case class IterateOp(bindingOp: AlgebraOp, iteratedOp: AlgebraOp) extends QueryOp {
@@ -58,6 +60,8 @@ case class IterateOp(bindingOp: AlgebraOp, iteratedOp: AlgebraOp) extends QueryO
   def bindingsPattern = iteratedOp.bindingsPattern
 
   def referencedVariables = (iteratedOp.referencedVariables -- bindingOp.bindingsPattern.variables) ++ bindingOp.referencedVariables
+
+  def referencesContext = iteratedOp.referencesContext || bindingOp.referencesContext
 }
 
 case class IfElseOp(conditionOp: AlgebraOp, ifOp: AlgebraOp, elseOp: Option[AlgebraOp]) extends QueryOp {
@@ -79,6 +83,8 @@ case class IfElseOp(conditionOp: AlgebraOp, ifOp: AlgebraOp, elseOp: Option[Alge
   def bindingsPattern = elseOp.map(_.bindingsPattern union ifOp.bindingsPattern).getOrElse(ifOp.bindingsPattern)
 
   def referencedVariables = conditionOp.referencedVariables ++ ifOp.referencedVariables ++ elseOp.map(_.referencedVariables).getOrElse(Set.empty)
+
+  def referencesContext = conditionOp.referencesContext || ifOp.referencesContext || elseOp.map(_.referencesContext).getOrElse(false)
 }
 
 case class BlockOp(ops: List[AlgebraOp]) extends QueryOp {
@@ -112,6 +118,8 @@ case class BlockOp(ops: List[AlgebraOp]) extends QueryOp {
   def referencedVariables = ops.headOption
     .map(head => ops.tail.foldLeft(head.referencedVariables)((l,r) => l ++ r.referencedVariables))
     .getOrElse(Set.empty)
+
+  def referencesContext = ops.exists(_.referencesContext)
 }
 
 case class AssignmentOp(variables: List[Variable], op: AlgebraOp) extends QueryOp with VariableBindings {
@@ -145,6 +153,8 @@ case class AssignmentOp(variables: List[Variable], op: AlgebraOp) extends QueryO
   def bindingsPattern = BindingsPattern()
 
   def referencedVariables = op.referencedVariables
+
+  def referencesContext = op.referencesContext
 }
 
 case class WhileDoOp(conditionOp: AlgebraOp, iteratedOp: AlgebraOp) extends QueryOp {
@@ -168,6 +178,8 @@ case class WhileDoOp(conditionOp: AlgebraOp, iteratedOp: AlgebraOp) extends Quer
   def bindingsPattern = iteratedOp.bindingsPattern
 
   def referencedVariables = conditionOp.referencedVariables ++ iteratedOp.referencedVariables
+
+  def referencesContext = conditionOp.referencesContext || iteratedOp.referencesContext
 }
 
 /*
@@ -189,6 +201,8 @@ case class UnionOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends QueryOp {
   def bindingsPattern = BindingsPattern()
 
   def referencedVariables = leftOp.referencedVariables ++ rightOp.referencedVariables
+
+  def referencesContext = leftOp.referencesContext || rightOp.referencesContext
 }
 
 case class ExceptOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends QueryOp {
@@ -210,6 +224,8 @@ case class ExceptOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends QueryOp {
   def bindingsPattern = BindingsPattern()
 
   def referencedVariables = leftOp.referencedVariables ++ rightOp.referencedVariables
+
+  def referencesContext = leftOp.referencesContext || rightOp.referencesContext
 }
 
 case class IntersectOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends QueryOp {
@@ -228,6 +244,8 @@ case class IntersectOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends QueryOp {
   def bindingsPattern = BindingsPattern()
 
   def referencedVariables = leftOp.referencedVariables ++ rightOp.referencedVariables
+
+  def referencesContext = leftOp.referencesContext || rightOp.referencesContext
 }
 
 case class JoinOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends QueryOp {
@@ -300,6 +318,8 @@ case class JoinOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends QueryOp {
   def bindingsPattern = leftOp.bindingsPattern union rightOp.bindingsPattern
 
   def referencedVariables = leftOp.referencedVariables ++ rightOp.referencedVariables
+
+  def referencesContext = leftOp.referencesContext || rightOp.referencesContext
 }
 
 /*
@@ -340,6 +360,8 @@ abstract class BinaryArithmeticOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends
   def bindingsPattern = BindingsPattern()
 
   def referencedVariables = leftOp.referencedVariables ++ rightOp.referencedVariables
+
+  def referencesContext = leftOp.referencesContext || rightOp.referencesContext
 }
 
 case class AddOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends BinaryArithmeticOp(leftOp, rightOp) {
@@ -433,6 +455,8 @@ case class MinusOp(op: AlgebraOp) extends QueryOp {
   def bindingsPattern = BindingsPattern()
 
   def referencedVariables = op.referencedVariables
+
+  def referencesContext = op.referencesContext
 }
 
 case class FunctionOp(function: Function, args: AlgebraOp) extends QueryOp {
@@ -449,6 +473,8 @@ case class FunctionOp(function: Function, args: AlgebraOp) extends QueryOp {
   def bindingsPattern = function.bindingsPattern(args)
 
   def referencedVariables = args.referencedVariables
+
+  def referencesContext = args.referencesContext
 }
 
 /*
@@ -502,6 +528,8 @@ case class SelectOp(op: AlgebraOp, condition: Condition) extends QueryOp {
   def bindingsPattern = op.bindingsPattern
 
   def referencedVariables = op.referencedVariables ++ (condition.referencedVariables -- op.bindingsPattern.variables)
+
+  def referencesContext = op.referencesContext
 }
 
 case class ProjectOp(op: AlgebraOp, projectOp: AlgebraOp) extends QueryOp {
@@ -546,9 +574,11 @@ case class ProjectOp(op: AlgebraOp, projectOp: AlgebraOp) extends QueryOp {
   def bindingsPattern = projectOp.bindingsPattern
 
   def referencedVariables = op.referencedVariables ++ (projectOp.referencedVariables -- op.bindingsPattern.variables)
+
+  def referencesContext = op.referencesContext
 }
 
-case class ExtendOp(op: AlgebraOp, from: Int, pattern: RelationalPattern, variables: List[Variable]) extends QueryOp {
+case class ExtendOp(op: AlgebraOp, from: Int, pattern: RelationalPattern, variables: List[Variable]) extends QueryOp with VariableTypeBindings {
   def evaluate(wordNet: WordNet, bindings: Bindings) = {
     val dataSet = op.evaluate(wordNet, bindings)
     val extensionSet = pattern.extend(wordNet.store, bindings, new DataExtensionSet(dataSet), from)
@@ -614,9 +644,15 @@ case class ExtendOp(op: AlgebraOp, from: Int, pattern: RelationalPattern, variab
 
   def maxTupleSize = op.maxTupleSize.map(maxTupleSize => pattern.maxSize.map(maxSize => maxTupleSize + maxSize)).getOrElse(None)
 
-  def bindingsPattern = op.bindingsPattern
+  def bindingsPattern = {
+    val pattern = op.bindingsPattern
+    bindTypes(pattern, this, variables)
+    pattern
+  }
 
   def referencedVariables = op.referencedVariables
+
+  def referencesContext = op.referencesContext
 }
 
 sealed abstract class RelationalPattern {
@@ -877,6 +913,8 @@ case class BindOp(op: AlgebraOp, variables: List[Variable]) extends QueryOp with
   }
 
   def referencedVariables = op.referencedVariables
+
+  def referencesContext = op.referencesContext
 }
 
 class VariableTemplate(val variables: List[Variable]) {
@@ -884,7 +922,7 @@ class VariableTemplate(val variables: List[Variable]) {
     val pos = variables.indexWhere{_.isInstanceOf[PathVariable]}
 
     if (pos != variables.lastIndexWhere{_.isInstanceOf[PathVariable]})
-      throw new WQueryEvaluationException("Variable list '" + variables.mkString + "' contains more than one path variable")
+      throw new WQueryEvaluationException("Variable list " + variables.mkString + " contains more than one path variable")
     else if (pos != -1)
       Some(pos)
     else
@@ -901,7 +939,7 @@ class VariableTemplate(val variables: List[Variable]) {
     val distinctNames = nameList.distinct
 
     if (nameList != distinctNames)
-      throw new WQueryEvaluationException("Variable list contains duplicated variable names")
+      throw new WQueryEvaluationException("Variable list " + variables.mkString + " contains duplicated variable names")
     else
       distinctNames.toSet
   }
@@ -939,6 +977,10 @@ class VariableTemplate(val variables: List[Variable]) {
   private val rightSize = pathVariablePosition.map(pos => variables.size - (pos + 1)).getOrElse(variables.size)
 
   def pathVariableIndexes(tupleSize: Int, shift: Int) = (shift + leftSize, shift + tupleSize - rightSize)
+}
+
+object VariableTemplate {
+  val empty = new VariableTemplate(Nil)
 }
 
 trait VariableBindings {
@@ -1018,6 +1060,8 @@ case class FetchOp(relation: Relation, from: List[(String, List[Any])], to: List
   def bindingsPattern = BindingsPattern()
 
   def referencedVariables = Set.empty
+
+  def referencesContext = false
 }
 
 object FetchOp {
@@ -1057,6 +1101,8 @@ case class ConstantOp(dataSet: DataSet) extends QueryOp {
   def bindingsPattern = BindingsPattern() // assumed that constant dataset does not contain variable bindings
 
   def referencedVariables = Set.empty
+
+  def referencesContext = false
 }
 
 object ConstantOp {
@@ -1068,10 +1114,10 @@ object ConstantOp {
 /*
  * Reference operations
  */
-case class ContextRefOp(ref: Int, types: Set[DataType]) extends QueryOp {
+case class ContextRefOp(types: Set[DataType]) extends QueryOp {
   def evaluate(wordNet: WordNet, bindings: Bindings) = {
-    bindings.lookupContextVariable(ref).map(DataSet.fromValue(_))
-      .getOrElse(throw new WQueryEvaluationException("Backward reference (" + ref + ") too far"))
+    bindings.lookupContextVariable.map(DataSet.fromValue(_))
+      .getOrElse(throw new WQueryEvaluationException("Context is not bound"))
   }
 
   def leftType(pos: Int) = if (pos == 0) types else Set.empty
@@ -1085,6 +1131,8 @@ case class ContextRefOp(ref: Int, types: Set[DataType]) extends QueryOp {
   def bindingsPattern = BindingsPattern()
 
   def referencedVariables = Set.empty
+
+  def referencesContext = true
 }
 
 case class PathVariableRefOp(name: String, types: (AlgebraOp, Int, Int)) extends QueryOp {
@@ -1101,6 +1149,8 @@ case class PathVariableRefOp(name: String, types: (AlgebraOp, Int, Int)) extends
   def bindingsPattern = BindingsPattern()
 
   def referencedVariables = Set(PathVariable(name))
+
+  def referencesContext = false
 }
 
 case class StepVariableRefOp(name: String, types: Set[DataType]) extends QueryOp {
@@ -1117,6 +1167,6 @@ case class StepVariableRefOp(name: String, types: Set[DataType]) extends QueryOp
   def bindingsPattern = BindingsPattern()
 
   def referencedVariables = Set(StepVariable(name))
+
+  def referencesContext = false
 }
-
-

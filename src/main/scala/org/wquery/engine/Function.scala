@@ -12,6 +12,7 @@ abstract class Function(val name: String) {
   def minTupleSize(args: AlgebraOp): Int
   def maxTupleSize(args: AlgebraOp): Option[Int]
   def bindingsPattern(args: AlgebraOp): BindingsPattern
+  override def toString = name
 }
 
 abstract class DataSetFunction(override val name: String) extends Function(name) {

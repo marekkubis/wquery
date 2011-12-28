@@ -6,24 +6,31 @@ import org.wquery.model.{WQueryListOrdering, DataType, StringType, WordNet}
 sealed abstract class Condition {
   def satisfied(wordNet: WordNet, bindings: Bindings): Boolean
   def referencedVariables: Set[Variable]
+  def referencesContext: Boolean
 }
 
 case class OrCondition(exprs: List[Condition]) extends Condition {
   def satisfied(wordNet: WordNet, bindings: Bindings) = exprs.exists(_.satisfied(wordNet, bindings))
 
   def referencedVariables = exprs.tail.foldLeft(exprs.head.referencedVariables)((vars, expr) => vars union expr.referencedVariables)
+
+  def referencesContext = exprs.exists(_.referencesContext)
 }
 
 case class AndCondition(exprs: List[Condition]) extends Condition {
   def satisfied(wordNet: WordNet, bindings: Bindings) = exprs.forall(_.satisfied(wordNet, bindings))
 
   def referencedVariables = exprs.tail.foldLeft(exprs.head.referencedVariables)((vars, expr) => vars union expr.referencedVariables)
+
+  def referencesContext = exprs.exists(_.referencesContext)
 }
 
 case class NotCondition(expr: Condition) extends Condition {
   def satisfied(wordNet: WordNet, bindings: Bindings) = !expr.satisfied(wordNet, bindings)
 
   def referencedVariables = expr.referencedVariables
+
+  def referencesContext = expr.referencesContext
 }
 
 case class BinaryCondition(op: String, leftOp: AlgebraOp, rightOp: AlgebraOp) extends Condition {
@@ -93,6 +100,8 @@ case class BinaryCondition(op: String, leftOp: AlgebraOp, rightOp: AlgebraOp) ex
   }
 
   def referencedVariables = leftOp.referencedVariables union rightOp.referencedVariables
+
+  def referencesContext = leftOp.referencesContext || rightOp.referencesContext
 }
 
 case class RightFringeCondition(op: AlgebraOp) extends Condition {
@@ -103,4 +112,6 @@ case class RightFringeCondition(op: AlgebraOp) extends Condition {
   }
 
   def referencedVariables = op.referencedVariables
+
+  def referencesContext = op.referencesContext
 }

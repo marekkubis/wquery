@@ -103,23 +103,21 @@ class FiltersTestSuite extends WQueryTestSuite {
 
   // [# < 2]
   
-  @Test def testSingleBackReference() = result of ("last({person:1}.senses[# != individual:1:n])") should equal ("mortal:1:n\nperson:1:n\nsomebody:1:n\nsomeone:1:n\nsoul:2:n\n")
+  @Test def testBackReference() = result of ("last({person:1}.senses[# != individual:1:n])") should equal ("mortal:1:n\nperson:1:n\nsomebody:1:n\nsomeone:1:n\nsoul:2:n\n")
     
-  @Test def testRelationAfterSingleBackReference() = result of ("last({person:1}.senses[# != individual:1:n].word)") should equal ("mortal\nperson\nsomebody\nsomeone\nsoul\n")
+  @Test def testRelationAfterBackReference() = result of ("last({person:1}.senses[# != individual:1:n].word)") should equal ("mortal\nperson\nsomebody\nsomeone\nsoul\n")
     
-  @Test def testTwoSingleBackReferences() = result of ("last({person}.senses[# != person:2:n].word[# != mortal])") should equal ("individual\nperson\nsomebody\nsomeone\nsoul\n")    
+  @Test def testTwoBackReferences() = result of ("last({person}.senses[# != person:2:n].word[# != mortal])") should equal ("individual\nperson\nsomebody\nsomeone\nsoul\n")
     
-  @Test def testSingleAndTripleBackReference() = result of ("last({person}.senses.word[### != individual:1:n and # != mortal])") should equal ("person\nsomebody\nsomeone\nsoul\n")
-
-  @Test def testSingleBackReferenceDotHypernyms() = result of ("{person}[{organism:1:n} in #.hypernym]") should equal ("{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n }\n")
+  @Test def testBackReferenceDotHypernyms() = result of ("{person}[{organism:1:n} in #.hypernym]") should equal ("{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n }\n")
     
   @Test def testHashFreeBackReference() = result of ("{person}[{organism:1:n} in hypernym]") should equal ("{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n }\n")
  
-  @Test def testSingleBackReferenceDotHypernymsWords() = result of ("{person}[organism in #.hypernym.words]") should equal ("{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n }\n")
+  @Test def testBackReferenceDotHypernymsWords() = result of ("{person}[organism in #.hypernym.words]") should equal ("{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n }\n")
     
   @Test def testHashFreeBackReferenceDotHypernymsWords() = result of ("{person}[organism in hypernym.words]") should equal ("{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n }\n")     
 
-  @Test def testSingleBackReferenceDotHypernymsCount() = result of ("{person}[count(#.hypernym)>1]") should equal ("{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n }\n")
+  @Test def testBackReferenceDotHypernymsCount() = result of ("{person}[count(#.hypernym)>1]") should equal ("{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n }\n")
 
   @Test def testHashFreeBackReferenceDotHypernymsCount() = result of ("{person}[count(hypernym)>1]") should equal ("{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n }\n")
 
@@ -147,9 +145,7 @@ class FiltersTestSuite extends WQueryTestSuite {
 
   @Test def testFloatGeneratorFilter()  = result of ("{bus}.senses.sensenum.(3.0)") should equal ("{ bus:4:n jalopy:1:n heap:3:n } senses heap:3:n sensenum 3\n")
 
-  @Test def testSingleBackReferenceGeneratorFilter()  = result of ("{bus}.hypernym.#") should equal ("{ bus:4:n jalopy:1:n heap:3:n } hypernym { car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n }\n")
-
-  @Test def testMultiBackReferenceGeneratorFilter()  = result of ("{bus}.hypernym.###") should equal ("(no result)\n")
+  @Test def testBackReferenceGeneratorFilter()  = result of ("{bus}.hypernym.#") should equal ("{ bus:4:n jalopy:1:n heap:3:n } hypernym { car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n }\n")
 
   @Test def testFilterGeneratorFilter()  = result of ("{bus}.nl.[1!=1]") should equal ("{ bus:4:n jalopy:1:n heap:3:n } nl false\n")
 

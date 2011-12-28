@@ -29,7 +29,7 @@ class Bindings(parent: Option[Bindings], updatesParent: Boolean) {
    
   def lookupStepVariable(name: String): Option[Any] = stepVariables.get(name).orElse(parent.flatMap(_.lookupStepVariable(name)))
 
-  def lookupContextVariable(pos: Int): Option[Any] = if (contextVars.size - 1 - pos >= 0) Some(contextVars(contextVars.size - 1 - pos)) else parent.flatMap(_.lookupContextVariable(pos))
+  def lookupContextVariable: Option[Any] = if (!contextVars.isEmpty) Some(contextVars.last) else parent.flatMap(_.lookupContextVariable)
 }
 
 object Bindings {

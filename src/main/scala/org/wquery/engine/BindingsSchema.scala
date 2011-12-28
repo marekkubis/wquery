@@ -36,9 +36,9 @@ class BindingsSchema(val parent: Option[BindingsSchema], updatesParent: Boolean)
       .orElse(contextOp.map(op => op.bindingsPattern.lookupPathVariableType(name)).getOrElse(None))
   }
 
-  def lookupContextVariableType(pos: Int): Set[DataType] = {
-    contextOp.map(_.rightType(pos))
-      .getOrElse(parent.map(_.lookupContextVariableType(pos))
+  def lookupContextVariableType: Set[DataType] = {
+    contextOp.map(_.rightType(0))
+      .getOrElse(parent.map(_.lookupContextVariableType)
         .getOrElse{throw new WQueryEvaluationException("Operator # placed outside of a filter")})
   }
 

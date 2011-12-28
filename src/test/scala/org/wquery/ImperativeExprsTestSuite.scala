@@ -4,7 +4,7 @@ import org.testng.annotations.Test
 class ImperativeExprsTestSuite extends WQueryTestSuite {
   @Test def testStepIterationAndEmission() = result of ("from {person}$a emit $a") should equal ("{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n }\n{ person:2:n }\n{ person:3:n }\n")
 
-  @Test def testPathIterationAndEmission() = result of ("from {person}.hypernym@P emit @P") should equal ("{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n } hypernym { organism:1:n being:2:n }\n{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n } hypernym { causal agent:1:n cause:4:n causal agency:1:n }\n{ person:2:n } hypernym { human body:1:n physical body:1:n material body:1:n soma:3:n build:2:n figure:2:n physique:2:n anatomy:2:n shape:3:n bod:1:n chassis:1:n frame:3:n form:5:n flesh:2:n }\n{ person:3:n } hypernym { grammatical category:1:n syntactic category:1:n }\n")
+  @Test def testPathIterationAndEmission() = result of ("from {person}.hypernym@P emit @P") should equal ("hypernym { organism:1:n being:2:n }\nhypernym { causal agent:1:n cause:4:n causal agency:1:n }\nhypernym { human body:1:n physical body:1:n material body:1:n soma:3:n build:2:n figure:2:n physique:2:n anatomy:2:n shape:3:n bod:1:n chassis:1:n frame:3:n form:5:n flesh:2:n }\nhypernym { grammatical category:1:n syntactic category:1:n }\n")
   
   @Test def testBlockAndAssignment() = result of ("from {person:1:n}$a, {person:2:n}$b do $c$d := $b, $a emit $c, $d end") should equal ("{ person:2:n } { person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n }\n")     
 

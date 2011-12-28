@@ -427,7 +427,7 @@ case class NodeTransformationExpr(generator: EvaluableExpr) extends Transformati
     if (op != ConstantOp.empty) {
       val filterBindings = BindingsSchema(bindings, false)
       filterBindings.bindContextOp(op)
-      val condition = BinaryCondition("in", ContextRefOp(0, op.rightType(0)), generator.evaluationPlan(wordNet, filterBindings, context))
+      val condition = BinaryCondition("in", ContextRefOp(op.rightType(0)), generator.evaluationPlan(wordNet, filterBindings, context))
       plan.appendCondition(condition)
       SelectOp(op, condition)
     } else {
@@ -662,7 +662,7 @@ case class SynsetByExprReq(expr: EvaluableExpr) extends EvaluableExpr {
               List(ArcPatternArgument(Relation.Destination, WordNet.SenseToSynset.destinationType)))
         }}.toList
 
-        ProjectOp(ExtendOp(op, 0, RelationUnionPattern(patterns), Nil), ContextRefOp(0, Set(SynsetType)))
+        ProjectOp(ExtendOp(op, 0, RelationUnionPattern(patterns), Nil), ContextRefOp(Set(SynsetType)))
       } else {
         throw new WQueryStaticCheckException("{...} requires an expression that generates either senses or word forms")
       }
@@ -683,7 +683,7 @@ case class ContextByRelationalExprReq(expr: RelationalExpr) extends EvaluableExp
   def evaluationPlan(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context) = {
     expr match {
       case RelationUnionExpr(List(QuantifiedRelationExpr(ArcExpr(List(ArcExprArgument(id, None))),Quantifier(1,Some(1))))) =>
-        val sourceTypes = if (bindings.areContextVariablesBound) bindings.lookupContextVariableType(0) else DataType.all
+        val sourceTypes = if (bindings.areContextVariablesBound) bindings.lookupContextVariableType else DataType.all
 
         if (wordNet.containsRelation(id, Map((Relation.Source, sourceTypes))) || id == "_") {
           extendBasedEvaluationPlan(wordNet, bindings)
@@ -697,9 +697,9 @@ case class ContextByRelationalExprReq(expr: RelationalExpr) extends EvaluableExp
 
   private def extendBasedEvaluationPlan(wordNet: WordNetSchema, bindings: BindingsSchema) = {
     if (bindings.areContextVariablesBound) {
-      val contextType = bindings.lookupContextVariableType(0)
+      val contextType = bindings.lookupContextVariableType
 
-      ExtendOp(ContextRefOp(0, contextType), 0, expr.evaluationPattern(wordNet, contextType), Nil)
+      ExtendOp(ContextRefOp(contextType), 0, expr.evaluationPattern(wordNet, contextType), Nil)
     } else {
       val pattern = expr.evaluationPattern(wordNet, DataType.all)
       val fetches = pattern.sourceType.collect {
@@ -721,13 +721,13 @@ case class ContextByRelationalExprReq(expr: RelationalExpr) extends EvaluableExp
 
 case class WordFormByRegexReq(regex: String) extends EvaluableExpr {
   def evaluationPlan(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context) = {
-    SelectOp(FetchOp.words, BinaryConditionalExpr("=~", AlgebraExpr(ContextRefOp(0, Set(StringType))),
+    SelectOp(FetchOp.words, BinaryConditionalExpr("=~", AlgebraExpr(ContextRefOp(Set(StringType))),
       AlgebraExpr(ConstantOp.fromValue(regex))).conditionPlan(wordNet, bindings, context))
   }
 }
 
-case class ContextReferenceReq(pos: Int) extends EvaluableExpr {
-  def evaluationPlan(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context) = ContextRefOp(pos, bindings.lookupContextVariableType(pos))
+case class ContextReferenceReq() extends EvaluableExpr {
+  def evaluationPlan(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context) = ContextRefOp(bindings.lookupContextVariableType)
 }
 
 case class BooleanByFilterReq(conditionalExpr: ConditionalExpr) extends EvaluableExpr {

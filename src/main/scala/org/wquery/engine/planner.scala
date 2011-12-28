@@ -6,7 +6,7 @@ import org.wquery.model.DataType
 class LogicalPlanBuilder {
   val steps = new ListBuffer[Step]
   val bindings = Map[Step, VariableTemplate]()
-  val conditions = new ListBuffer[Condition]
+  val conditions = new ListBuffer[(Option[Step], Condition)]
   
   def createStep(generator: AlgebraOp) {
     steps.append(NodeStep(generator.rightType(0), Some(generator)))
@@ -24,7 +24,7 @@ class LogicalPlanBuilder {
 
     // build condition trigger
     
-    conditions.append(condition)
+    conditions.append((steps.lastOption, condition))
   }
 
   def appendVariables(variables: List[Variable]) {
@@ -44,6 +44,7 @@ class LogicalPlanBuilder {
     val applier = new ConditionApplier(conditions.toList)
 
     var op: AlgebraOp = BindOp(path.head.asInstanceOf[NodeStep].generator.get, bindings.get(path.head).map(_.variables).getOrElse(Nil)) // TODO remove this cast and get
+    op = applier.applyConditions(op, bindings.get(path.head).getOrElse(VariableTemplate.empty), path.head)
 
     for (step <- path.tail) {
       val stepBindings = bindings.get(step)
@@ -55,24 +56,24 @@ class LogicalPlanBuilder {
           // do nothing
       }
 
-      stepBindings.map(binds => op = applier.applyConditions(op, binds))
+      op = applier.applyConditions(op, stepBindings.getOrElse(VariableTemplate.empty), step)
     }
 
     op
   }
 }
 
-class ConditionApplier(conditions: List[Condition]) {
+class ConditionApplier(conditions: List[(Option[Step], Condition)]) {
   val appliedConditions = scala.collection.mutable.Set[Condition]()
   val alreadyBoundVariables = scala.collection.mutable.Set[Variable]()
 
-  def applyConditions(inputOp: AlgebraOp, template: VariableTemplate) = {
+  def applyConditions(inputOp: AlgebraOp, template: VariableTemplate, currentStep: Step) = {
     var op = inputOp
 
-    for (condition <- conditions.filterNot(appliedConditions.contains(_))) {
+    for ((step, condition) <- conditions.filterNot{ case (_, c) => appliedConditions.contains(c)}) {
       if (condition.referencedVariables.forall { variable =>
         alreadyBoundVariables.contains(variable) || template.variables.contains(variable)
-      }) {
+      } && (!condition.referencesContext || step.map(_ == currentStep).getOrElse(false))) {
         appliedConditions += condition
         alreadyBoundVariables ++= condition.referencedVariables
         op = SelectOp(op, condition)
