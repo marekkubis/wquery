@@ -16,7 +16,7 @@ class WQuery(val wordNet: WordNet) extends Logging {
   
   def execute(input:String): Result = {    
     try {
-      val expr = parser parse input    
+      val expr = parser parse input
       debug("Expr: " + expr)
 
       val plan = expr.evaluationPlan(wordNet.schema, bindingsSchema, Context())

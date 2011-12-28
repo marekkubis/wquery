@@ -123,7 +123,7 @@ class FiltersTestSuite extends WQueryTestSuite {
 
   @Test def testHashFreeBackReferenceDotHypernymsOrHyponymsWords() = result of ("{person}[organism in (hypernym|^hypernym).words]") should equal ("{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n }\n")
   
-  @Test def testArcFilter() = result of ("{}.partial_holonym|member_holonym$r$_[$r = \\member_holonym]") should equal ("$r=member_holonym { person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n } member_holonym { people:1:n }\n$r=member_holonym { cab:3:n hack:5:n taxi:1:n taxicab:1:n } member_holonym { fleet:2:n }\n")
+  @Test def testArcFilter() = result of ("{}.partial_holonym|member_holonym$q$_[$q = \\member_holonym]") should equal ("$q=member_holonym { person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n } member_holonym { people:1:n }\n$q=member_holonym { cab:3:n hack:5:n taxi:1:n taxicab:1:n } member_holonym { fleet:2:n }\n")
 
   // generator filters
 

@@ -575,7 +575,7 @@ case class ProjectionExpr(expr: EvaluableExpr) extends Expr {
 
 case class PathExpr(exprs: List[TransformationExpr], projections: List[ProjectionExpr]) extends EvaluableExpr {
   def evaluationPlan(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context) = {
-    val planner = new LogicalPlanBuilder
+    val planner = new LogicalPlanBuilder(bindings)
 
     exprs.foldLeft[AlgebraOp](ConstantOp.empty) { (contextOp, expr) =>
       expr.push(wordNet, bindings, context, contextOp, planner)

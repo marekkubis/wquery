@@ -3,7 +3,7 @@ package org.wquery.engine
 import collection.mutable.{ListBuffer, Map}
 import org.wquery.model.DataType
 
-class LogicalPlanBuilder {
+class LogicalPlanBuilder(context: BindingsSchema) {
   val steps = new ListBuffer[Step]
   val bindings = Map[Step, VariableTemplate]()
   val conditions = new ListBuffer[(Option[Step], Condition)]
@@ -41,9 +41,10 @@ class LogicalPlanBuilder {
 
   private def walkForward(leftPos: Int, rightPos: Int) = {
     val path = steps.slice(leftPos, rightPos + 1).toList
-    val applier = new ConditionApplier(conditions.toList)
+    val applier = new ConditionApplier(conditions.toList, context)
 
-    var op: AlgebraOp = BindOp(path.head.asInstanceOf[NodeStep].generator.get, bindings.get(path.head).map(_.variables).getOrElse(Nil)) // TODO remove this cast and get
+    var op: AlgebraOp = path.head.asInstanceOf[NodeStep].generator.get // TODO remove this cast and get
+    op = bindings.get(path.head).map(template => BindOp(op, template.variables)).getOrElse(op)
     op = applier.applyConditions(op, bindings.get(path.head).getOrElse(VariableTemplate.empty), path.head)
 
     for (step <- path.tail) {
@@ -63,7 +64,7 @@ class LogicalPlanBuilder {
   }
 }
 
-class ConditionApplier(conditions: List[(Option[Step], Condition)]) {
+class ConditionApplier(conditions: List[(Option[Step], Condition)], context: BindingsSchema) {
   val appliedConditions = scala.collection.mutable.Set[Condition]()
   val alreadyBoundVariables = scala.collection.mutable.Set[Variable]()
 
@@ -73,7 +74,7 @@ class ConditionApplier(conditions: List[(Option[Step], Condition)]) {
 
     for ((step, condition) <- conditions.filterNot{ case (_, c) => appliedConditions.contains(c)}) {
       if (condition.referencedVariables.forall { variable =>
-        alreadyBoundVariables.contains(variable) || template.variables.contains(variable)
+        alreadyBoundVariables.contains(variable) || template.variables.contains(variable) || (variable.isInstanceOf[PathVariable] && context.lookupPathVariableType(variable.name).isDefined) || (variable.isInstanceOf[StepVariable] && context.lookupStepVariableType(variable.name).isDefined) //TODO implement lookupVariableType
       } && (!condition.referencesContext || step.map(_ == currentStep).getOrElse(false))) {
         appliedConditions += condition
         op = SelectOp(op, condition)
