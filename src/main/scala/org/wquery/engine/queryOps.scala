@@ -850,7 +850,7 @@ case class VariableRelationalPattern(variable: StepVariable) extends RelationalP
 case class ArcPattern(relation: Option[Relation], source: ArcPatternArgument, destinations: List[ArcPatternArgument]) extends RelationalPattern {
   def extend(wordNet: WordNetStore, bindings: Bindings, extensionSet: ExtensionSet, from: Int) = {
     relation.map(wordNet.extend(extensionSet, _, from, source.name, destinations.map(_.name)))
-      .getOrElse(wordNet.extend(extensionSet, from, (source.name, source.nodeType), destinations.map(dest => (dest.name, dest.nodeType))))
+      .getOrElse(wordNet.extend(extensionSet, from, (source.name, source.nodeType), if (destinations == List(ArcPatternArgument("_", None))) Nil else destinations.map(dest => (dest.name, dest.nodeType))))
   }
 
   def minSize = 2*destinations.size

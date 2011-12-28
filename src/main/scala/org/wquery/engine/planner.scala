@@ -9,12 +9,12 @@ class LogicalPlanBuilder {
   val conditions = new ListBuffer[(Option[Step], Condition)]
   
   def createStep(generator: AlgebraOp) {
-    steps.append(NodeStep(generator.rightType(0), Some(generator)))
+    steps.append(new NodeStep(generator.rightType(0), Some(generator)))
   }
 
   def appendStep(pos: Int, pattern: RelationalPattern) {
-    steps.append(LinkStep(pos, pattern))
-    steps.append(NodeStep(pattern.rightType(0), None)) // TODO use None or Some depending on type
+    steps.append(new LinkStep(pos, pattern))
+    steps.append(new NodeStep(pattern.rightType(0), None)) // TODO use None or Some depending on type
   }
 
   def appendCondition(condition: Condition) {    
@@ -50,8 +50,8 @@ class LogicalPlanBuilder {
       val stepBindings = bindings.get(step)
 
       step match {
-        case LinkStep(pos, pattern) =>
-          op = ExtendOp(op, pos, pattern, stepBindings.map(_.variables).getOrElse(Nil))
+        case link: LinkStep =>
+          op = ExtendOp(op, link.pos, link.pattern, stepBindings.map(_.variables).getOrElse(Nil))
         case _ =>
           // do nothing
       }
@@ -69,13 +69,13 @@ class ConditionApplier(conditions: List[(Option[Step], Condition)]) {
 
   def applyConditions(inputOp: AlgebraOp, template: VariableTemplate, currentStep: Step) = {
     var op = inputOp
+    alreadyBoundVariables ++= template.variables.filterNot(_.name == "_") // TODO move to namedVariables, remove template, use current step
 
     for ((step, condition) <- conditions.filterNot{ case (_, c) => appliedConditions.contains(c)}) {
       if (condition.referencedVariables.forall { variable =>
         alreadyBoundVariables.contains(variable) || template.variables.contains(variable)
       } && (!condition.referencesContext || step.map(_ == currentStep).getOrElse(false))) {
         appliedConditions += condition
-        alreadyBoundVariables ++= condition.referencedVariables
         op = SelectOp(op, condition)
       }
     }
@@ -86,6 +86,10 @@ class ConditionApplier(conditions: List[(Option[Step], Condition)]) {
 
 sealed abstract class Step
 
-case class NodeStep(types: Set[DataType], generator: Option[AlgebraOp]) extends Step
+class NodeStep(types: Set[DataType], val generator: Option[AlgebraOp]) extends Step {
+  override def toString = "node(" + generator + ")"
+}
 
-case class LinkStep(pos: Int, pattern: RelationalPattern) extends Step
+class LinkStep(val pos: Int, val pattern: RelationalPattern) extends Step {
+  override def toString = "link(" + pos + "," + pattern + ")"
+}
