@@ -122,13 +122,13 @@ case class BlockOp(ops: List[AlgebraOp]) extends QueryOp {
   def referencesContext = ops.exists(_.referencesContext)
 }
 
-case class AssignmentOp(variables: List[Variable], op: AlgebraOp) extends QueryOp with VariableBindings {
+case class AssignmentOp(variables: VariableTemplate, op: AlgebraOp) extends QueryOp with VariableBindings {
   def evaluate(wordNet: WordNet, bindings: Bindings) = {
     val result = op.evaluate(wordNet, bindings)
 
     if (result.pathCount == 1) { // TODO remove this constraint
       val tuple = result.paths.head
-      val dataSet = bind(DataSet.fromTuple(tuple), VariableTemplate(variables))
+      val dataSet = bind(DataSet.fromTuple(tuple), variables)
 
       dataSet.pathVars.keys.foreach { pathVar =>
         val varPos = dataSet.pathVars(pathVar)(0)
@@ -578,16 +578,15 @@ case class ProjectOp(op: AlgebraOp, projectOp: AlgebraOp) extends QueryOp {
   def referencesContext = op.referencesContext
 }
 
-case class ExtendOp(op: AlgebraOp, from: Int, pattern: RelationalPattern, variables: List[Variable]) extends QueryOp with VariableTypeBindings {
+case class ExtendOp(op: AlgebraOp, from: Int, pattern: RelationalPattern, variables: VariableTemplate) extends QueryOp with VariableTypeBindings {
   def evaluate(wordNet: WordNet, bindings: Bindings) = {
     val dataSet = op.evaluate(wordNet, bindings)
     val extensionSet = pattern.extend(wordNet.store, bindings, new DataExtensionSet(dataSet), from)
-    val template = new VariableTemplate(variables)
     val dataSetPathVarNames = dataSet.pathVars.keySet
     val dataSetStepVarNames = dataSet.stepVars.keySet
     val pathBuffer = DataSetBuffers.createPathBuffer
-    val pathVarBuffers = DataSetBuffers.createPathVarBuffers(template.pathVariableName.map(dataSetPathVarNames + _).getOrElse(dataSetPathVarNames))
-    val stepVarBuffers = DataSetBuffers.createStepVarBuffers(dataSetStepVarNames union template.stepVariableNames)
+    val pathVarBuffers = DataSetBuffers.createPathVarBuffers(variables.pathVariableName.map(dataSetPathVarNames + _).getOrElse(dataSetPathVarNames))
+    val stepVarBuffers = DataSetBuffers.createStepVarBuffers(dataSetStepVarNames union variables.stepVariableNames)
 
     for (head::extension <- extensionSet.extensions) {
       val pathPos = head.asInstanceOf[Int]
@@ -603,14 +602,14 @@ case class ExtendOp(op: AlgebraOp, from: Int, pattern: RelationalPattern, variab
       for (stepVar <- dataSetStepVarNames)
         stepVarBuffers(stepVar).append(dataSet.stepVars(stepVar)(pathPos))
 
-      for (pathVar <- template.pathVariableName)
-        pathVarBuffers(pathVar).append(template.pathVariableIndexes(extensionSize, pathSize))
+      for (pathVar <- variables.pathVariableName)
+        pathVarBuffers(pathVar).append(variables.pathVariableIndexes(extensionSize, pathSize))
 
-      for (stepVar <- template.leftVariablesNames)
-        stepVarBuffers(stepVar).append(template.leftIndex(stepVar, extensionSize, pathSize))
+      for (stepVar <- variables.leftVariablesNames)
+        stepVarBuffers(stepVar).append(variables.leftIndex(stepVar, extensionSize, pathSize))
 
-      for (stepVar <- template.rightVariablesNames)
-        stepVarBuffers(stepVar).append(template.rightIndex(stepVar, extensionSize, pathSize))
+      for (stepVar <- variables.rightVariablesNames)
+        stepVarBuffers(stepVar).append(variables.rightIndex(stepVar, extensionSize, pathSize))
     }
     
     DataSet.fromBuffers(pathBuffer, pathVarBuffers, stepVarBuffers)
@@ -646,7 +645,7 @@ case class ExtendOp(op: AlgebraOp, from: Int, pattern: RelationalPattern, variab
 
   def bindingsPattern = {
     val pattern = op.bindingsPattern
-    bindTypes(pattern, this, VariableTemplate(variables))
+    bindTypes(pattern, this, variables)
     pattern
   }
 
@@ -893,9 +892,9 @@ case class ArcPatternArgument(name: String, nodeType: Option[NodeType]) {
   override def toString = name + nodeType.map("&" + _).getOrElse("")
 }
 
-case class BindOp(op: AlgebraOp, variables: List[Variable]) extends QueryOp with VariableBindings with VariableTypeBindings {
+case class BindOp(op: AlgebraOp, variables: VariableTemplate) extends QueryOp with VariableBindings with VariableTypeBindings {
   def evaluate(wordNet: WordNet, bindings: Bindings) = {
-    bind(op.evaluate(wordNet, bindings), VariableTemplate(variables))
+    bind(op.evaluate(wordNet, bindings), variables)
   }
 
   def leftType(pos: Int) = op.leftType(pos)
@@ -908,7 +907,7 @@ case class BindOp(op: AlgebraOp, variables: List[Variable]) extends QueryOp with
 
   def bindingsPattern = {
     val pattern = op.bindingsPattern
-    bindTypes(pattern, op, VariableTemplate(variables))
+    bindTypes(pattern, op, variables)
     pattern
   }
 
@@ -984,16 +983,16 @@ object VariableTemplate {
 }
 
 trait VariableBindings {
-  def bind(dataSet: DataSet, template: VariableTemplate) = {
-    if (template != VariableTemplate.empty) {
-      val pathVarBuffers = DataSetBuffers.createPathVarBuffers(template.pathVariableName.map(p => Set(p)).getOrElse(Set.empty))
-      val stepVarBuffers = DataSetBuffers.createStepVarBuffers(template.stepVariableNames)
+  def bind(dataSet: DataSet, variables: VariableTemplate) = {
+    if (variables != VariableTemplate.empty) {
+      val pathVarBuffers = DataSetBuffers.createPathVarBuffers(variables.pathVariableName.map(p => Set(p)).getOrElse(Set.empty))
+      val stepVarBuffers = DataSetBuffers.createStepVarBuffers(variables.stepVariableNames)
 
-      template.pathVariablePosition match {
+      variables.pathVariablePosition match {
         case Some(pathVarPos) =>
-          val leftVars = template.leftVariablesIndexes
-          val rightVars = template.rightVariablesIndexes
-          val pathVarBuffer = if (template.variables(pathVarPos).name != "_") Some(pathVarBuffers(template.variables(pathVarPos).name)) else None
+          val leftVars = variables.leftVariablesIndexes
+          val rightVars = variables.rightVariablesIndexes
+          val pathVarBuffer = if (variables.variables(pathVarPos).name != "_") Some(pathVarBuffers(variables.variables(pathVarPos).name)) else None
           val pathVarStart = leftVars.size
           val pathVarEnd = rightVars.size
 
@@ -1003,7 +1002,7 @@ trait VariableBindings {
             dataSet.paths.foreach(tuple => bindVariablesFromLeft(leftVars, stepVarBuffers, tuple.size))
           }
         case None =>
-          val rightVars = template.rightVariablesIndexes
+          val rightVars = variables.rightVariablesIndexes
           dataSet.paths.foreach(tuple => bindVariablesFromRight(rightVars, stepVarBuffers, tuple.size))
       }
 

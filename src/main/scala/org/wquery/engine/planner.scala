@@ -46,20 +46,20 @@ class LogicalPlanBuilder(context: BindingsSchema) {
     val applier = new ConditionApplier(conditions.toList, context)
 
     var op: AlgebraOp = path.head.asInstanceOf[NodeStep].generator.get // TODO remove this cast and get
-    op = bindings.get(path.head).map(template => BindOp(op, template.variables)).getOrElse(op)
+    op = bindings.get(path.head).map(template => BindOp(op, template)).getOrElse(op)
     op = applier.applyConditions(op, bindings.get(path.head).getOrElse(VariableTemplate.empty), path.head)
 
     for (step <- path.tail) {
-      val stepBindings = bindings.get(step)
+      val stepBindings = bindings.get(step).getOrElse(VariableTemplate.empty)
 
       step match {
         case link: LinkStep =>
-          op = ExtendOp(op, link.pos, link.pattern, stepBindings.some(_.variables).none(Nil))
+          op = ExtendOp(op, link.pos, link.pattern, stepBindings)
         case _ =>
           // do nothing
       }
 
-      op = applier.applyConditions(op, stepBindings.getOrElse(VariableTemplate.empty), step)
+      op = applier.applyConditions(op, stepBindings, step)
     }
 
     op

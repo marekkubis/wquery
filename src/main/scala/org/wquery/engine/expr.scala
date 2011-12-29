@@ -78,9 +78,10 @@ case class SplitExpr(expr: EvaluableExpr, withs: List[PropertyAssignmentExpr]) e
 case class VariableAssignmentExpr(variables: List[Variable], expr: EvaluableExpr) extends EvaluableExpr with VariableTypeBindings {
   def evaluationPlan(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context) = {
     val op = expr.evaluationPlan(wordNet, bindings, context)
+    val template = VariableTemplate(variables)
 
-    bindTypes(bindings, op, VariableTemplate(variables))
-    AssignmentOp(variables, op)
+    bindTypes(bindings, op, template)
+    AssignmentOp(template, op)
   }
 }
 
@@ -341,19 +342,19 @@ case class FunctionExpr(name: String, args: EvaluableExpr) extends EvaluableExpr
  * Step related expressions
  */
 trait VariableTypeBindings {
-  def bindTypes(bindings: BindingsPattern, op: AlgebraOp, template: VariableTemplate) {
-    template.pathVariablePosition match {
+  def bindTypes(bindings: BindingsPattern, op: AlgebraOp, variables: VariableTemplate) {
+    variables.pathVariablePosition match {
       case Some(pathVarPos) =>
-        bindVariablesFromRight(bindings, op, template)
-        template.pathVariableName.map(bindings.bindPathVariableType(_, op, pathVarPos, template.variables.size - pathVarPos - 1))
-        bindVariablesFromLeft(bindings, op, template)
+        bindVariablesFromRight(bindings, op, variables)
+        variables.pathVariableName.map(bindings.bindPathVariableType(_, op, pathVarPos, variables.variables.size - pathVarPos - 1))
+        bindVariablesFromLeft(bindings, op, variables)
       case None =>
-        bindVariablesFromRight(bindings, op, template)
+        bindVariablesFromRight(bindings, op, variables)
     }
   }
 
-  private def bindVariablesFromLeft(bindings: BindingsPattern, op: AlgebraOp, template: VariableTemplate) {
-    for ((name, pos) <- template.leftVariablesIndexes) {
+  private def bindVariablesFromLeft(bindings: BindingsPattern, op: AlgebraOp, variables: VariableTemplate) {
+    for ((name, pos) <- variables.leftVariablesIndexes) {
       if (op.maxTupleSize.map(pos < _).getOrElse(true))
         bindings.bindStepVariableType(name, op.leftType(pos))
       else
@@ -361,8 +362,8 @@ trait VariableTypeBindings {
     }
   }
 
-  private def bindVariablesFromRight(bindings: BindingsPattern, op: AlgebraOp, template: VariableTemplate) {
-    for ((name, pos) <- template.rightVariablesIndexes) {
+  private def bindVariablesFromRight(bindings: BindingsPattern, op: AlgebraOp, variables: VariableTemplate) {
+    for ((name, pos) <- variables.rightVariablesIndexes) {
       if (op.maxTupleSize.map(pos < _).getOrElse(true))
         bindings.bindStepVariableType(name, op.rightType(pos))
       else
@@ -379,7 +380,7 @@ case class RelationTransformationExpr(pos: Int, expr: RelationalExpr) extends Tr
   def push(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context, op: AlgebraOp, plan: LogicalPlanBuilder) = {
     val pattern = expr.evaluationPattern(wordNet, op.rightType(pos))
     plan.appendStep(pos, pattern)
-    ExtendOp(op, pos, pattern, Nil) // TODO remove bindop
+    ExtendOp(op, pos, pattern, VariableTemplate.empty)
   }
 }
 
@@ -412,7 +413,7 @@ case class NodeTransformationExpr(generator: EvaluableExpr) extends Transformati
 case class BindTransformationExpr(variables: List[Variable]) extends TransformationExpr {
   def push(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context, op: AlgebraOp, plan: LogicalPlanBuilder) = {
     plan.appendVariables(variables)
-    BindOp(op, variables)
+    BindOp(op, VariableTemplate(variables))
   }
 }
 
@@ -633,7 +634,7 @@ case class SynsetByExprReq(expr: EvaluableExpr) extends EvaluableExpr {
               List(ArcPatternArgument(Relation.Destination, WordNet.SenseToSynset.destinationType)))
         }}.toList
 
-        ProjectOp(ExtendOp(op, 0, RelationUnionPattern(patterns), Nil), ContextRefOp(Set(SynsetType)))
+        ProjectOp(ExtendOp(op, 0, RelationUnionPattern(patterns), VariableTemplate.empty), ContextRefOp(Set(SynsetType)))
       } else {
         throw new WQueryStaticCheckException("{...} requires an expression that generates either senses or word forms")
       }
@@ -670,7 +671,7 @@ case class ContextByRelationalExprReq(expr: RelationalExpr) extends EvaluableExp
     if (bindings.areContextVariablesBound) {
       val contextType = bindings.lookupContextVariableType
 
-      ExtendOp(ContextRefOp(contextType), 0, expr.evaluationPattern(wordNet, contextType), Nil)
+      ExtendOp(ContextRefOp(contextType), 0, expr.evaluationPattern(wordNet, contextType), VariableTemplate.empty)
     } else {
       val pattern = expr.evaluationPattern(wordNet, DataType.all)
       val fetches = pattern.sourceType.collect {
@@ -685,7 +686,7 @@ case class ContextByRelationalExprReq(expr: RelationalExpr) extends EvaluableExp
       if (pattern.minSize == 0 && pattern.maxSize == Some(0))
         fetchOp
       else
-        ExtendOp(fetchOp , 0, pattern, Nil)
+        ExtendOp(fetchOp , 0, pattern, VariableTemplate.empty)
     }
   }
 }
