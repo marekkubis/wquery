@@ -29,10 +29,10 @@ class LogicalPlanBuilder(context: BindingsSchema) {
     conditions.append((steps.lastOption, condition))
   }
 
-  def appendVariables(variables: List[Variable]) {
+  def appendVariables(variables: VariableTemplate) {
     // TODO distinguish left and right traverses for step variables
     val step = if (steps.size == 1) steps.last else steps(steps.size - 2)
-    bindings(step) = new VariableTemplate(variables)
+    bindings(step) = variables
   }
 
   def build = { // TODO return multiple plans - PlanEvaluator will choose one

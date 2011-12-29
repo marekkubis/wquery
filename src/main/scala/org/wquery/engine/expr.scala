@@ -75,13 +75,12 @@ case class SplitExpr(expr: EvaluableExpr, withs: List[PropertyAssignmentExpr]) e
   }
 }
 
-case class VariableAssignmentExpr(variables: List[Variable], expr: EvaluableExpr) extends EvaluableExpr with VariableTypeBindings {
+case class VariableAssignmentExpr(variables: VariableTemplate, expr: EvaluableExpr) extends EvaluableExpr with VariableTypeBindings {
   def evaluationPlan(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context) = {
     val op = expr.evaluationPlan(wordNet, bindings, context)
-    val template = VariableTemplate(variables)
 
-    bindTypes(bindings, op, template)
-    AssignmentOp(template, op)
+    bindTypes(bindings, op, variables)
+    AssignmentOp(variables, op)
   }
 }
 
@@ -410,10 +409,10 @@ case class NodeTransformationExpr(generator: EvaluableExpr) extends Transformati
   }
 }
 
-case class BindTransformationExpr(variables: List[Variable]) extends TransformationExpr {
+case class BindTransformationExpr(variables: VariableTemplate) extends TransformationExpr {
   def push(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context, op: AlgebraOp, plan: LogicalPlanBuilder) = {
     plan.appendVariables(variables)
-    BindOp(op, VariableTemplate(variables))
+    BindOp(op, variables)
   }
 }
 

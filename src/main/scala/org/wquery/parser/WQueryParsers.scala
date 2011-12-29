@@ -244,7 +244,7 @@ trait WQueryParsers extends RegexParsers {
   def arc_generator = "\\" ~> arc_expr ^^ { ArcByArcExprReq(_) }
 
   // variables
-  def var_decls = rep1(var_decl)
+  def var_decls = rep1(var_decl) ^^ { VariableTemplate(_) }
 
   def var_decl = (
     step_var_decl
