@@ -411,8 +411,18 @@ case class NodeTransformationExpr(generator: EvaluableExpr) extends Transformati
 
 case class BindTransformationExpr(variables: VariableTemplate) extends TransformationExpr {
   def push(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context, op: AlgebraOp, plan: LogicalPlanBuilder) = {
-    plan.appendVariables(variables)
-    BindOp(op, variables)
+    if (variables != VariableTemplate.empty) {
+      plan.appendVariables(variables)
+
+      op match {
+        case ExtendOp(op, pos, pattern, VariableTemplate.empty) =>
+          ExtendOp(op, pos, pattern, variables)
+        case op =>
+          BindOp(op, variables)
+      }
+    } else {
+      op
+    }
   }
 }
 
