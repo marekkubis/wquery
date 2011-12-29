@@ -128,7 +128,7 @@ case class AssignmentOp(variables: List[Variable], op: AlgebraOp) extends QueryO
 
     if (result.pathCount == 1) { // TODO remove this constraint
       val tuple = result.paths.head
-      val dataSet = bind(DataSet.fromTuple(tuple), variables)
+      val dataSet = bind(DataSet.fromTuple(tuple), VariableTemplate(variables))
 
       dataSet.pathVars.keys.foreach { pathVar =>
         val varPos = dataSet.pathVars(pathVar)(0)
@@ -895,7 +895,7 @@ case class ArcPatternArgument(name: String, nodeType: Option[NodeType]) {
 
 case class BindOp(op: AlgebraOp, variables: List[Variable]) extends QueryOp with VariableBindings with VariableTypeBindings {
   def evaluate(wordNet: WordNet, bindings: Bindings) = {
-    bind(op.evaluate(wordNet, bindings), variables)
+    bind(op.evaluate(wordNet, bindings), VariableTemplate(variables))
   }
 
   def leftType(pos: Int) = op.leftType(pos)
@@ -917,7 +917,7 @@ case class BindOp(op: AlgebraOp, variables: List[Variable]) extends QueryOp with
   def referencesContext = op.referencesContext
 }
 
-case class VariableTemplate(val variables: List[Variable]) {
+case class VariableTemplate(variables: List[Variable]) {
   val pathVariablePosition = {
     val pos = variables.indexWhere{_.isInstanceOf[PathVariable]}
 
@@ -984,9 +984,8 @@ object VariableTemplate {
 }
 
 trait VariableBindings {
-  def bind(dataSet: DataSet, variables: List[Variable]) = {
-    if (variables != Nil) {
-      val template = new VariableTemplate(variables)
+  def bind(dataSet: DataSet, template: VariableTemplate) = {
+    if (template != VariableTemplate.empty) {
       val pathVarBuffers = DataSetBuffers.createPathVarBuffers(template.pathVariableName.map(p => Set(p)).getOrElse(Set.empty))
       val stepVarBuffers = DataSetBuffers.createStepVarBuffers(template.stepVariableNames)
 
@@ -994,7 +993,7 @@ trait VariableBindings {
         case Some(pathVarPos) =>
           val leftVars = template.leftVariablesIndexes
           val rightVars = template.rightVariablesIndexes
-          val pathVarBuffer = if (variables(pathVarPos).name != "_") Some(pathVarBuffers(variables(pathVarPos).name)) else None
+          val pathVarBuffer = if (template.variables(pathVarPos).name != "_") Some(pathVarBuffers(template.variables(pathVarPos).name)) else None
           val pathVarStart = leftVars.size
           val pathVarEnd = rightVars.size
 
