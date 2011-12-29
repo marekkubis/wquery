@@ -79,7 +79,7 @@ case class VariableAssignmentExpr(variables: List[Variable], expr: EvaluableExpr
   def evaluationPlan(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context) = {
     val op = expr.evaluationPlan(wordNet, bindings, context)
 
-    bindTypes(bindings, op, variables)
+    bindTypes(bindings, op, VariableTemplate(variables))
     AssignmentOp(variables, op)
   }
 }
@@ -341,48 +341,19 @@ case class FunctionExpr(name: String, args: EvaluableExpr) extends EvaluableExpr
  * Step related expressions
  */
 trait VariableTypeBindings {
-  def bindTypes(bindings: BindingsPattern, op: AlgebraOp, variables: List[Variable]) {
-    demandUniqueVariableNames(variables)
-
-    getPathVariableNameAndPos(variables) match {
-      case Some((pathVarName, pathVarPos)) =>
-        val leftVars = variables.slice(0, pathVarPos).map(_.name).zipWithIndex.filterNot{_._1 == "_"}.toMap
-        val rightVars = variables.slice(pathVarPos + 1, variables.size).map(_.name).reverse.zipWithIndex.filterNot{_._1 == "_"}.toMap
-
-        bindVariablesFromRight(bindings, op, rightVars)
-
-        if (pathVarName != "_")
-          bindings.bindPathVariableType(pathVarName, op, pathVarPos, variables.size - pathVarPos - 1)
-
-        bindVariablesFromLeft(bindings, op, leftVars)
+  def bindTypes(bindings: BindingsPattern, op: AlgebraOp, template: VariableTemplate) {
+    template.pathVariablePosition match {
+      case Some(pathVarPos) =>
+        bindVariablesFromRight(bindings, op, template)
+        template.pathVariableName.map(bindings.bindPathVariableType(_, op, pathVarPos, template.variables.size - pathVarPos - 1))
+        bindVariablesFromLeft(bindings, op, template)
       case None =>
-        val rightVars = variables.map(_.name).reverse.zipWithIndex.filterNot{_._1 == "_"}.toMap
-        bindVariablesFromRight(bindings, op, rightVars)
+        bindVariablesFromRight(bindings, op, template)
     }
   }
 
-  private def demandUniqueVariableNames(variables: List[Variable]) {
-    val vars = variables.filter(x => !x.isInstanceOf[PathVariable] && x.name != "_").map(_.name)
-
-    if (vars.size != vars.distinct.size)
-      throw new WQueryStaticCheckException("Variable list " + variables.mkString + " contains duplicated variable names")
-  }
-
-  private def getPathVariableNameAndPos(variables: List[Variable]) = {
-    val pathVarPos = variables.indexWhere{_.isInstanceOf[PathVariable]}
-
-    if (pathVarPos != variables.lastIndexWhere{_.isInstanceOf[PathVariable]}) {
-      throw new WQueryStaticCheckException("Variable list " + variables.mkString + " contains more than one path variable")
-    } else {
-      if (pathVarPos != -1)
-        Some(variables(pathVarPos).name, pathVarPos)
-      else
-        None
-    }
-  }
-
-  private def bindVariablesFromLeft(bindings: BindingsPattern, op: AlgebraOp, vars: Map[String, Int]) {
-    for ((name, pos) <- vars) {
+  private def bindVariablesFromLeft(bindings: BindingsPattern, op: AlgebraOp, template: VariableTemplate) {
+    for ((name, pos) <- template.leftVariablesIndexes) {
       if (op.maxTupleSize.map(pos < _).getOrElse(true))
         bindings.bindStepVariableType(name, op.leftType(pos))
       else
@@ -390,8 +361,8 @@ trait VariableTypeBindings {
     }
   }
 
-  private def bindVariablesFromRight(bindings: BindingsPattern, op: AlgebraOp, vars: Map[String, Int]) {
-    for ((name, pos) <- vars) {
+  private def bindVariablesFromRight(bindings: BindingsPattern, op: AlgebraOp, template: VariableTemplate) {
+    for ((name, pos) <- template.rightVariablesIndexes) {
       if (op.maxTupleSize.map(pos < _).getOrElse(true))
         bindings.bindStepVariableType(name, op.rightType(pos))
       else

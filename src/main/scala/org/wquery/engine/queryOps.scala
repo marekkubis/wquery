@@ -646,7 +646,7 @@ case class ExtendOp(op: AlgebraOp, from: Int, pattern: RelationalPattern, variab
 
   def bindingsPattern = {
     val pattern = op.bindingsPattern
-    bindTypes(pattern, this, variables)
+    bindTypes(pattern, this, VariableTemplate(variables))
     pattern
   }
 
@@ -908,7 +908,7 @@ case class BindOp(op: AlgebraOp, variables: List[Variable]) extends QueryOp with
 
   def bindingsPattern = {
     val pattern = op.bindingsPattern
-    bindTypes(pattern, op, variables)
+    bindTypes(pattern, op, VariableTemplate(variables))
     pattern
   }
 
@@ -917,7 +917,7 @@ case class BindOp(op: AlgebraOp, variables: List[Variable]) extends QueryOp with
   def referencesContext = op.referencesContext
 }
 
-class VariableTemplate(val variables: List[Variable]) {
+case class VariableTemplate(val variables: List[Variable]) {
   val pathVariablePosition = {
     val pos = variables.indexWhere{_.isInstanceOf[PathVariable]}
 
