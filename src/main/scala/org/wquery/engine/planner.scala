@@ -16,7 +16,7 @@ class LogicalPlanBuilder(context: BindingsSchema) {
 
   def appendStep(pos: Int, pattern: RelationalPattern) {
     steps.append(new LinkStep(pos, pattern))
-    steps.append(new NodeStep(pattern.rightType(0), none)) // TODO use None or Some depending on type
+    steps.append(new NodeStep(pattern.rightType(0), none)) // TODO backwardGenerator: use None or Some depending on type
   }
 
   def appendCondition(condition: Condition) {    
@@ -36,7 +36,7 @@ class LogicalPlanBuilder(context: BindingsSchema) {
   }
 
   def build = { // TODO return multiple plans - PlanEvaluator will choose one
-    // travrse the graph biinding variables and firing trigers
+    // travrse the graph
     
     walkForward(0, steps.size - 1)
   }
@@ -47,7 +47,7 @@ class LogicalPlanBuilder(context: BindingsSchema) {
 
     var op: AlgebraOp = path.head.asInstanceOf[NodeStep].generator.get // TODO remove this cast and get
     op = bindings.get(path.head).map(template => BindOp(op, template)).getOrElse(op)
-    op = applier.applyConditions(op, bindings.get(path.head).getOrElse(VariableTemplate.empty), path.head)
+    op = applier.applyConditions(op, path.head, bindings.get(path.head).getOrElse(VariableTemplate.empty))
 
     for (step <- path.tail) {
       val stepBindings = bindings.get(step).getOrElse(VariableTemplate.empty)
@@ -59,7 +59,7 @@ class LogicalPlanBuilder(context: BindingsSchema) {
           // do nothing
       }
 
-      op = applier.applyConditions(op, stepBindings, step)
+      op = applier.applyConditions(op, step, stepBindings)
     }
 
     op
@@ -70,9 +70,9 @@ class ConditionApplier(conditions: List[(Option[Step], Condition)], context: Bin
   val appliedConditions = scala.collection.mutable.Set[Condition]()
   val alreadyBoundVariables = scala.collection.mutable.Set[Variable]()
 
-  def applyConditions(inputOp: AlgebraOp, template: VariableTemplate, currentStep: Step) = {
+  def applyConditions(inputOp: AlgebraOp, currentStep: Step, template: VariableTemplate) = {
     var op = inputOp
-    alreadyBoundVariables ++= template.variables.filterNot(_.name == "_") // TODO move to namedVariables, remove template, use current step
+    alreadyBoundVariables ++= template.variables
 
     for ((step, condition) <- conditions.filterNot{ case (_, c) => appliedConditions.contains(c)}) {
       if (condition.referencedVariables.forall { variable =>

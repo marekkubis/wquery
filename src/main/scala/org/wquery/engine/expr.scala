@@ -345,7 +345,7 @@ trait VariableTypeBindings {
     variables.pathVariablePosition match {
       case Some(pathVarPos) =>
         bindVariablesFromRight(bindings, op, variables)
-        variables.pathVariableName.map(bindings.bindPathVariableType(_, op, pathVarPos, variables.variables.size - pathVarPos - 1))
+        variables.pathVariableName.map(bindings.bindPathVariableType(_, op, variables.leftPatternSize, variables.rightPatternSize))
         bindVariablesFromLeft(bindings, op, variables)
       case None =>
         bindVariablesFromRight(bindings, op, variables)

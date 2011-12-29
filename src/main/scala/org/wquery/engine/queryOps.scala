@@ -924,20 +924,17 @@ trait VariableBindings {
 
       variables.pathVariablePosition match {
         case Some(pathVarPos) =>
-          val leftVars = variables.leftVariablesIndexes
-          val rightVars = variables.rightVariablesIndexes
-          val pathVarBuffer = if (variables.variables(pathVarPos).name != "_") Some(pathVarBuffers(variables.variables(pathVarPos).name)) else None
-          val pathVarStart = leftVars.size
-          val pathVarEnd = rightVars.size
+          val pathVarBuffer = variables.pathVariableName.map(pathVarBuffers(_))
+          val pathVarStart = variables.leftVariablesIndexes.size
+          val pathVarEnd = variables.rightVariablesIndexes.size
 
           for (tuple <- dataSet.paths) {
-            dataSet.paths.foreach(tuple => bindVariablesFromRight(rightVars, stepVarBuffers, tuple.size))
+            dataSet.paths.foreach(tuple => bindVariablesFromRight(variables, stepVarBuffers, tuple.size))
             pathVarBuffer.map(_.append((pathVarStart, tuple.size - pathVarEnd)))
-            dataSet.paths.foreach(tuple => bindVariablesFromLeft(leftVars, stepVarBuffers, tuple.size))
+            dataSet.paths.foreach(tuple => bindVariablesFromLeft(variables, stepVarBuffers, tuple.size))
           }
         case None =>
-          val rightVars = variables.rightVariablesIndexes
-          dataSet.paths.foreach(tuple => bindVariablesFromRight(rightVars, stepVarBuffers, tuple.size))
+          dataSet.paths.foreach(tuple => bindVariablesFromRight(variables, stepVarBuffers, tuple.size))
       }
 
       DataSet(dataSet.paths, dataSet.pathVars ++ pathVarBuffers.mapValues(_.toList), dataSet.stepVars ++ stepVarBuffers.mapValues(_.toList))
@@ -946,16 +943,16 @@ trait VariableBindings {
     }
   }
 
-  private def bindVariablesFromLeft(vars: Map[String, Int], varIndexes: Map[String, ListBuffer[Int]], tupleSize: Int) {
-    for ((v, pos) <- vars)
+  private def bindVariablesFromLeft(variables: VariableTemplate, varIndexes: Map[String, ListBuffer[Int]], tupleSize: Int) {
+    for ((v, pos) <- variables.leftVariablesIndexes)
       if (pos < tupleSize)
         varIndexes(v).append(pos)
       else
         throw new WQueryEvaluationException("Variable $" + v + " cannot be bound")
   }
 
-  private def bindVariablesFromRight(vars: Map[String, Int], varIndexes: Map[String, ListBuffer[Int]], tupleSize: Int) {
-    for ((v, pos) <- vars) {
+  private def bindVariablesFromRight(variables: VariableTemplate, varIndexes: Map[String, ListBuffer[Int]], tupleSize: Int) {
+    for ((v, pos) <- variables.rightVariablesIndexes) {
       val index = tupleSize - 1 - pos
 
       if (index >= 0)
