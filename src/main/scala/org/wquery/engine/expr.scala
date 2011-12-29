@@ -720,12 +720,12 @@ case class BooleanByFilterReq(conditionalExpr: ConditionalExpr) extends Evaluabl
 
 case class ContextByVariableReq(variable: Variable) extends EvaluableExpr {
   def evaluationPlan(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context) = variable match {
-    case PathVariable(name) =>
-      bindings.lookupPathVariableType(name).map(PathVariableRefOp(name, _))
-        .getOrElse(throw new WQueryStaticCheckException("A reference to unknown variable @" + name + " found"))
-    case StepVariable(name) =>
-      bindings.lookupStepVariableType(name).map(StepVariableRefOp(name, _))
-        .getOrElse(throw new WQueryStaticCheckException("A reference to unknown variable $" + name + " found"))
+    case variable @ PathVariable(name) =>
+      bindings.lookupPathVariableType(name).map(PathVariableRefOp(variable, _))
+        .getOrElse(throw new WQueryStaticCheckException("A reference to unknown variable " + variable + " found"))
+    case variable @ StepVariable(name) =>
+      bindings.lookupStepVariableType(name).map(StepVariableRefOp(variable, _))
+        .getOrElse(throw new WQueryStaticCheckException("A reference to unknown variable " + variable + " found"))
   }
 }
 

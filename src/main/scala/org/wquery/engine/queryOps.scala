@@ -1064,8 +1064,8 @@ case class ContextRefOp(types: Set[DataType]) extends QueryOp {
   def referencesContext = true
 }
 
-case class PathVariableRefOp(name: String, types: (AlgebraOp, Int, Int)) extends QueryOp {
-  def evaluate(wordNet: WordNet, bindings: Bindings) = bindings.lookupPathVariable(name).map(DataSet.fromTuple(_)).get
+case class PathVariableRefOp(variable: PathVariable, types: (AlgebraOp, Int, Int)) extends QueryOp {
+  def evaluate(wordNet: WordNet, bindings: Bindings) = bindings.lookupPathVariable(variable.name).map(DataSet.fromTuple(_)).get
 
   def leftType(pos: Int) = types._1.leftType(pos + types._2)
 
@@ -1077,13 +1077,13 @@ case class PathVariableRefOp(name: String, types: (AlgebraOp, Int, Int)) extends
 
   def bindingsPattern = BindingsPattern()
 
-  def referencedVariables = Set(PathVariable(name))
+  def referencedVariables = Set(variable)
 
   def referencesContext = false
 }
 
-case class StepVariableRefOp(name: String, types: Set[DataType]) extends QueryOp {
-  def evaluate(wordNet: WordNet, bindings: Bindings) = bindings.lookupStepVariable(name).map(DataSet.fromValue(_)).get
+case class StepVariableRefOp(variable: StepVariable, types: Set[DataType]) extends QueryOp {
+  def evaluate(wordNet: WordNet, bindings: Bindings) = bindings.lookupStepVariable(variable.name).map(DataSet.fromValue(_)).get
 
   def leftType(pos: Int) = if (pos == 0) types else Set.empty
 
@@ -1095,7 +1095,7 @@ case class StepVariableRefOp(name: String, types: Set[DataType]) extends QueryOp
 
   def bindingsPattern = BindingsPattern()
 
-  def referencedVariables = Set(StepVariable(name))
+  def referencedVariables = Set(variable)
 
   def referencesContext = false
 }

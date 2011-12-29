@@ -26,6 +26,13 @@ class BindingsPattern {
 
   def lookupPathVariableType(name: String): Option[(AlgebraOp, Int, Int)] = pathVariablesTypes.get(name)
 
+  def isBound(variable: Variable) = variable match {
+    case PathVariable(name) =>
+      lookupPathVariableType(name).isDefined
+    case StepVariable(name) =>
+      lookupStepVariableType(name).isDefined
+  }
+
   def union(that: BindingsPattern) = {
     val sum = BindingsPattern()
 

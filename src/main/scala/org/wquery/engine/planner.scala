@@ -76,7 +76,7 @@ class ConditionApplier(conditions: List[(Option[Step], Condition)], context: Bin
 
     for ((step, condition) <- conditions.filterNot{ case (_, c) => appliedConditions.contains(c)}) {
       if (condition.referencedVariables.forall { variable =>
-        alreadyBoundVariables.contains(variable) || template.variables.contains(variable) || (variable.isInstanceOf[PathVariable] && context.lookupPathVariableType(variable.name).isDefined) || (variable.isInstanceOf[StepVariable] && context.lookupStepVariableType(variable.name).isDefined) //TODO implement lookupVariableType
+        alreadyBoundVariables.contains(variable) || template.variables.contains(variable) || context.isBound(variable)
       } && (!condition.referencesContext || step.some(_ == currentStep).none(false))) {
         appliedConditions += condition
         op = SelectOp(op, condition)
