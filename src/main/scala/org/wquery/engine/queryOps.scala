@@ -505,7 +505,7 @@ case class SelectOp(op: AlgebraOp, condition: Condition) extends QueryOp {
         binds.bindStepVariable(stepVar, tuple(varPos))
       }
 
-      binds.bindContextVariables(tuple)
+      binds.bindContextVariable(tuple.last)
 
       if (condition.satisfied(wordNet, binds)) {
         pathBuffer.append(tuple)
@@ -545,7 +545,7 @@ case class ProjectOp(op: AlgebraOp, projectOp: AlgebraOp) extends QueryOp {
     for (i <- 0 until dataSet.pathCount) {
       val tuple = dataSet.paths(i)
 
-      binds.bindContextVariables(tuple)
+      binds.bindContextVariable(tuple.last)
 
       for (pathVar <- pathVarNames) {
         val varPos = dataSet.pathVars(pathVar)(i)

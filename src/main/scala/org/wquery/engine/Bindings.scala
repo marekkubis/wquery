@@ -1,11 +1,13 @@
 package org.wquery.engine
 
 import scala.collection.mutable.Map
+import scalaz._
+import Scalaz._
 
 class Bindings(parent: Option[Bindings], updatesParent: Boolean) {
   val pathVariables = Map[String, List[Any]]()
   val stepVariables = Map[String, Any]()  
-  private var contextVars = List[Any]()
+  private var contextVariable: Option[Any] = none
 
   def bindStepVariable(name: String, value: Any) {
     if (updatesParent && parent.map(_.lookupStepVariable(name).isDefined).getOrElse(false)) {
@@ -23,13 +25,13 @@ class Bindings(parent: Option[Bindings], updatesParent: Boolean) {
     }
   }
 
-  def bindContextVariables(vars: List[Any]) = contextVars = vars
+  def bindContextVariable(variable: Any) = contextVariable = Some(variable)
     
   def lookupPathVariable(name: String): Option[List[Any]] = pathVariables.get(name).orElse(parent.flatMap(_.lookupPathVariable(name)))
    
   def lookupStepVariable(name: String): Option[Any] = stepVariables.get(name).orElse(parent.flatMap(_.lookupStepVariable(name)))
 
-  def lookupContextVariable: Option[Any] = if (!contextVars.isEmpty) Some(contextVars.last) else parent.flatMap(_.lookupContextVariable)
+  def lookupContextVariable: Option[Any] = contextVariable.orElse(parent.flatMap(_.lookupContextVariable))
 }
 
 object Bindings {
