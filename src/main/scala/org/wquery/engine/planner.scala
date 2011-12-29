@@ -1,6 +1,8 @@
 package org.wquery.engine
 
 import collection.mutable.{ListBuffer, Map}
+import scalaz._
+import Scalaz._
 import org.wquery.model.DataType
 
 class LogicalPlanBuilder(context: BindingsSchema) {
@@ -9,12 +11,12 @@ class LogicalPlanBuilder(context: BindingsSchema) {
   val conditions = new ListBuffer[(Option[Step], Condition)]
   
   def createStep(generator: AlgebraOp) {
-    steps.append(new NodeStep(generator.rightType(0), Some(generator)))
+    steps.append(new NodeStep(generator.rightType(0), some(generator)))
   }
 
   def appendStep(pos: Int, pattern: RelationalPattern) {
     steps.append(new LinkStep(pos, pattern))
-    steps.append(new NodeStep(pattern.rightType(0), None)) // TODO use None or Some depending on type
+    steps.append(new NodeStep(pattern.rightType(0), none)) // TODO use None or Some depending on type
   }
 
   def appendCondition(condition: Condition) {    
@@ -52,7 +54,7 @@ class LogicalPlanBuilder(context: BindingsSchema) {
 
       step match {
         case link: LinkStep =>
-          op = ExtendOp(op, link.pos, link.pattern, stepBindings.map(_.variables).getOrElse(Nil))
+          op = ExtendOp(op, link.pos, link.pattern, stepBindings.some(_.variables).none(Nil))
         case _ =>
           // do nothing
       }
@@ -75,7 +77,7 @@ class ConditionApplier(conditions: List[(Option[Step], Condition)], context: Bin
     for ((step, condition) <- conditions.filterNot{ case (_, c) => appliedConditions.contains(c)}) {
       if (condition.referencedVariables.forall { variable =>
         alreadyBoundVariables.contains(variable) || template.variables.contains(variable) || (variable.isInstanceOf[PathVariable] && context.lookupPathVariableType(variable.name).isDefined) || (variable.isInstanceOf[StepVariable] && context.lookupStepVariableType(variable.name).isDefined) //TODO implement lookupVariableType
-      } && (!condition.referencesContext || step.map(_ == currentStep).getOrElse(false))) {
+      } && (!condition.referencesContext || step.some(_ == currentStep).none(false))) {
         appliedConditions += condition
         op = SelectOp(op, condition)
       }
