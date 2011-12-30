@@ -56,6 +56,8 @@ class VariablesTestSuite extends WQueryTestSuite {
     
   @Test def twoVariablesInFilter() = result of ("last({person}.senses$a.word$b[$a != individual:1:n and $b != mortal])") should equal ("person\nsomebody\nsomeone\nsoul\n")
 
+  @Test def threeVariablesInFilter() = result of ("{car:1:n}.hypernym{3}$a$_@P$_$b") should equal ("@P=(hypernym { self-propelled vehicle:1:n }) $a=hypernym $b={ wheeled vehicle:1:n } { car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n } hypernym { motor vehicle:1:n automotive vehicle:1:n } hypernym { self-propelled vehicle:1:n } hypernym { wheeled vehicle:1:n }\n")
+  
   @Test def stepAfterAnonymousVariable() = result of ("{person}$_a[{organism:1:n} in $_a.hypernym]") should equal ("{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n }\n")     
 
   @Test def anonymousVariableAsFunctionParam() = result of ("{person}$_a[count($_a.hypernym)>1]") should equal ("{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n }\n")
