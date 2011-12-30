@@ -116,10 +116,8 @@ case class AddSensesOp(override val valuesOp: AlgebraOp, override val patterns: 
   }
 }
 
-case class AddSynsetsOp(valuesOp: AlgebraOp, patterns: List[PropertyAssignmentPattern]) extends UpdateOp {
-  def update(wordNet: WordNet, bindings: Bindings) {
-    val assignments = patterns.map(_.evaluatePattern(wordNet, bindings))
-
+case class AddSynsetsOp(override val valuesOp: AlgebraOp, override val patterns: List[PropertyAssignmentPattern]) extends WordNetUpdateWithAssignmentsOp(valuesOp, patterns) {
+  def updateWithAssignments(wordNet: WordNet, bindings: Bindings, assignments: List[PropertyAssignment]) = {
     for (tuple <- valuesOp.evaluate(wordNet, bindings).paths) {
       tuple.last match {
         case newSynset: NewSynset =>
@@ -129,10 +127,6 @@ case class AddSynsetsOp(valuesOp: AlgebraOp, patterns: List[PropertyAssignmentPa
       }
     }
   }
-
-  def referencedVariables = patterns.foldLeft(valuesOp.referencedVariables)((l,r) => l ++ r.referencedVariables)
-
-  def referencesContext = valuesOp.referencesContext || patterns.exists(_.referencesContext)
 }
 
 case class AddWordsOp(override val valuesOp: AlgebraOp, override val patterns: List[PropertyAssignmentPattern]) extends WordNetUpdateWithValuesOp[String](valuesOp, patterns) {
@@ -147,15 +141,11 @@ case class AddPartOfSpeechSymbolsOp(override val valuesOp: AlgebraOp, override v
   }
 }
 
-case class AddRelationsOp(valuesOp: AlgebraOp, patterns: List[PropertyAssignmentPattern]) extends UpdateOp {
-  def update(wordNet: WordNet, bindings: Bindings) = {
+case class AddRelationsOp(override val valuesOp: AlgebraOp, override val patterns: List[PropertyAssignmentPattern]) extends WordNetUpdateWithAssignmentsOp(valuesOp, patterns) {
+  def updateWithAssignments(wordNet: WordNet, bindings: Bindings, assignments: List[PropertyAssignment]) = {
     val valueSet = valuesOp.evaluate(wordNet, bindings)
     valueSet.paths.map(_.last.asInstanceOf[Arc].relation).distinct.foreach(wordNet.store.addRelation(_))
   }
-
-  def referencedVariables = patterns.foldLeft(valuesOp.referencedVariables)((l,r) => l ++ r.referencedVariables)
-
-  def referencesContext = valuesOp.referencesContext || patterns.exists(_.referencesContext)
 }
 
 case class RemoveSensesOp(override val valuesOp: AlgebraOp, override val patterns: List[PropertyAssignmentPattern]) extends WordNetUpdateWithValuesOp[Sense](valuesOp, patterns) {
@@ -182,15 +172,11 @@ case class RemovePartOfSpeechSymbolsOp(override val valuesOp: AlgebraOp, overrid
   }
 }
 
-case class RemoveRelationsOp(valuesOp: AlgebraOp, patterns: List[PropertyAssignmentPattern]) extends UpdateOp {
-  def update(wordNet: WordNet, bindings: Bindings) = {
+case class RemoveRelationsOp(override val valuesOp: AlgebraOp, override val patterns: List[PropertyAssignmentPattern]) extends WordNetUpdateWithAssignmentsOp(valuesOp, patterns) {
+  def updateWithAssignments(wordNet: WordNet, bindings: Bindings, assignments: List[PropertyAssignment]) = {
     val valueSet = valuesOp.evaluate(wordNet, bindings)
     valueSet.paths.map(_.last.asInstanceOf[Arc].relation).distinct.foreach(wordNet.store.removeRelation(_))
   }
-
-  def referencedVariables = patterns.foldLeft(valuesOp.referencedVariables)((l,r) => l ++ r.referencedVariables)
-
-  def referencesContext = valuesOp.referencesContext || patterns.exists(_.referencesContext)
 }
 
 case class SetSensesOp(override val valuesOp: AlgebraOp, override val patterns: List[PropertyAssignmentPattern]) extends WordNetUpdateWithAssignmentsOp(valuesOp, patterns) {
@@ -404,28 +390,16 @@ case class RelationUpdateOp(arcsOp: AlgebraOp, op: String, property: String, act
 // Merge & Split
 //
 
-case class MergeOp(valuesOp: AlgebraOp, patterns: List[PropertyAssignmentPattern]) extends UpdateOp {
-  def update(wordNet: WordNet, bindings: Bindings) = {
-    val assignments = patterns.map(_.evaluatePattern(wordNet, bindings))
+case class MergeOp(override val valuesOp: AlgebraOp, override val patterns: List[PropertyAssignmentPattern]) extends WordNetUpdateWithAssignmentsOp(valuesOp, patterns) {
+  def updateWithAssignments(wordNet: WordNet, bindings: Bindings, assignments: List[PropertyAssignment]) = {
     val (synsets, senses) = valuesOp.evaluate(wordNet, bindings).paths.map(_.last).partition(_.isInstanceOf[Synset]).asInstanceOf[(List[Synset], List[Sense])]
-
     wordNet.store.merge(synsets, senses, assignments)
   }
-
-  def referencedVariables = patterns.foldLeft(valuesOp.referencedVariables)((l,r) => l ++ r.referencedVariables)
-
-  def referencesContext = valuesOp.referencesContext || patterns.exists(_.referencesContext)
 }
 
-case class SplitOp(valuesOp: AlgebraOp, patterns: List[PropertyAssignmentPattern]) extends UpdateOp {
-  def update(wordNet: WordNet, bindings: Bindings) = {
-    val assignments = patterns.map(_.evaluatePattern(wordNet, bindings))
+case class SplitOp(override val valuesOp: AlgebraOp, override val patterns: List[PropertyAssignmentPattern]) extends WordNetUpdateWithAssignmentsOp(valuesOp, patterns) {
+  def updateWithAssignments(wordNet: WordNet, bindings: Bindings, assignments: List[PropertyAssignment]) = {
     val synsets = valuesOp.evaluate(wordNet, bindings).paths.map(_.last).asInstanceOf[List[Synset]]
-
     wordNet.store.split(synsets, assignments)
   }
-
-  def referencedVariables = patterns.foldLeft(valuesOp.referencedVariables)((l,r) => l ++ r.referencedVariables)
-
-  def referencesContext = valuesOp.referencesContext || patterns.exists(_.referencesContext)
 }
