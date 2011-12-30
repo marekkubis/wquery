@@ -2,7 +2,7 @@ package org.wquery.engine
 
 import org.wquery.model._
 import collection.mutable.ListBuffer
-import org.wquery.{WQueryStepVariableCannotBeBoundException, WQueryEvaluationException}
+import org.wquery.WQueryEvaluationException
 
 sealed abstract class QueryOp extends AlgebraOp
 
