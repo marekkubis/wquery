@@ -56,8 +56,8 @@ class QueryReader(reader: Reader) {
   private def skipSingleLineComment(): Boolean = {
     do {
       in.read match {
-        case -1 => true
-        case '\n' => false
+        case -1 => return true
+        case '\n' => return false
         case _ =>
       }
     } while (true)
@@ -68,11 +68,11 @@ class QueryReader(reader: Reader) {
   private def skipMultiLineComment(): Boolean = {
     do {
       in.read match {
-        case -1 => true
+        case -1 => return true
         case '*' => 
           in.read match {
-            case -1 =>  true
-            case '/' => false
+            case -1 =>  return true
+            case '/' => return false
             case _ =>  
           }                        
         case _ =>
