@@ -100,7 +100,7 @@ object NodeType {
       FloatType
     case "boolean" =>
       BooleanType
-    case name =>
+    case _ =>
       throw new WQueryModelException("Datatype '" + name + "' not found")
   }
 }
