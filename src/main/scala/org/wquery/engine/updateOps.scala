@@ -123,7 +123,7 @@ case class AddSynsetsOp(override val valuesOp: AlgebraOp, override val patterns:
     for (tuple <- valuesOp.evaluate(wordNet, bindings).paths) {
       tuple.last match {
         case newSynset: NewSynset =>
-          wordNet.store.addSynset(None, newSynset.senses, assignments)
+          wordNet.store.addSynset(none, newSynset.senses, assignments)
         case _ =>
           // do nothing
       }

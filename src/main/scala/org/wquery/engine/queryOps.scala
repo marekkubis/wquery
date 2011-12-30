@@ -80,7 +80,7 @@ case class IfElseOp(conditionOp: AlgebraOp, ifOp: AlgebraOp, elseOp: Option[Alge
 
   def minTupleSize = elseOp.map(_.minTupleSize.min(ifOp.minTupleSize)).getOrElse(ifOp.minTupleSize)
 
-  def maxTupleSize = elseOp.map(_.maxTupleSize.map(elseSize => ifOp.maxTupleSize.map(_.max(elseSize))).getOrElse(None)).getOrElse(ifOp.maxTupleSize)
+  def maxTupleSize = elseOp.map(_.maxTupleSize.map(elseSize => ifOp.maxTupleSize.map(_.max(elseSize))).getOrElse(none)).getOrElse(ifOp.maxTupleSize)
 
   def bindingsPattern = elseOp.map(_.bindingsPattern union ifOp.bindingsPattern).getOrElse(ifOp.bindingsPattern)
 
@@ -117,9 +117,7 @@ case class BlockOp(ops: List[AlgebraOp]) extends QueryOp {
     ops.headOption.map(_.bindingsPattern).getOrElse(BindingsPattern())
   }
 
-  def referencedVariables = ops.headOption
-    .map(head => ops.tail.foldLeft(head.referencedVariables)((l,r) => l ++ r.referencedVariables))
-    .orZero
+  def referencedVariables = ops.foldLeft(Set.empty[Variable])((l,r) => l ++ r.referencedVariables)
 
   def referencesContext = ops.exists(_.referencesContext)
 }
@@ -680,7 +678,7 @@ case class RelationUnionPattern(patterns: List[RelationalPattern]) extends Relat
 
   def minSize = patterns.map(_.minSize).min
 
-  def maxSize = if (patterns.exists(!_.maxSize.isDefined)) None else patterns.map(_.maxSize).max
+  def maxSize = if (patterns.exists(!_.maxSize.isDefined)) none else patterns.map(_.maxSize).max
 
   def sourceType = patterns.flatMap(_.sourceType).toSet
 
@@ -700,7 +698,7 @@ case class RelationCompositionPattern(patterns: List[RelationalPattern]) extends
 
   def maxSize = {
     if (patterns.exists(!_.maxSize.isDefined))
-      None
+      none
     else
       some(patterns.map(_.maxSize).collect{ case Some(num) => num }.sum)
   }
