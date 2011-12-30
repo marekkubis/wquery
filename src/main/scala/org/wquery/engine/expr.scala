@@ -75,11 +75,11 @@ case class SplitExpr(expr: EvaluableExpr, withs: List[PropertyAssignmentExpr]) e
   }
 }
 
-case class VariableAssignmentExpr(variables: VariableTemplate, expr: EvaluableExpr) extends EvaluableExpr with VariableTypeBindings {
+case class VariableAssignmentExpr(variables: VariableTemplate, expr: EvaluableExpr) extends EvaluableExpr {
   def evaluationPlan(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context) = {
     val op = expr.evaluationPlan(wordNet, bindings, context)
 
-    bindTypes(bindings, op, variables)
+    bindings.bindTypes(op, variables)
     AssignmentOp(variables, op)
   }
 }
@@ -340,37 +340,6 @@ case class FunctionExpr(name: String, args: EvaluableExpr) extends EvaluableExpr
 /*
  * Step related expressions
  */
-trait VariableTypeBindings {
-  def bindTypes(bindings: BindingsPattern, op: AlgebraOp, variables: VariableTemplate) {
-    variables.pathVariablePosition match {
-      case Some(pathVarPos) =>
-        bindVariablesFromRight(bindings, op, variables)
-        variables.pathVariableName.map(bindings.bindPathVariableType(_, op, variables.leftPatternSize, variables.rightPatternSize))
-        bindVariablesFromLeft(bindings, op, variables)
-      case None =>
-        bindVariablesFromRight(bindings, op, variables)
-    }
-  }
-
-  private def bindVariablesFromLeft(bindings: BindingsPattern, op: AlgebraOp, variables: VariableTemplate) {
-    for ((name, pos) <- variables.leftVariablesIndexes) {
-      if (op.maxTupleSize.map(pos < _).getOrElse(true))
-        bindings.bindStepVariableType(name, op.leftType(pos))
-      else
-        throw new WQueryStaticCheckException("Variable $" + name + " cannot be bound")
-    }
-  }
-
-  private def bindVariablesFromRight(bindings: BindingsPattern, op: AlgebraOp, variables: VariableTemplate) {
-    for ((name, pos) <- variables.rightVariablesIndexes) {
-      if (op.maxTupleSize.map(pos < _).getOrElse(true))
-        bindings.bindStepVariableType(name, op.rightType(pos))
-      else
-        throw new WQueryStaticCheckException("Variable $" + name + " cannot be bound")
-    }
-  }
-}
-
 sealed abstract class TransformationExpr extends Expr {
   def push(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context, op: AlgebraOp, plan: LogicalPlanBuilder): AlgebraOp
 }

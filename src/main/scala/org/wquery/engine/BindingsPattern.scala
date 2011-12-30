@@ -2,6 +2,7 @@ package org.wquery.engine
 
 import scala.collection.mutable.Map
 import org.wquery.model.DataType
+import org.wquery.WQueryStaticCheckException
 
 class BindingsPattern {
   val stepVariablesTypes = Map[String, Set[DataType]]()
@@ -42,6 +43,35 @@ class BindingsPattern {
     sum.pathVariablesTypes ++= that.pathVariablesTypes
 
     sum
+  }
+
+  def bindTypes(op: AlgebraOp, variables: VariableTemplate) {
+    variables.pathVariablePosition match {
+      case Some(pathVarPos) =>
+        bindTypesFromRight(op, variables)
+        variables.pathVariableName.map(bindPathVariableType(_, op, variables.leftPatternSize, variables.rightPatternSize))
+        bindTypesFromLeft(op, variables)
+      case None =>
+        bindTypesFromRight(op, variables)
+    }
+  }
+
+  private def bindTypesFromLeft(op: AlgebraOp, variables: VariableTemplate) {
+    for ((name, pos) <- variables.leftVariablesIndexes) {
+      if (op.maxTupleSize.map(pos < _).getOrElse(true))
+        bindStepVariableType(name, op.leftType(pos))
+      else
+        throw new WQueryStaticCheckException("Variable $" + name + " cannot be bound")
+    }
+  }
+
+  private def bindTypesFromRight(op: AlgebraOp, variables: VariableTemplate) {
+    for ((name, pos) <- variables.rightVariablesIndexes) {
+      if (op.maxTupleSize.map(pos < _).getOrElse(true))
+        bindStepVariableType(name, op.rightType(pos))
+      else
+        throw new WQueryStaticCheckException("Variable $" + name + " cannot be bound")
+    }
   }
 }
 

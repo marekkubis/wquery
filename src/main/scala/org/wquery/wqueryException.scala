@@ -12,6 +12,9 @@ class WQueryParsingErrorException(message: String) extends WQueryParsingExceptio
 
 class WQueryStaticCheckException(message: String) extends WQueryException(message)
 
+class WQueryStepVariableCannotBeBoundException(variableName: String)
+  extends WQueryStaticCheckException("Variable $" + variableName + " cannot be bound")
+
 class WQueryEvaluationException(message: String) extends WQueryException(message)
 
 class WQueryInvalidValueSpecifiedForRelationPropertyException(property: String)
