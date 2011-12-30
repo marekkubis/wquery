@@ -20,7 +20,7 @@ class LogicalPlanBuilder(context: BindingsSchema) {
   }
 
   def appendCondition(condition: Condition) {    
-    // if the filter is context dependednt then check if there is a suiatble variable
+    // if the filter is context dependent then check if there is a suitable variable
     //    if yes then substitute
     //    if not then add $__poz variable
 
@@ -36,7 +36,7 @@ class LogicalPlanBuilder(context: BindingsSchema) {
   }
 
   def build = { // TODO return multiple plans - PlanEvaluator will choose one
-    // travrse the graph
+    // traverse the graph
     
     walkForward(0, steps.size - 1)
   }
@@ -52,7 +52,7 @@ class LogicalPlanBuilder(context: BindingsSchema) {
     for (step <- path.tail) {
       step match {
         case link: LinkStep =>
-          op = ExtendOp(op, link.pos, link.pattern, bindings.get(step).getOrElse(VariableTemplate.empty))
+          op = ExtendOp(op, link.pos, link.pattern, ~bindings.get(step))
         case _ =>
           // do nothing
       }
@@ -71,7 +71,7 @@ class ConditionApplier(bindings: Map[Step, VariableTemplate], conditions: List[(
 
   def applyConditions(inputOp: AlgebraOp, currentStep: Step) = {
     var op = inputOp
-    val template = bindings.get(currentStep).getOrElse(VariableTemplate.empty)
+    val template = ~bindings.get(currentStep)
 
     alreadyBoundVariables ++= template.variables
 

@@ -1,5 +1,7 @@
 package org.wquery.engine
 
+import scalaz._
+import Scalaz._
 import org.wquery.{WQueryStepVariableCannotBeBoundException, WQueryEvaluationException}
 
 case class VariableTemplate(pattern: List[Variable]) {
@@ -11,15 +13,12 @@ case class VariableTemplate(pattern: List[Variable]) {
     if (pos != pattern.lastIndexWhere{_.isInstanceOf[PathVariable]})
       throw new WQueryEvaluationException("Variable list " + pattern.mkString + " contains more than one path variable")
     else if (pos != -1)
-      Some(pos)
+      some(pos)
     else
-      None
+      none
   }
 
-  val pathVariableName = {
-    val name = pathVariablePosition.map(pattern(_).name)
-    if (name.map(_ != "_").getOrElse(false)) name else None
-  }
+  val pathVariableName = pathVariablePosition.map(pattern(_).name).filter(_ != "_")
 
   val stepVariableNames = {
     val nameList = pattern.filterNot(x => (x.isInstanceOf[PathVariable] || x.name == "_")).map(_.name)
@@ -42,7 +41,7 @@ case class VariableTemplate(pattern: List[Variable]) {
   val leftVariablesNames = leftVariablesIndexes.keySet
   val rightVariablesNames = rightVariablesIndexes.keySet
   val leftPatternSize = pathVariablePosition.getOrElse(0)
-  val rightPatternSize = pathVariablePosition.map(pos => pattern.size - (pos + 1)).getOrElse(pattern.size)
+  val rightPatternSize = pathVariablePosition.some(pos => pattern.size - (pos + 1)).none(pattern.size)
 
   def leftIndex(variable: String, tupleSize: Int, shift: Int) = {
     val pos = leftVariablesIndexes(variable)
@@ -67,4 +66,6 @@ case class VariableTemplate(pattern: List[Variable]) {
 
 object VariableTemplate {
   val empty = new VariableTemplate(Nil)
+  
+  implicit def VariableTemplateZero = zero(VariableTemplate.empty)
 }

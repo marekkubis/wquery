@@ -10,7 +10,7 @@ class Bindings(parent: Option[Bindings], updatesParent: Boolean) {
   private var contextVariable: Option[Any] = none
 
   def bindStepVariable(name: String, value: Any) {
-    if (updatesParent && parent.map(_.lookupStepVariable(name).isDefined).getOrElse(false)) {
+    if (updatesParent && parent.some(_.lookupStepVariable(name).isDefined).none(false)) {
       parent.get.bindStepVariable(name, value)
     } else {
       stepVariables(name) = value
@@ -18,14 +18,14 @@ class Bindings(parent: Option[Bindings], updatesParent: Boolean) {
   }
 
   def bindPathVariable(name: String, value: List[Any]) {
-    if (updatesParent && parent.map(_.lookupPathVariable(name).isDefined).getOrElse(false)) {
+    if (updatesParent && parent.some(_.lookupPathVariable(name).isDefined).none(false)) {
       parent.get.bindPathVariable(name, value)
     } else {
       pathVariables(name) = value
     }
   }
 
-  def bindContextVariable(variable: Any) = contextVariable = Some(variable)
+  def bindContextVariable(variable: Any) { contextVariable = Some(variable) }
     
   def lookupPathVariable(name: String): Option[List[Any]] = pathVariables.get(name).orElse(parent.flatMap(_.lookupPathVariable(name)))
    
