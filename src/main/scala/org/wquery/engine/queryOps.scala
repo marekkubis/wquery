@@ -2,7 +2,7 @@ package org.wquery.engine
 
 import org.wquery.model._
 import collection.mutable.ListBuffer
-import org.wquery.WQueryEvaluationException
+import org.wquery.{WQueryStepVariableCannotBeBoundException, WQueryEvaluationException}
 
 sealed abstract class QueryOp extends AlgebraOp
 
@@ -944,21 +944,21 @@ trait VariableBindings {
   }
 
   private def bindValuesFromLeft(variables: VariableTemplate, varIndexes: Map[String, ListBuffer[Int]], tupleSize: Int) {
-    for ((v, pos) <- variables.leftVariablesIndexes)
+    for ((name, pos) <- variables.leftVariablesIndexes)
       if (pos < tupleSize)
-        varIndexes(v).append(pos)
+        varIndexes(name).append(pos)
       else
-        throw new WQueryEvaluationException("Variable $" + v + " cannot be bound")
+        throw new WQueryStepVariableCannotBeBoundException(name)
   }
 
   private def bindValuesFromRight(variables: VariableTemplate, varIndexes: Map[String, ListBuffer[Int]], tupleSize: Int) {
-    for ((v, pos) <- variables.rightVariablesIndexes) {
+    for ((name, pos) <- variables.rightVariablesIndexes) {
       val index = tupleSize - 1 - pos
 
       if (index >= 0)
-        varIndexes(v).append(index)
+        varIndexes(name).append(index)
       else
-        throw new WQueryEvaluationException("Variable $" + v + " cannot be bound")
+        throw new WQueryStepVariableCannotBeBoundException(name)
     }
   }
 }

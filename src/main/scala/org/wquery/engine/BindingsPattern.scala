@@ -2,7 +2,7 @@ package org.wquery.engine
 
 import scala.collection.mutable.Map
 import org.wquery.model.DataType
-import org.wquery.WQueryStaticCheckException
+import org.wquery.{WQueryStepVariableCannotBeBoundException, WQueryStaticCheckException}
 
 class BindingsPattern {
   val stepVariablesTypes = Map[String, Set[DataType]]()
@@ -61,7 +61,7 @@ class BindingsPattern {
       if (op.maxTupleSize.map(pos < _).getOrElse(true))
         bindStepVariableType(name, op.leftType(pos))
       else
-        throw new WQueryStaticCheckException("Variable $" + name + " cannot be bound")
+        throw new WQueryStepVariableCannotBeBoundException(name)
     }
   }
 
@@ -70,7 +70,7 @@ class BindingsPattern {
       if (op.maxTupleSize.map(pos < _).getOrElse(true))
         bindStepVariableType(name, op.rightType(pos))
       else
-        throw new WQueryStaticCheckException("Variable $" + name + " cannot be bound")
+        throw new WQueryStepVariableCannotBeBoundException(name)
     }
   }
 }

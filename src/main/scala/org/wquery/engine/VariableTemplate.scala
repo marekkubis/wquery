@@ -1,5 +1,6 @@
 package org.wquery.engine
-import org.wquery.WQueryEvaluationException
+
+import org.wquery.{WQueryStepVariableCannotBeBoundException, WQueryEvaluationException}
 
 case class VariableTemplate(pattern: List[Variable]) {
   val variables = pattern.filterNot(_.name == "_").toSet
@@ -49,7 +50,7 @@ case class VariableTemplate(pattern: List[Variable]) {
     if (pos < tupleSize)
       shift + pos
     else
-      throw new WQueryEvaluationException("Variable $" + variable + " cannot be bound")
+      throw new WQueryStepVariableCannotBeBoundException(variable)
   }
 
   def rightIndex(variable: String, tupleSize: Int, shift: Int) = {
@@ -58,7 +59,7 @@ case class VariableTemplate(pattern: List[Variable]) {
     if (pos >= 0)
       shift + pos
     else
-      throw new WQueryEvaluationException("Variable $" + variable + " cannot be bound")
+      throw new WQueryStepVariableCannotBeBoundException(variable)
   }
 
   def pathVariableIndexes(tupleSize: Int, shift: Int) = (shift + leftPatternSize, shift + tupleSize - rightPatternSize)
