@@ -5,7 +5,7 @@ class QueryReader(reader: Reader) {
   private val in = new BufferedReader(reader)
   private var eof = false
 
-  def close = in.close
+  def close { in.close }
 
   def isEof = eof
   
@@ -26,7 +26,7 @@ class QueryReader(reader: Reader) {
               eof = skipSingleLineComment()
             case _ =>
               builder append '-'
-              in reset 
+              in.reset
           }
         case '/' =>
           in.mark(1)          
@@ -35,7 +35,7 @@ class QueryReader(reader: Reader) {
               eof = skipMultiLineComment()  
             case _ =>
               builder append '/'
-              in reset 
+              in.reset
           }
         case chr =>
           builder append chr.asInstanceOf[Char]  
@@ -56,29 +56,29 @@ class QueryReader(reader: Reader) {
   private def skipSingleLineComment(): Boolean = {
     do {
       in.read match {
-        case -1 => return true
-        case '\n' => return false                   
+        case -1 => true
+        case '\n' => false
         case _ =>
       }
     } while (true)
       
-    return false
+    false
   }  
   
   private def skipMultiLineComment(): Boolean = {
     do {
       in.read match {
-        case -1 => return true
+        case -1 => true
         case '*' => 
           in.read match {
-            case -1 =>  return true
-            case '/' => return false
+            case -1 =>  true
+            case '/' => false
             case _ =>  
           }                        
         case _ =>
       }
     } while (true)
       
-    return false
+    false
   }  
 }
