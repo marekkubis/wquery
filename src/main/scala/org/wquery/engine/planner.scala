@@ -52,7 +52,7 @@ class LogicalPlanBuilder(context: BindingsSchema) {
     for (step <- path.tail) {
       step match {
         case link: LinkStep =>
-          op = ExtendOp(op, link.pos, link.pattern, ~bindings.get(step))
+          op = ExtendOp(op, link.pos, link.pattern, bindings.get(step).orZero)
         case _ =>
           // do nothing
       }

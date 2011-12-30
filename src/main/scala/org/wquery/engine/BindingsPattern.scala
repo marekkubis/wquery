@@ -2,7 +2,7 @@ package org.wquery.engine
 
 import scala.collection.mutable.Map
 import org.wquery.model.DataType
-import org.wquery.{WQueryStepVariableCannotBeBoundException, WQueryStaticCheckException}
+import org.wquery.WQueryStepVariableCannotBeBoundException
 
 class BindingsPattern {
   val stepVariablesTypes = Map[String, Set[DataType]]()

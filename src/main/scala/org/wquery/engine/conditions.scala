@@ -12,7 +12,7 @@ sealed abstract class Condition {
 case class OrCondition(exprs: List[Condition]) extends Condition {
   def satisfied(wordNet: WordNet, bindings: Bindings) = exprs.exists(_.satisfied(wordNet, bindings))
 
-  def referencedVariables = exprs.tail.foldLeft(exprs.head.referencedVariables)((vars, expr) => vars union expr.referencedVariables)
+  def referencedVariables = exprs.foldLeft(Set.empty[Variable])((vars, expr) => vars union expr.referencedVariables)
 
   def referencesContext = exprs.exists(_.referencesContext)
 }
@@ -20,7 +20,7 @@ case class OrCondition(exprs: List[Condition]) extends Condition {
 case class AndCondition(exprs: List[Condition]) extends Condition {
   def satisfied(wordNet: WordNet, bindings: Bindings) = exprs.forall(_.satisfied(wordNet, bindings))
 
-  def referencedVariables = exprs.tail.foldLeft(exprs.head.referencedVariables)((vars, expr) => vars union expr.referencedVariables)
+  def referencedVariables = exprs.foldLeft(Set.empty[Variable])((vars, expr) => vars union expr.referencedVariables)
 
   def referencesContext = exprs.exists(_.referencesContext)
 }
@@ -52,14 +52,14 @@ case class BinaryCondition(op: String, leftOp: AlgebraOp, rightOp: AlgebraOp) ex
       case "pin" =>
         leftGroup.forall{ case (left, leftValues) => rightGroup.get(left).map(rightValues => leftValues.size <= rightValues.size).getOrElse(false) } && leftResult.size < rightResult.size
       case "=~" =>
-        if (rightResult.size == 1 ) {
+        if (rightResult.size == 1) {
           // element context
           if (DataType.fromValue(rightResult.head) == StringType) {
             val regex = rightResult.head.asInstanceOf[String].r
 
             leftGroup.forall {
               case (elem: String, _) =>
-                regex.findFirstIn(elem).map(_ => true).getOrElse(false)
+                regex.findFirstIn(elem).isDefined
             }
           } else {
             throw new WQueryEvaluationException("The rightSet side of '" + op +

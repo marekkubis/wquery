@@ -35,7 +35,7 @@ class Bindings(parent: Option[Bindings], updatesParent: Boolean) {
 }
 
 object Bindings {
-  def apply() = new Bindings(None, false)
+  def apply() = new Bindings(none, false)
   
-  def apply(parent: Bindings, updatesParent: Boolean) = new Bindings(Some(parent), updatesParent)
+  def apply(parent: Bindings, updatesParent: Boolean) = new Bindings(some(parent), updatesParent)
 }
