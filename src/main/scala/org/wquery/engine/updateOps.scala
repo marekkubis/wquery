@@ -1,5 +1,7 @@
 package org.wquery.engine
 
+import scalaz._
+import Scalaz._
 import org.wquery.model._
 import org.wquery.WQueryInvalidValueSpecifiedForRelationPropertyException
 
@@ -17,7 +19,7 @@ sealed abstract class UpdateOp extends AlgebraOp {
 
   def minTupleSize = 0
 
-  def maxTupleSize = Some(0)
+  def maxTupleSize = some(0)
 
   def bindingsPattern = BindingsSchema()
 }
@@ -236,7 +238,7 @@ case class NewSynsetOp(sensesOp: AlgebraOp) extends AlgebraOp {
 
   def minTupleSize = 1
 
-  def maxTupleSize = Some(1)
+  def maxTupleSize = some(1)
 
   def bindingsPattern = BindingsPattern()
 

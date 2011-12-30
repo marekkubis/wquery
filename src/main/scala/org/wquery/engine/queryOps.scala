@@ -74,9 +74,9 @@ case class IfElseOp(conditionOp: AlgebraOp, ifOp: AlgebraOp, elseOp: Option[Alge
       elseOp.map(_.evaluate(wordNet, bindings)).orZero
   }
 
-  def leftType(pos: Int) = ifOp.leftType(pos) ++ elseOp.map(_.leftType(pos)).getOrElse(Set.empty)
+  def leftType(pos: Int) = ifOp.leftType(pos) ++ elseOp.map(_.leftType(pos)).orZero
 
-  def rightType(pos: Int) = ifOp.rightType(pos) ++ elseOp.map(_.rightType(pos)).getOrElse(Set.empty)
+  def rightType(pos: Int) = ifOp.rightType(pos) ++ elseOp.map(_.rightType(pos)).orZero
 
   def minTupleSize = elseOp.map(_.minTupleSize.min(ifOp.minTupleSize)).getOrElse(ifOp.minTupleSize)
 
@@ -84,7 +84,7 @@ case class IfElseOp(conditionOp: AlgebraOp, ifOp: AlgebraOp, elseOp: Option[Alge
 
   def bindingsPattern = elseOp.map(_.bindingsPattern union ifOp.bindingsPattern).getOrElse(ifOp.bindingsPattern)
 
-  def referencedVariables = conditionOp.referencedVariables ++ ifOp.referencedVariables ++ elseOp.map(_.referencedVariables).getOrElse(Set.empty)
+  def referencedVariables = conditionOp.referencedVariables ++ ifOp.referencedVariables ++ elseOp.map(_.referencedVariables).orZero
 
   def referencesContext = conditionOp.referencesContext || ifOp.referencesContext || elseOp.map(_.referencesContext).getOrElse(false)
 }
@@ -109,7 +109,7 @@ case class BlockOp(ops: List[AlgebraOp]) extends QueryOp {
   def maxTupleSize = {
     val opSizes = ops.map(_.maxTupleSize).collect { case Some(x) => x}
 
-    if (opSizes.size != ops.size) None else Some(opSizes.max)
+    if (opSizes.size != ops.size) none else some(opSizes.max)
   }
 
   def bindingsPattern = {
@@ -119,7 +119,7 @@ case class BlockOp(ops: List[AlgebraOp]) extends QueryOp {
 
   def referencedVariables = ops.headOption
     .map(head => ops.tail.foldLeft(head.referencedVariables)((l,r) => l ++ r.referencedVariables))
-    .getOrElse(Set.empty)
+    .orZero
 
   def referencesContext = ops.exists(_.referencesContext)
 }
@@ -150,7 +150,7 @@ case class AssignmentOp(variables: VariableTemplate, op: AlgebraOp) extends Quer
 
   def minTupleSize = 0
 
-  def maxTupleSize = Some(0)
+  def maxTupleSize = some(0)
 
   def bindingsPattern = BindingsPattern()
 
@@ -357,7 +357,7 @@ abstract class BinaryArithmeticOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends
 
   def minTupleSize = 1
 
-  def maxTupleSize = Some(1)
+  def maxTupleSize = some(1)
 
   def bindingsPattern = BindingsPattern()
 
@@ -367,7 +367,7 @@ abstract class BinaryArithmeticOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends
 }
 
 case class AddOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends BinaryArithmeticOp(leftOp, rightOp) {
-  def combine(leftVal: Any, rightVal: Any) = (leftVal, rightVal) match {
+  def combine(leftVal: Any, rightVal: Any): Any = (leftVal, rightVal) match {
     case (leftVal: Double, rightVal: Double) =>
       leftVal + rightVal
     case (leftVal: Double, rightVal: Int) =>
@@ -380,7 +380,7 @@ case class AddOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends BinaryArithmetic
 }
 
 case class SubOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends BinaryArithmeticOp(leftOp, rightOp) {
-  def combine(leftVal: Any, rightVal: Any) = (leftVal, rightVal) match {
+  def combine(leftVal: Any, rightVal: Any): Any = (leftVal, rightVal) match {
     case (leftVal: Double, rightVal: Double) =>
       leftVal - rightVal
     case (leftVal: Double, rightVal: Int) =>
@@ -393,7 +393,7 @@ case class SubOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends BinaryArithmetic
 }
 
 case class MulOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends BinaryArithmeticOp(leftOp, rightOp) {
-  def combine(leftVal: Any, rightVal: Any) = (leftVal, rightVal) match {
+  def combine(leftVal: Any, rightVal: Any): Any = (leftVal, rightVal) match {
     case (leftVal: Double, rightVal: Double) =>
       leftVal * rightVal
     case (leftVal: Double, rightVal: Int) =>
@@ -406,7 +406,7 @@ case class MulOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends BinaryArithmetic
 }
 
 case class DivOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends BinaryArithmeticOp(leftOp, rightOp) {
-  def combine(leftVal: Any, rightVal: Any) = (leftVal, rightVal) match {
+  def combine(leftVal: Any, rightVal: Any): Any = (leftVal, rightVal) match {
     case (leftVal: Double, rightVal: Double) =>
       leftVal / rightVal
     case (leftVal: Double, rightVal: Int) =>
@@ -426,7 +426,7 @@ case class IntDivOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends BinaryArithme
 }
 
 case class ModOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends BinaryArithmeticOp(leftOp, rightOp) {
-  def combine(leftVal: Any, rightVal: Any) = (leftVal, rightVal) match {
+  def combine(leftVal: Any, rightVal: Any): Any = (leftVal, rightVal) match {
     case (leftVal: Double, rightVal: Double) =>
       leftVal % rightVal
     case (leftVal: Double, rightVal: Int) =>
@@ -452,7 +452,7 @@ case class MinusOp(op: AlgebraOp) extends QueryOp {
 
   def minTupleSize = 1
 
-  def maxTupleSize = Some(1)
+  def maxTupleSize = some(1)
 
   def bindingsPattern = BindingsPattern()
 
@@ -702,7 +702,7 @@ case class RelationCompositionPattern(patterns: List[RelationalPattern]) extends
     if (patterns.exists(!_.maxSize.isDefined))
       None
     else
-      Some(patterns.map(_.maxSize).collect{ case Some(num) => num }.sum)
+      some(patterns.map(_.maxSize).collect{ case Some(num) => num }.sum)
   }
 
   def sourceType = patterns.head.sourceType
@@ -740,7 +740,7 @@ case class QuantifiedRelationPattern(pattern: RelationalPattern, quantifier: Qua
   def extend(wordNet: WordNetStore, bindings: Bindings, extensionSet: ExtensionSet, from: Int) = {
     val lowerExtensionSet = (1 to quantifier.lowerBound).foldLeft(extensionSet)((x, _) => pattern.extend(wordNet, bindings, x, from))
 
-    if (Some(quantifier.lowerBound) != quantifier.upperBound)
+    if (some(quantifier.lowerBound) != quantifier.upperBound)
       computeClosure(wordNet, bindings, lowerExtensionSet, from, quantifier.upperBound.map(_ - quantifier.lowerBound))
     else
       lowerExtensionSet.asInstanceOf[ExtendedExtensionSet] // valid quantifiers invoke extend at least once
@@ -823,7 +823,7 @@ case class VariableRelationalPattern(variable: StepVariable) extends RelationalP
 
   def minSize = 2
 
-  def maxSize = Some(2)
+  def maxSize = some(2)
 
   def sourceType = DataType.all
 
@@ -856,7 +856,7 @@ case class ArcPattern(relation: Option[Relation], source: ArcPatternArgument, de
 
   def minSize = 2*destinations.size
 
-  def maxSize = Some(2*destinations.size)
+  def maxSize = some(2*destinations.size)
 
   def sourceType = demandArgumentType(source)
 
@@ -891,7 +891,7 @@ case class ArcPattern(relation: Option[Relation], source: ArcPatternArgument, de
 }
 
 case class ArcPatternArgument(name: String, nodeType: Option[NodeType]) {
-  override def toString = name + nodeType.map("&" + _).getOrElse("")
+  override def toString = name + ~nodeType.map("&" + _)
 }
 
 case class BindOp(op: AlgebraOp, variables: VariableTemplate) extends QueryOp {
@@ -939,7 +939,7 @@ case class FetchOp(relation: Relation, from: List[(String, List[Any])], to: List
 
   def minTupleSize = to.size
 
-  def maxTupleSize = Some(to.size)
+  def maxTupleSize = some(to.size)
 
   def bindingsPattern = BindingsPattern()
 
@@ -980,7 +980,7 @@ case class ConstantOp(dataSet: DataSet) extends QueryOp {
 
   def minTupleSize = dataSet.minTupleSize
 
-  def maxTupleSize = Some(dataSet.maxTupleSize)
+  def maxTupleSize = some(dataSet.maxTupleSize)
 
   def bindingsPattern = BindingsPattern() // assumed that constant dataset does not contain variable bindings
 
@@ -1010,7 +1010,7 @@ case class ContextRefOp(types: Set[DataType]) extends QueryOp {
 
   def minTupleSize = 1
 
-  def maxTupleSize = Some(1)
+  def maxTupleSize = some(1)
 
   def bindingsPattern = BindingsPattern()
 
@@ -1046,7 +1046,7 @@ case class StepVariableRefOp(variable: StepVariable, types: Set[DataType]) exten
 
   def minTupleSize = 1
 
-  def maxTupleSize = Some(1)
+  def maxTupleSize = some(1)
 
   def bindingsPattern = BindingsPattern()
 
