@@ -45,7 +45,7 @@ class BindingsPattern {
     sum
   }
 
-  def bindTypes(op: AlgebraOp, variables: VariableTemplate) {
+  def bindVariablesTypes(variables: VariableTemplate, op: AlgebraOp) {
     variables.pathVariablePosition match {
       case Some(pathVarPos) =>
         bindTypesFromRight(op, variables)

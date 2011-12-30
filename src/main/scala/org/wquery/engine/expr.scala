@@ -79,7 +79,7 @@ case class VariableAssignmentExpr(variables: VariableTemplate, expr: EvaluableEx
   def evaluationPlan(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context) = {
     val op = expr.evaluationPlan(wordNet, bindings, context)
 
-    bindings.bindTypes(op, variables)
+    bindings.bindVariablesTypes(variables, op)
     AssignmentOp(variables, op)
   }
 }

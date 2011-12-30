@@ -1,6 +1,8 @@
 package org.wquery.model
 import scala.collection.mutable.ListBuffer
 import java.lang.IllegalArgumentException
+import org.wquery.engine.VariableTemplate
+import org.wquery.WQueryStepVariableCannotBeBoundException
 
 class DataSet(val paths: List[List[Any]], val pathVars: Map[String, List[(Int, Int)]], val stepVars: Map[String, List[Int]]) {
   private val minAndMaxTupleSizes = {
@@ -58,6 +60,51 @@ class DataSet(val paths: List[List[Any]], val pathVars: Map[String, List[(Int, I
   }
 
   override def toString = paths.toString
+
+  def bindVariables(variables: VariableTemplate) = {
+    if (variables != VariableTemplate.empty) {
+      val pathVarBuffers = DataSetBuffers.createPathVarBuffers(variables.pathVariableName.map(p => Set(p)).getOrElse(Set.empty))
+      val stepVarBuffers = DataSetBuffers.createStepVarBuffers(variables.stepVariableNames)
+
+      variables.pathVariablePosition match {
+        case Some(pathVarPos) =>
+          val pathVarBuffer = variables.pathVariableName.map(pathVarBuffers(_))
+          val pathVarStart = variables.leftVariablesIndexes.size
+          val pathVarEnd = variables.rightVariablesIndexes.size
+
+          for (tuple <- paths) {
+            paths.foreach(tuple => bindVariablesFromRight(variables, stepVarBuffers, tuple.size))
+            pathVarBuffer.map(_.append((pathVarStart, tuple.size - pathVarEnd)))
+            paths.foreach(tuple => bindVariablesFromLeft(variables, stepVarBuffers, tuple.size))
+          }
+        case None =>
+          paths.foreach(tuple => bindVariablesFromRight(variables, stepVarBuffers, tuple.size))
+      }
+
+      DataSet(paths, pathVars ++ pathVarBuffers.mapValues(_.toList), stepVars ++ stepVarBuffers.mapValues(_.toList))
+    } else {
+      this
+    }
+  }
+
+  private def bindVariablesFromLeft(variables: VariableTemplate, varIndexes: Map[String, ListBuffer[Int]], tupleSize: Int) {
+    for ((name, pos) <- variables.leftVariablesIndexes)
+      if (pos < tupleSize)
+        varIndexes(name).append(pos)
+      else
+        throw new WQueryStepVariableCannotBeBoundException(name)
+  }
+
+  private def bindVariablesFromRight(variables: VariableTemplate, varIndexes: Map[String, ListBuffer[Int]], tupleSize: Int) {
+    for ((name, pos) <- variables.rightVariablesIndexes) {
+      val index = tupleSize - 1 - pos
+
+      if (index >= 0)
+        varIndexes(name).append(index)
+      else
+        throw new WQueryStepVariableCannotBeBoundException(name)
+    }
+  }
 }
 
 object DataSet {
@@ -97,7 +144,7 @@ object DataSet {
 
   def fromValue(value: Any) = new DataSet(List(List(value)), Map(), Map())
 
-  def fromOptionalValue(option: Option[Any]) = option.map(fromValue(_)).getOrElse(empty)      
+  def fromOptionalValue(option: Option[Any]) = option.map(fromValue(_)).getOrElse(empty)
 }
 
 object DataSetBuffers {

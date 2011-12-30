@@ -122,13 +122,13 @@ case class BlockOp(ops: List[AlgebraOp]) extends QueryOp {
   def referencesContext = ops.exists(_.referencesContext)
 }
 
-case class AssignmentOp(variables: VariableTemplate, op: AlgebraOp) extends QueryOp with VariableBindings {
+case class AssignmentOp(variables: VariableTemplate, op: AlgebraOp) extends QueryOp {
   def evaluate(wordNet: WordNet, bindings: Bindings) = {
     val result = op.evaluate(wordNet, bindings)
 
     if (result.pathCount == 1) { // TODO remove this constraint
       val tuple = result.paths.head
-      val dataSet = bindValues(DataSet.fromTuple(tuple), variables)
+      val dataSet = DataSet.fromTuple(tuple).bindVariables(variables)
 
       dataSet.pathVars.keys.foreach { pathVar =>
         val varPos = dataSet.pathVars(pathVar)(0)
@@ -645,7 +645,7 @@ case class ExtendOp(op: AlgebraOp, from: Int, pattern: RelationalPattern, variab
 
   def bindingsPattern = {
     val pattern = op.bindingsPattern
-    pattern.bindTypes(this, variables)
+    pattern.bindVariablesTypes(variables, this)
     pattern
   }
 
@@ -892,9 +892,9 @@ case class ArcPatternArgument(name: String, nodeType: Option[NodeType]) {
   override def toString = name + nodeType.map("&" + _).getOrElse("")
 }
 
-case class BindOp(op: AlgebraOp, variables: VariableTemplate) extends QueryOp with VariableBindings {
+case class BindOp(op: AlgebraOp, variables: VariableTemplate) extends QueryOp {
   def evaluate(wordNet: WordNet, bindings: Bindings) = {
-    bindValues(op.evaluate(wordNet, bindings), variables)
+    op.evaluate(wordNet, bindings).bindVariables(variables)
   }
 
   def leftType(pos: Int) = op.leftType(pos)
@@ -907,60 +907,13 @@ case class BindOp(op: AlgebraOp, variables: VariableTemplate) extends QueryOp wi
 
   def bindingsPattern = {
     val pattern = op.bindingsPattern
-    pattern.bindTypes(op, variables)
+    pattern.bindVariablesTypes(variables, op)
     pattern
   }
 
   def referencedVariables = op.referencedVariables
 
   def referencesContext = op.referencesContext
-}
-
-trait VariableBindings {
-  def bindValues(dataSet: DataSet, variables: VariableTemplate) = {
-    if (variables != VariableTemplate.empty) {
-      val pathVarBuffers = DataSetBuffers.createPathVarBuffers(variables.pathVariableName.map(p => Set(p)).getOrElse(Set.empty))
-      val stepVarBuffers = DataSetBuffers.createStepVarBuffers(variables.stepVariableNames)
-
-      variables.pathVariablePosition match {
-        case Some(pathVarPos) =>
-          val pathVarBuffer = variables.pathVariableName.map(pathVarBuffers(_))
-          val pathVarStart = variables.leftVariablesIndexes.size
-          val pathVarEnd = variables.rightVariablesIndexes.size
-
-          for (tuple <- dataSet.paths) {
-            dataSet.paths.foreach(tuple => bindValuesFromRight(variables, stepVarBuffers, tuple.size))
-            pathVarBuffer.map(_.append((pathVarStart, tuple.size - pathVarEnd)))
-            dataSet.paths.foreach(tuple => bindValuesFromLeft(variables, stepVarBuffers, tuple.size))
-          }
-        case None =>
-          dataSet.paths.foreach(tuple => bindValuesFromRight(variables, stepVarBuffers, tuple.size))
-      }
-
-      DataSet(dataSet.paths, dataSet.pathVars ++ pathVarBuffers.mapValues(_.toList), dataSet.stepVars ++ stepVarBuffers.mapValues(_.toList))
-    } else {
-      dataSet
-    }
-  }
-
-  private def bindValuesFromLeft(variables: VariableTemplate, varIndexes: Map[String, ListBuffer[Int]], tupleSize: Int) {
-    for ((name, pos) <- variables.leftVariablesIndexes)
-      if (pos < tupleSize)
-        varIndexes(name).append(pos)
-      else
-        throw new WQueryStepVariableCannotBeBoundException(name)
-  }
-
-  private def bindValuesFromRight(variables: VariableTemplate, varIndexes: Map[String, ListBuffer[Int]], tupleSize: Int) {
-    for ((name, pos) <- variables.rightVariablesIndexes) {
-      val index = tupleSize - 1 - pos
-
-      if (index >= 0)
-        varIndexes(name).append(index)
-      else
-        throw new WQueryStepVariableCannotBeBoundException(name)
-    }
-  }
 }
 
 /*
