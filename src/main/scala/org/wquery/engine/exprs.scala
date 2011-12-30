@@ -1,7 +1,10 @@
 package org.wquery.engine
+
+import scalaz._
+import Scalaz._
 import org.wquery.model._
 import org.wquery.{WQueryStaticCheckException, WQueryEvaluationException}
-import collection.mutable.{Stack, ListBuffer}
+import collection.mutable.ListBuffer
 
 sealed abstract class Expr
 
@@ -123,7 +126,7 @@ case class WordNetUpdateExpr(property: String, op: String, valuesExpr: Evaluable
         StringType
       case Relations =>
         ArcType
-      case property =>
+      case _ =>
         throw new WQueryStaticCheckException("wordnet has no property '" + property + "'")
     }
 
@@ -384,9 +387,9 @@ case class BindTransformationExpr(variables: VariableTemplate) extends Transform
       plan.appendVariables(variables)
 
       op match {
-        case ExtendOp(op, pos, pattern, VariableTemplate.empty) =>
-          ExtendOp(op, pos, pattern, variables)
-        case op =>
+        case ExtendOp(extendedOp, pos, pattern, VariableTemplate.empty) =>
+          ExtendOp(extendedOp, pos, pattern, variables)
+        case _ =>
           BindOp(op, variables)
       }
     } else {
@@ -460,7 +463,7 @@ case class ArcExpr(ids: List[ArcExprArgument]) extends RelationalExpr {
         if (arg.nodeType.isEmpty) {
           wordNet.getRelation(arg.name, Map((Relation.Source, contextTypes)))
             .map(relation => ArcPattern(Some(relation), ArcPatternArgument(Relation.Source, Some(relation.sourceType)),
-              relation.destinationType.map(destinationType => List(ArcPatternArgument(Relation.Destination, Some(destinationType)))).getOrElse(Nil)))
+              relation.destinationType.map(destinationType => List(ArcPatternArgument(Relation.Destination, Some(destinationType)))).orZero))
         } else {
           throw new WQueryStaticCheckException("Relation name " + arg.name + " cannot be followed by type specifier &")
         }
