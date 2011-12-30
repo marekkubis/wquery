@@ -19,13 +19,7 @@ class LogicalPlanBuilder(context: BindingsSchema) {
     steps.append(new NodeStep(pattern.rightType(0), none)) // TODO backwardGenerator: use None or Some depending on type
   }
 
-  def appendCondition(condition: Condition) {    
-    // if the filter is context dependent then check if there is a suitable variable
-    //    if yes then substitute
-    //    if not then add $__poz variable
-
-    // build condition trigger
-    
+  def appendCondition(condition: Condition) {
     conditions.append((steps.lastOption, condition))
   }
 
