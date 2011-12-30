@@ -198,7 +198,7 @@ case class UnionOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends QueryOp {
 
   def minTupleSize = leftOp.minTupleSize min rightOp.minTupleSize
 
-  def maxTupleSize = leftOp.maxTupleSize.map(leftSize => rightOp.maxTupleSize.map(_.max(leftSize))).getOrElse(None)
+  def maxTupleSize = (leftOp.maxTupleSize <|*|> rightOp.maxTupleSize).map{ case (a, b) => a max b }
 
   def bindingsPattern = BindingsPattern()
 
@@ -241,7 +241,7 @@ case class IntersectOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends QueryOp {
 
   def minTupleSize = leftOp.minTupleSize max rightOp.minTupleSize
 
-  def maxTupleSize = leftOp.maxTupleSize.map(leftSize => rightOp.maxTupleSize.map(_.min(leftSize))).getOrElse(None)
+  def maxTupleSize = (leftOp.maxTupleSize <|*|> rightOp.maxTupleSize).map{ case (a, b) => a min b}
 
   def bindingsPattern = BindingsPattern()
 
@@ -315,7 +315,7 @@ case class JoinOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends QueryOp {
 
   def minTupleSize = leftOp.minTupleSize + rightOp.minTupleSize
 
-  def maxTupleSize = leftOp.maxTupleSize.map(leftSize => rightOp.maxTupleSize.map(_ + leftSize)).getOrElse(None)
+  def maxTupleSize = (leftOp.maxTupleSize <|*|> rightOp.maxTupleSize).map{ case (a, b) => a + b }
 
   def bindingsPattern = leftOp.bindingsPattern union rightOp.bindingsPattern
 
@@ -643,7 +643,7 @@ case class ExtendOp(op: AlgebraOp, from: Int, pattern: RelationalPattern, variab
 
   def minTupleSize = op.minTupleSize + pattern.minSize
 
-  def maxTupleSize = op.maxTupleSize.map(maxTupleSize => pattern.maxSize.map(maxSize => maxTupleSize + maxSize)).getOrElse(None)
+  def maxTupleSize = (op.maxTupleSize <|*|> pattern.maxSize).map{ case (a, b) => a + b }
 
   def bindingsPattern = {
     val pattern = op.bindingsPattern
@@ -788,7 +788,7 @@ case class QuantifiedRelationPattern(pattern: RelationalPattern, quantifier: Qua
 
   def minSize = pattern.minSize * quantifier.lowerBound
 
-  def maxSize = pattern.maxSize.map(maxSize => quantifier.upperBound.map(upperBound => maxSize * upperBound)).getOrElse(None)
+  def maxSize = (pattern.maxSize <|*|> quantifier.upperBound).map{ case (a, b) => a * b }
 
   def sourceType = pattern.sourceType
 
