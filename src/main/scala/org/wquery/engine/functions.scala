@@ -2,6 +2,8 @@ package org.wquery.engine
 
 import collection.mutable.ListBuffer
 import java.lang.reflect.Method
+import scalaz._
+import Scalaz._
 import org.wquery.model._
 
 abstract class Function(val name: String) {
@@ -168,7 +170,7 @@ object MinFunction extends DataSetFunction("min") with AcceptsAll with Preserves
 
   def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings) = {
    SortFunction.evaluate(dataSet, wordNet, bindings)
-     .paths.headOption.map(x => DataSet(List(x))).getOrElse(DataSet.empty)
+     .paths.headOption.map(x => DataSet(List(x))).orZero
   }
 }
 
@@ -177,7 +179,7 @@ object MaxFunction extends DataSetFunction("max") with AcceptsAll with Preserves
 
   def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings) = {
    SortFunction.evaluate(dataSet, wordNet, bindings)
-     .paths.lastOption.map(x => DataSet(List(x))).getOrElse(DataSet.empty)
+     .paths.lastOption.map(x => DataSet(List(x))).orZero
   }
 }
 

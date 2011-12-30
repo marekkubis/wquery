@@ -2,6 +2,8 @@ package org.wquery.engine
 
 import org.wquery.model._
 import collection.mutable.ListBuffer
+import scalaz._
+import Scalaz._
 import org.wquery.WQueryEvaluationException
 
 sealed abstract class QueryOp extends AlgebraOp
@@ -69,7 +71,7 @@ case class IfElseOp(conditionOp: AlgebraOp, ifOp: AlgebraOp, elseOp: Option[Alge
     if (conditionOp.evaluate(wordNet, bindings).isTrue)
       ifOp.evaluate(wordNet, bindings)
     else
-      elseOp.map(_.evaluate(wordNet, bindings)).getOrElse(DataSet.empty)
+      elseOp.map(_.evaluate(wordNet, bindings)).orZero
   }
 
   def leftType(pos: Int) = ifOp.leftType(pos) ++ elseOp.map(_.leftType(pos)).getOrElse(Set.empty)

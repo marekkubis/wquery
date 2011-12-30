@@ -67,5 +67,5 @@ case class VariableTemplate(pattern: List[Variable]) {
 object VariableTemplate {
   val empty = new VariableTemplate(Nil)
   
-  implicit def VariableTemplateZero = zero(VariableTemplate.empty)
+  implicit def VariableTemplateZero = zero(empty)
 }

@@ -3,16 +3,14 @@ import scala.collection.mutable.ListBuffer
 import java.lang.IllegalArgumentException
 import org.wquery.engine.VariableTemplate
 import org.wquery.WQueryStepVariableCannotBeBoundException
+import scalaz._
+import Scalaz._
 
 class DataSet(val paths: List[List[Any]], val pathVars: Map[String, List[(Int, Int)]], val stepVars: Map[String, List[Int]]) {
-  private val minAndMaxTupleSizes = {
+  val (minTupleSize, maxTupleSize) = {
     val sizes = paths.map(_.size)
     (if (sizes.isEmpty) 0 else sizes.min, if (sizes.isEmpty) 0 else sizes.max)
   }
-
-  val minTupleSize = minAndMaxTupleSizes._1
-
-  val maxTupleSize = minAndMaxTupleSizes._2
         
   val pathCount = paths.size
 
@@ -109,6 +107,8 @@ class DataSet(val paths: List[List[Any]], val pathVars: Map[String, List[(Int, I
 
 object DataSet {
   val empty = new DataSet(Nil, Map(), Map())
+  
+  implicit def DataSetZero = zero(empty)
 
   def apply(paths: List[List[Any]]) = new DataSet(paths, Map(), Map())
   
@@ -144,7 +144,7 @@ object DataSet {
 
   def fromValue(value: Any) = new DataSet(List(List(value)), Map(), Map())
 
-  def fromOptionalValue(option: Option[Any]) = option.map(fromValue(_)).getOrElse(empty)
+  def fromOptionalValue(option: Option[Any]) = option.some(fromValue(_)).none(empty)
 }
 
 object DataSetBuffers {
