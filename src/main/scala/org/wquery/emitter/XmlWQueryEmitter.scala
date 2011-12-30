@@ -73,7 +73,7 @@ class XmlWQueryEmitter extends WQueryEmitter {
         emitSense(element, builder)      
       case element: Arc =>
         emitArc(element, builder)
-      case element => 
+      case _ =>
         builder append "<VALUE>" append element append "</VALUE>\n"      
     }
   }

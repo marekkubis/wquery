@@ -50,9 +50,9 @@ class PlainWQueryEmitter extends WQueryEmitter {
         builder append "\n"
       }
       
-      return builder toString
+      builder.toString
     } else {
-      return "(no result)\n"
+      "(no result)\n"
     }    
   }
   
@@ -101,7 +101,7 @@ class PlainWQueryEmitter extends WQueryEmitter {
         } else {
           builder append element
         }
-      case element => 
+      case _ =>
         builder append element      
     }
   }

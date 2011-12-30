@@ -50,9 +50,9 @@ class RawWQueryEmitter extends WQueryEmitter {
         builder append "\n"
       }
       
-      return builder toString
+      builder.toString
     } else {
-      return "(no result)\n"
+      "(no result)\n"
     }    
   }
   
@@ -80,7 +80,7 @@ class RawWQueryEmitter extends WQueryEmitter {
         builder append element.to
       case element: String =>
         builder append element
-      case element =>
+      case _ =>
         builder append element      
     }
   }
