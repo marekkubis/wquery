@@ -581,7 +581,7 @@ case class ProjectOp(op: AlgebraOp, projectOp: AlgebraOp) extends QueryOp {
 case class ExtendOp(op: AlgebraOp, from: Int, pattern: RelationalPattern, direction: Direction, variables: VariableTemplate) extends QueryOp {
   def evaluate(wordNet: WordNet, bindings: Bindings) = {
     val dataSet = op.evaluate(wordNet, bindings)
-    val extensionSet = pattern.extend(wordNet.store, bindings, new DataExtensionSet(dataSet), from)
+    val extensionSet = pattern.extend(wordNet.store, bindings, new DataExtensionSet(dataSet), from, direction)
     val dataSetPathVarNames = dataSet.pathVars.keySet
     val dataSetStepVarNames = dataSet.stepVars.keySet
     val pathBuffer = DataSetBuffers.createPathBuffer

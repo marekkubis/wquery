@@ -1,6 +1,7 @@
 package org.wquery.model
 
-import org.wquery.engine.{ArcPattern, RelationalPattern}
+import org.wquery.engine.{Direction, ArcPattern, RelationalPattern}
+
 
 trait WordNetStore {
   // querying
@@ -8,9 +9,9 @@ trait WordNetStore {
 
   def fetch(relation: Relation, from: List[(String, List[Any])], to: List[String]): DataSet
 
-  def extend(extensionSet: ExtensionSet, relation: Relation, from: Int, through: String, to: List[String]): ExtendedExtensionSet
+  def extend(extensionSet: ExtensionSet, relation: Relation, from: Int, direction: Direction, through: String, to: List[String]): ExtendedExtensionSet
 
-  def extend(extensionSet: ExtensionSet, from: Int, through: (String, Option[NodeType]), to: List[(String, Option[NodeType])]): ExtendedExtensionSet
+  def extend(extensionSet: ExtensionSet, from: Int, direction: Direction, through: (String, Option[NodeType]), to: List[(String, Option[NodeType])]): ExtendedExtensionSet
 
   def getSenses(synset: Synset): List[Sense]
 
