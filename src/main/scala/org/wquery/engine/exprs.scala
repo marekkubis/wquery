@@ -351,7 +351,7 @@ case class RelationTransformationExpr(pos: Int, expr: RelationalExpr) extends Tr
   def push(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context, op: AlgebraOp, plan: LogicalPlanBuilder) = {
     val pattern = expr.evaluationPattern(wordNet, op.rightType(pos))
     plan.appendStep(pos, pattern)
-    ExtendOp(op, pos, pattern, VariableTemplate.empty)
+    ExtendOp(op, pos, pattern, Forward, VariableTemplate.empty)
   }
 }
 
@@ -387,8 +387,8 @@ case class BindTransformationExpr(variables: VariableTemplate) extends Transform
       plan.appendVariables(variables)
 
       op match {
-        case ExtendOp(extendedOp, pos, pattern, VariableTemplate.empty) =>
-          ExtendOp(extendedOp, pos, pattern, variables)
+        case ExtendOp(extendedOp, pos, pattern, direction, VariableTemplate.empty) =>
+          ExtendOp(extendedOp, pos, pattern, direction, variables)
         case _ =>
           BindOp(op, variables)
       }
@@ -528,15 +528,21 @@ case class ProjectionExpr(expr: EvaluableExpr) extends Expr {
 
 case class PathExpr(exprs: List[TransformationExpr], projections: List[ProjectionExpr]) extends EvaluableExpr {
   def evaluationPlan(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context) = {
+    val planner = createPlanner(exprs, wordNet, bindings, context)
+
+    projections.foldLeft[AlgebraOp](planner.build.head) { (contextOp, expr) =>
+      expr.project(wordNet, bindings, context, contextOp)
+    }
+  }
+
+  def createPlanner(exprs: List[TransformationExpr], wordNet: WordNetSchema, bindings: BindingsSchema, context: Context) = {
     val planner = new LogicalPlanBuilder(bindings)
 
     exprs.foldLeft[AlgebraOp](ConstantOp.empty) { (contextOp, expr) =>
       expr.push(wordNet, bindings, context, contextOp, planner)
     }
 
-    projections.foldLeft[AlgebraOp](planner.build) { (contextOp, expr) =>
-      expr.project(wordNet, bindings, context, contextOp)
-    }
+    planner
   }
 }
 
@@ -615,7 +621,7 @@ case class SynsetByExprReq(expr: EvaluableExpr) extends EvaluableExpr {
               List(ArcPatternArgument(Relation.Destination, WordNet.SenseToSynset.destinationType)))
         }}.toList
 
-        ProjectOp(ExtendOp(op, 0, RelationUnionPattern(patterns), VariableTemplate.empty), ContextRefOp(Set(SynsetType)))
+        ProjectOp(ExtendOp(op, 0, RelationUnionPattern(patterns), Forward, VariableTemplate.empty), ContextRefOp(Set(SynsetType)))
       } else {
         throw new WQueryStaticCheckException("{...} requires an expression that generates either senses or word forms")
       }
@@ -652,7 +658,7 @@ case class ContextByRelationalExprReq(expr: RelationalExpr) extends EvaluableExp
     if (bindings.areContextVariablesBound) {
       val contextType = bindings.lookupContextVariableType
 
-      ExtendOp(ContextRefOp(contextType), 0, expr.evaluationPattern(wordNet, contextType), VariableTemplate.empty)
+      ExtendOp(ContextRefOp(contextType), 0, expr.evaluationPattern(wordNet, contextType), Forward, VariableTemplate.empty)
     } else {
       val pattern = expr.evaluationPattern(wordNet, DataType.all)
       val fetches = pattern.sourceType.collect {
@@ -667,7 +673,7 @@ case class ContextByRelationalExprReq(expr: RelationalExpr) extends EvaluableExp
       if (pattern.minSize == 0 && pattern.maxSize == Some(0))
         fetchOp
       else
-        ExtendOp(fetchOp , 0, pattern, VariableTemplate.empty)
+        ExtendOp(fetchOp , 0, pattern, Forward, VariableTemplate.empty)
     }
   }
 }

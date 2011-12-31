@@ -36,9 +36,9 @@ abstract class WQueryTestSuite extends TestNGSuite with ShouldMatchers {
   class Result {
     def of(query: String) = emitter.emit(wquery.execute(query))
   }
-  
+
   val result = new Result
-  
+
   @BeforeClass def setUp() {
     wquery = WQueryRuntime.wquery
     emitter = WQueryRuntime.emitter

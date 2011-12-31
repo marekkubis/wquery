@@ -11,8 +11,7 @@ import scala.collection.mutable.LinkedHashSet
 class WQuery(val wordNet: WordNet) extends Logging {
   val bindingsSchema = BindingsSchema()
   val bindings = Bindings()
-  
-  private val parser = new Object with WQueryParsers  
+  val parser = new Object with WQueryParsers
   
   def execute(input:String): Result = {    
     try {

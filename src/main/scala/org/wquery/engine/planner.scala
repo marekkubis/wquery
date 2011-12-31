@@ -16,7 +16,8 @@ class LogicalPlanBuilder(context: BindingsSchema) {
 
   def appendStep(pos: Int, pattern: RelationalPattern) {
     steps.append(new LinkStep(pos, pattern))
-    steps.append(new NodeStep(pattern.rightType(0), none)) // TODO backwardGenerator: use None or Some depending on type
+    // TODO backwardGenerator: use None or Some depending on type
+    steps.append(new NodeStep(pattern.rightType(0), none))
   }
 
   def appendCondition(condition: Condition) {
@@ -31,11 +32,12 @@ class LogicalPlanBuilder(context: BindingsSchema) {
 
   def build = { // TODO return multiple plans - PlanEvaluator will choose one
     // traverse the graph
-    
-    walkForward(0, steps.size - 1)
+    List(
+      walkForward(0, steps.size - 1)//, walkBackward(0, steps.size - 1)
+    )
   }
 
-  private def walkForward(leftPos: Int, rightPos: Int) = {
+  def walkForward(leftPos: Int, rightPos: Int) = {
     val path = steps.slice(leftPos, rightPos + 1).toList
     val applier = new ConditionApplier(bindings, conditions.toList, context)
 
@@ -46,7 +48,7 @@ class LogicalPlanBuilder(context: BindingsSchema) {
     for (step <- path.tail) {
       step match {
         case link: LinkStep =>
-          op = ExtendOp(op, link.pos, link.pattern, bindings.get(step).orZero)
+          op = ExtendOp(op, link.pos, link.pattern, Forward, bindings.get(step).orZero)
         case _ =>
           // do nothing
       }
@@ -56,6 +58,29 @@ class LogicalPlanBuilder(context: BindingsSchema) {
 
     op
   }
+
+  def walkBackward(leftPos: Int, rightPos: Int) = {
+    val path = steps.slice(leftPos, rightPos + 1).toList.reverse
+    val applier = new ConditionApplier(bindings, conditions.toList, context)
+
+    var op: AlgebraOp = path.head.asInstanceOf[NodeStep].generator.get // TODO remove this cast and get
+    op = bindings.get(path.head).map(template => BindOp(op, template)).getOrElse(op)
+    op = applier.applyConditions(op, path.head)
+
+    for (step <- path.tail) {
+      step match {
+        case link: LinkStep =>
+          op = ExtendOp(op, link.pos, link.pattern, Backward, bindings.get(step).orZero)
+        case _ =>
+        // do nothing
+      }
+
+      op = applier.applyConditions(op, step)
+    }
+
+    op
+  }
+
 }
 
 class ConditionApplier(bindings: Map[Step, VariableTemplate], conditions: List[(Option[Step], Condition)], context: BindingsSchema) {
