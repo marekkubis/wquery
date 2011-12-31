@@ -591,27 +591,35 @@ case class ExtendOp(op: AlgebraOp, from: Int, pattern: RelationalPattern, direct
     for (head::extension <- extensionSet.extensions) {
       val pathPos = head.asInstanceOf[Int]
       val path = dataSet.paths(pathPos)
-      val pathSize = path.size
       val extensionSize = extension.size
-      
-      pathBuffer.append(path ++ extension)
 
-      for (pathVar <- dataSetPathVarNames)
-        pathVarBuffers(pathVar).append(dataSet.pathVars(pathVar)(pathPos))
+      val (pathShift, extensionShift) = direction match {
+        case Forward =>
+          pathBuffer.append(path ++ extension)
+          (0, path.size)
+        case Backward =>
+          pathBuffer.append(extension ++ path)
+          (extensionSize, 0)
+      }
+
+      for (pathVar <- dataSetPathVarNames) {
+        val (left, right) = dataSet.pathVars(pathVar)(pathPos)
+        pathVarBuffers(pathVar).append((left + pathShift, right + pathShift))
+      }
 
       for (stepVar <- dataSetStepVarNames)
-        stepVarBuffers(stepVar).append(dataSet.stepVars(stepVar)(pathPos))
+        stepVarBuffers(stepVar).append(dataSet.stepVars(stepVar)(pathPos) + pathShift)
 
       for (pathVar <- variables.pathVariableName)
-        pathVarBuffers(pathVar).append(variables.pathVariableIndexes(extensionSize, pathSize))
+        pathVarBuffers(pathVar).append(variables.pathVariableIndexes(extensionSize, extensionShift))
 
       for (stepVar <- variables.leftVariablesNames)
-        stepVarBuffers(stepVar).append(variables.leftIndex(stepVar, extensionSize, pathSize))
+        stepVarBuffers(stepVar).append(variables.leftIndex(stepVar, extensionSize, extensionShift))
 
       for (stepVar <- variables.rightVariablesNames)
-        stepVarBuffers(stepVar).append(variables.rightIndex(stepVar, extensionSize, pathSize))
+        stepVarBuffers(stepVar).append(variables.rightIndex(stepVar, extensionSize, extensionShift))
     }
-    
+
     DataSet.fromBuffers(pathBuffer, pathVarBuffers, stepVarBuffers)
   }
 
