@@ -1,7 +1,6 @@
 package org.wquery.engine
 
 import org.wquery.model._
-import collection.mutable.ListBuffer
 import scalaz._
 import Scalaz._
 import org.wquery.WQueryEvaluationException
@@ -78,15 +77,15 @@ case class IfElseOp(conditionOp: AlgebraOp, ifOp: AlgebraOp, elseOp: Option[Alge
 
   def rightType(pos: Int) = ifOp.rightType(pos) ++ elseOp.map(_.rightType(pos)).orZero
 
-  def minTupleSize = elseOp.map(_.minTupleSize.min(ifOp.minTupleSize)).getOrElse(ifOp.minTupleSize)
+  def minTupleSize = elseOp.some(_.minTupleSize.min(ifOp.minTupleSize)).none(ifOp.minTupleSize)
 
   def maxTupleSize = elseOp.map(_.maxTupleSize.map(elseSize => ifOp.maxTupleSize.map(_.max(elseSize))).getOrElse(none)).getOrElse(ifOp.maxTupleSize)
 
-  def bindingsPattern = elseOp.map(_.bindingsPattern union ifOp.bindingsPattern).getOrElse(ifOp.bindingsPattern)
+  def bindingsPattern = elseOp.some(_.bindingsPattern union ifOp.bindingsPattern).none(ifOp.bindingsPattern)
 
   def referencedVariables = conditionOp.referencedVariables ++ ifOp.referencedVariables ++ elseOp.map(_.referencedVariables).orZero
 
-  def referencesContext = conditionOp.referencesContext || ifOp.referencesContext || elseOp.map(_.referencesContext).getOrElse(false)
+  def referencesContext = conditionOp.referencesContext || ifOp.referencesContext || elseOp.some(_.referencesContext).none(false)
 }
 
 case class BlockOp(ops: List[AlgebraOp]) extends QueryOp {
@@ -117,7 +116,7 @@ case class BlockOp(ops: List[AlgebraOp]) extends QueryOp {
     ops.headOption.map(_.bindingsPattern).getOrElse(BindingsPattern())
   }
 
-  def referencedVariables = ops.foldLeft(Set.empty[Variable])((l,r) => l ++ r.referencedVariables)
+  def referencedVariables = ops.map(_.referencedVariables).asMA.sum
 
   def referencesContext = ops.exists(_.referencesContext)
 }

@@ -668,7 +668,7 @@ case class ContextByRelationalExprReq(expr: RelationalExpr) extends EvaluableExp
         case POSType => FetchOp.possyms
         case _ => ConstantOp.empty
       }
-      val fetchOp = fetches.tail.foldLeft(UnionOp(fetches.head, ConstantOp.empty))((left, right) => UnionOp(left, right))
+      val fetchOp = fetches.foldLeft(ConstantOp.empty: AlgebraOp)((left, right) => UnionOp(left, right))
 
       if (pattern.minSize == 0 && pattern.maxSize == Some(0))
         fetchOp
