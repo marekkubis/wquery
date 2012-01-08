@@ -3,7 +3,6 @@ package org.wquery.engine
 import collection.mutable.{ListBuffer, Map}
 import scalaz._
 import Scalaz._
-import org.wquery.model.DataType
 
 class LogicalPlanBuilder(context: BindingsSchema) {
   val steps = new ListBuffer[Step]
@@ -11,13 +10,13 @@ class LogicalPlanBuilder(context: BindingsSchema) {
   val conditions = new ListBuffer[(Option[Step], Condition)]
   
   def createStep(generator: AlgebraOp) {
-    steps.append(new NodeStep(generator.rightType(0), some(generator)))
+    steps.append(new NodeStep(some(generator)))
   }
 
   def appendStep(pos: Int, pattern: RelationalPattern) {
     steps.append(new LinkStep(pos, pattern))
     // TODO backwardGenerator: use None or Some depending on type
-    steps.append(new NodeStep(pattern.rightType(0), none))
+    steps.append(new NodeStep(none))
   }
 
   def appendCondition(condition: Condition) {
@@ -109,7 +108,7 @@ class ConditionApplier(bindings: Map[Step, VariableTemplate], conditions: List[(
 
 sealed abstract class Step
 
-class NodeStep(types: Set[DataType], val generator: Option[AlgebraOp]) extends Step {
+class NodeStep(val generator: Option[AlgebraOp]) extends Step {
   override def toString = "node(" + generator + ")"
 }
 

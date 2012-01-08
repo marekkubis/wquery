@@ -26,7 +26,7 @@ class PlannerTests extends WQueryTestSuite {
     planBuilder.steps(2).toString should equal ("node(None)")
 
     planBuilder.walkForward(0, planBuilder.steps.size - 1).toString should equal ("ExtendOp(ProjectOp(ExtendOp(FetchOp(words,List((source,List(car))),List(source)),0,RelationUnionPattern(List(source&string^synsets^destination&synset)),Forward,VariableTemplate(List())),ContextRefOp(Set(synset))),0,QuantifiedRelationPattern(source&synset^hypernym^destination&synset,{1}),Forward,VariableTemplate(List()))")
-
+//    planBuilder.walkBackward(0, planBuilder.steps.size - 1).toString should equal ("")
   }
 
   // {car}.hypernym.{bus}

@@ -41,9 +41,16 @@ case class RelationUnionPattern(patterns: List[RelationalPattern]) extends Relat
 
 case class RelationCompositionPattern(patterns: List[RelationalPattern]) extends RelationalPattern {
   def extend(wordNet: WordNetStore, bindings: Bindings, extensionSet: ExtensionSet, from: Int, direction: Direction) = {
-    val headSet = patterns.head.extend(wordNet, bindings, extensionSet, from, direction)
+    direction match {
+      case Forward =>
+        val headSet = patterns.head.extend(wordNet, bindings, extensionSet, from, direction)
 
-    patterns.tail.foldLeft(headSet)((dataSet, expr) => expr.extend(wordNet, bindings, dataSet, 0, direction))
+        patterns.tail.foldLeft(headSet)((dataSet, expr) => expr.extend(wordNet, bindings, dataSet, 0, direction))
+      case Backward =>
+        val tailSet = patterns.tail.foldRight(extensionSet)((expr, dataSet) => expr.extend(wordNet, bindings, dataSet, 0, direction))
+
+        patterns.head.extend(wordNet, bindings, tailSet, from, direction)
+    }
   }
 
   def minSize = patterns.map(_.minSize).sum
