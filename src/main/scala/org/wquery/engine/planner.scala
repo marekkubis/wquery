@@ -27,9 +27,18 @@ class LogicalPlanBuilder(context: BindingsSchema) {
 
   def build = { // TODO return multiple plans - PlanEvaluator will choose one
     // traverse the graph
-    List(
-      walkForward(0, steps.size - 1)//, walkBackward(0, steps.size - 1)
-    )
+    if (steps.size == 1) {
+      val step = steps.last.asInstanceOf[FirstStep]
+      val stepOp: AlgebraOp = bindings.get(step).map(template => BindOp(step.generator, template)).getOrElse(step.generator)
+
+      List(conditions.foldLeft(stepOp){ case (op, (_, cond)) => SelectOp(op, cond) })
+    } else {
+      // create links
+    
+      List(
+        walkForward(0, steps.size - 1)//, walkBackward(0, steps.size - 1)
+      )
+    }
   }
 
   def walkForward(leftPos: Int, rightPos: Int) = {
@@ -78,6 +87,8 @@ class ConditionApplier(bindings: Map[Step, VariableTemplate], conditions: List[(
     op
   }
 }
+
+class Link(left: Option[AlgebraOp], val pos: Int, val pattern: RelationalPattern, right: Option[AlgebraOp])
 
 sealed abstract class Step
 
