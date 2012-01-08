@@ -10,13 +10,11 @@ class LogicalPlanBuilder(context: BindingsSchema) {
   val conditions = new ListBuffer[(Step, Condition)]
   
   def createStep(generator: AlgebraOp) {
-    steps.append(new NodeStep(some(generator)))
+    steps.append(new FirstStep(generator))
   }
 
   def appendStep(pos: Int, pattern: RelationalPattern) {
-    steps.append(new LinkStep(pos, pattern))
-    // TODO backwardGenerator: use None or Some depending on type
-    steps.append(new NodeStep(none))
+    steps.append(new NextStep(pos, pattern))
   }
 
   def appendCondition(condition: Condition) {
@@ -24,9 +22,7 @@ class LogicalPlanBuilder(context: BindingsSchema) {
   }
 
   def appendVariables(variables: VariableTemplate) {
-    // TODO distinguish left and right traverses for step variables
-    val step = if (steps.size == 1) steps.last else steps(steps.size - 2)
-    bindings(step) = variables
+    bindings(steps.last) = variables
   }
 
   def build = { // TODO return multiple plans - PlanEvaluator will choose one
@@ -40,13 +36,13 @@ class LogicalPlanBuilder(context: BindingsSchema) {
     val path = steps.slice(leftPos, rightPos + 1).toList
     val applier = new ConditionApplier(bindings, conditions.toList, context)
 
-    var op: AlgebraOp = path.head.asInstanceOf[NodeStep].generator.get // TODO remove this cast and get
+    var op: AlgebraOp = path.head.asInstanceOf[FirstStep].generator // TODO remove this cast
     op = bindings.get(path.head).map(template => BindOp(op, template)).getOrElse(op)
     op = applier.applyConditions(op, path.head)
 
     for (step <- path.tail) {
       step match {
-        case link: LinkStep =>
+        case link: NextStep =>
           op = ExtendOp(op, link.pos, link.pattern, Forward, bindings.get(step).orZero)
         case _ =>
           // do nothing
@@ -57,29 +53,6 @@ class LogicalPlanBuilder(context: BindingsSchema) {
 
     op
   }
-
-  def walkBackward(leftPos: Int, rightPos: Int) = {
-    val path = steps.slice(leftPos, rightPos + 1).toList.reverse
-    val applier = new ConditionApplier(bindings, conditions.toList, context)
-
-    var op: AlgebraOp = path.head.asInstanceOf[NodeStep].generator.get // TODO remove this cast and get
-    op = bindings.get(path.head).map(template => BindOp(op, template)).getOrElse(op)
-    op = applier.applyConditions(op, path.head)
-
-    for (step <- path.tail) {
-      step match {
-        case link: LinkStep =>
-          op = ExtendOp(op, link.pos, link.pattern, Backward, bindings.get(step).orZero)
-        case _ =>
-        // do nothing
-      }
-
-      op = applier.applyConditions(op, step)
-    }
-
-    op
-  }
-
 }
 
 class ConditionApplier(bindings: Map[Step, VariableTemplate], conditions: List[(Step, Condition)], context: BindingsSchema) {
@@ -108,10 +81,10 @@ class ConditionApplier(bindings: Map[Step, VariableTemplate], conditions: List[(
 
 sealed abstract class Step
 
-class NodeStep(val generator: Option[AlgebraOp]) extends Step {
-  override def toString = "node(" + generator + ")"
+class FirstStep(val generator: AlgebraOp) extends Step {
+  override def toString = "fs(" + generator + ")"
 }
 
-class LinkStep(val pos: Int, val pattern: RelationalPattern) extends Step {
-  override def toString = "link(" + pos + "," + pattern + ")"
+class NextStep(val pos: Int, val pattern: RelationalPattern) extends Step {
+  override def toString = "ns(" + pos + "," + pattern + ")"
 }
