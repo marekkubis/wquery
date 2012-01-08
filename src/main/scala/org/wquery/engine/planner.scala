@@ -7,7 +7,7 @@ import Scalaz._
 class LogicalPlanBuilder(context: BindingsSchema) {
   val steps = new ListBuffer[Step]
   val bindings = Map[Step, VariableTemplate]()
-  val conditions = new ListBuffer[(Option[Step], Condition)]
+  val conditions = new ListBuffer[(Step, Condition)]
   
   def createStep(generator: AlgebraOp) {
     steps.append(new NodeStep(some(generator)))
@@ -20,7 +20,7 @@ class LogicalPlanBuilder(context: BindingsSchema) {
   }
 
   def appendCondition(condition: Condition) {
-    conditions.append((steps.lastOption, condition))
+    conditions.append((steps.last, condition))
   }
 
   def appendVariables(variables: VariableTemplate) {
@@ -82,7 +82,7 @@ class LogicalPlanBuilder(context: BindingsSchema) {
 
 }
 
-class ConditionApplier(bindings: Map[Step, VariableTemplate], conditions: List[(Option[Step], Condition)], context: BindingsSchema) {
+class ConditionApplier(bindings: Map[Step, VariableTemplate], conditions: List[(Step, Condition)], context: BindingsSchema) {
   val appliedConditions = scala.collection.mutable.Set[Condition]()
   val pathVariables = bindings.values.map(_.variables).foldLeft(Set.empty[Variable])((l, r) => l union r)
   val alreadyBoundVariables = scala.collection.mutable.Set[Variable]()
@@ -96,7 +96,7 @@ class ConditionApplier(bindings: Map[Step, VariableTemplate], conditions: List[(
     for ((step, condition) <- conditions.filterNot{ case (_, c) => appliedConditions.contains(c)}) {
       if (condition.referencedVariables.forall { variable =>
         alreadyBoundVariables.contains(variable) || template.variables.contains(variable) || (context.isBound(variable) && !pathVariables.contains(variable))
-      } && (!condition.referencesContext || step.some(_ == currentStep).none(false))) {
+      } && (!condition.referencesContext || step == currentStep)) {
         appliedConditions += condition
         op = SelectOp(op, condition)
       }
