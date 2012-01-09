@@ -5,33 +5,45 @@ import scalaz._
 import Scalaz._
 
 class LogicalPlanBuilder(context: BindingsSchema) {
-  val steps = new ListBuffer[Step]
-  val bindings = Map[Step, VariableTemplate]()
-  val conditions = new ListBuffer[(Step, Condition)]
-  
+  val steps = new ListBuffer[Link]
+  val bindings = Map[Int, VariableTemplate]()
+  val conditions = Map[Option[Int], ListBuffer[Condition]]()
+  var currentStep = 0
+  var rootGenerator = none[AlgebraOp]
+
   def createStep(generator: AlgebraOp) {
-    steps.append(new FirstStep(generator))
+    rootGenerator = generator.some
   }
 
   def appendStep(pos: Int, pattern: RelationalPattern) {
-    steps.append(new NextStep(pos, pattern))
+    val leftGenerator = (pos == 0).??(rootGenerator)
+      
+    steps.append(new Link(leftGenerator, pos, pattern, none))
+    currentStep += 1
   }
 
   def appendCondition(condition: Condition) {
-    conditions.append((steps.last, condition))
+    val step = condition.referencesContext.??(currentStep.some)
+
+    if (!conditions.contains(step))
+      conditions(step) = new ListBuffer[Condition]
+
+    conditions(step).append(condition)
   }
 
   def appendVariables(variables: VariableTemplate) {
-    bindings(steps.last) = variables
+    bindings(currentStep) = variables
   }
 
   def build = { // TODO return multiple plans - PlanEvaluator will choose one
     // traverse the graph
-    if (steps.size == 1) {
-      val step = steps.last.asInstanceOf[FirstStep]
-      val stepOp: AlgebraOp = bindings.get(step).map(template => BindOp(step.generator, template)).getOrElse(step.generator)
+    if (steps.isEmpty) {
+      ~rootGenerator.map{ generator =>
+        val stepOp: AlgebraOp = bindings.get(0).map(template => BindOp(generator, template)).getOrElse(generator)
+        val applier = new ConditionApplier(bindings, conditions, context)
 
-      List(conditions.foldLeft(stepOp){ case (op, (_, cond)) => SelectOp(op, cond) })
+        List(applier.applyConditions(stepOp, 0))
+      }
     } else {
       // create links
     
@@ -43,20 +55,16 @@ class LogicalPlanBuilder(context: BindingsSchema) {
 
   def walkForward(leftPos: Int, rightPos: Int) = {
     val path = steps.slice(leftPos, rightPos + 1).toList
-    val applier = new ConditionApplier(bindings, conditions.toList, context)
+    val applier = new ConditionApplier(bindings, conditions, context)
 
-    var op: AlgebraOp = path.head.asInstanceOf[FirstStep].generator // TODO remove this cast
-    op = bindings.get(path.head).map(template => BindOp(op, template)).getOrElse(op)
-    op = applier.applyConditions(op, path.head)
+    var op: AlgebraOp = path.head.leftGenerator.get // TODO if there is no generator use path.head.generate
+    op = bindings.get(0).map(template => BindOp(op, template)).getOrElse(op)
+    op = applier.applyConditions(op, 0)
 
-    for (step <- path.tail) {
-      step match {
-        case link: NextStep =>
-          op = ExtendOp(op, link.pos, link.pattern, Forward, bindings.get(step).orZero)
-        case _ =>
-          // do nothing
-      }
+    for (step <- 1 to path.size) {
+      val link = path(step - 1)
 
+      op = ExtendOp(op, link.pos, link.pattern, Forward, ~bindings.get(step))
       op = applier.applyConditions(op, step)
     }
 
@@ -64,21 +72,22 @@ class LogicalPlanBuilder(context: BindingsSchema) {
   }
 }
 
-class ConditionApplier(bindings: Map[Step, VariableTemplate], conditions: List[(Step, Condition)], context: BindingsSchema) {
+class ConditionApplier(bindings: Map[Int, VariableTemplate], conditions: Map[Option[Int], ListBuffer[Condition]], context: BindingsSchema) {
   val appliedConditions = scala.collection.mutable.Set[Condition]()
   val pathVariables = bindings.values.map(_.variables).foldLeft(Set.empty[Variable])((l, r) => l union r)
   val alreadyBoundVariables = scala.collection.mutable.Set[Variable]()
 
-  def applyConditions(inputOp: AlgebraOp, currentStep: Step) = {
+  def applyConditions(inputOp: AlgebraOp, currentStep: Int) = {
     var op = inputOp
     val template = ~bindings.get(currentStep)
 
     alreadyBoundVariables ++= template.variables
+    val candidateConditions = (~conditions.get(none) ++ ~conditions.get(some(currentStep))).filterNot(appliedConditions.contains)
 
-    for ((step, condition) <- conditions.filterNot{ case (_, c) => appliedConditions.contains(c)}) {
+    for (condition <- candidateConditions) {
       if (condition.referencedVariables.forall { variable =>
         alreadyBoundVariables.contains(variable) || template.variables.contains(variable) || (context.isBound(variable) && !pathVariables.contains(variable))
-      } && (!condition.referencesContext || step == currentStep)) {
+      }) {
         appliedConditions += condition
         op = SelectOp(op, condition)
       }
@@ -88,14 +97,7 @@ class ConditionApplier(bindings: Map[Step, VariableTemplate], conditions: List[(
   }
 }
 
-class Link(left: Option[AlgebraOp], val pos: Int, val pattern: RelationalPattern, right: Option[AlgebraOp])
+class Link(val leftGenerator: Option[AlgebraOp], val pos: Int, val pattern: RelationalPattern, val rightGenerator: Option[AlgebraOp]) {
 
-sealed abstract class Step
-
-class FirstStep(val generator: AlgebraOp) extends Step {
-  override def toString = "fs(" + generator + ")"
-}
-
-class NextStep(val pos: Int, val pattern: RelationalPattern) extends Step {
-  override def toString = "ns(" + pos + "," + pattern + ")"
+  override def toString = "(" + List(leftGenerator, pos, pattern, rightGenerator).mkString(",") + ")"
 }
