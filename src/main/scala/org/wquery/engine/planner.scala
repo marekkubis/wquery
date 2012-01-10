@@ -98,6 +98,5 @@ class ConditionApplier(bindings: Map[Int, VariableTemplate], conditions: Map[Opt
 }
 
 class Link(val leftGenerator: Option[AlgebraOp], val pos: Int, val pattern: RelationalPattern, val rightGenerator: Option[AlgebraOp]) {
-
   override def toString = "(" + List(leftGenerator, pos, pattern, rightGenerator).mkString(",") + ")"
 }

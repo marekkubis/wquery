@@ -5,6 +5,8 @@ import org.wquery.model._
 import org.wquery.{WQueryUpdateBreaksRelationPropertyException, WQueryModelException, WQueryEvaluationException}
 import akka.stm._
 import org.wquery.engine.{Direction, NewSynset, Bindings, RelationalPattern}
+import scalaz._
+import Scalaz._
 
 class InMemoryWordNetStore extends WordNetStore {
   private val successors = TransactionalMap[Relation, TransactionalMap[(String, Any), IndexedSeq[Map[String, Any]]]]()
@@ -16,11 +18,11 @@ class InMemoryWordNetStore extends WordNetStore {
   def addRelation(relation: Relation) {
     if (!relations.contains(relation)) {
       relationsList = (relationsList :+ relation).sortWith((l, r) => l.name < r.name || l.name == r.name && l.arguments.size < r.arguments.size || l.name == r.name && l.arguments.size == r.arguments.size && l.sourceType < r.sourceType)
-      successors(relation) = TransactionalMap()
-      dependent(relation) = Set.empty
-      collectionDependent(relation) = Set.empty
-      functionalFor(relation) = Set.empty
-      requiredBys(relation) = Set.empty
+      successors(relation) = TransactionalMap[(String, Any), IndexedSeq[Map[String, Any]]]()
+      dependent(relation) = ∅[Set[String]]
+      collectionDependent(relation) = ∅[Set[String]]
+      functionalFor(relation) = ∅[Set[String]]
+      requiredBys(relation) = ∅[Set[String]]
       transitives(relation) = false
       symmetry(relation) = NonSymmetric
     }
