@@ -6,8 +6,8 @@ import engine._
 import org.testng.annotations.Test
 
 class PlannerTests extends WQueryTestSuite {
-  class Planner {
-    def of(query: String) = {
+  class PlannerFor {
+    def ffor(query: String) = {
       (wquery.parser.parse(query): @unchecked) match {
         case FunctionExpr(sort,FunctionExpr(distinct, ConjunctiveExpr(pathExpr @ PathExpr(steps, _)))) =>
           pathExpr.createPlanner(steps, wquery.wordNet.schema, BindingsSchema(), Context())
@@ -15,12 +15,12 @@ class PlannerTests extends WQueryTestSuite {
     }
   }
 
-  val planner = new Planner
+  val planner = new PlannerFor
 
   @Test def planSingleTransformation() = {
-    val planBuilder = planner of ("{car}.hypernym")
+    val path = planner ffor ("{car}.hypernym") path
 
-    planBuilder.build.head.toString should equal ("ExtendOp(ProjectOp(ExtendOp(FetchOp(words,List((source,List(car))),List(source)),0,RelationUnionPattern(List(source&string^synsets^destination&synset)),Forward,VariableTemplate(List())),ContextRefOp(Set(synset))),0,QuantifiedRelationPattern(source&synset^hypernym^destination&synset,{1}),Forward,VariableTemplate(List()))")
+    path.walkForward(BindingsSchema(), 0, path.links.size - 1).toString should equal ("ExtendOp(ProjectOp(ExtendOp(FetchOp(words,List((source,List(car))),List(source)),0,RelationUnionPattern(List(source&string^synsets^destination&synset)),Forward,VariableTemplate(List())),ContextRefOp(Set(synset))),0,QuantifiedRelationPattern(source&synset^hypernym^destination&synset,{1}),Forward,VariableTemplate(List()))")
   }
 
   // {car}.hypernym.{bus}

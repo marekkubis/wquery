@@ -4,7 +4,14 @@ import collection.mutable.{ListBuffer, Map}
 import scalaz._
 import Scalaz._
 
-class LogicalPlanBuilder(context: BindingsSchema) {
+class PathPlanner(val path: Path) {
+  def plan(context: BindingsSchema) = {
+    // TODO choose the best one after evaluation
+    path.walkForward(context, 0, path.links.size - 1)
+  }
+}
+
+class PathBuilder {
   val linkBuffer = new ListBuffer[Link]
   val conditions = Map[Option[Link], List[Condition]]()
   var rootGenerator = none[AlgebraOp]
@@ -54,17 +61,16 @@ class LogicalPlanBuilder(context: BindingsSchema) {
     linkConditions = new ListBuffer[Condition]
   }
 
-  def build = { // TODO return multiple plans - PlanEvaluator will choose one
+  def build = {
     flushLink
 
-    val links = linkBuffer.toList
-
-    List(
-      walkForward(links, 0, links.size - 1)//, walkBackward(0, steps.size)
-    )
+    new Path(linkBuffer.toList, conditions)
   }
 
-  def walkForward(links: List[Link], leftPos: Int, rightPos: Int) = {
+}
+
+class Path(val links: List[Link], conditions: Map[Option[Link], List[Condition]]) {
+  def walkForward(context: BindingsSchema, leftPos: Int, rightPos: Int) = {
     val applier = new ConditionApplier(links, conditions, context)
     val path = links.slice(leftPos, rightPos + 1)
 

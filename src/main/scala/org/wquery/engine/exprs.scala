@@ -344,11 +344,11 @@ case class FunctionExpr(name: String, args: EvaluableExpr) extends EvaluableExpr
  * Step related expressions
  */
 sealed abstract class TransformationExpr extends Expr {
-  def push(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context, op: AlgebraOp, plan: LogicalPlanBuilder): AlgebraOp
+  def push(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context, op: AlgebraOp, plan: PathBuilder): AlgebraOp
 }
 
 case class RelationTransformationExpr(pos: Int, expr: RelationalExpr) extends TransformationExpr {
-  def push(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context, op: AlgebraOp, plan: LogicalPlanBuilder) = {
+  def push(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context, op: AlgebraOp, plan: PathBuilder) = {
     val pattern = expr.evaluationPattern(wordNet, op.rightType(pos))
     plan.appendLink(pos, pattern)
     ExtendOp(op, pos, pattern, Forward, VariableTemplate.empty)
@@ -356,7 +356,7 @@ case class RelationTransformationExpr(pos: Int, expr: RelationalExpr) extends Tr
 }
 
 case class FilterTransformationExpr(conditionalExpr: ConditionalExpr) extends TransformationExpr {
-  def push(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context, op: AlgebraOp, plan: LogicalPlanBuilder) = {
+  def push(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context, op: AlgebraOp, plan: PathBuilder) = {
     val filterBindings = BindingsSchema(bindings, false)
     filterBindings.bindContextOp(op)
     val condition = conditionalExpr.conditionPlan(wordNet, filterBindings, context.copy(creation = false))
@@ -366,7 +366,7 @@ case class FilterTransformationExpr(conditionalExpr: ConditionalExpr) extends Tr
 }
 
 case class NodeTransformationExpr(generator: EvaluableExpr) extends TransformationExpr {
-  def push(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context, op: AlgebraOp, plan: LogicalPlanBuilder) = {
+  def push(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context, op: AlgebraOp, plan: PathBuilder) = {
     if (op != ConstantOp.empty) {
       val filterBindings = BindingsSchema(bindings, false)
       filterBindings.bindContextOp(op)
@@ -382,7 +382,7 @@ case class NodeTransformationExpr(generator: EvaluableExpr) extends Transformati
 }
 
 case class BindTransformationExpr(variables: VariableTemplate) extends TransformationExpr {
-  def push(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context, op: AlgebraOp, plan: LogicalPlanBuilder) = {
+  def push(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context, op: AlgebraOp, plan: PathBuilder) = {
     if (variables != VariableTemplate.empty) {
       plan.appendVariables(variables)
 
@@ -530,19 +530,19 @@ case class PathExpr(exprs: List[TransformationExpr], projections: List[Projectio
   def evaluationPlan(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context) = {
     val planner = createPlanner(exprs, wordNet, bindings, context)
 
-    projections.foldLeft[AlgebraOp](planner.build.head) { (contextOp, expr) =>
+    projections.foldLeft[AlgebraOp](planner.plan(bindings)) { (contextOp, expr) =>
       expr.project(wordNet, bindings, context, contextOp)
     }
   }
 
   def createPlanner(exprs: List[TransformationExpr], wordNet: WordNetSchema, bindings: BindingsSchema, context: Context) = {
-    val planner = new LogicalPlanBuilder(bindings)
+    val builder = new PathBuilder
 
     exprs.foldLeft[AlgebraOp](ConstantOp.empty) { (contextOp, expr) =>
-      expr.push(wordNet, bindings, context, contextOp, planner)
+      expr.push(wordNet, bindings, context, contextOp, builder)
     }
 
-    planner
+    new PathPlanner(builder.build)
   }
 }
 
