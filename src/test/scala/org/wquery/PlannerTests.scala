@@ -20,8 +20,7 @@ class PlannerTests extends WQueryTestSuite {
   @Test def planSingleTransformation() = {
     val planBuilder = planner of ("{car}.hypernym")
 
-    planBuilder.walkForward(0, planBuilder.steps.size - 1).toString should equal ("ExtendOp(ProjectOp(ExtendOp(FetchOp(words,List((source,List(car))),List(source)),0,RelationUnionPattern(List(source&string^synsets^destination&synset)),Forward,VariableTemplate(List())),ContextRefOp(Set(synset))),0,QuantifiedRelationPattern(source&synset^hypernym^destination&synset,{1}),Forward,VariableTemplate(List()))")
-//    planBuilder.walkBackward(0, planBuilder.steps.size - 1).toString should equal ("")
+    planBuilder.build.head.toString should equal ("ExtendOp(ProjectOp(ExtendOp(FetchOp(words,List((source,List(car))),List(source)),0,RelationUnionPattern(List(source&string^synsets^destination&synset)),Forward,VariableTemplate(List())),ContextRefOp(Set(synset))),0,QuantifiedRelationPattern(source&synset^hypernym^destination&synset,{1}),Forward,VariableTemplate(List()))")
   }
 
   // {car}.hypernym.{bus}

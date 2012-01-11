@@ -9,6 +9,8 @@ import org.wquery.WQueryEvaluationException
 sealed abstract class RelationalPattern {
   def extend(wordNet: WordNetStore, bindings: Bindings, extensionSet: ExtensionSet, from: Int, direction: Direction): ExtendedExtensionSet
 
+  def fringe(wordNet: WordNetStore, bindings: Bindings, side: Side): DataSet
+
   def minSize: Int
 
   def maxSize: Option[Int]
@@ -26,6 +28,13 @@ case class RelationUnionPattern(patterns: List[RelationalPattern]) extends Relat
 
     patterns.foreach(expr => buffer.append(expr.extend(wordNet, bindings, extensionSet, from, direction)))
     buffer.toExtensionSet
+  }
+
+  def fringe(wordNet: WordNetStore, bindings: Bindings, side: Side) = {
+    val buffer = new DataSetBuffer
+
+    patterns.foreach(expr => buffer.append(expr.fringe(wordNet, bindings, side)))
+    buffer.toDataSet
   }
 
   def minSize = patterns.map(_.minSize).min
@@ -50,6 +59,15 @@ case class RelationCompositionPattern(patterns: List[RelationalPattern]) extends
         val tailSet = patterns.tail.foldRight(extensionSet)((expr, dataSet) => expr.extend(wordNet, bindings, dataSet, 0, direction))
 
         patterns.head.extend(wordNet, bindings, tailSet, from, direction)
+    }
+  }
+
+  def fringe(wordNet: WordNetStore, bindings: Bindings, side: Side) = {
+    side match {
+      case Left =>
+        patterns.head.fringe(wordNet, bindings, Left)
+      case Right =>
+        patterns.last.fringe(wordNet, bindings, Right)
     }
   }
 
@@ -101,6 +119,42 @@ case class QuantifiedRelationPattern(pattern: RelationalPattern, quantifier: Qua
       computeClosure(wordNet, bindings, lowerExtensionSet, from, direction, quantifier.upperBound.map(_ - quantifier.lowerBound))
     else
       lowerExtensionSet.asInstanceOf[ExtendedExtensionSet] // valid quantifiers invoke extend at least once
+  }
+
+  def fringe(wordNet: WordNetStore, bindings: Bindings, side: Side) = {
+    if (quantifier.lowerBound > 0)
+      pattern.fringe(wordNet, bindings, side)
+    else {
+      val dataTypes = side match {
+        case Left =>
+          leftType(0)
+        case Right =>
+          rightType(0)
+      }
+
+      val buffer = new DataSetBuffer
+      val source = List((Relation.Source, Nil))
+      val destination = List(Relation.Source)
+
+      for (dataType <- dataTypes) {
+        val dataSet = dataType match {
+          case SynsetType =>
+            wordNet.fetch(WordNet.SynsetSet, source, destination)
+          case SenseType =>
+            wordNet.fetch(WordNet.SenseSet, source, destination)
+          case StringType =>
+            wordNet.fetch(WordNet.WordSet, source, destination)
+          case POSType =>
+            wordNet.fetch(WordNet.PosSet, source, destination)
+          case _ =>
+            pattern.fringe(wordNet, bindings, side)
+        }
+
+        buffer.append(dataSet)
+      }
+
+      buffer.toDataSet
+    }
   }
 
   private def computeClosure(wordNet: WordNetStore, bindings: Bindings, extensionSet: ExtensionSet, from: Int, direction: Direction, limit: Option[Int]) = {
@@ -170,6 +224,18 @@ case class ArcPattern(relation: Option[Relation], source: ArcPatternArgument, de
       .getOrElse(wordNet.extend(extensionSet, from, direction, (source.name, source.nodeType), if (destinations == List(ArcPatternArgument("_", None))) Nil else destinations.map(dest => (dest.name, dest.nodeType))))
   }
 
+  def fringe(wordNet: WordNetStore, bindings: Bindings, side: Side) = relation.map{ relation =>
+    side match {
+      case Left =>
+        wordNet.fetch(relation, List((source.name, Nil)), List(source.name))
+      case Right =>
+        wordNet.fetch(relation, List((destinations.last.name, Nil)), List(destinations.last.name))
+    }
+  }.getOrElse {
+    // TODO implement empty relation fringe AKA fetch/2
+    DataSet.empty
+  }
+
   def minSize = 2*destinations.size
 
   def maxSize = some(2*destinations.size)
@@ -211,6 +277,21 @@ case class VariableRelationalPattern(variable: StepVariable) extends RelationalP
     bindings.lookupStepVariable(variable.name).map {
       case Arc(relation, source, destination) =>
         wordNet.extend(extensionSet, relation, from, direction, source, List(destination))
+      case _ =>
+        throw new WQueryEvaluationException("Cannot extend a path using a non-arc value of variable " + variable)
+    }.getOrElse(throw new WQueryEvaluationException("Variable " + variable + " is not bound"))
+  }
+
+
+  def fringe(wordNet: WordNetStore, bindings: Bindings, side: Side) = {
+    bindings.lookupStepVariable(variable.name).map {
+      case Arc(relation, source, destination) =>
+        side match {
+          case Left =>
+            wordNet.fetch(relation, List((source, Nil)), List(source))
+          case Right =>
+            wordNet.fetch(relation, List((destination, Nil)), List(destination))
+        }
       case _ =>
         throw new WQueryEvaluationException("Cannot extend a path using a non-arc value of variable " + variable)
     }.getOrElse(throw new WQueryEvaluationException("Variable " + variable + " is not bound"))

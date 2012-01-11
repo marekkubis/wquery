@@ -350,7 +350,7 @@ sealed abstract class TransformationExpr extends Expr {
 case class RelationTransformationExpr(pos: Int, expr: RelationalExpr) extends TransformationExpr {
   def push(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context, op: AlgebraOp, plan: LogicalPlanBuilder) = {
     val pattern = expr.evaluationPattern(wordNet, op.rightType(pos))
-    plan.appendStep(pos, pattern)
+    plan.appendLink(pos, pattern)
     ExtendOp(op, pos, pattern, Forward, VariableTemplate.empty)
   }
 }
@@ -375,7 +375,7 @@ case class NodeTransformationExpr(generator: EvaluableExpr) extends Transformati
       SelectOp(op, condition)
     } else {
       val generateOp = generator.evaluationPlan(wordNet, bindings, context)
-      plan.createStep(generateOp)
+      plan.createRootLink(generateOp)
       generateOp
     }
   }

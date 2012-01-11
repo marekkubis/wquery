@@ -693,6 +693,24 @@ case class BindOp(op: AlgebraOp, variables: VariableTemplate) extends QueryOp {
   def referencesContext = op.referencesContext
 }
 
+case class FringeOp(pattern: RelationalPattern, side: Side) extends QueryOp {
+  def evaluate(wordNet: WordNet, bindings: Bindings) = pattern.fringe(wordNet.store, bindings, side)
+
+  def leftType(pos: Int) = (pos == 0).??(pattern.leftType(0))
+
+  def rightType(pos: Int) = (pos == 0).??(pattern.rightType(0))
+
+  def minTupleSize = 1
+
+  def maxTupleSize = some(1)
+
+  def bindingsPattern = BindingsPattern()
+
+  def referencedVariables = Set.empty
+
+  def referencesContext = false
+}
+
 /*
  * Elementary operations
  */
