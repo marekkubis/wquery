@@ -36,6 +36,24 @@ class PlannerTests extends WQueryTestSuite {
     assert(forwardResult mequal backwardResult)
   }
 
+  @Test def planInvertedTransformation() = {
+    val path = planner ffor ("{cab}.^hypernym") path
+
+    val forwardPlan = path.walkForward(BindingsSchema(), 0, path.links.size - 1)
+    val backwardPlan = path.walkBackward(BindingsSchema(), 0, path.links.size - 1)
+
+    forwardPlan.toString should equal ("ExtendOp(ProjectOp(ExtendOp(FetchOp(words,List((source,List(cab))),List(source)),0,RelationUnionPattern(List(source&string^synsets^destination&synset)),Forward,VariableTemplate(List())),ContextRefOp(Set(synset))),0,QuantifiedRelationPattern(destination&synset^hypernym^source&synset,{1}),Forward,VariableTemplate(List()))")
+    backwardPlan.toString should equal ("SelectOp(BindOp(ExtendOp(FringeOp(QuantifiedRelationPattern(destination&synset^hypernym^source&synset,{1}),Right),0,QuantifiedRelationPattern(destination&synset^hypernym^source&synset,{1}),Backward,VariableTemplate(List())),VariableTemplate(List($__a, @_))),BinaryCondition(in,StepVariableRefOp($__a,Set(synset)),ProjectOp(ExtendOp(FetchOp(words,List((source,List(cab))),List(source)),0,RelationUnionPattern(List(source&string^synsets^destination&synset)),Forward,VariableTemplate(List())),ContextRefOp(Set(synset)))))")
+
+    val forwardResult = forwardPlan.evaluate(wquery.wordNet, Bindings())
+    val backwardResult = backwardPlan.evaluate(wquery.wordNet, Bindings())
+
+    emitted(forwardResult) should equal ("{ cab:3:n hack:5:n taxi:1:n taxicab:1:n } ^hypernym { gypsy cab:1:n }\n{ cab:3:n hack:5:n taxi:1:n taxicab:1:n } ^hypernym { minicab:1:n }\n")
+    assert(forwardResult mequal backwardResult)
+  }
+
+  // {}.hypernym.partial_holonym.hypernym
+
   // {car}.hypernym.{bus}
 
   // {plan}.hypernym$a.meronym[$a={xyz}]

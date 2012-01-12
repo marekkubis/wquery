@@ -485,25 +485,27 @@ case class ArcExpr(ids: List[ArcExprArgument]) extends RelationalExpr {
     val sourceTypes = left.nodeType.map(Set[DataType](_)).getOrElse(contextTypes)
     val sourceName = left.name
     val relationName = right.name
-    val destinations = if (rest.isEmpty) List(ArcPatternArgument(Relation.Destination, None)) else rest.map(arg => ArcPatternArgument(arg.name, arg.nodeType))
+    val emptyDestination = rest.isEmpty??(List(ArcPatternArgument(Relation.Destination, None)).some)
 
     if (relationName == "_") {
-      Some(ArcPattern(None, ArcPatternArgument(sourceName, left.nodeType), destinations))
+      Some(ArcPattern(None, ArcPatternArgument(sourceName, left.nodeType),
+        emptyDestination.getOrElse(rest.map(arg => ArcPatternArgument(arg.name, arg.nodeType)))))
     } else {
       wordNet.getRelation(right.name, ((sourceName, sourceTypes) +: (rest.map(_.nodeDescription))).toMap)
-        .map(relation => ArcPattern(Some(relation), ArcPatternArgument(sourceName, Some(relation.sourceType)), destinations))
+        .map(relation => ArcPattern(Some(relation), ArcPatternArgument(sourceName, Some(relation.sourceType)),
+        emptyDestination.getOrElse(rest.map(arg => ArcPatternArgument(arg.name, relation.demandArgument(arg.name).nodeType.some)))))
     }
   }
 
   private def evaluateAsDestinationTypePattern(wordNet: WordNetSchema, contextTypes: Set[DataType], left: ArcExprArgument, right: ArcExprArgument, rest: List[ArcExprArgument]) = {
     val relationName = left.name
-    val destinations = (right::rest).map(arg => ArcPatternArgument(arg.name, arg.nodeType))
 
     if (relationName == "_") {
-      Some(ArcPattern(None, ArcPatternArgument(Relation.Source, None), destinations))
+      Some(ArcPattern(None, ArcPatternArgument(Relation.Source, None), (right::rest).map(arg => ArcPatternArgument(arg.name, arg.nodeType))))
     } else {
       wordNet.getRelation(relationName, ((Relation.Source, contextTypes) +: right.nodeDescription +: (rest.map(_.nodeDescription))).toMap)
-        .map(relation => ArcPattern(Some(relation), ArcPatternArgument(Relation.Source, Some(relation.sourceType)), destinations))
+        .map(relation => ArcPattern(Some(relation), ArcPatternArgument(Relation.Source, Some(relation.sourceType)),
+          (right::rest).map(arg => ArcPatternArgument(arg.name, relation.demandArgument(arg.name).nodeType.some))))
     }
   }
 
