@@ -227,9 +227,9 @@ case class ArcPattern(relation: Option[Relation], source: ArcPatternArgument, de
   def fringe(wordNet: WordNetStore, bindings: Bindings, side: Side) = relation.map{ relation =>
     side match {
       case Left =>
-        wordNet.fetch(relation, List((source.name, Nil)), List(source.name))
+        wordNet.fetch(relation, List((source.name, Nil)), List(source.name)).distinct
       case Right =>
-        wordNet.fetch(relation, List((destinations.last.name, Nil)), List(destinations.last.name))
+        wordNet.fetch(relation, List((destinations.last.name, Nil)), List(destinations.last.name)).distinct
     }
   }.getOrElse {
     // TODO implement empty relation fringe AKA fetch/2
@@ -282,15 +282,14 @@ case class VariableRelationalPattern(variable: StepVariable) extends RelationalP
     }.getOrElse(throw new WQueryEvaluationException("Variable " + variable + " is not bound"))
   }
 
-
   def fringe(wordNet: WordNetStore, bindings: Bindings, side: Side) = {
     bindings.lookupStepVariable(variable.name).map {
       case Arc(relation, source, destination) =>
         side match {
           case Left =>
-            wordNet.fetch(relation, List((source, Nil)), List(source))
+            wordNet.fetch(relation, List((source, Nil)), List(source)).distinct
           case Right =>
-            wordNet.fetch(relation, List((destination, Nil)), List(destination))
+            wordNet.fetch(relation, List((destination, Nil)), List(destination)).distinct
         }
       case _ =>
         throw new WQueryEvaluationException("Cannot extend a path using a non-arc value of variable " + variable)

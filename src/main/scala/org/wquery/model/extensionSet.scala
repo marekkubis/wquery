@@ -5,7 +5,7 @@ import collection.mutable.ListBuffer
 trait ExtensionSet {
   def size: Int
   def right(pathPos: Int, pos: Int): Any
-  def path(pathPos: Int): List[Any]
+
   def extension(pathPos: Int): List[Any]
   def extensions = (0 until size).map(extension(_))
 }
@@ -17,8 +17,6 @@ class DataExtensionSet(dataSet: DataSet) extends ExtensionSet {
     val path = dataSet.paths(pathPos)
     path(path.size - 1 - pos)
   }
-
-  def path(pathPos: Int) = dataSet.paths(pathPos)
 
   def extension(pathPos: Int) = List(pathPos)
 }
@@ -33,11 +31,6 @@ class ExtendedExtensionSet(val parent: ExtensionSet, val extensionsList: List[(I
       extension(extension.size - 1 - pos)
     else
       parent.right(parentPos, pos - extension.size)
-  }
-
-  def path(pathPos: Int) = {
-    val (parentPos, extension) = extensionsList(pathPos)
-    parent.path(parentPos) ++ extension
   }
 
   def extension(pathPos: Int) = {

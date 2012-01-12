@@ -59,6 +59,22 @@ class DataSet(val paths: List[List[Any]], val pathVars: Map[String, List[(Int, I
 
   override def toString = paths.toString
 
+  def distinct = DataSet.fromBoundPaths(toBoundPaths.distinct)
+
+  /**
+   * multiset equality
+   */
+  def mequal(dataSet: DataSet) = {
+    val pathGroups = paths.groupBy(x => x)
+    val dataSetPathGroups = dataSet.paths.groupBy(x => x)
+
+    isSubgroupOf(pathGroups, dataSetPathGroups) && isSubgroupOf(dataSetPathGroups, pathGroups)
+  }
+
+  private def isSubgroupOf(leftGroups: Map[scala.List[Any], List[scala.List[Any]]], rightGroups: Map[scala.List[Any], List[scala.List[Any]]]) = {
+    leftGroups.forall{ case (left, leftValues) => rightGroups.get(left).map(_.size == leftValues.size).getOrElse(false) }
+  }
+
   def bindVariables(variables: VariableTemplate) = {
     if (variables != VariableTemplate.empty) {
       val pathVarBuffers = DataSetBuffers.createPathVarBuffers(variables.pathVariableName.map(p => Set(p)).getOrElse(Set.empty))

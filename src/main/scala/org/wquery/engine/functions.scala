@@ -78,7 +78,7 @@ object DistinctFunction extends DataSetFunction("distinct") with AcceptsAll with
  with PreservesSizes with PreservesBindingsPattern {
 
   def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings) = {
-    DataSet.fromBoundPaths(dataSet.toBoundPaths.distinct)
+    dataSet.distinct
   }
 }
 

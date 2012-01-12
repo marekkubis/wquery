@@ -4,9 +4,9 @@ import collection.mutable.ListBuffer
 import org.wquery.model._
 import org.wquery.{WQueryUpdateBreaksRelationPropertyException, WQueryModelException, WQueryEvaluationException}
 import akka.stm._
-import org.wquery.engine.{Direction, NewSynset, Bindings, RelationalPattern}
 import scalaz._
 import Scalaz._
+import org.wquery.engine._
 
 class InMemoryWordNetStore extends WordNetStore {
   private val successors = TransactionalMap[Relation, TransactionalMap[(String, Any), IndexedSeq[Map[String, Any]]]]()
@@ -102,7 +102,7 @@ class InMemoryWordNetStore extends WordNetStore {
          source <- relation.argumentNames if (through._1 == "_" || through._1 == source) && through._2.map(_ == relation.demandArgument(source).nodeType).getOrElse(true);
          destination <- relation.argumentNames if toMap.isEmpty || toMap.get(destination).map(nodeTypeOption => nodeTypeOption.map(_ == relation.demandArgument(destination).nodeType).getOrElse(true)).getOrElse(false);
          if source != destination)
-      buffer.append(extendWithRelationTuples(extensionSet, relation, from, source, List(destination)))
+      buffer.append(extendWithRelationTuples(extensionSet, relation, from, direction, source, List(destination)))
 
     buffer.toExtensionSet
   }
@@ -110,15 +110,24 @@ class InMemoryWordNetStore extends WordNetStore {
   def extend(extensionSet: ExtensionSet, relation: Relation, from: Int, direction: Direction, through: String, to: List[String]) = {
     val buffer = new ExtensionSetBuffer(extensionSet)
 
-    buffer.append(extendWithRelationTuples(extensionSet, relation, from, through, to))
+    buffer.append(extendWithRelationTuples(extensionSet, relation, from, direction, through, to))
     extendWithPatterns(extensionSet, relation, from, direction, through, to, buffer)
     buffer.toExtensionSet
   }
 
-  private def extendWithRelationTuples(extensionSet: ExtensionSet, relation: Relation, from: Int, through: String, to: List[String]) = {
+  private def extendWithRelationTuples(extensionSet: ExtensionSet, relation: Relation, from: Int, direction: Direction, through: String, to: List[String]) = {
     relation.demandArgument(through)
     to.foreach(relation.demandArgument)
 
+    direction match {
+      case Forward =>
+        extendWithRelationTuplesForward(extensionSet, relation, from, through, to)
+      case Backward =>
+        extendWithRelationTuplesBackward(extensionSet, relation, through, to)
+    }
+  }
+
+  private def extendWithRelationTuplesForward(extensionSet: ExtensionSet, relation: Relation, from: Int, through: String, to: List[String]) = {
     val relationSuccessors = successors(relation)
     val builder = new ExtensionSetBuilder(extensionSet)
 
@@ -131,6 +140,31 @@ class InMemoryWordNetStore extends WordNetStore {
         for(destination <- to if (succs.contains(destination))) {
           extensionBuffer.append(Arc(relation, through, destination))
           extensionBuffer.append(succs(destination))
+        }
+
+        val extension = extensionBuffer.toList
+
+        if (!extension.isEmpty)
+          builder.extend(pathPos, extension)
+      }
+    }
+
+    builder.build
+  }
+
+  private def extendWithRelationTuplesBackward(extensionSet: ExtensionSet, relation: Relation, through: String, to: List[String]) = {
+    val relationSuccessors = successors(relation)
+    val builder = new ExtensionSetBuilder(extensionSet)
+
+    for (pathPos <- 0 until extensionSet.size) {
+      val sources = to.reverse.indices.map(extensionSet.right(pathPos, _))
+
+      for (relSuccs <- relationSuccessors.get((to.head, sources.head)); succs <- relSuccs.distinct) {
+        val extensionBuffer = new ListBuffer[Any]
+
+        if (succs.contains(through) && (to zip sources).forall{ case (name, value) => succs(name) == value}) {
+          extensionBuffer.append(succs(through))
+          extensionBuffer.append(Arc(relation, through, to.head))
         }
 
         val extension = extensionBuffer.toList
