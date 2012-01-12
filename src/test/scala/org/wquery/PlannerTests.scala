@@ -52,7 +52,21 @@ class PlannerTests extends WQueryTestSuite {
     assert(forwardResult mequal backwardResult)
   }
 
-  // {}.hypernym.partial_holonym.hypernym
+  @Test def planMultiplleTransformations() = {
+    val path = planner ffor ("{}.hypernym.partial_holonym.hypernym") path
+
+    val forwardPlan = path.walkForward(BindingsSchema(), 0, path.links.size - 1)
+    val backwardPlan = path.walkBackward(BindingsSchema(), 0, path.links.size - 1)
+
+    forwardPlan.toString should equal ("ExtendOp(ExtendOp(ExtendOp(FetchOp(synsets,List((source,List())),List(source)),0,QuantifiedRelationPattern(source&synset^hypernym^destination&synset,{1}),Forward,VariableTemplate(List())),0,QuantifiedRelationPattern(source&synset^partial_holonym^destination&synset,{1}),Forward,VariableTemplate(List())),0,QuantifiedRelationPattern(source&synset^hypernym^destination&synset,{1}),Forward,VariableTemplate(List()))")
+    backwardPlan.toString should equal ("SelectOp(BindOp(ExtendOp(ExtendOp(ExtendOp(FringeOp(QuantifiedRelationPattern(source&synset^hypernym^destination&synset,{1}),Right),0,QuantifiedRelationPattern(source&synset^hypernym^destination&synset,{1}),Backward,VariableTemplate(List())),0,QuantifiedRelationPattern(source&synset^partial_holonym^destination&synset,{1}),Backward,VariableTemplate(List())),0,QuantifiedRelationPattern(source&synset^hypernym^destination&synset,{1}),Backward,VariableTemplate(List())),VariableTemplate(List($__a, @_))),BinaryCondition(in,StepVariableRefOp($__a,Set(synset)),FetchOp(synsets,List((source,List())),List(source))))")
+
+    val forwardResult = forwardPlan.evaluate(wquery.wordNet, Bindings())
+    val backwardResult = backwardPlan.evaluate(wquery.wordNet, Bindings())
+
+    emitted(forwardResult) should equal ("{ person:2:n } hypernym { human body:1:n physical body:1:n material body:1:n soma:3:n build:2:n figure:2:n physique:2:n anatomy:2:n shape:3:n bod:1:n chassis:1:n frame:3:n form:5:n flesh:2:n } partial_holonym { person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n } hypernym { organism:1:n being:2:n }\n{ person:2:n } hypernym { human body:1:n physical body:1:n material body:1:n soma:3:n build:2:n figure:2:n physique:2:n anatomy:2:n shape:3:n bod:1:n chassis:1:n frame:3:n form:5:n flesh:2:n } partial_holonym { person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n } hypernym { causal agent:1:n cause:4:n causal agency:1:n }\n{ compartment:2:n } hypernym { room:1:n } partial_holonym { building:1:n edifice:1:n } hypernym { structure:1:n construction:4:n }\n")
+    assert(forwardResult mequal backwardResult)
+  }
 
   // {car}.hypernym.{bus}
 

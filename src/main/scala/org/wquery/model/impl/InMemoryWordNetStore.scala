@@ -157,7 +157,7 @@ class InMemoryWordNetStore extends WordNetStore {
     val builder = new ExtensionSetBuilder(extensionSet)
 
     for (pathPos <- 0 until extensionSet.size) {
-      val sources = to.reverse.indices.map(extensionSet.right(pathPos, _))
+      val sources = to.indices.map(extensionSet.left(pathPos, _))
 
       for (relSuccs <- relationSuccessors.get((to.head, sources.head)); succs <- relSuccs.distinct) {
         val extensionBuffer = new ListBuffer[Any]
