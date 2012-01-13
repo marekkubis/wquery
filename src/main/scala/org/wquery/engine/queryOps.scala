@@ -587,8 +587,7 @@ case class ExtendOp(op: AlgebraOp, from: Int, pattern: RelationalPattern, direct
     val pathVarBuffers = DataSetBuffers.createPathVarBuffers(variables.pathVariableName.map(dataSetPathVarNames + _).getOrElse(dataSetPathVarNames))
     val stepVarBuffers = DataSetBuffers.createStepVarBuffers(dataSetStepVarNames union variables.stepVariableNames)
 
-    for (head::extension <- extensionSet.extensions) {
-      val pathPos = head.asInstanceOf[Int]
+    for ((pathPos, extension) <- extensionSet.extensions) {
       val path = dataSet.paths(pathPos)
       val extensionSize = extension.size
 

@@ -24,7 +24,7 @@ sealed abstract class RelationalPattern {
 
 case class RelationUnionPattern(patterns: List[RelationalPattern]) extends RelationalPattern {
   def extend(wordNet: WordNetStore, bindings: Bindings, extensionSet: ExtensionSet, from: Int, direction: Direction) = {
-    val buffer = new ExtensionSetBuffer(extensionSet)
+    val buffer = new ExtensionSetBuffer(extensionSet, direction)
 
     patterns.foreach(expr => buffer.append(expr.extend(wordNet, bindings, extensionSet, from, direction)))
     buffer.toExtensionSet
@@ -56,7 +56,9 @@ case class RelationCompositionPattern(patterns: List[RelationalPattern]) extends
 
         patterns.tail.foldLeft(headSet)((dataSet, expr) => expr.extend(wordNet, bindings, dataSet, 0, direction))
       case Backward =>
-        val tailSet = patterns.tail.foldRight(extensionSet)((expr, dataSet) => expr.extend(wordNet, bindings, dataSet, 0, direction))
+        val tailSet = patterns.tail.foldRight(extensionSet){ case (expr, dataSet) =>
+          expr.extend(wordNet, bindings, dataSet, 0, direction)
+        }
 
         patterns.head.extend(wordNet, bindings, tailSet, from, direction)
     }
@@ -158,7 +160,7 @@ case class QuantifiedRelationPattern(pattern: RelationalPattern, quantifier: Qua
   }
 
   private def computeClosure(wordNet: WordNetStore, bindings: Bindings, extensionSet: ExtensionSet, from: Int, direction: Direction, limit: Option[Int]) = {
-    val builder = new ExtensionSetBuilder(extensionSet)
+    val builder = new ExtensionSetBuilder(extensionSet, direction)
 
     for (i <- 0 until extensionSet.size) {
       val source = extensionSet.right(i, from)
@@ -174,7 +176,7 @@ case class QuantifiedRelationPattern(pattern: RelationalPattern, quantifier: Qua
   private def closeTuple(wordNet: WordNetStore, bindings: Bindings, direction: Direction, source: List[Any], forbidden: Set[Any], limit: Option[Int]): Seq[List[Any]] = {
     if (limit.getOrElse(1) > 0) {
       val transformed = pattern.extend(wordNet, bindings, new DataExtensionSet(DataSet.fromList(source)), 0, direction)
-      val filtered = transformed.extensions.filter(x => !forbidden.contains(x.last)).map(_.tail)
+      val filtered = transformed.extensions.filter{ case (_, extension) => !forbidden.contains(extension.last)}.map(_._2)
 
       if (filtered.isEmpty) {
         filtered

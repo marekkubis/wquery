@@ -95,7 +95,7 @@ class InMemoryWordNetStore extends WordNetStore {
   }
 
   def extend(extensionSet: ExtensionSet, from: Int, direction: Direction, through: (String, Option[NodeType]), to: List[(String, Option[NodeType])]): ExtendedExtensionSet = {
-    val buffer = new ExtensionSetBuffer(extensionSet)
+    val buffer = new ExtensionSetBuffer(extensionSet, direction)
     val toMap = to.toMap
 
     for (relation <- relations if relation.arguments.size > 1;
@@ -108,7 +108,7 @@ class InMemoryWordNetStore extends WordNetStore {
   }
 
   def extend(extensionSet: ExtensionSet, relation: Relation, from: Int, direction: Direction, through: String, to: List[String]) = {
-    val buffer = new ExtensionSetBuffer(extensionSet)
+    val buffer = new ExtensionSetBuffer(extensionSet, direction)
 
     buffer.append(extendWithRelationTuples(extensionSet, relation, from, direction, through, to))
     extendWithPatterns(extensionSet, relation, from, direction, through, to, buffer)
@@ -129,7 +129,7 @@ class InMemoryWordNetStore extends WordNetStore {
 
   private def extendWithRelationTuplesForward(extensionSet: ExtensionSet, relation: Relation, from: Int, through: String, to: List[String]) = {
     val relationSuccessors = successors(relation)
-    val builder = new ExtensionSetBuilder(extensionSet)
+    val builder = new ExtensionSetBuilder(extensionSet, Forward)
 
     for (pathPos <- 0 until extensionSet.size) {
       val source = extensionSet.right(pathPos, from)
@@ -154,7 +154,7 @@ class InMemoryWordNetStore extends WordNetStore {
 
   private def extendWithRelationTuplesBackward(extensionSet: ExtensionSet, relation: Relation, through: String, to: List[String]) = {
     val relationSuccessors = successors(relation)
-    val builder = new ExtensionSetBuilder(extensionSet)
+    val builder = new ExtensionSetBuilder(extensionSet, Backward)
 
     for (pathPos <- 0 until extensionSet.size) {
       val sources = to.indices.map(extensionSet.left(pathPos, _))
