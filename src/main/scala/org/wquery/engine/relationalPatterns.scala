@@ -118,9 +118,15 @@ case class QuantifiedRelationPattern(pattern: RelationalPattern, quantifier: Qua
     val lowerExtensionSet = (1 to quantifier.lowerBound).foldLeft(extensionSet)((x, _) => pattern.extend(wordNet, bindings, x, from, direction))
 
     if (some(quantifier.lowerBound) != quantifier.upperBound)
-      computeClosure(wordNet, bindings, lowerExtensionSet, from, direction, quantifier.upperBound.map(_ - quantifier.lowerBound))
-    else
+      direction match {
+        case Forward =>
+          computeClosureForward(wordNet, bindings, lowerExtensionSet, from, direction, quantifier.upperBound.map(_ - quantifier.lowerBound))
+        case Backward =>
+          computeClosureBackward(wordNet, bindings, lowerExtensionSet, direction, quantifier.upperBound.map(_ - quantifier.lowerBound))
+      }
+    else {
       lowerExtensionSet.asInstanceOf[ExtendedExtensionSet] // valid quantifiers invoke extend at least once
+    }
   }
 
   def fringe(wordNet: WordNetStore, bindings: Bindings, side: Side) = {
@@ -159,23 +165,37 @@ case class QuantifiedRelationPattern(pattern: RelationalPattern, quantifier: Qua
     }
   }
 
-  private def computeClosure(wordNet: WordNetStore, bindings: Bindings, extensionSet: ExtensionSet, from: Int, direction: Direction, limit: Option[Int]) = {
+  private def computeClosureForward(wordNet: WordNetStore, bindings: Bindings, extensionSet: ExtensionSet, from: Int, direction: Direction, limit: Option[Int]) = {
     val builder = new ExtensionSetBuilder(extensionSet, direction)
 
     for (i <- 0 until extensionSet.size) {
       val source = extensionSet.right(i, from)
       builder.extend(i, Nil)
 
-      for (cnode <- closeTuple(wordNet, bindings, direction, List(source), Set(source), limit))
+      for (cnode <- closeTupleForward(wordNet, bindings, List(source), Set(source), limit))
         builder.extend(i, cnode)
     }
 
     builder.build
   }
 
-  private def closeTuple(wordNet: WordNetStore, bindings: Bindings, direction: Direction, source: List[Any], forbidden: Set[Any], limit: Option[Int]): Seq[List[Any]] = {
+  private def computeClosureBackward(wordNet: WordNetStore, bindings: Bindings, extensionSet: ExtensionSet, direction: Direction, limit: Option[Int]) = {
+    val builder = new ExtensionSetBuilder(extensionSet, direction)
+
+    for (i <- 0 until extensionSet.size) {
+      val source = extensionSet.left(i, 0)
+      builder.extend(i, Nil)
+
+      for (cnode <- closeTupleBackward(wordNet, bindings, List(source), Set(source), limit))
+        builder.extend(i, cnode)
+    }
+
+    builder.build
+  }
+
+  private def closeTupleForward(wordNet: WordNetStore, bindings: Bindings, source: List[Any], forbidden: Set[Any], limit: Option[Int]): Seq[List[Any]] = {
     if (limit.getOrElse(1) > 0) {
-      val transformed = pattern.extend(wordNet, bindings, new DataExtensionSet(DataSet.fromList(source)), 0, direction)
+      val transformed = pattern.extend(wordNet, bindings, new DataExtensionSet(DataSet.fromList(source)), 0, Forward)
       val filtered = transformed.extensions.filter{ case (_, extension) => !forbidden.contains(extension.last)}.map(_._2)
 
       if (filtered.isEmpty) {
@@ -189,7 +209,33 @@ case class QuantifiedRelationPattern(pattern: RelationalPattern, quantifier: Qua
           val newSource = source ++ extension
 
           result.append(newSource.tail)
-          result.appendAll(closeTuple(wordNet, bindings, direction, newSource, newForbidden, newLimit))
+          result.appendAll(closeTupleForward(wordNet, bindings, newSource, newForbidden, newLimit))
+        }
+
+        result
+      }
+    } else {
+      Nil
+    }
+  }
+
+  private def closeTupleBackward(wordNet: WordNetStore, bindings: Bindings, source: List[Any], forbidden: Set[Any], limit: Option[Int]): Seq[List[Any]] = {
+    if (limit.getOrElse(1) > 0) {
+      val transformed = pattern.extend(wordNet, bindings, new DataExtensionSet(DataSet.fromList(source)), 0, Backward)
+      val filtered = transformed.extensions.filter{ case (_, extension) => !forbidden.contains(extension.head)}.map(_._2)
+
+      if (filtered.isEmpty) {
+        filtered
+      } else {
+        val result = new ListBuffer[List[Any]]
+        val newForbidden = forbidden ++ filtered.map(_.head)
+        val newLimit = limit.map(_ - 1)
+
+        for (extension <- filtered) {
+          val newSource = extension ++ source
+
+          result.append(newSource.dropRight(1))
+          result.appendAll(closeTupleBackward(wordNet, bindings, newSource, newForbidden, newLimit))
         }
 
         result

@@ -100,6 +100,38 @@ class PlannerTests extends WQueryTestSuite {
     assert(forwardResult mequal backwardResult)
   }
 
+  @Test def planOneOrMoreTransformations() = {
+    val path = planner ffor ("{car:3:n}.hypernym+") path
+
+    val forwardPlan = path.walkForward(BindingsSchema(), 0, path.links.size - 1)
+    val backwardPlan = path.walkBackward(BindingsSchema(), 0, path.links.size - 1)
+
+    forwardPlan.toString should equal ("ExtendOp(ProjectOp(ExtendOp(FetchOp(literal,List((destination,List(car)), (num,List(3)), (pos,List(n))),List(source)),0,RelationUnionPattern(List(source&sense^synset^destination&synset)),Forward,VariableTemplate(List())),ContextRefOp(Set(synset))),0,QuantifiedRelationPattern(source&synset^hypernym^destination&synset,{1,}),Forward,VariableTemplate(List()))")
+    backwardPlan.toString should equal ("SelectOp(BindOp(ExtendOp(FringeOp(QuantifiedRelationPattern(source&synset^hypernym^destination&synset,{1,}),Right),0,QuantifiedRelationPattern(source&synset^hypernym^destination&synset,{1,}),Backward,VariableTemplate(List())),VariableTemplate(List($__a, @_))),BinaryCondition(in,StepVariableRefOp($__a,Set(synset)),ProjectOp(ExtendOp(FetchOp(literal,List((destination,List(car)), (num,List(3)), (pos,List(n))),List(source)),0,RelationUnionPattern(List(source&sense^synset^destination&synset)),Forward,VariableTemplate(List())),ContextRefOp(Set(synset)))))")
+
+    val forwardResult = forwardPlan.evaluate(wquery.wordNet, Bindings())
+    val backwardResult = backwardPlan.evaluate(wquery.wordNet, Bindings())
+
+    emitted(forwardResult) should equal ("{ car:3:n gondola:3:n } hypernym { compartment:2:n }\n{ car:3:n gondola:3:n } hypernym { compartment:2:n } hypernym { room:1:n }\n{ car:3:n gondola:3:n } hypernym { compartment:2:n } hypernym { room:1:n } hypernym { area:5:n }\n{ car:3:n gondola:3:n } hypernym { compartment:2:n } hypernym { room:1:n } hypernym { area:5:n } hypernym { structure:1:n construction:4:n }\n{ car:3:n gondola:3:n } hypernym { compartment:2:n } hypernym { room:1:n } hypernym { area:5:n } hypernym { structure:1:n construction:4:n } hypernym { artifact:1:n artefact:1:n }\n{ car:3:n gondola:3:n } hypernym { compartment:2:n } hypernym { room:1:n } hypernym { area:5:n } hypernym { structure:1:n construction:4:n } hypernym { artifact:1:n artefact:1:n } hypernym { whole:2:n unit:6:n }\n{ car:3:n gondola:3:n } hypernym { compartment:2:n } hypernym { room:1:n } hypernym { area:5:n } hypernym { structure:1:n construction:4:n } hypernym { artifact:1:n artefact:1:n } hypernym { whole:2:n unit:6:n } hypernym { object:1:n physical object:1:n }\n{ car:3:n gondola:3:n } hypernym { compartment:2:n } hypernym { room:1:n } hypernym { area:5:n } hypernym { structure:1:n construction:4:n } hypernym { artifact:1:n artefact:1:n } hypernym { whole:2:n unit:6:n } hypernym { object:1:n physical object:1:n } hypernym { physical entity:1:n }\n{ car:3:n gondola:3:n } hypernym { compartment:2:n } hypernym { room:1:n } hypernym { area:5:n } hypernym { structure:1:n construction:4:n } hypernym { artifact:1:n artefact:1:n } hypernym { whole:2:n unit:6:n } hypernym { object:1:n physical object:1:n } hypernym { physical entity:1:n } hypernym { entity:1:n }\n")
+    assert(forwardResult mequal backwardResult)
+  }
+
+  @Test def planZeroOrMoreTransformations() = {
+    val path = planner ffor ("{car:3:n}.hypernym*") path
+
+    val forwardPlan = path.walkForward(BindingsSchema(), 0, path.links.size - 1)
+    val backwardPlan = path.walkBackward(BindingsSchema(), 0, path.links.size - 1)
+
+    forwardPlan.toString should equal ("ExtendOp(ProjectOp(ExtendOp(FetchOp(literal,List((destination,List(car)), (num,List(3)), (pos,List(n))),List(source)),0,RelationUnionPattern(List(source&sense^synset^destination&synset)),Forward,VariableTemplate(List())),ContextRefOp(Set(synset))),0,QuantifiedRelationPattern(source&synset^hypernym^destination&synset,{0,}),Forward,VariableTemplate(List()))")
+    backwardPlan.toString should equal ("SelectOp(BindOp(ExtendOp(FringeOp(QuantifiedRelationPattern(source&synset^hypernym^destination&synset,{0,}),Right),0,QuantifiedRelationPattern(source&synset^hypernym^destination&synset,{0,}),Backward,VariableTemplate(List())),VariableTemplate(List($__a, @_))),BinaryCondition(in,StepVariableRefOp($__a,Set(synset)),ProjectOp(ExtendOp(FetchOp(literal,List((destination,List(car)), (num,List(3)), (pos,List(n))),List(source)),0,RelationUnionPattern(List(source&sense^synset^destination&synset)),Forward,VariableTemplate(List())),ContextRefOp(Set(synset)))))")
+
+    val forwardResult = forwardPlan.evaluate(wquery.wordNet, Bindings())
+    val backwardResult = backwardPlan.evaluate(wquery.wordNet, Bindings())
+
+    emitted(forwardResult) should equal ("{ car:3:n gondola:3:n }\n{ car:3:n gondola:3:n } hypernym { compartment:2:n }\n{ car:3:n gondola:3:n } hypernym { compartment:2:n } hypernym { room:1:n }\n{ car:3:n gondola:3:n } hypernym { compartment:2:n } hypernym { room:1:n } hypernym { area:5:n }\n{ car:3:n gondola:3:n } hypernym { compartment:2:n } hypernym { room:1:n } hypernym { area:5:n } hypernym { structure:1:n construction:4:n }\n{ car:3:n gondola:3:n } hypernym { compartment:2:n } hypernym { room:1:n } hypernym { area:5:n } hypernym { structure:1:n construction:4:n } hypernym { artifact:1:n artefact:1:n }\n{ car:3:n gondola:3:n } hypernym { compartment:2:n } hypernym { room:1:n } hypernym { area:5:n } hypernym { structure:1:n construction:4:n } hypernym { artifact:1:n artefact:1:n } hypernym { whole:2:n unit:6:n }\n{ car:3:n gondola:3:n } hypernym { compartment:2:n } hypernym { room:1:n } hypernym { area:5:n } hypernym { structure:1:n construction:4:n } hypernym { artifact:1:n artefact:1:n } hypernym { whole:2:n unit:6:n } hypernym { object:1:n physical object:1:n }\n{ car:3:n gondola:3:n } hypernym { compartment:2:n } hypernym { room:1:n } hypernym { area:5:n } hypernym { structure:1:n construction:4:n } hypernym { artifact:1:n artefact:1:n } hypernym { whole:2:n unit:6:n } hypernym { object:1:n physical object:1:n } hypernym { physical entity:1:n }\n{ car:3:n gondola:3:n } hypernym { compartment:2:n } hypernym { room:1:n } hypernym { area:5:n } hypernym { structure:1:n construction:4:n } hypernym { artifact:1:n artefact:1:n } hypernym { whole:2:n unit:6:n } hypernym { object:1:n physical object:1:n } hypernym { physical entity:1:n } hypernym { entity:1:n }\n")
+    assert(forwardResult mequal backwardResult)
+  }
+
   // {car}.hypernym.{bus}
 
   // {plan}.hypernym$a.meronym[$a={xyz}]
