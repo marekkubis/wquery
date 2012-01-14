@@ -4,6 +4,7 @@ import scalaz._
 import Scalaz._
 import org.wquery.model._
 import org.wquery.WQueryInvalidValueSpecifiedForRelationPropertyException
+import scala.collection.mutable.{Map => MMap}
 
 sealed abstract class UpdateOp extends AlgebraOp {
   def update(wordNet: WordNet, bindings: Bindings)
@@ -337,7 +338,7 @@ case class RelationUpdateOp(arcsOp: AlgebraOp, op: String, property: String, act
     }
   }
 
-  private def updateRelationArgumentProperty(propertyCollection: scala.collection.mutable.Map[Relation, Set[String]], arcs: List[Arc], value: Any) {
+  private def updateRelationArgumentProperty(propertyCollection: MMap[Relation, Set[String]], arcs: List[Arc], value: Any) {
     val logicValue = value.asInstanceOf[Boolean]
 
     if (op == "+=" || op == ":=") {
@@ -359,7 +360,7 @@ case class RelationUpdateOp(arcsOp: AlgebraOp, op: String, property: String, act
     }
   }
 
-  private def updateRelationPropertyAction(actionCollection: scala.collection.mutable.Map[Relation, String], arcs: List[Arc], value: Any) {
+  private def updateRelationPropertyAction(actionCollection: MMap[Relation, String], arcs: List[Arc], value: Any) {
     val action = value.asInstanceOf[String]
 
     if (op == "+=" || op == ":=") {
@@ -373,7 +374,7 @@ case class RelationUpdateOp(arcsOp: AlgebraOp, op: String, property: String, act
     }
   }
 
-  private def updateRelationArgumentPropertyAction(actionCollection: scala.collection.mutable.Map[(Relation, String), String], arcs: List[Arc], value: Any) {
+  private def updateRelationArgumentPropertyAction(actionCollection: MMap[(Relation, String), String], arcs: List[Arc], value: Any) {
     val action = value.asInstanceOf[String]
 
     if (op == "+=" || op == ":=") {

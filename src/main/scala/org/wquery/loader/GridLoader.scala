@@ -5,6 +5,7 @@ import org.wquery.utils.Logging
 import org.xml.sax.{Locator, Attributes}
 import org.xml.sax.helpers.DefaultHandler
 import scala.collection.mutable.{Set, Map, ListBuffer}
+import scala.collection.immutable.{Map => IMap, Set => ISet}
 import org.wquery.model._
 import org.wquery.WQueryUpdateBreaksRelationPropertyException
 
@@ -193,7 +194,7 @@ class GridHandler(wordnet: WordNet) extends DefaultHandler with Logging {
 
     // create semantic relations successors       
     for ((synset, relname, reldest) <- ilrRelationsTuples) {      
-      val relation = wordnet.schema.demandRelation(relname, scala.collection.immutable.Map((Relation.Source, scala.collection.immutable.Set[DataType](SynsetType))))
+      val relation = wordnet.schema.demandRelation(relname, IMap((Relation.Source, ISet[DataType](SynsetType))))
 
       relation.destinationType.map { dt =>
         dt match {
@@ -237,7 +238,7 @@ class GridHandler(wordnet: WordNet) extends DefaultHandler with Logging {
     
     // create successors
     for ((synset, relname, reldest) <- genericRelationsTuples) {
-      val relation = wordnet.schema.demandRelation(relname, scala.collection.immutable.Map((Relation.Source, scala.collection.immutable.Set[DataType](SynsetType))))
+      val relation = wordnet.schema.demandRelation(relname, IMap((Relation.Source, ISet[DataType](SynsetType))))
 
       relation.destinationType.map { dt =>
         dt match {

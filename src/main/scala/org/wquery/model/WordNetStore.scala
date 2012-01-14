@@ -1,6 +1,7 @@
 package org.wquery.model
 
 import org.wquery.engine.{Direction, ArcPattern, RelationalPattern}
+import scala.collection.mutable.{Map => MMap}
 
 trait WordNetStore {
   // querying
@@ -67,16 +68,16 @@ trait WordNetStore {
   def split(synsets: List[Synset], assignments: List[PropertyAssignment])
 
   // relation properties
-  val dependent = scala.collection.mutable.Map[Relation, Set[String]]()
-  val collectionDependent = scala.collection.mutable.Map[Relation, Set[String]]()
-  val functionalFor = scala.collection.mutable.Map[Relation, Set[String]]()
-  val requiredBys = scala.collection.mutable.Map[Relation, Set[String]]()
-  val transitives = scala.collection.mutable.Map[Relation, Boolean]()
-  val symmetry = scala.collection.mutable.Map[Relation, Symmetry]()
+  val dependent = MMap[Relation, Set[String]]()
+  val collectionDependent = MMap[Relation, Set[String]]()
+  val functionalFor = MMap[Relation, Set[String]]()
+  val requiredBys = MMap[Relation, Set[String]]()
+  val transitives = MMap[Relation, Boolean]()
+  val symmetry = MMap[Relation, Symmetry]()
 
-  val transitivesActions = scala.collection.mutable.Map[Relation, String]()
-  val symmetryActions = scala.collection.mutable.Map[Relation, String]()
-  val functionalForActions = scala.collection.mutable.Map[(Relation, String), String]()
+  val transitivesActions = MMap[Relation, String]()
+  val symmetryActions = MMap[Relation, String]()
+  val functionalForActions = MMap[(Relation, String), String]()
 
   // helper methods
   def addSuccessor(pred: Any, relation: Relation, succ: Any) = addLink(relation, Map((Relation.Source, pred), (Relation.Destination, succ)))

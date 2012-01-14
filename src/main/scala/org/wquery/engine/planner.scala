@@ -1,9 +1,8 @@
 package org.wquery.engine
 
-import collection.mutable.{ListBuffer, Map}
+import collection.mutable.{ListBuffer, Map, Set}
 import scalaz._
 import Scalaz._
-import org.wquery.model.DataType
 
 class PathPlanner(val path: Path) {
   def plan(context: BindingsSchema) = {
@@ -87,9 +86,9 @@ class Path(val links: List[Link], conditions: Map[Option[Link], List[Condition]]
 }
 
 class ConditionApplier(links: List[Link], conditions: Map[Option[Link], List[Condition]], context: BindingsSchema) {
-  val appliedConditions = scala.collection.mutable.Set[Condition]()
+  val appliedConditions = Set[Condition]()
   val pathVariables = links.map(_.variables.variables).asMA.sum
-  val alreadyBoundVariables = scala.collection.mutable.Set[Variable]()
+  val alreadyBoundVariables = Set[Variable]()
 
   def applyConditions(inputOp: AlgebraOp, currentLink: Link) = {
     var op = inputOp
