@@ -666,6 +666,8 @@ case class Quantifier(lowerBound: Int, upperBound: Option[Int]) {
 }
 
 case class ArcPatternArgument(name: String, nodeType: Option[NodeType]) {
+  implicit val ArcPatternArgumentEqual = equalA[ArcPatternArgument]
+
   override def toString = name + ~nodeType.map("&" + _)
 }
 

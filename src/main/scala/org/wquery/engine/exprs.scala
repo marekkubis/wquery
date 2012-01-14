@@ -250,7 +250,7 @@ case class PropertyAssignmentExpr(arcExpr: ArcExpr, op: String, expr: EvaluableE
     val valuesOp = expr.evaluationPlan(wordNet, bindings, context)
 
     for (i <- 0 until pattern.destinations.size) {
-      if (pattern.leftType(2*i + 1) != valuesOp.rightType(i))
+      if (pattern.leftType(2*i + 1) /== valuesOp.rightType(i))
         throw new WQueryStaticCheckException("Arc pattern " + pattern + " does not match the types of values on the right hand side of " + op + " operator")
     }
 
@@ -368,7 +368,7 @@ case class FilterTransformationExpr(conditionalExpr: ConditionalExpr) extends Tr
 
 case class NodeTransformationExpr(generator: EvaluableExpr) extends TransformationExpr {
   def push(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context, op: AlgebraOp, plan: PathBuilder) = {
-    if (op != ConstantOp.empty) {
+    if (op /== ConstantOp.empty) {
       val filterBindings = BindingsSchema(bindings, false)
       filterBindings.bindContextOp(op)
       val condition = BinaryCondition("in", ContextRefOp(op.rightType(0)), generator.evaluationPlan(wordNet, filterBindings, context))
@@ -384,7 +384,7 @@ case class NodeTransformationExpr(generator: EvaluableExpr) extends Transformati
 
 case class BindTransformationExpr(variables: VariableTemplate) extends TransformationExpr {
   def push(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context, op: AlgebraOp, plan: PathBuilder) = {
-    if (variables != VariableTemplate.empty) {
+    if (variables /== ∅[VariableTemplate]) {
       plan.appendVariables(variables)
 
       op match {
@@ -431,7 +431,7 @@ case class RelationCompositionExpr(exprs: List[RelationalExpr]) extends Relation
 case class QuantifiedRelationExpr(expr: RelationalExpr, quantifier: Quantifier) extends RelationalExpr {
   def evaluationPattern(wordNet: WordNetSchema, sourceTypes: Set[DataType]) = {
     if (quantifier.lowerBound >= 0 && quantifier.upperBound
-      .map(upperBound => quantifier.lowerBound < upperBound || quantifier.lowerBound === upperBound && upperBound != 0)
+      .map(upperBound => quantifier.lowerBound < upperBound || quantifier.lowerBound === upperBound && (upperBound /== 0))
       .getOrElse(true))
       QuantifiedRelationPattern(expr.evaluationPattern(wordNet, sourceTypes), quantifier)
     else
@@ -447,7 +447,7 @@ case class VariableRelationalExpr(variable: StepVariable) extends RelationalExpr
 
 case class ArcExpr(ids: List[ArcExprArgument]) extends RelationalExpr {
   def creationPattern(wordNet: WordNetSchema) = {
-    if (ids.size > 1 && ids(0).nodeType.isDefined && ids.exists(_.name === Relation.Source) && ids(1).nodeType.isEmpty && ids(1) != "_" && ids.tail.tail.forall(_.nodeType.isDefined)) {
+    if (ids.size > 1 && ids(0).nodeType.isDefined && ids.exists(_.name === Relation.Source) && ids(1).nodeType.isEmpty && (ids(1).name /== "_") && ids.tail.tail.forall(_.nodeType.isDefined)) {
       val relation = Relation(ids(1).name,(Argument(ids(0).name, ids(0).nodeType.get) :: ids.tail.tail.map(elem => Argument(elem.name, elem.nodeType.get))).toSet)
 
       ArcPattern(Some(relation), ArcPatternArgument(ids(0).name, ids(0).nodeType), ids.tail.tail.map(id => ArcPatternArgument(id.name, id.nodeType)))
@@ -718,12 +718,18 @@ case class ArcByArcExprReq(expr: ArcExpr) extends EvaluableExpr {
       val arcs = pattern.destinations.map(destination => List(Arc(pattern.relation.get, pattern.source.name, destination.name)))
       ConstantOp(DataSet(if (arcs.isEmpty) List(List(Arc(pattern.relation.get, pattern.source.name, pattern.source.name))) else arcs))
     }.getOrElse {
-      val toMap = if (pattern.destinations != List(ArcPatternArgument("_", None))) pattern.destinations.map(arg => (arg.name, arg.nodeType)).toMap else Map.empty[String, Option[NodeType]]
+      val toMap = pattern.destinations match {
+        case List(ArcPatternArgument("_", None)) =>
+          ∅[Map[String, Option[NodeType]]]
+        case _ =>
+          pattern.destinations.map(arg => (arg.name, arg.nodeType)).toMap
+      }
+
       val arcs = (for (relation <- wordNet.relations;
            source <- relation.argumentNames if (pattern.source.name === "_" || pattern.source.name === source)  && pattern.source.nodeType.map(_ === relation.demandArgument(source).nodeType).getOrElse(true);
            destination <- relation.argumentNames if toMap.isEmpty || toMap.get(destination).map(nodeTypeOption =>
              nodeTypeOption.map(_ === relation.demandArgument(destination).nodeType).getOrElse(true)).getOrElse(false);
-           if relation.arguments.size === 1 || source != destination)
+           if relation.arguments.size === 1 || (source /== destination))
         yield List(Arc(relation, source, destination)))
 
       ConstantOp(DataSet(arcs))

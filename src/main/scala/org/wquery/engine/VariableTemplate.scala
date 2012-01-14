@@ -10,21 +10,21 @@ case class VariableTemplate(pattern: List[Variable]) {
   val pathVariablePosition = {
     val pos = pattern.indexWhere{_.isInstanceOf[PathVariable]}
 
-    if (pos != pattern.lastIndexWhere{_.isInstanceOf[PathVariable]})
+    if (pos /== pattern.lastIndexWhere{_.isInstanceOf[PathVariable]})
       throw new WQueryEvaluationException("Variable list " + pattern.mkString + " contains more than one path variable")
-    else if (pos != -1)
+    else if (pos /== -1)
       some(pos)
     else
       none
   }
 
-  val pathVariableName = pathVariablePosition.map(pattern(_).name).filter(_ != "_")
+  val pathVariableName = pathVariablePosition.map(pattern(_).name).filter(_ /== "_")
 
   val stepVariableNames = {
     val nameList = pattern.filterNot(x => (x.isInstanceOf[PathVariable] || x.name === "_")).map(_.name)
     val distinctNames = nameList.distinct
 
-    if (nameList != distinctNames)
+    if (nameList /== distinctNames)
       throw new WQueryEvaluationException("Variable list " + pattern.mkString + " contains duplicated variable names")
     else
       distinctNames.toSet
@@ -67,5 +67,7 @@ case class VariableTemplate(pattern: List[Variable]) {
 object VariableTemplate {
   val empty = new VariableTemplate(Nil)
   
-  implicit def VariableTemplateZero = zero(empty)
+  implicit val VariableTemplateZero = zero(empty)
+  
+  implicit val VariableTemplateEqual = equalA[VariableTemplate]
 }
