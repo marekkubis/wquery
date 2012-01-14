@@ -3,7 +3,7 @@ package org.wquery
 import engine._
 import loader.{LmfLoader, GridLoader, WordNetLoader}
 import model.impl.InMemoryWordNetStore
-import operations.Bindings
+import operations.{Bindings, BindingsSchema}
 import org.wquery.model.WordNet
 import org.wquery.parser.WQueryParsers
 import org.wquery.utils.Logging

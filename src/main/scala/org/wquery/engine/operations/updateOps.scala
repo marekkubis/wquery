@@ -5,7 +5,6 @@ import Scalaz._
 import org.wquery.model._
 import org.wquery.WQueryInvalidValueSpecifiedForRelationPropertyException
 import scala.collection.mutable.{Map => MMap}
-import org.wquery.engine.{BindingsPattern, BindingsSchema}
 
 sealed abstract class UpdateOp extends AlgebraOp {
   def update(wordNet: WordNet, bindings: Bindings)

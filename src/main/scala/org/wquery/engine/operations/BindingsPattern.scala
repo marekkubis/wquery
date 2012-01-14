@@ -1,9 +1,9 @@
-package org.wquery.engine
+package org.wquery.engine.operations
 
-import operations.AlgebraOp
 import scala.collection.mutable.Map
 import org.wquery.model.DataType
 import org.wquery.WQueryStepVariableCannotBeBoundException
+import org.wquery.engine.{VariableTemplate, Variable, PathVariable, StepVariable}
 
 class BindingsPattern {
   val stepVariablesTypes = Map[String, Set[DataType]]()

@@ -1,6 +1,5 @@
-package org.wquery.engine
+package org.wquery.engine.operations
 
-import operations.AlgebraOp
 import org.wquery.model._
 import org.wquery.WQueryEvaluationException
 
@@ -66,6 +65,6 @@ class BindingsSchema(val parent: Option[BindingsSchema], updatesParent: Boolean)
 
 object BindingsSchema {
   def apply() = new BindingsSchema(None, false)
-  
+
   def apply(parent: BindingsSchema, updatesParent: Boolean) = new BindingsSchema(Some(parent), updatesParent)
 }
