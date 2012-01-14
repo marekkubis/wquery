@@ -463,7 +463,7 @@ case class ArcExpr(ids: List[ArcExprArgument]) extends RelationalExpr {
         if (arg.nodeType.isEmpty) {
           wordNet.getRelation(arg.name, Map((Relation.Source, contextTypes)))
             .map(relation => ArcPattern(Some(relation), ArcPatternArgument(Relation.Source, Some(relation.sourceType)),
-              relation.destinationType.map(destinationType => List(ArcPatternArgument(Relation.Destination, Some(destinationType)))).orZero))
+              relation.destinationType.map(destinationType => ArcPatternArgument(Relation.Destination, Some(destinationType))).toList))
         } else {
           throw new WQueryStaticCheckException("Relation name " + arg.name + " cannot be followed by type specifier &")
         }
