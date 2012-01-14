@@ -255,21 +255,22 @@ case class QuantifiedRelationPattern(pattern: RelationalPattern, quantifier: Qua
   }
 }
 
-case class ArcPattern(relation: Option[Relation], source: ArcPatternArgument, destinations: List[ArcPatternArgument]) extends RelationalPattern {
+case class ArcRelationalPattern(pattern: ArcPattern) extends RelationalPattern {
   def extend(wordNet: WordNetStore, bindings: Bindings, extensionSet: ExtensionSet, from: Int, direction: Direction) = {
-    relation.map(wordNet.extend(extensionSet, _, from, direction, source.name, destinations.map(_.name)))
-      .getOrElse(wordNet.extend(extensionSet, from, direction, (source.name, source.nodeType), if (destinations == List(ArcPatternArgument("_", None))) Nil else destinations.map(dest => (dest.name, dest.nodeType))))
+    pattern.relation.map(wordNet.extend(extensionSet, _, from, direction, pattern.source.name, pattern.destinations.map(_.name)))
+      .getOrElse(wordNet.extend(extensionSet, from, direction, (pattern.source.name, pattern.source.nodeType),
+        if (pattern.destinations == List(ArcPatternArgument("_", None))) Nil else pattern.destinations.map(dest => (dest.name, dest.nodeType))))
   }
 
   def fringe(wordNet: WordNetStore, bindings: Bindings, side: Side) = {
     val (fringeName, fringeType) = side match {
       case Left =>
-        (source.name, source.nodeType)
+        (pattern.source.name, pattern.source.nodeType)
       case Right =>
-        (destinations.last.name, destinations.last.nodeType)
+        (pattern.destinations.last.name, pattern.destinations.last.nodeType)
     }
 
-    val relations = relation
+    val relations = pattern.relation
       .some(rel => List((rel, fringeName)))
       .none(for (relation <- wordNet.relations if relation.getArgument(fringeName)
         .some(arg => fringeType.some(_ == arg.nodeType).none(true))
@@ -278,46 +279,40 @@ case class ArcPattern(relation: Option[Relation], source: ArcPatternArgument, de
     wordNet.fringe(relations)
   }
 
-  def minSize = 2*destinations.size
+  def minSize = 2*pattern.destinations.size
 
-  def maxSize = some(2*destinations.size)
+  def maxSize = some(2*pattern.destinations.size)
 
-  def sourceType = demandArgumentType(source)
+  def sourceType = demandArgumentType(pattern.source)
 
   def leftType(pos: Int) = {
     if (pos < minSize)
       if (pos % 2 == 0) {
         Set(ArcType)
       } else {
-        demandArgumentType(destinations((pos - 1)/2))
+        demandArgumentType(pattern.destinations((pos - 1)/2))
       }
     else
       Set.empty
   }
 
   def rightType(pos: Int) = {
-    if (pos < destinations.size)
+    if (pos < pattern.destinations.size)
       if (pos % 2 == 1) {
         Set(ArcType)
       } else {
-        demandArgumentType(destinations(destinations.size - 1 - pos/2))
+        demandArgumentType(pattern.destinations(pattern.destinations.size - 1 - pos/2))
       }
     else
       Set.empty
   }
 
-  override def toString = (source::relation.map(_.name).getOrElse("_")::destinations).mkString("^")
+  override def toString = pattern.toString
 
   private def demandArgumentType(argument: ArcPatternArgument) = {
-    relation.map(rel => Set(rel.demandArgument(argument.name).nodeType))
+    pattern.relation.map(rel => Set(rel.demandArgument(argument.name).nodeType))
       .getOrElse(argument.nodeType.map(Set(_)).getOrElse(NodeType.all)).asInstanceOf[Set[DataType]]
   }
-}
-
-case class ArcPatternArgument(name: String, nodeType: Option[NodeType]) {
-  implicit val ArcPatternArgumentEqual = equalA[ArcPatternArgument]
-
-  override def toString = name + ~nodeType.map("&" + _)
 }
 
 case class VariableRelationalPattern(variable: StepVariable) extends RelationalPattern {

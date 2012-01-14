@@ -1,5 +1,6 @@
 package org.wquery.engine
 
+import planner.{PathPlanner, PathBuilder}
 import scalaz._
 import Scalaz._
 import org.wquery.model._
@@ -52,7 +53,7 @@ case class MergeExpr(expr: EvaluableExpr, withs: List[PropertyAssignmentExpr]) e
     if (op.rightType(0).subsetOf(Set(SynsetType, SenseType))) {
       val patterns = withs.map(_.evaluationPattern(wordNet, bindings, context, SynsetType))
 
-      if (patterns.exists(!_.pattern.relation.isDefined))
+      if (patterns.exists(!_.relationalPattern.pattern.relation.isDefined))
         throw new WQueryStaticCheckException("_ cannot be used as a relation name in the update operation")
 
       MergeOp(op, patterns)
@@ -69,7 +70,7 @@ case class SplitExpr(expr: EvaluableExpr, withs: List[PropertyAssignmentExpr]) e
     if (op.rightType(0) === Set(SynsetType)) {
       val patterns = withs.map(_.evaluationPattern(wordNet, bindings, context, SynsetType))
 
-      if (patterns.exists(!_.pattern.relation.isDefined))
+      if (patterns.exists(!_.relationalPattern.pattern.relation.isDefined))
         throw new WQueryStaticCheckException("_ cannot be used as a relation name in the update operation")
 
       SplitOp(op, patterns)
@@ -226,16 +227,16 @@ case class UpdateExpr(left: EvaluableExpr, arcExpr: ArcExpr, op: String, right: 
       }
     } else {
       val rightOp = right.evaluationPlan(wordNet, bindings, context)
-      val pattern = arcExpr.evaluationPattern(wordNet, leftType)
+      val relationalPattern = arcExpr.evaluationPattern(wordNet, leftType)
 
-      if (pattern.relation.isDefined) {
+      if (relationalPattern.pattern.relation.isDefined) {
         op match {
           case "+=" =>
-            AddTuplesOp(leftOp, pattern, rightOp)
+            AddTuplesOp(leftOp, relationalPattern, rightOp)
           case "-=" =>
-            RemoveTuplesOp(leftOp, pattern, rightOp)
+            RemoveTuplesOp(leftOp, relationalPattern, rightOp)
           case ":=" =>
-            SetTuplesOp(leftOp, pattern, rightOp)
+            SetTuplesOp(leftOp, relationalPattern, rightOp)
         }
       } else {
         throw new WQueryStaticCheckException("_ cannot be used as a relation name in the update operation")
@@ -246,18 +247,18 @@ case class UpdateExpr(left: EvaluableExpr, arcExpr: ArcExpr, op: String, right: 
 
 case class PropertyAssignmentExpr(arcExpr: ArcExpr, op: String, expr: EvaluableExpr) extends Expr {
   def evaluationPattern(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context, contextType: DataType) = {
-    val pattern = arcExpr.evaluationPattern(wordNet, Set(contextType))
+    val relationalPattern = arcExpr.evaluationPattern(wordNet, Set(contextType))
     val valuesOp = expr.evaluationPlan(wordNet, bindings, context)
 
-    for (i <- 0 until pattern.destinations.size) {
-      if (pattern.leftType(2*i + 1) /== valuesOp.rightType(i))
-        throw new WQueryStaticCheckException("Arc pattern " + pattern + " does not match the types of values on the right hand side of " + op + " operator")
+    for (i <- 0 until relationalPattern.pattern.destinations.size) {
+      if (relationalPattern.leftType(2*i + 1) /== valuesOp.rightType(i))
+        throw new WQueryStaticCheckException("Arc pattern " + relationalPattern + " does not match the types of values on the right hand side of " + op + " operator")
     }
 
-    if (!pattern.relation.isDefined)
+    if (!relationalPattern.pattern.relation.isDefined)
       throw new WQueryStaticCheckException("_ cannot be used as a relation name in the update operation")
 
-    PropertyAssignmentPattern(pattern, op, valuesOp)
+    PropertyAssignmentPattern(relationalPattern, op, valuesOp)
   }
 }
 /*
@@ -450,7 +451,7 @@ case class ArcExpr(ids: List[ArcExprArgument]) extends RelationalExpr {
     if (ids.size > 1 && ids(0).nodeType.isDefined && ids.exists(_.name === Relation.Source) && ids(1).nodeType.isEmpty && (ids(1).name /== "_") && ids.tail.tail.forall(_.nodeType.isDefined)) {
       val relation = Relation(ids(1).name,(Argument(ids(0).name, ids(0).nodeType.get) :: ids.tail.tail.map(elem => Argument(elem.name, elem.nodeType.get))).toSet)
 
-      ArcPattern(Some(relation), ArcPatternArgument(ids(0).name, ids(0).nodeType), ids.tail.tail.map(id => ArcPatternArgument(id.name, id.nodeType)))
+      ArcRelationalPattern(ArcPattern(Some(relation), ArcPatternArgument(ids(0).name, ids(0).nodeType), ids.tail.tail.map(id => ArcPatternArgument(id.name, id.nodeType))))
     } else {
       throw new WQueryStaticCheckException("Arc expression " + toString + " does not determine a relation to create unambiguously")
     }
@@ -459,12 +460,12 @@ case class ArcExpr(ids: List[ArcExprArgument]) extends RelationalExpr {
   def evaluationPattern(wordNet: WordNetSchema, contextTypes: Set[DataType]) = {
     ((ids: @unchecked) match {
       case List(ArcExprArgument("_", nodeType)) =>
-        Some(ArcPattern(None, ArcPatternArgument("_", nodeType.map(NodeType.fromName(_))), List(ArcPatternArgument("_", None))))
+        Some(ArcRelationalPattern(ArcPattern(None, ArcPatternArgument("_", nodeType.map(NodeType.fromName(_))), List(ArcPatternArgument("_", None)))))
       case List(arg) =>
         if (arg.nodeType.isEmpty) {
           wordNet.getRelation(arg.name, Map((Relation.Source, contextTypes)))
-            .map(relation => ArcPattern(Some(relation), ArcPatternArgument(Relation.Source, Some(relation.sourceType)),
-              relation.destinationType.map(destinationType => ArcPatternArgument(Relation.Destination, Some(destinationType))).toList))
+            .map(relation => ArcRelationalPattern(ArcPattern(Some(relation), ArcPatternArgument(Relation.Source, Some(relation.sourceType)),
+              relation.destinationType.map(destinationType => ArcPatternArgument(Relation.Destination, Some(destinationType))).toList)))
         } else {
           throw new WQueryStaticCheckException("Relation name " + arg.name + " cannot be followed by type specifier &")
         }
@@ -489,12 +490,12 @@ case class ArcExpr(ids: List[ArcExprArgument]) extends RelationalExpr {
     val emptyDestination = rest.isEmpty??(List(ArcPatternArgument(Relation.Destination, None)).some)
 
     if (relationName === "_") {
-      Some(ArcPattern(None, ArcPatternArgument(sourceName, left.nodeType),
-        emptyDestination.getOrElse(rest.map(arg => ArcPatternArgument(arg.name, arg.nodeType)))))
+      Some(ArcRelationalPattern(ArcPattern(None, ArcPatternArgument(sourceName, left.nodeType),
+        emptyDestination.getOrElse(rest.map(arg => ArcPatternArgument(arg.name, arg.nodeType))))))
     } else {
       wordNet.getRelation(right.name, ((sourceName, sourceTypes) +: (rest.map(_.nodeDescription))).toMap)
-        .map(relation => ArcPattern(Some(relation), ArcPatternArgument(sourceName, Some(relation.sourceType)),
-        emptyDestination.getOrElse(rest.map(arg => ArcPatternArgument(arg.name, relation.demandArgument(arg.name).nodeType.some)))))
+        .map(relation => ArcRelationalPattern(ArcPattern(Some(relation), ArcPatternArgument(sourceName, Some(relation.sourceType)),
+        emptyDestination.getOrElse(rest.map(arg => ArcPatternArgument(arg.name, relation.demandArgument(arg.name).nodeType.some))))))
     }
   }
 
@@ -502,11 +503,11 @@ case class ArcExpr(ids: List[ArcExprArgument]) extends RelationalExpr {
     val relationName = left.name
 
     if (relationName === "_") {
-      Some(ArcPattern(None, ArcPatternArgument(Relation.Source, None), (right::rest).map(arg => ArcPatternArgument(arg.name, arg.nodeType))))
+      Some(ArcRelationalPattern(ArcPattern(None, ArcPatternArgument(Relation.Source, None), (right::rest).map(arg => ArcPatternArgument(arg.name, arg.nodeType)))))
     } else {
       wordNet.getRelation(relationName, ((Relation.Source, contextTypes) +: right.nodeDescription +: (rest.map(_.nodeDescription))).toMap)
-        .map(relation => ArcPattern(Some(relation), ArcPatternArgument(Relation.Source, Some(relation.sourceType)),
-          (right::rest).map(arg => ArcPatternArgument(arg.name, relation.demandArgument(arg.name).nodeType.some))))
+        .map(relation => ArcRelationalPattern(ArcPattern(Some(relation), ArcPatternArgument(Relation.Source, Some(relation.sourceType)),
+          (right::rest).map(arg => ArcPatternArgument(arg.name, relation.demandArgument(arg.name).nodeType.some)))))
     }
   }
 
@@ -617,11 +618,11 @@ case class SynsetByExprReq(expr: EvaluableExpr) extends EvaluableExpr {
       if (!contextTypes.isEmpty) {
         val patterns = contextTypes.map{ contextType => (contextType: @unchecked) match {
           case StringType =>
-            ArcPattern(Some(WordNet.WordFormToSynsets), ArcPatternArgument(Relation.Source, Some(WordNet.WordFormToSynsets.sourceType)),
-              List(ArcPatternArgument(Relation.Destination, WordNet.WordFormToSynsets.destinationType)))
+            ArcRelationalPattern(ArcPattern(Some(WordNet.WordFormToSynsets), ArcPatternArgument(Relation.Source, Some(WordNet.WordFormToSynsets.sourceType)),
+              List(ArcPatternArgument(Relation.Destination, WordNet.WordFormToSynsets.destinationType))))
           case SenseType =>
-            ArcPattern(Some(WordNet.SenseToSynset), ArcPatternArgument(Relation.Source, Some(WordNet.SenseToSynset.sourceType)),
-              List(ArcPatternArgument(Relation.Destination, WordNet.SenseToSynset.destinationType)))
+            ArcRelationalPattern(ArcPattern(Some(WordNet.SenseToSynset), ArcPatternArgument(Relation.Source, Some(WordNet.SenseToSynset.sourceType)),
+              List(ArcPatternArgument(Relation.Destination, WordNet.SenseToSynset.destinationType))))
         }}.toList
 
         ProjectOp(ExtendOp(op, 0, RelationUnionPattern(patterns), Forward, VariableTemplate.empty), ContextRefOp(Set(SynsetType)))
@@ -712,7 +713,8 @@ case class ContextByVariableReq(variable: Variable) extends EvaluableExpr {
 
 case class ArcByArcExprReq(expr: ArcExpr) extends EvaluableExpr {
   def evaluationPlan(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context) = {
-    val pattern = if (context.creation) expr.creationPattern(wordNet) else expr.evaluationPattern(wordNet, DataType.all)
+    val relationalPattern = if (context.creation) expr.creationPattern(wordNet) else expr.evaluationPattern(wordNet, DataType.all)
+    val pattern = relationalPattern.pattern
 
     pattern.relation.map { relation =>
       val arcs = pattern.destinations.map(destination => List(Arc(pattern.relation.get, pattern.source.name, destination.name)))

@@ -30,7 +30,7 @@ sealed abstract class UpdateOp extends AlgebraOp {
 //
 
 
-sealed abstract class TupleUpdateOp(val leftOp: AlgebraOp, val pattern: ArcPattern, val rightOp: AlgebraOp) extends UpdateOp {
+sealed abstract class TupleUpdateOp(val leftOp: AlgebraOp, val relationalPattern: ArcRelationalPattern, val rightOp: AlgebraOp) extends UpdateOp {
   def referencedVariables = leftOp.referencedVariables ++ rightOp.referencedVariables
 
   def referencesContext = leftOp.referencesContext || rightOp.referencesContext
@@ -38,43 +38,43 @@ sealed abstract class TupleUpdateOp(val leftOp: AlgebraOp, val pattern: ArcPatte
   def update(wordNet: WordNet, bindings: Bindings) {
     val leftSet = leftOp.evaluate(wordNet, bindings)
     val rightSet = rightOp.evaluate(wordNet, bindings)
-    val destinationNames = pattern.destinations.map(_.name)
+    val destinationNames = relationalPattern.pattern.destinations.map(_.name)
 
     for (sources <- leftSet.paths; destinations <- rightSet.paths) {
-      updateWith(wordNet, bindings, pattern.relation.get, ((pattern.source.name, sources.last) :: destinationNames.zip(destinations)).toMap)
+      updateWith(wordNet, bindings, relationalPattern.pattern.relation.get, ((relationalPattern.pattern.source.name, sources.last) :: destinationNames.zip(destinations)).toMap)
     }
   }
 
   def updateWith(wordNet: WordNet, bindings: Bindings, relation: Relation, tuple: Map[String, Any])
 }
 
-case class AddTuplesOp(override val leftOp: AlgebraOp, override val pattern: ArcPattern, override val rightOp:AlgebraOp) extends TupleUpdateOp(leftOp, pattern, rightOp) {
+case class AddTuplesOp(override val leftOp: AlgebraOp, override val relationalPattern: ArcRelationalPattern, override val rightOp: AlgebraOp) extends TupleUpdateOp(leftOp, relationalPattern, rightOp) {
   def updateWith(wordNet: WordNet, bindings: Bindings, relation: Relation, tuple: Map[String, Any]) {
     wordNet.store.addLink(relation, tuple)
   }
 }
 
-case class RemoveTuplesOp(override val leftOp: AlgebraOp, override val pattern: ArcPattern, override val rightOp:AlgebraOp) extends TupleUpdateOp(leftOp, pattern, rightOp) {
+case class RemoveTuplesOp(override val leftOp: AlgebraOp, override val relationalPattern: ArcRelationalPattern, override val rightOp: AlgebraOp) extends TupleUpdateOp(leftOp, relationalPattern, rightOp) {
   def updateWith(wordNet: WordNet, bindings: Bindings, relation: Relation, tuple: Map[String, Any]) {
     wordNet.store.removeMatchingLinks(relation, tuple)
   }
 }
 
-case class SetTuplesOp(leftOp:AlgebraOp, pattern: ArcPattern, rightOp:AlgebraOp) extends UpdateOp {
+case class SetTuplesOp(leftOp:AlgebraOp, relationalPattern: ArcRelationalPattern, rightOp:AlgebraOp) extends UpdateOp {
   def update(wordNet: WordNet, bindings: Bindings) {
     val leftSet = leftOp.evaluate(wordNet, bindings)
     val rightSet = rightOp.evaluate(wordNet, bindings)
 
     if (!rightSet.isEmpty) {
-      val destinationNames = pattern.destinations.map(_.name)
+      val destinationNames = relationalPattern.pattern.destinations.map(_.name)
 
       for (tuple <- leftSet.paths) {
-        wordNet.store.setLinks(pattern.relation.get, pattern.source.name, tuple.last,
-          (for (destinations <- rightSet.paths) yield ((pattern.source.name, tuple.last)::destinationNames.zip(destinations)).toMap))
+        wordNet.store.setLinks(relationalPattern.pattern.relation.get, relationalPattern.pattern.source.name, tuple.last,
+          (for (destinations <- rightSet.paths) yield ((relationalPattern.pattern.source.name, tuple.last)::destinationNames.zip(destinations)).toMap))
       }
     } else {
       for(tuple <- leftSet.paths)
-        wordNet.store.removeMatchingLinks(pattern.relation.get, Map((pattern.source.name, tuple.last)))
+        wordNet.store.removeMatchingLinks(relationalPattern.pattern.relation.get, Map((relationalPattern.pattern.source.name, tuple.last)))
     }
   }
 
@@ -103,9 +103,9 @@ sealed abstract class WordNetUpdateWithValuesOp[A](override val valuesOp: Algebr
   def updateWithValue(wordNet: WordNet, bindings: Bindings, assignments: List[PropertyAssignment], value: A)
 }
 
-case class PropertyAssignmentPattern(pattern: ArcPattern, op: String, valuesOp: AlgebraOp) {
+case class PropertyAssignmentPattern(relationalPattern: ArcRelationalPattern, op: String, valuesOp: AlgebraOp) {
   def evaluatePattern(wordNet: WordNet, bindings: Bindings) = {
-    PropertyAssignment(pattern, op, valuesOp.evaluate(wordNet, bindings))
+    PropertyAssignment(relationalPattern.pattern, op, valuesOp.evaluate(wordNet, bindings))
   }
 
   def referencedVariables = valuesOp.referencedVariables

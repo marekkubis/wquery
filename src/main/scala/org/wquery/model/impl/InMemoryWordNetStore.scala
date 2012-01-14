@@ -6,7 +6,6 @@ import org.wquery.{WQueryUpdateBreaksRelationPropertyException, WQueryModelExcep
 import akka.stm._
 import scalaz._
 import Scalaz._
-import org.wquery.engine._
 import org.wquery.engine.operations.{RelationalPattern, NewSynset, Bindings}
 
 class InMemoryWordNetStore extends WordNetStore {
@@ -267,7 +266,7 @@ class InMemoryWordNetStore extends WordNetStore {
     val relation = WordNet.dataTypesRelations(nodeType)
 
     for ((relation, argument) <- getRequiredBys(nodeType)) {
-      if (!assignments.exists(pattern => pattern.pattern.relation.get == relation && pattern.pattern.source.name == argument && pattern.op != "-="))
+      if (!assignments.exists(assignment => assignment.pattern.relation.get == relation && assignment.pattern.source.name == argument && assignment.op != "-="))
         throw new WQueryModelException("A new " + nodeType + " does not fulfil required by constrains of the relation '" + relation + "' on the argument '" + argument + "'")
     }
 
