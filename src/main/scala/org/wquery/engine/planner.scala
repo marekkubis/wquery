@@ -4,6 +4,7 @@ import collection.mutable.{ListBuffer, Map, Set}
 import operations._
 import scalaz._
 import Scalaz._
+import org.wquery.model.{Backward, Forward}
 
 class PathPlanner(val path: Path) {
   def plan(context: BindingsSchema) = {

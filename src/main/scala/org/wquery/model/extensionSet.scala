@@ -1,7 +1,6 @@
 package org.wquery.model
 
 import collection.mutable.ListBuffer
-import org.wquery.engine.{Direction, Forward, Backward}
 
 trait ExtensionSet {
   def size: Int
