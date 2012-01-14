@@ -94,6 +94,15 @@ class InMemoryWordNetStore extends WordNetStore {
     }
   }
 
+  def fringe(fringeRelations: List[(Relation, String)], distinct: Boolean) = {
+    val buffer = new DataSetBuffer
+
+    for ((relation, argument) <- fringeRelations)
+      buffer.append(fetch(relation, List((argument, Nil)), List(argument)))
+
+    if (distinct) buffer.toDataSet.distinct else buffer.toDataSet
+  }
+
   def extend(extensionSet: ExtensionSet, from: Int, direction: Direction, through: (String, Option[NodeType]), to: List[(String, Option[NodeType])]): ExtendedExtensionSet = {
     val buffer = new ExtensionSetBuffer(extensionSet, direction)
     val toMap = to.toMap

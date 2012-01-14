@@ -62,6 +62,7 @@ case object BooleanType extends NodeType {
 
 object DataType {
   val all = NodeType.all.toSet[DataType] +  ArcType
+  val domain = Set[DataType](SynsetType, SenseType, StringType, POSType)
   val numeric = Set[DataType](IntegerType, FloatType)
 
   def fromValue(value: Any) = value match {

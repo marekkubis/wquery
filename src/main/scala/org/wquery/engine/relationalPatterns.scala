@@ -5,6 +5,7 @@ import Scalaz._
 import org.wquery.model._
 import collection.mutable.ListBuffer
 import org.wquery.WQueryEvaluationException
+import collection.GenSet
 
 sealed abstract class RelationalPattern {
   def extend(wordNet: WordNetStore, bindings: Bindings, extensionSet: ExtensionSet, from: Int, direction: Direction): ExtendedExtensionSet
@@ -34,7 +35,7 @@ case class RelationUnionPattern(patterns: List[RelationalPattern]) extends Relat
     val buffer = new DataSetBuffer
 
     patterns.foreach(expr => buffer.append(expr.fringe(wordNet, bindings, side)))
-    buffer.toDataSet
+    buffer.toDataSet.distinct
   }
 
   def minSize = patterns.map(_.minSize).min
@@ -141,27 +142,16 @@ case class QuantifiedRelationPattern(pattern: RelationalPattern, quantifier: Qua
       }
 
       val buffer = new DataSetBuffer
-      val source = List((Relation.Source, Nil))
-      val destination = List(Relation.Source)
 
-      for (dataType <- dataTypes) {
-        val dataSet = dataType match {
-          case SynsetType =>
-            wordNet.fetch(WordNet.SynsetSet, source, destination)
-          case SenseType =>
-            wordNet.fetch(WordNet.SenseSet, source, destination)
-          case StringType =>
-            wordNet.fetch(WordNet.WordSet, source, destination)
-          case POSType =>
-            wordNet.fetch(WordNet.PosSet, source, destination)
-          case _ =>
-            pattern.fringe(wordNet, bindings, side)
-        }
-
-        buffer.append(dataSet)
+      if (DataType.domain.exists(dataTypes.contains(_))) {
+        val relations = dataTypes.map(WordNet.dataTypesRelations.get(_)).flatten.map((_, Relation.Source)).toList
+        buffer.append(wordNet.fringe(relations, distinct = false))
       }
 
-      buffer.toDataSet
+      if (!dataTypes.subsetOf(DataType.domain))
+        buffer.append(pattern.fringe(wordNet, bindings, side))
+
+      buffer.toDataSet.distinct
     }
   }
 
@@ -272,16 +262,21 @@ case class ArcPattern(relation: Option[Relation], source: ArcPatternArgument, de
       .getOrElse(wordNet.extend(extensionSet, from, direction, (source.name, source.nodeType), if (destinations == List(ArcPatternArgument("_", None))) Nil else destinations.map(dest => (dest.name, dest.nodeType))))
   }
 
-  def fringe(wordNet: WordNetStore, bindings: Bindings, side: Side) = relation.map{ relation =>
-    side match {
+  def fringe(wordNet: WordNetStore, bindings: Bindings, side: Side) = {
+    val (fringeName, fringeType) = side match {
       case Left =>
-        wordNet.fetch(relation, List((source.name, Nil)), List(source.name)).distinct
+        (source.name, source.nodeType)
       case Right =>
-        wordNet.fetch(relation, List((destinations.last.name, Nil)), List(destinations.last.name)).distinct
+        (destinations.last.name, destinations.last.nodeType)
     }
-  }.getOrElse {
-    // TODO implement empty relation fringe AKA fetch/2
-    DataSet.empty
+
+    val relations = relation
+      .some(rel => List((rel, fringeName)))
+      .none(for (relation <- wordNet.relations if relation.getArgument(fringeName)
+        .some(arg => fringeType.some(_ == arg.nodeType).none(true))
+        .none(false)) yield (relation, fringeName))
+
+    wordNet.fringe(relations)
   }
 
   def minSize = 2*destinations.size
@@ -335,9 +330,9 @@ case class VariableRelationalPattern(variable: StepVariable) extends RelationalP
       case Arc(relation, source, destination) =>
         side match {
           case Left =>
-            wordNet.fetch(relation, List((source, Nil)), List(source)).distinct
+            wordNet.fringe(List((relation, source)))
           case Right =>
-            wordNet.fetch(relation, List((destination, Nil)), List(destination)).distinct
+            wordNet.fringe(List((relation, destination)))
         }
       case _ =>
         throw new WQueryEvaluationException("Cannot extend a path using a non-arc value of variable " + variable)

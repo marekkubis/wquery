@@ -2,12 +2,13 @@ package org.wquery.model
 
 import org.wquery.engine.{Direction, ArcPattern, RelationalPattern}
 
-
 trait WordNetStore {
   // querying
   def relations: List[Relation]
 
   def fetch(relation: Relation, from: List[(String, List[Any])], to: List[String]): DataSet
+
+  def fringe(relation: List[(Relation, String)], distinct: Boolean = true): DataSet
 
   def extend(extensionSet: ExtensionSet, relation: Relation, from: Int, direction: Direction, through: String, to: List[String]): ExtendedExtensionSet
 
