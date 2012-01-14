@@ -5,7 +5,7 @@ import Scalaz._
 import org.wquery.{WQueryStepVariableCannotBeBoundException, WQueryEvaluationException}
 
 case class VariableTemplate(pattern: List[Variable]) {
-  val variables = pattern.filterNot(_.name == "_").toSet
+  val variables = pattern.filterNot(_.name === "_").toSet
 
   val pathVariablePosition = {
     val pos = pattern.indexWhere{_.isInstanceOf[PathVariable]}
@@ -21,7 +21,7 @@ case class VariableTemplate(pattern: List[Variable]) {
   val pathVariableName = pathVariablePosition.map(pattern(_).name).filter(_ != "_")
 
   val stepVariableNames = {
-    val nameList = pattern.filterNot(x => (x.isInstanceOf[PathVariable] || x.name == "_")).map(_.name)
+    val nameList = pattern.filterNot(x => (x.isInstanceOf[PathVariable] || x.name === "_")).map(_.name)
     val distinctNames = nameList.distinct
 
     if (nameList != distinctNames)
@@ -32,10 +32,10 @@ case class VariableTemplate(pattern: List[Variable]) {
 
   val (leftVariablesIndexes, rightVariablesIndexes) = pathVariablePosition match {
     case Some(pathVarPos) =>
-      (pattern.slice(0, pathVarPos).map(_.name).zipWithIndex.filterNot{_._1 == "_"}.toMap,
-        pattern.slice(pathVarPos + 1, pattern.size).map(_.name).reverse.zipWithIndex.filterNot{_._1 == "_"}.toMap)
+      (pattern.slice(0, pathVarPos).map(_.name).zipWithIndex.filterNot{_._1 === "_"}.toMap,
+        pattern.slice(pathVarPos + 1, pattern.size).map(_.name).reverse.zipWithIndex.filterNot{_._1 === "_"}.toMap)
     case None =>
-      (Map[String, Int](), pattern.map(_.name).reverse.zipWithIndex.filterNot{_._1 == "_"}.toMap)
+      (Map[String, Int](), pattern.map(_.name).reverse.zipWithIndex.filterNot{_._1 === "_"}.toMap)
   }
 
   val leftVariablesNames = leftVariablesIndexes.keySet

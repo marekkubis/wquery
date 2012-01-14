@@ -4,16 +4,18 @@ import scala.util.parsing.combinator.RegexParsers
 import org.wquery.engine._
 import org.wquery.engine.operations._
 import org.wquery.model.DataSet
+import scalaz._
+import Scalaz._
 
 trait WQueryParsers extends RegexParsers {
 
   def parse(input: String): EvaluableExpr = {
     parseAll(query, input) match {
-      case Success(expr, _) =>
+      case this.Success(expr, _) =>
         expr
-      case Failure(message, _) =>
+      case this.Failure(message, _) =>
         throw new WQueryParsingFailureException(message)
-      case Error(message, _) =>
+      case this.Error(message, _) =>
         throw new WQueryParsingErrorException(message)
     }
   }
@@ -230,7 +232,7 @@ trait WQueryParsers extends RegexParsers {
 
   def quoted_word_generator = (
     backQuotedString ^^ { value => AlgebraExpr(ConstantOp.fromValue(value)) }
-    | quotedString ^^ { value => AlgebraExpr(if (value == "") FetchOp.words else FetchOp.wordByValue(value)) }
+    | quotedString ^^ { value => AlgebraExpr(if (value === "") FetchOp.words else FetchOp.wordByValue(value)) }
     | doubleQuotedString ^^ { WordFormByRegexReq(_) }
   )
 
@@ -269,7 +271,7 @@ trait WQueryParsers extends RegexParsers {
   def quotedString: Parser[String] = "'(\\\\'|[^'])*?'".r ^^ { x => x.substring(1, x.length - 1).replaceAll("\\'","'") }
 
   def notQuotedString: Parser[String] = new Parser[String] {
-    def apply(in: Input) = {
+    def apply(in: Input): ParseResult[String] = {
       val source = in.source
       val offset = in.offset
       val start = handleWhiteSpace(source, offset)

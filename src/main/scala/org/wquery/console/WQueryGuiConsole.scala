@@ -8,6 +8,8 @@ import org.wquery.emitter.{XmlWQueryEmitter, PlainWQueryEmitter}
 import scala.io.Source
 import scala.swing.{SimpleSwingApplication, TextArea, Frame, FileChooser, MenuBar, Menu, MenuItem, Separator, Dialog, BoxPanel, Orientation, Swing, ScrollPane, Component, Button, TabbedPane}
 import scala.swing.event.{ButtonClicked, WindowClosing, Event}
+import scalaz._
+import Scalaz._
 
 object WQueryGuiConsole extends SimpleSwingApplication {    
   var args: Array[String] = null
@@ -65,7 +67,7 @@ object WQueryGuiConsole extends SimpleSwingApplication {
         
         contents += new MenuItem("Save Queries As...") {          
           reactions += dialogApproved(this, queriesChooser, "Save", { file =>
-            val fileSuffix = if (file.getName.indexOf(".") == -1 && 
+            val fileSuffix = if (file.getName.indexOf(".") === -1 &&
                                    queriesChooser.fileFilter.getDescription.startsWith("WQuery")) ".wq" else ""
             
             val writer = new BufferedWriter(new FileWriter(file.getAbsolutePath + fileSuffix))
@@ -76,13 +78,13 @@ object WQueryGuiConsole extends SimpleSwingApplication {
         
         contents += new MenuItem("Save Result As...") {
           reactions += dialogApproved(this, resultChooser, "Save", { file =>
-            val fileSuffix = if (file.getName.indexOf(".") == -1) {
+            val fileSuffix = if (file.getName.indexOf(".") === -1) {
               if (resultChooser.fileFilter.getDescription.startsWith("XML")) ".xml" else ".txt"             
             } else  {
               ""
             }
             
-            val area = if (fileSuffix == ".xml") xmlResultArea else plainResultArea            
+            val area = if (fileSuffix === ".xml") xmlResultArea else plainResultArea
             val writer = new BufferedWriter(new FileWriter(file.getAbsolutePath + fileSuffix))
             writer.write(area.text)
             writer.close            

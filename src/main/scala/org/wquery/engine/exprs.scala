@@ -66,7 +66,7 @@ case class SplitExpr(expr: EvaluableExpr, withs: List[PropertyAssignmentExpr]) e
   def evaluationPlan(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context) = {
     val op = expr.evaluationPlan(wordNet, bindings, context)
 
-    if (op.rightType(0) == Set(SynsetType)) {
+    if (op.rightType(0) === Set(SynsetType)) {
       val patterns = withs.map(_.evaluationPattern(wordNet, bindings, context, SynsetType))
 
       if (patterns.exists(!_.pattern.relation.isDefined))
@@ -98,7 +98,7 @@ case class RelationAssignmentExpr(name: String, expr: RelationalExpr) extends Ev
   }
 
   private def demandSingleNodeType(types: Set[_ <: DataType], typeName: String) = {
-    if (types.size == 1 && types.head.isInstanceOf[NodeType])
+    if (types.size === 1 && types.head.isInstanceOf[NodeType])
       types.head.asInstanceOf[NodeType]
     else
       throw new WQueryEvaluationException("Expression " + expr + " does not determine single " + typeName + " type")
@@ -113,12 +113,12 @@ case class WordNetUpdateExpr(property: String, op: String, valuesExpr: Evaluable
   val Relations = "relations"
 
   def evaluationPlan(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context) = {
-    val valuesContext = if (op == "-=") context else context.copy(creation = true)
+    val valuesContext = if (op === "-=") context else context.copy(creation = true)
     val valuesOp = valuesExpr.evaluationPlan(wordNet, bindings, valuesContext)
 
     val contextType = property match {
       case Senses =>
-        if (op == "+=") SynsetType else SenseType
+        if (op === "+=") SynsetType else SenseType
       case Synsets =>
         SynsetType
       case Words =>
@@ -179,7 +179,7 @@ case class WordNetUpdateExpr(property: String, op: String, valuesExpr: Evaluable
   }
 
   private def checkTypes(valuesType: Set[DataType]) {
-    if (valuesType.size == 1) {
+    if (valuesType.size === 1) {
        (property, valuesType.toList.head) match {
         case (Senses, SenseType) =>
           return
@@ -205,7 +205,7 @@ case class UpdateExpr(left: EvaluableExpr, arcExpr: ArcExpr, op: String, right: 
     val leftOp = left.evaluationPlan(wordNet, bindings, context)
     val leftType = leftOp.rightType(0)
 
-    if (leftType == Set(ArcType)) {
+    if (leftType === Set(ArcType)) {
       arcExpr match {
         case ArcExpr(List(ArcExprArgument(name, None))) =>
           val (property, action) = if (name.endsWith("_action")) (name.dropRight(7), true) else (name, false)
@@ -213,7 +213,7 @@ case class UpdateExpr(left: EvaluableExpr, arcExpr: ArcExpr, op: String, right: 
           if (Relation.Properties.contains(property)) {
             val rightOp = right.evaluationPlan(wordNet, bindings, context.copy(creation = true))
 
-            if (((property == Relation.Symmetry || action) && rightOp.rightType(0) == Set(StringType)) || rightOp.rightType(0) == Set(BooleanType)) {
+            if (((property === Relation.Symmetry || action) && rightOp.rightType(0) === Set(StringType)) || rightOp.rightType(0) === Set(BooleanType)) {
               RelationUpdateOp(leftOp, op, property, action, rightOp)
             } else {
               throw new WQueryStaticCheckException("Invalid relation property value on the right hand side of operator " + op)
@@ -405,7 +405,7 @@ sealed abstract class RelationalExpr extends Expr {
 
 case class RelationUnionExpr(exprs: List[RelationalExpr]) extends RelationalExpr {
   def evaluationPattern(wordNet: WordNetSchema, sourceTypes: Set[DataType]) = {
-    if (exprs.size == 1)
+    if (exprs.size === 1)
       exprs.head.evaluationPattern(wordNet, sourceTypes)
     else
       RelationUnionPattern(exprs.map(_.evaluationPattern(wordNet, sourceTypes)))
@@ -416,7 +416,7 @@ case class RelationCompositionExpr(exprs: List[RelationalExpr]) extends Relation
   def evaluationPattern(wordNet: WordNetSchema, sourceTypes: Set[DataType]) = {
     val headPattern = exprs.head.evaluationPattern(wordNet, sourceTypes)
 
-    if (exprs.size == 1) {
+    if (exprs.size === 1) {
       headPattern
     } else {
       val buffer = new ListBuffer[RelationalPattern]
@@ -431,7 +431,7 @@ case class RelationCompositionExpr(exprs: List[RelationalExpr]) extends Relation
 case class QuantifiedRelationExpr(expr: RelationalExpr, quantifier: Quantifier) extends RelationalExpr {
   def evaluationPattern(wordNet: WordNetSchema, sourceTypes: Set[DataType]) = {
     if (quantifier.lowerBound >= 0 && quantifier.upperBound
-      .map(upperBound => quantifier.lowerBound < upperBound || quantifier.lowerBound == upperBound && upperBound != 0)
+      .map(upperBound => quantifier.lowerBound < upperBound || quantifier.lowerBound === upperBound && upperBound != 0)
       .getOrElse(true))
       QuantifiedRelationPattern(expr.evaluationPattern(wordNet, sourceTypes), quantifier)
     else
@@ -447,7 +447,7 @@ case class VariableRelationalExpr(variable: StepVariable) extends RelationalExpr
 
 case class ArcExpr(ids: List[ArcExprArgument]) extends RelationalExpr {
   def creationPattern(wordNet: WordNetSchema) = {
-    if (ids.size > 1 && ids(0).nodeType.isDefined && ids.exists(_.name == Relation.Source) && ids(1).nodeType.isEmpty && ids(1) != "_" && ids.tail.tail.forall(_.nodeType.isDefined)) {
+    if (ids.size > 1 && ids(0).nodeType.isDefined && ids.exists(_.name === Relation.Source) && ids(1).nodeType.isEmpty && ids(1) != "_" && ids.tail.tail.forall(_.nodeType.isDefined)) {
       val relation = Relation(ids(1).name,(Argument(ids(0).name, ids(0).nodeType.get) :: ids.tail.tail.map(elem => Argument(elem.name, elem.nodeType.get))).toSet)
 
       ArcPattern(Some(relation), ArcPatternArgument(ids(0).name, ids(0).nodeType), ids.tail.tail.map(id => ArcPatternArgument(id.name, id.nodeType)))
@@ -488,7 +488,7 @@ case class ArcExpr(ids: List[ArcExprArgument]) extends RelationalExpr {
     val relationName = right.name
     val emptyDestination = rest.isEmpty??(List(ArcPatternArgument(Relation.Destination, None)).some)
 
-    if (relationName == "_") {
+    if (relationName === "_") {
       Some(ArcPattern(None, ArcPatternArgument(sourceName, left.nodeType),
         emptyDestination.getOrElse(rest.map(arg => ArcPatternArgument(arg.name, arg.nodeType)))))
     } else {
@@ -501,7 +501,7 @@ case class ArcExpr(ids: List[ArcExprArgument]) extends RelationalExpr {
   private def evaluateAsDestinationTypePattern(wordNet: WordNetSchema, contextTypes: Set[DataType], left: ArcExprArgument, right: ArcExprArgument, rest: List[ArcExprArgument]) = {
     val relationName = left.name
 
-    if (relationName == "_") {
+    if (relationName === "_") {
       Some(ArcPattern(None, ArcPatternArgument(Relation.Source, None), (right::rest).map(arg => ArcPatternArgument(arg.name, arg.nodeType))))
     } else {
       wordNet.getRelation(relationName, ((Relation.Source, contextTypes) +: right.nodeDescription +: (rest.map(_.nodeDescription))).toMap)
@@ -609,10 +609,10 @@ case class SynsetByExprReq(expr: EvaluableExpr) extends EvaluableExpr {
   def evaluationPlan(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context) = {
     val op = expr.evaluationPlan(wordNet, bindings, context)
 
-    if (context.creation && op.rightType(0) == Set(SenseType)) {
+    if (context.creation && op.rightType(0) === Set(SenseType)) {
       NewSynsetOp(op)
     } else {
-      val contextTypes = op.rightType(0).filter(t => t == StringType || t == SenseType)
+      val contextTypes = op.rightType(0).filter(t => t === StringType || t === SenseType)
 
       if (!contextTypes.isEmpty) {
         val patterns = contextTypes.map{ contextType => (contextType: @unchecked) match {
@@ -647,7 +647,7 @@ case class ContextByRelationalExprReq(expr: RelationalExpr) extends EvaluableExp
       case RelationUnionExpr(List(QuantifiedRelationExpr(ArcExpr(List(ArcExprArgument(id, None))),Quantifier(1,Some(1))))) =>
         val sourceTypes = if (bindings.areContextVariablesBound) bindings.lookupContextVariableType else DataType.all
 
-        if (wordNet.containsRelation(id, Map((Relation.Source, sourceTypes))) || id == "_") {
+        if (wordNet.containsRelation(id, Map((Relation.Source, sourceTypes))) || id === "_") {
           extendBasedEvaluationPlan(wordNet, bindings)
         } else {
           if (context.creation) ConstantOp.fromValue(id) else FetchOp.wordByValue(id)
@@ -673,7 +673,7 @@ case class ContextByRelationalExprReq(expr: RelationalExpr) extends EvaluableExp
       }
       val fetchOp = fetches.foldLeft(ConstantOp.empty: AlgebraOp)((left, right) => UnionOp(left, right))
 
-      if (pattern.minSize == 0 && pattern.maxSize == Some(0))
+      if (pattern.minSize === 0 && pattern.maxSize === Some(0))
         fetchOp
       else
         ExtendOp(fetchOp , 0, pattern, Forward, VariableTemplate.empty)
@@ -720,10 +720,10 @@ case class ArcByArcExprReq(expr: ArcExpr) extends EvaluableExpr {
     }.getOrElse {
       val toMap = if (pattern.destinations != List(ArcPatternArgument("_", None))) pattern.destinations.map(arg => (arg.name, arg.nodeType)).toMap else Map.empty[String, Option[NodeType]]
       val arcs = (for (relation <- wordNet.relations;
-           source <- relation.argumentNames if (pattern.source.name == "_" || pattern.source.name == source)  && pattern.source.nodeType.map(_ == relation.demandArgument(source).nodeType).getOrElse(true);
+           source <- relation.argumentNames if (pattern.source.name === "_" || pattern.source.name === source)  && pattern.source.nodeType.map(_ === relation.demandArgument(source).nodeType).getOrElse(true);
            destination <- relation.argumentNames if toMap.isEmpty || toMap.get(destination).map(nodeTypeOption =>
-             nodeTypeOption.map(_ == relation.demandArgument(destination).nodeType).getOrElse(true)).getOrElse(false);
-           if relation.arguments.size == 1 || source != destination)
+             nodeTypeOption.map(_ === relation.demandArgument(destination).nodeType).getOrElse(true)).getOrElse(false);
+           if relation.arguments.size === 1 || source != destination)
         yield List(Arc(relation, source, destination)))
 
       ConstantOp(DataSet(arcs))
