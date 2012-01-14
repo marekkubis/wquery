@@ -77,7 +77,7 @@ class DataSet(val paths: List[List[Any]], val pathVars: Map[String, List[(Int, I
 
   def bindVariables(variables: VariableTemplate) = {
     if (variables != VariableTemplate.empty) {
-      val pathVarBuffers = DataSetBuffers.createPathVarBuffers(variables.pathVariableName.map(p => Set(p)).getOrElse(Set.empty))
+      val pathVarBuffers = DataSetBuffers.createPathVarBuffers(variables.pathVariableName.toSet)
       val stepVarBuffers = DataSetBuffers.createStepVarBuffers(variables.stepVariableNames)
 
       variables.pathVariablePosition match {

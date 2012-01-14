@@ -5,7 +5,6 @@ import Scalaz._
 import org.wquery.model._
 import collection.mutable.ListBuffer
 import org.wquery.WQueryEvaluationException
-import collection.GenSet
 
 sealed abstract class RelationalPattern {
   def extend(wordNet: WordNetStore, bindings: Bindings, extensionSet: ExtensionSet, from: Int, direction: Direction): ExtendedExtensionSet
@@ -95,7 +94,7 @@ case class RelationCompositionPattern(patterns: List[RelationalPattern]) extends
       } else { // else pos < maxSize and defined
         leftType(patterns.tail, pos - headPattern.maxSize.get)
       }
-    }.getOrElse(Set.empty)
+    }.orZero
   }
 
   def rightType(pos: Int) = rightType(patterns.reverse, pos)
@@ -109,7 +108,7 @@ case class RelationCompositionPattern(patterns: List[RelationalPattern]) extends
       } else { // else pos < maxSize and defined
         rightType(patterns.tail, pos - headPattern.maxSize.get)
       }
-    }.getOrElse(Set.empty)
+    }.orZero
   }
 }
 

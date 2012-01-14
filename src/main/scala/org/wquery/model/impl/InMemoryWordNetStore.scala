@@ -49,7 +49,7 @@ class InMemoryWordNetStore extends WordNetStore {
   }
 
   private def follow(relation: Relation, from: String, through: Any, to: String) = {
-    successors(relation).get((from, through)).map(_.map(succ => succ(to))).getOrElse(IndexedSeq.empty)
+    successors(relation).get((from, through)).map(_.map(succ => succ(to))).orZero
   }
 
   def getSenses(synset: Synset) = follow(WordNet.SynsetToSenses, Relation.Source, synset, Relation.Destination).toList.asInstanceOf[List[Sense]]
@@ -502,7 +502,7 @@ class InMemoryWordNetStore extends WordNetStore {
 
   def setLinks(relation: Relation, sourceName: String, sourceValue: Any, tuples: Seq[Map[String, Any]]) = atomic {
     val relationSuccessors = successors(relation)
-    val sourceSuccessors = relationSuccessors.get((sourceName, sourceValue)).getOrElse(TransactionalVector())
+    val sourceSuccessors = relationSuccessors.getOrElse((sourceName, sourceValue), TransactionalVector())
     val (matchingSuccessors, notMatchingSuccessors) = sourceSuccessors.partition(tuples.contains(_))
 
     notMatchingSuccessors.foreach(tuple => removeLinkByNode(relation, tuple, Some(sourceValue)))
@@ -526,10 +526,10 @@ class InMemoryWordNetStore extends WordNetStore {
         removeMatchingLinksByNode(assignment.pattern.relation.get, tuple, None, true, true)
 
       for (synset <- sources; relation <- notSetRelations)
-        copyLinks(relation, destinationType, synset, destination, skippedTuples.get(relation).getOrElse(Nil))
+        copyLinks(relation, destinationType, synset, destination, skippedTuples.get(relation).orZero)
 
       for (sense <- senses; relation <- notSetRelations.filterNot(List(WordNet.SynsetToSenses, WordNet.SenseToSynset,WordNet.SynsetToWordForms, WordNet.WordFormToSynsets).contains(_))) {
-        copyLinks(relation, destinationType, demandSynset(sense), destination, skippedTuples.get(relation).getOrElse(Nil))
+        copyLinks(relation, destinationType, demandSynset(sense), destination, skippedTuples.get(relation).orZero)
       }
 
       for (assignment <- setAssignments) {
