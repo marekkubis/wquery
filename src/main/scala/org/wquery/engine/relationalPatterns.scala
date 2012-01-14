@@ -77,10 +77,9 @@ case class RelationCompositionPattern(patterns: List[RelationalPattern]) extends
   def minSize = patterns.map(_.minSize).sum
 
   def maxSize = {
-    if (patterns.exists(!_.maxSize.isDefined))
-      none
-    else
-      some(patterns.map(_.maxSize).collect{ case Some(num) => num }.sum)
+    val patternSizes = patterns.map(_.maxSize).flatten
+
+    (patternSizes.size == patterns.size)??(patternSizes.max.some)
   }
 
   def sourceType = patterns.head.sourceType

@@ -106,9 +106,9 @@ case class BlockOp(ops: List[AlgebraOp]) extends QueryOp {
   def minTupleSize = ops.map(_.minTupleSize).min
 
   def maxTupleSize = {
-    val opSizes = ops.map(_.maxTupleSize).collect { case Some(x) => x}
+    val opSizes = ops.map(_.maxTupleSize).flatten
 
-    if (opSizes.size != ops.size) none else some(opSizes.max)
+    (opSizes.size == ops.size)??(opSizes.max.some)
   }
 
   def bindingsPattern = {
