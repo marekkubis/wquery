@@ -1,4 +1,4 @@
-package org.wquery.engine
+package org.wquery.engine.operations
 
 import scala.collection.mutable.Map
 import scalaz._
@@ -6,7 +6,7 @@ import Scalaz._
 
 class Bindings(parent: Option[Bindings], updatesParent: Boolean) {
   val pathVariables = Map[String, List[Any]]()
-  val stepVariables = Map[String, Any]()  
+  val stepVariables = Map[String, Any]()
   private var contextVariable: Option[Any] = none
 
   def bindStepVariable(name: String, value: Any) {
@@ -26,9 +26,9 @@ class Bindings(parent: Option[Bindings], updatesParent: Boolean) {
   }
 
   def bindContextVariable(variable: Any) { contextVariable = Some(variable) }
-    
+
   def lookupPathVariable(name: String): Option[List[Any]] = pathVariables.get(name).orElse(parent.flatMap(_.lookupPathVariable(name)))
-   
+
   def lookupStepVariable(name: String): Option[Any] = stepVariables.get(name).orElse(parent.flatMap(_.lookupStepVariable(name)))
 
   def lookupContextVariable: Option[Any] = contextVariable.orElse(parent.flatMap(_.lookupContextVariable))
@@ -36,6 +36,6 @@ class Bindings(parent: Option[Bindings], updatesParent: Boolean) {
 
 object Bindings {
   def apply() = new Bindings(none, false)
-  
+
   def apply(parent: Bindings, updatesParent: Boolean) = new Bindings(some(parent), updatesParent)
 }

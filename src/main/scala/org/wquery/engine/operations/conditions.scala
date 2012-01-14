@@ -1,7 +1,8 @@
-package org.wquery.engine
+package org.wquery.engine.operations
 
 import org.wquery.WQueryEvaluationException
 import org.wquery.model.{WQueryListOrdering, DataType, StringType, WordNet}
+import org.wquery.engine.Variable
 
 sealed abstract class Condition {
   def satisfied(wordNet: WordNet, bindings: Bindings): Boolean

@@ -1,5 +1,6 @@
 package org.wquery.engine
 
+import operations.AlgebraOp
 import scala.collection.mutable.Map
 import org.wquery.model.DataType
 import org.wquery.WQueryStepVariableCannotBeBoundException

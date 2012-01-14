@@ -1,6 +1,7 @@
 package org.wquery.model
 
-import org.wquery.engine.{Direction, ArcPattern, RelationalPattern}
+import org.wquery.engine.operations.{RelationalPattern, ArcPattern}
+import org.wquery.engine.Direction
 import scala.collection.mutable.{Map => MMap}
 
 trait WordNetStore {

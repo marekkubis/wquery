@@ -1,10 +1,11 @@
-package org.wquery.engine
+package org.wquery.engine.operations
 
 import scalaz._
 import Scalaz._
 import org.wquery.model._
 import collection.mutable.ListBuffer
 import org.wquery.WQueryEvaluationException
+import org.wquery.engine._
 
 sealed abstract class RelationalPattern {
   def extend(wordNet: WordNetStore, bindings: Bindings, extensionSet: ExtensionSet, from: Int, direction: Direction): ExtendedExtensionSet

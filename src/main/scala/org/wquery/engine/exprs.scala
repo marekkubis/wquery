@@ -3,6 +3,7 @@ package org.wquery.engine
 import scalaz._
 import Scalaz._
 import org.wquery.model._
+import org.wquery.engine.operations._
 import org.wquery.{WQueryStaticCheckException, WQueryEvaluationException}
 import collection.mutable.ListBuffer
 

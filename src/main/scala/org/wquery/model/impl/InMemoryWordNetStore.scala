@@ -6,7 +6,8 @@ import org.wquery.{WQueryUpdateBreaksRelationPropertyException, WQueryModelExcep
 import akka.stm._
 import scalaz._
 import Scalaz._
-import org.wquery.engine._
+import org.wquery.engine.operations.{RelationalPattern, Bindings, NewSynset}
+import org.wquery.engine.{Forward, Backward, Direction}
 
 class InMemoryWordNetStore extends WordNetStore {
   private val successors = TransactionalMap[Relation, TransactionalMap[(String, Any), IndexedSeq[Map[String, Any]]]]()

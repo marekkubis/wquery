@@ -1,5 +1,6 @@
 package org.wquery.engine
 
+import operations.AlgebraOp
 import org.wquery.model._
 import org.wquery.WQueryEvaluationException
 

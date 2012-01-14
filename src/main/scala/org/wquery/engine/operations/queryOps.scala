@@ -1,9 +1,10 @@
-package org.wquery.engine
+package org.wquery.engine.operations
 
 import org.wquery.model._
 import scalaz._
 import Scalaz._
 import org.wquery.WQueryEvaluationException
+import org.wquery.engine._
 
 sealed abstract class QueryOp extends AlgebraOp
 

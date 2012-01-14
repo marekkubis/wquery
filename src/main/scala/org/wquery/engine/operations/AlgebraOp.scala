@@ -1,6 +1,7 @@
-package org.wquery.engine
+package org.wquery.engine.operations
 
 import org.wquery.model.{DataType, DataSet, WordNet}
+import org.wquery.engine.{Variable, BindingsPattern}
 
 abstract class AlgebraOp {
   def evaluate(wordNet: WordNet, bindings: Bindings): DataSet

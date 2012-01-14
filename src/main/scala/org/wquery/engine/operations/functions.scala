@@ -1,10 +1,11 @@
-package org.wquery.engine
+package org.wquery.engine.operations
 
 import collection.mutable.ListBuffer
 import java.lang.reflect.Method
 import scalaz._
 import Scalaz._
 import org.wquery.model._
+import org.wquery.engine.BindingsPattern
 
 abstract class Function(val name: String) {
   def accepts(args: AlgebraOp): Boolean

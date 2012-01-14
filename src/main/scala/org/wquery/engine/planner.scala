@@ -1,6 +1,7 @@
 package org.wquery.engine
 
 import collection.mutable.{ListBuffer, Map, Set}
+import operations._
 import scalaz._
 import Scalaz._
 

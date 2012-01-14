@@ -4,6 +4,7 @@ import model.DataSet
 import scalaz._
 import Scalaz._
 import engine._
+import engine.operations.Bindings
 import org.testng.annotations.Test
 
 class PlannerTests extends WQueryTestSuite {

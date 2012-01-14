@@ -1,10 +1,11 @@
-package org.wquery.engine
+package org.wquery.engine.operations
 
 import scalaz._
 import Scalaz._
 import org.wquery.model._
 import org.wquery.WQueryInvalidValueSpecifiedForRelationPropertyException
 import scala.collection.mutable.{Map => MMap}
+import org.wquery.engine.{BindingsPattern, BindingsSchema}
 
 sealed abstract class UpdateOp extends AlgebraOp {
   def update(wordNet: WordNet, bindings: Bindings)
@@ -107,7 +108,7 @@ case class PropertyAssignmentPattern(pattern: ArcPattern, op: String, valuesOp: 
   def evaluatePattern(wordNet: WordNet, bindings: Bindings) = {
     PropertyAssignment(pattern, op, valuesOp.evaluate(wordNet, bindings))
   }
-  
+
   def referencedVariables = valuesOp.referencedVariables
 
   def referencesContext = valuesOp.referencesContext

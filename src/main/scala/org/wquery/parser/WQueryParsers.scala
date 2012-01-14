@@ -2,6 +2,7 @@ package org.wquery.parser
 import org.wquery.{WQueryParsingErrorException, WQueryParsingFailureException}
 import scala.util.parsing.combinator.RegexParsers
 import org.wquery.engine._
+import org.wquery.engine.operations._
 import org.wquery.model.DataSet
 
 trait WQueryParsers extends RegexParsers {
