@@ -18,25 +18,27 @@ case object ArcType extends DataType {
 
 sealed abstract class NodeType extends DataType
 
-case object SynsetType extends NodeType {
+sealed abstract class DomainType extends NodeType
+
+case object SynsetType extends DomainType {
   def rank = 1
   def associatedClass = classOf[Synset]
   override def toString = "synset"
 }
 
-case object SenseType extends NodeType {
+case object SenseType extends DomainType {
   def rank = 2
   def associatedClass = classOf[Sense]
   override def toString = "sense"
 }
 
-case object StringType extends NodeType {
+case object StringType extends DomainType {
   def rank = 3
   def associatedClass = classOf[String]
   override def toString = "string"
 }
 
-case object POSType extends NodeType {
+case object POSType extends DomainType {
   def rank = 4
   def associatedClass = classOf[String]
   override def toString = "pos"

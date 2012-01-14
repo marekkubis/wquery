@@ -263,7 +263,7 @@ class InMemoryWordNetStore extends WordNetStore {
   }
 
   private def addNode(nodeType: NodeType, node: Any, assignments: List[PropertyAssignment]) = atomic {
-    val relation = getRelationByNodeType(nodeType)
+    val relation = WordNet.dataTypesRelations(nodeType)
 
     for ((relation, argument) <- getRequiredBys(nodeType)) {
       if (!assignments.exists(pattern => pattern.pattern.relation.get == relation && pattern.pattern.source.name == argument && pattern.op != "-="))
@@ -288,17 +288,6 @@ class InMemoryWordNetStore extends WordNetStore {
 
   private def getRequiredBys(requiredType: NodeType) = {
     relations.flatMap(relation => requiredBys(relation).filter(name => relation.demandArgument(name).nodeType == requiredType).map(name => (relation, name)))
-  }
-
-  private def getRelationByNodeType(nodeType: NodeType) = (nodeType: @unchecked) match {
-    case SynsetType =>
-      WordNet.SynsetSet
-    case SenseType =>
-      WordNet.SenseSet
-    case StringType =>
-      WordNet.WordSet
-    case POSType =>
-      WordNet.PosSet
   }
 
   def addLink(relation: Relation, tuple: Map[String, Any]) = atomic {
@@ -393,19 +382,9 @@ class InMemoryWordNetStore extends WordNetStore {
     removeNode(POSType, pos, true, true)
   }
 
-  private def removeNode(nodeType: NodeType, value: Any, withDependentNodes: Boolean, withCollectionDependentNodes: Boolean) = atomic {
-    removeDependentLinks(nodeType, value, withDependentNodes, withCollectionDependentNodes)
-
-    (nodeType: @unchecked) match {
-      case SynsetType =>
-        removeLink(WordNet.SynsetSet, Map((Relation.Source, value)))
-      case SenseType =>
-        removeLink(WordNet.SenseSet, Map((Relation.Source, value)))
-      case StringType =>
-        removeLink(WordNet.WordSet, Map((Relation.Source, value)))
-      case POSType =>
-        removeLink(WordNet.PosSet, Map((Relation.Source, value)))
-    }
+  private def removeNode(domainType: DomainType, value: Any, withDependentNodes: Boolean, withCollectionDependentNodes: Boolean) = atomic {
+    removeDependentLinks(domainType, value, withDependentNodes, withCollectionDependentNodes)
+    removeLink(WordNet.dataTypesRelations(domainType), Map((Relation.Source, value)))
   }
 
   private def removeDependentLinks(nodeType: NodeType, obj: Any, withDependentNodes: Boolean, withCollectionDependentNodes: Boolean) {
@@ -476,16 +455,16 @@ class InMemoryWordNetStore extends WordNetStore {
     }
 
     if (withDependentNodes) {
-      for (dependentArg <- dependent(relation))
-        removeNode(relation.demandArgument(dependentArg).nodeType, tuple(dependentArg), true, true)
+      for (dependentArg <- dependent(relation) if DataType.domain.contains(relation.demandArgument(dependentArg).nodeType))
+        removeNode(relation.demandArgument(dependentArg).nodeType.asInstanceOf[DomainType], tuple(dependentArg), true, true)
     }
 
     if (withCollectionDependentNodes) {
-      for (collectionDependentArg <- collectionDependent(relation)) {
+      for (collectionDependentArg <- collectionDependent(relation) if DataType.domain.contains(relation.demandArgument(collectionDependentArg).nodeType)) {
         val collectionDependentNode = tuple(collectionDependentArg)
 
         if (relationSuccessors(collectionDependentArg, collectionDependentNode).isEmpty)
-          removeNode(relation.demandArgument(collectionDependentArg).nodeType, collectionDependentNode, true, true)
+          removeNode(relation.demandArgument(collectionDependentArg).nodeType.asInstanceOf[DomainType], collectionDependentNode, true, true)
       }
     }
 
