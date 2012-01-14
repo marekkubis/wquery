@@ -314,6 +314,12 @@ case class ArcPattern(relation: Option[Relation], source: ArcPatternArgument, de
   }
 }
 
+case class ArcPatternArgument(name: String, nodeType: Option[NodeType]) {
+  implicit val ArcPatternArgumentEqual = equalA[ArcPatternArgument]
+
+  override def toString = name + ~nodeType.map("&" + _)
+}
+
 case class VariableRelationalPattern(variable: StepVariable) extends RelationalPattern {
   def extend(wordNet: WordNetStore, bindings: Bindings, extensionSet: ExtensionSet, from: Int, direction: Direction) = {
     bindings.lookupStepVariable(variable.name).map {

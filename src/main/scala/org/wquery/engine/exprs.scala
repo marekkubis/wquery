@@ -244,7 +244,7 @@ case class UpdateExpr(left: EvaluableExpr, arcExpr: ArcExpr, op: String, right: 
   }
 }
 
-case class PropertyAssignmentExpr(arcExpr: ArcExpr, op: String, expr: EvaluableExpr) {
+case class PropertyAssignmentExpr(arcExpr: ArcExpr, op: String, expr: EvaluableExpr) extends Expr {
   def evaluationPattern(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context, contextType: DataType) = {
     val pattern = arcExpr.evaluationPattern(wordNet, Set(contextType))
     val valuesOp = expr.evaluationPlan(wordNet, bindings, context)

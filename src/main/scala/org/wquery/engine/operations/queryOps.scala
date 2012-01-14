@@ -661,16 +661,6 @@ case class ExtendOp(op: AlgebraOp, from: Int, pattern: RelationalPattern, direct
   def referencesContext = op.referencesContext
 }
 
-case class Quantifier(lowerBound: Int, upperBound: Option[Int]) {
-  override def toString = "{" + lowerBound + upperBound.map(ub => if (lowerBound == ub) "}" else "," + ub  + "}").getOrElse(",}")
-}
-
-case class ArcPatternArgument(name: String, nodeType: Option[NodeType]) {
-  implicit val ArcPatternArgumentEqual = equalA[ArcPatternArgument]
-
-  override def toString = name + ~nodeType.map("&" + _)
-}
-
 case class BindOp(op: AlgebraOp, variables: VariableTemplate) extends QueryOp {
   def evaluate(wordNet: WordNet, bindings: Bindings) = {
     op.evaluate(wordNet, bindings).bindVariables(variables)
