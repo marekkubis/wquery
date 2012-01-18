@@ -25,7 +25,7 @@ class PlannerTests extends WQueryTestSuite {
     val path = planner ffor ("{car}.hypernym") path
 
     val forwardPlan = path.walkForward(BindingsSchema(), 0, path.links.size - 1)
-    val backwardPlan = path.walkBackward(BindingsSchema(), 0, path.links.size - 1)
+    val backwardPlan = path.walkBackward(wquery.wordNet.schema, BindingsSchema(), 0, path.links.size - 1)
 
     forwardPlan.toString should equal ("ExtendOp(ProjectOp(ExtendOp(FetchOp(words,List((source,List(car))),List(source)),0,RelationUnionPattern(List(source&string^synsets^destination&synset)),Forward,VariableTemplate(List())),ContextRefOp(Set(synset))),0,QuantifiedRelationPattern(source&synset^hypernym^destination&synset,{1}),Forward,VariableTemplate(List()))")
     backwardPlan.toString should equal ("SelectOp(BindOp(ExtendOp(FringeOp(QuantifiedRelationPattern(source&synset^hypernym^destination&synset,{1}),Right),0,QuantifiedRelationPattern(source&synset^hypernym^destination&synset,{1}),Backward,VariableTemplate(List())),VariableTemplate(List($__a, @_))),BinaryCondition(in,StepVariableRefOp($__a,Set(synset)),ProjectOp(ExtendOp(FetchOp(words,List((source,List(car))),List(source)),0,RelationUnionPattern(List(source&string^synsets^destination&synset)),Forward,VariableTemplate(List())),ContextRefOp(Set(synset)))))")
@@ -41,7 +41,7 @@ class PlannerTests extends WQueryTestSuite {
     val path = planner ffor ("{cab}.^hypernym") path
 
     val forwardPlan = path.walkForward(BindingsSchema(), 0, path.links.size - 1)
-    val backwardPlan = path.walkBackward(BindingsSchema(), 0, path.links.size - 1)
+    val backwardPlan = path.walkBackward(wquery.wordNet.schema, BindingsSchema(), 0, path.links.size - 1)
 
     forwardPlan.toString should equal ("ExtendOp(ProjectOp(ExtendOp(FetchOp(words,List((source,List(cab))),List(source)),0,RelationUnionPattern(List(source&string^synsets^destination&synset)),Forward,VariableTemplate(List())),ContextRefOp(Set(synset))),0,QuantifiedRelationPattern(destination&synset^hypernym^source&synset,{1}),Forward,VariableTemplate(List()))")
     backwardPlan.toString should equal ("SelectOp(BindOp(ExtendOp(FringeOp(QuantifiedRelationPattern(destination&synset^hypernym^source&synset,{1}),Right),0,QuantifiedRelationPattern(destination&synset^hypernym^source&synset,{1}),Backward,VariableTemplate(List())),VariableTemplate(List($__a, @_))),BinaryCondition(in,StepVariableRefOp($__a,Set(synset)),ProjectOp(ExtendOp(FetchOp(words,List((source,List(cab))),List(source)),0,RelationUnionPattern(List(source&string^synsets^destination&synset)),Forward,VariableTemplate(List())),ContextRefOp(Set(synset)))))")
@@ -57,7 +57,7 @@ class PlannerTests extends WQueryTestSuite {
     val path = planner ffor ("{}.hypernym.partial_holonym.hypernym") path
 
     val forwardPlan = path.walkForward(BindingsSchema(), 0, path.links.size - 1)
-    val backwardPlan = path.walkBackward(BindingsSchema(), 0, path.links.size - 1)
+    val backwardPlan = path.walkBackward(wquery.wordNet.schema, BindingsSchema(), 0, path.links.size - 1)
 
     forwardPlan.toString should equal ("ExtendOp(ExtendOp(ExtendOp(FetchOp(synsets,List((source,List())),List(source)),0,QuantifiedRelationPattern(source&synset^hypernym^destination&synset,{1}),Forward,VariableTemplate(List())),0,QuantifiedRelationPattern(source&synset^partial_holonym^destination&synset,{1}),Forward,VariableTemplate(List())),0,QuantifiedRelationPattern(source&synset^hypernym^destination&synset,{1}),Forward,VariableTemplate(List()))")
     backwardPlan.toString should equal ("SelectOp(BindOp(ExtendOp(ExtendOp(ExtendOp(FringeOp(QuantifiedRelationPattern(source&synset^hypernym^destination&synset,{1}),Right),0,QuantifiedRelationPattern(source&synset^hypernym^destination&synset,{1}),Backward,VariableTemplate(List())),0,QuantifiedRelationPattern(source&synset^partial_holonym^destination&synset,{1}),Backward,VariableTemplate(List())),0,QuantifiedRelationPattern(source&synset^hypernym^destination&synset,{1}),Backward,VariableTemplate(List())),VariableTemplate(List($__a, @_))),BinaryCondition(in,StepVariableRefOp($__a,Set(synset)),FetchOp(synsets,List((source,List())),List(source))))")
@@ -73,7 +73,7 @@ class PlannerTests extends WQueryTestSuite {
     val path = planner ffor ("{car}.hypernym|partial_holonym") path
 
     val forwardPlan = path.walkForward(BindingsSchema(), 0, path.links.size - 1)
-    val backwardPlan = path.walkBackward(BindingsSchema(), 0, path.links.size - 1)
+    val backwardPlan = path.walkBackward(wquery.wordNet.schema, BindingsSchema(), 0, path.links.size - 1)
 
     forwardPlan.toString should equal ("ExtendOp(ProjectOp(ExtendOp(FetchOp(words,List((source,List(car))),List(source)),0,RelationUnionPattern(List(source&string^synsets^destination&synset)),Forward,VariableTemplate(List())),ContextRefOp(Set(synset))),0,RelationUnionPattern(List(QuantifiedRelationPattern(source&synset^hypernym^destination&synset,{1}), QuantifiedRelationPattern(source&synset^partial_holonym^destination&synset,{1}))),Forward,VariableTemplate(List()))")
     backwardPlan.toString should equal ("SelectOp(BindOp(ExtendOp(FringeOp(RelationUnionPattern(List(QuantifiedRelationPattern(source&synset^hypernym^destination&synset,{1}), QuantifiedRelationPattern(source&synset^partial_holonym^destination&synset,{1}))),Right),0,RelationUnionPattern(List(QuantifiedRelationPattern(source&synset^hypernym^destination&synset,{1}), QuantifiedRelationPattern(source&synset^partial_holonym^destination&synset,{1}))),Backward,VariableTemplate(List())),VariableTemplate(List($__a, @_))),BinaryCondition(in,StepVariableRefOp($__a,Set(synset)),ProjectOp(ExtendOp(FetchOp(words,List((source,List(car))),List(source)),0,RelationUnionPattern(List(source&string^synsets^destination&synset)),Forward,VariableTemplate(List())),ContextRefOp(Set(synset)))))")
@@ -89,7 +89,7 @@ class PlannerTests extends WQueryTestSuite {
     val path = planner ffor ("{}.(hypernym.partial_holonym.hypernym)") path
 
     val forwardPlan = path.walkForward(BindingsSchema(), 0, path.links.size - 1)
-    val backwardPlan = path.walkBackward(BindingsSchema(), 0, path.links.size - 1)
+    val backwardPlan = path.walkBackward(wquery.wordNet.schema, BindingsSchema(), 0, path.links.size - 1)
 
     forwardPlan.toString should equal ("ExtendOp(FetchOp(synsets,List((source,List())),List(source)),0,QuantifiedRelationPattern(RelationCompositionPattern(List(QuantifiedRelationPattern(source&synset^hypernym^destination&synset,{1}), QuantifiedRelationPattern(source&synset^partial_holonym^destination&synset,{1}), QuantifiedRelationPattern(source&synset^hypernym^destination&synset,{1}))),{1}),Forward,VariableTemplate(List()))")
     backwardPlan.toString should equal ("SelectOp(BindOp(ExtendOp(FringeOp(QuantifiedRelationPattern(RelationCompositionPattern(List(QuantifiedRelationPattern(source&synset^hypernym^destination&synset,{1}), QuantifiedRelationPattern(source&synset^partial_holonym^destination&synset,{1}), QuantifiedRelationPattern(source&synset^hypernym^destination&synset,{1}))),{1}),Right),0,QuantifiedRelationPattern(RelationCompositionPattern(List(QuantifiedRelationPattern(source&synset^hypernym^destination&synset,{1}), QuantifiedRelationPattern(source&synset^partial_holonym^destination&synset,{1}), QuantifiedRelationPattern(source&synset^hypernym^destination&synset,{1}))),{1}),Backward,VariableTemplate(List())),VariableTemplate(List($__a, @_))),BinaryCondition(in,StepVariableRefOp($__a,Set(synset)),FetchOp(synsets,List((source,List())),List(source))))")
@@ -105,7 +105,7 @@ class PlannerTests extends WQueryTestSuite {
     val path = planner ffor ("{car:3:n}.hypernym+") path
 
     val forwardPlan = path.walkForward(BindingsSchema(), 0, path.links.size - 1)
-    val backwardPlan = path.walkBackward(BindingsSchema(), 0, path.links.size - 1)
+    val backwardPlan = path.walkBackward(wquery.wordNet.schema, BindingsSchema(), 0, path.links.size - 1)
 
     forwardPlan.toString should equal ("ExtendOp(ProjectOp(ExtendOp(FetchOp(literal,List((destination,List(car)), (num,List(3)), (pos,List(n))),List(source)),0,RelationUnionPattern(List(source&sense^synset^destination&synset)),Forward,VariableTemplate(List())),ContextRefOp(Set(synset))),0,QuantifiedRelationPattern(source&synset^hypernym^destination&synset,{1,}),Forward,VariableTemplate(List()))")
     backwardPlan.toString should equal ("SelectOp(BindOp(ExtendOp(FringeOp(QuantifiedRelationPattern(source&synset^hypernym^destination&synset,{1,}),Right),0,QuantifiedRelationPattern(source&synset^hypernym^destination&synset,{1,}),Backward,VariableTemplate(List())),VariableTemplate(List($__a, @_))),BinaryCondition(in,StepVariableRefOp($__a,Set(synset)),ProjectOp(ExtendOp(FetchOp(literal,List((destination,List(car)), (num,List(3)), (pos,List(n))),List(source)),0,RelationUnionPattern(List(source&sense^synset^destination&synset)),Forward,VariableTemplate(List())),ContextRefOp(Set(synset)))))")
@@ -121,7 +121,7 @@ class PlannerTests extends WQueryTestSuite {
     val path = planner ffor ("{car:3:n}.hypernym*") path
 
     val forwardPlan = path.walkForward(BindingsSchema(), 0, path.links.size - 1)
-    val backwardPlan = path.walkBackward(BindingsSchema(), 0, path.links.size - 1)
+    val backwardPlan = path.walkBackward(wquery.wordNet.schema, BindingsSchema(), 0, path.links.size - 1)
 
     forwardPlan.toString should equal ("ExtendOp(ProjectOp(ExtendOp(FetchOp(literal,List((destination,List(car)), (num,List(3)), (pos,List(n))),List(source)),0,RelationUnionPattern(List(source&sense^synset^destination&synset)),Forward,VariableTemplate(List())),ContextRefOp(Set(synset))),0,QuantifiedRelationPattern(source&synset^hypernym^destination&synset,{0,}),Forward,VariableTemplate(List()))")
     backwardPlan.toString should equal ("SelectOp(BindOp(ExtendOp(FringeOp(QuantifiedRelationPattern(source&synset^hypernym^destination&synset,{0,}),Right),0,QuantifiedRelationPattern(source&synset^hypernym^destination&synset,{0,}),Backward,VariableTemplate(List())),VariableTemplate(List($__a, @_))),BinaryCondition(in,StepVariableRefOp($__a,Set(synset)),ProjectOp(ExtendOp(FetchOp(literal,List((destination,List(car)), (num,List(3)), (pos,List(n))),List(source)),0,RelationUnionPattern(List(source&sense^synset^destination&synset)),Forward,VariableTemplate(List())),ContextRefOp(Set(synset)))))")

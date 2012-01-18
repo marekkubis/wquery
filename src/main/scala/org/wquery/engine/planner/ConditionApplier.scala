@@ -11,6 +11,8 @@ class ConditionApplier(links: List[Link], conditions: Map[Option[Link], List[Con
   val pathVariables = links.map(_.variables.variables).asMA.sum
   val alreadyBoundVariables = Set[Variable]()
 
+  def skipCondition(condition: Condition) = appliedConditions += condition
+
   def applyConditions(inputOp: AlgebraOp, currentLink: Link) = {
     var op = inputOp
 

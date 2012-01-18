@@ -1,9 +1,9 @@
 package org.wquery.engine.operations
 
-import org.wquery.model.{DataType, DataSet, WordNet}
 import scalaz._
 import Scalaz._
 import org.wquery.engine.Variable
+import org.wquery.model.{WordNetSchema, DataType, DataSet, WordNet}
 
 abstract class AlgebraOp {
   def evaluate(wordNet: WordNet, bindings: Bindings): DataSet
@@ -14,6 +14,7 @@ abstract class AlgebraOp {
   def bindingsPattern: BindingsPattern
   def referencedVariables: Set[Variable]
   def referencesContext: Boolean
+  def maxCount(wordNet: WordNetSchema): Option[BigInt]
 }
 
 object AlgebraOp {

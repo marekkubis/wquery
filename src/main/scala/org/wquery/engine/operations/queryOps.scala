@@ -27,6 +27,8 @@ case class EmitOp(op: AlgebraOp) extends QueryOp {
   def referencedVariables = op.referencedVariables
 
   def referencesContext = op.referencesContext
+
+  def maxCount(wordNet: WordNetSchema) = op.maxCount(wordNet)
 }
 
 case class IterateOp(bindingOp: AlgebraOp, iteratedOp: AlgebraOp) extends QueryOp {
@@ -64,6 +66,8 @@ case class IterateOp(bindingOp: AlgebraOp, iteratedOp: AlgebraOp) extends QueryO
   def referencedVariables = (iteratedOp.referencedVariables -- bindingOp.bindingsPattern.variables) ++ bindingOp.referencedVariables
 
   def referencesContext = iteratedOp.referencesContext || bindingOp.referencesContext
+
+  def maxCount(wordNet: WordNetSchema) = (bindingOp.maxCount(wordNet) <|*|> iteratedOp.maxCount(wordNet)).map{ case (a, b) => a * b }
 }
 
 case class IfElseOp(conditionOp: AlgebraOp, ifOp: AlgebraOp, elseOp: Option[AlgebraOp]) extends QueryOp {
@@ -87,6 +91,8 @@ case class IfElseOp(conditionOp: AlgebraOp, ifOp: AlgebraOp, elseOp: Option[Alge
   def referencedVariables = conditionOp.referencedVariables ++ ifOp.referencedVariables ++ elseOp.map(_.referencedVariables).orZero
 
   def referencesContext = conditionOp.referencesContext || ifOp.referencesContext || elseOp.some(_.referencesContext).none(false)
+
+  def maxCount(wordNet: WordNetSchema) = elseOp.some(op => (op.maxCount(wordNet)<|*|>ifOp.maxCount(wordNet)).map{ case (a,b) => a max b}).none(ifOp.maxCount(wordNet))
 }
 
 case class BlockOp(ops: List[AlgebraOp]) extends QueryOp {
@@ -120,6 +126,12 @@ case class BlockOp(ops: List[AlgebraOp]) extends QueryOp {
   def referencedVariables = ops.map(_.referencedVariables).asMA.sum
 
   def referencesContext = ops.exists(_.referencesContext)
+
+  def maxCount(wordNet: WordNetSchema) = {
+    val opCounts = ops.map(_.maxCount(wordNet)).flatten
+
+    (opCounts.size == ops.size)??(opCounts.max.some)
+  }
 }
 
 case class AssignmentOp(variables: VariableTemplate, op: AlgebraOp) extends QueryOp {
@@ -155,6 +167,8 @@ case class AssignmentOp(variables: VariableTemplate, op: AlgebraOp) extends Quer
   def referencedVariables = op.referencedVariables
 
   def referencesContext = op.referencesContext
+
+  def maxCount(wordNet: WordNetSchema) = some(0)
 }
 
 case class WhileDoOp(conditionOp: AlgebraOp, iteratedOp: AlgebraOp) extends QueryOp {
@@ -180,6 +194,8 @@ case class WhileDoOp(conditionOp: AlgebraOp, iteratedOp: AlgebraOp) extends Quer
   def referencedVariables = conditionOp.referencedVariables ++ iteratedOp.referencedVariables
 
   def referencesContext = conditionOp.referencesContext || iteratedOp.referencesContext
+
+  def maxCount(wordNet: WordNetSchema) = none
 }
 
 /*
@@ -203,7 +219,8 @@ case class UnionOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends QueryOp {
   def referencedVariables = leftOp.referencedVariables ++ rightOp.referencedVariables
 
   def referencesContext = leftOp.referencesContext || rightOp.referencesContext
-}
+
+  def maxCount(wordNet: WordNetSchema) = (leftOp.maxCount(wordNet) <|*|> rightOp.maxCount(wordNet)).map{ case (a, b) => a max b}}
 
 case class ExceptOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends QueryOp {
   def evaluate(wordNet: WordNet, bindings: Bindings) = {
@@ -226,6 +243,8 @@ case class ExceptOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends QueryOp {
   def referencedVariables = leftOp.referencedVariables ++ rightOp.referencedVariables
 
   def referencesContext = leftOp.referencesContext || rightOp.referencesContext
+
+  def maxCount(wordNet: WordNetSchema) = leftOp.maxCount(wordNet)
 }
 
 case class IntersectOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends QueryOp {
@@ -246,6 +265,8 @@ case class IntersectOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends QueryOp {
   def referencedVariables = leftOp.referencedVariables ++ rightOp.referencedVariables
 
   def referencesContext = leftOp.referencesContext || rightOp.referencesContext
+
+  def maxCount(wordNet: WordNetSchema) = (leftOp.maxCount(wordNet) <|*|> rightOp.maxCount(wordNet)).map{ case (a, b) => a min b}
 }
 
 case class JoinOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends QueryOp {
@@ -320,6 +341,8 @@ case class JoinOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends QueryOp {
   def referencedVariables = leftOp.referencedVariables ++ rightOp.referencedVariables
 
   def referencesContext = leftOp.referencesContext || rightOp.referencesContext
+
+  def maxCount(wordNet: WordNetSchema) = (leftOp.maxCount(wordNet) <|*|> rightOp.maxCount(wordNet)).map{ case (a, b) => a * b }
 }
 
 /*
@@ -362,6 +385,8 @@ abstract class BinaryArithmeticOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends
   def referencedVariables = leftOp.referencedVariables ++ rightOp.referencedVariables
 
   def referencesContext = leftOp.referencesContext || rightOp.referencesContext
+
+  def maxCount(wordNet: WordNetSchema) = (leftOp.maxCount(wordNet) <|*|> rightOp.maxCount(wordNet)).map{ case (a, b) => a * b }
 }
 
 case class AddOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends BinaryArithmeticOp(leftOp, rightOp) {
@@ -457,6 +482,8 @@ case class MinusOp(op: AlgebraOp) extends QueryOp {
   def referencedVariables = op.referencedVariables
 
   def referencesContext = op.referencesContext
+
+  def maxCount(wordNet: WordNetSchema) = op.maxCount(wordNet)
 }
 
 case class FunctionOp(function: Function, args: AlgebraOp) extends QueryOp {
@@ -475,6 +502,8 @@ case class FunctionOp(function: Function, args: AlgebraOp) extends QueryOp {
   def referencedVariables = args.referencedVariables
 
   def referencesContext = args.referencesContext
+
+  def maxCount(wordNet: WordNetSchema) = function.maxCount(args, wordNet)
 }
 
 /*
@@ -530,6 +559,8 @@ case class SelectOp(op: AlgebraOp, condition: Condition) extends QueryOp {
   def referencedVariables = op.referencedVariables ++ (condition.referencedVariables -- op.bindingsPattern.variables)
 
   def referencesContext = op.referencesContext
+
+  def maxCount(wordNet: WordNetSchema) = op.maxCount(wordNet)
 }
 
 case class ProjectOp(op: AlgebraOp, projectOp: AlgebraOp) extends QueryOp {
@@ -576,6 +607,8 @@ case class ProjectOp(op: AlgebraOp, projectOp: AlgebraOp) extends QueryOp {
   def referencedVariables = op.referencedVariables ++ (projectOp.referencedVariables -- op.bindingsPattern.variables)
 
   def referencesContext = op.referencesContext
+
+  def maxCount(wordNet: WordNetSchema) = (op.maxCount(wordNet) <|*|> projectOp.maxCount(wordNet)).map{ case (a, b) => a * b }
 }
 
 case class ExtendOp(op: AlgebraOp, from: Int, pattern: RelationalPattern, direction: Direction, variables: VariableTemplate) extends QueryOp {
@@ -659,6 +692,8 @@ case class ExtendOp(op: AlgebraOp, from: Int, pattern: RelationalPattern, direct
   def referencedVariables = op.referencedVariables
 
   def referencesContext = op.referencesContext
+
+  def maxCount(wordNet: WordNetSchema) = pattern.maxCount(op.maxCount(wordNet), wordNet)
 }
 
 case class BindOp(op: AlgebraOp, variables: VariableTemplate) extends QueryOp {
@@ -683,6 +718,8 @@ case class BindOp(op: AlgebraOp, variables: VariableTemplate) extends QueryOp {
   def referencedVariables = op.referencedVariables
 
   def referencesContext = op.referencesContext
+
+  def maxCount(wordNet: WordNetSchema) = op.maxCount(wordNet)
 }
 
 case class FringeOp(pattern: RelationalPattern, side: Side) extends QueryOp {
@@ -701,6 +738,8 @@ case class FringeOp(pattern: RelationalPattern, side: Side) extends QueryOp {
   def referencedVariables = Set.empty
 
   def referencesContext = false
+
+  def maxCount(wordNet: WordNetSchema) = some(pattern.fringeMaxCount(side, wordNet))
 }
 
 /*
@@ -731,6 +770,8 @@ case class FetchOp(relation: Relation, from: List[(String, List[Any])], to: List
   def referencedVariables = Set.empty
 
   def referencesContext = false
+
+  def maxCount(wordNet: WordNetSchema) = some(wordNet.fetchMaxCount(relation, from, to))
 }
 
 object FetchOp {
@@ -767,11 +808,13 @@ case class ConstantOp(dataSet: DataSet) extends QueryOp {
 
   def maxTupleSize = some(dataSet.maxTupleSize)
 
-  def bindingsPattern = BindingsPattern() // assumed that constant dataset does not contain variable bindings
+  def bindingsPattern = BindingsPattern() // assumed that a constant dataset does not contain variable bindings
 
   def referencedVariables = Set.empty
 
   def referencesContext = false
+
+  def maxCount(wordNet: WordNetSchema) = some(dataSet.pathCount)
 }
 
 object ConstantOp {
@@ -802,6 +845,8 @@ case class ContextRefOp(types: Set[DataType]) extends QueryOp {
   def referencedVariables = Set.empty
 
   def referencesContext = true
+
+  def maxCount(wordNet: WordNetSchema) = some(1)
 }
 
 case class PathVariableRefOp(variable: PathVariable, types: (AlgebraOp, Int, Int)) extends QueryOp {
@@ -820,6 +865,8 @@ case class PathVariableRefOp(variable: PathVariable, types: (AlgebraOp, Int, Int
   def referencedVariables = Set(variable)
 
   def referencesContext = false
+
+  def maxCount(wordNet: WordNetSchema) = some(1)
 }
 
 case class StepVariableRefOp(variable: StepVariable, types: Set[DataType]) extends QueryOp {
@@ -838,4 +885,6 @@ case class StepVariableRefOp(variable: StepVariable, types: Set[DataType]) exten
   def referencedVariables = Set(variable)
 
   def referencesContext = false
+
+  def maxCount(wordNet: WordNetSchema) = some(1)
 }

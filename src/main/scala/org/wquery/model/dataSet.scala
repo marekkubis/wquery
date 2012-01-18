@@ -13,7 +13,9 @@ class DataSet(val paths: List[List[Any]], val pathVars: Map[String, List[(Int, I
   }
         
   val pathCount = paths.size
-
+  val containsSingleTuple = pathCount == 1
+  val containsValues = minTupleSize == 1 && maxTupleSize == 1
+  val containsSingleValue = containsSingleTuple && containsValues
   val isEmpty = pathCount == 0
 
   def isTrue = {

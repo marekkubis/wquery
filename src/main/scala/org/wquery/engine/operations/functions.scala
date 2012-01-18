@@ -14,6 +14,7 @@ abstract class Function(val name: String) {
   def minTupleSize(args: AlgebraOp): Int
   def maxTupleSize(args: AlgebraOp): Option[Int]
   def bindingsPattern(args: AlgebraOp): BindingsPattern
+  def maxCount(args: AlgebraOp, wordNet: WordNetSchema): Option[BigInt]
   override def toString = name
 }
 
@@ -50,7 +51,7 @@ trait ClearsBindingsPattern {
   def bindingsPattern(args: AlgebraOp) = BindingsPattern()
 }
 
-trait ReturnsSingletonTuples {
+trait ReturnsValueSet {
   def returnType(args: AlgebraOp): Set[DataType]
 
   def minTupleSize(args: AlgebraOp) = 1
@@ -62,35 +63,49 @@ trait ReturnsSingletonTuples {
   def rightType(args: AlgebraOp, pos: Int): Set[DataType] = if (pos == 0) returnType(args) else Set.empty
 }
 
+trait ReturnsSingleTuple {
+  def maxCount(args: AlgebraOp, wordNet: WordNetSchema) = some(BigInt(1))
+}
+
+trait ReturnsDataSetOfEqualSize {
+  def maxCount(args: AlgebraOp, wordNet: WordNetSchema) = args.maxCount(wordNet)
+}
+
+trait ReturnsSingleValue extends ReturnsValueSet with ReturnsSingleTuple
+
+trait ReturnsValueSetOfEqualSize extends ReturnsValueSet with ReturnsDataSetOfEqualSize
+
 trait PreservesTypes {
   def leftType(args: AlgebraOp, pos: Int) = args.leftType(pos)
 
   def rightType(args: AlgebraOp, pos: Int) = args.rightType(pos)
 }
 
-trait PreservesSizes {
+trait PreservesTupleSizes {
   def minTupleSize(args: AlgebraOp) = args.minTupleSize
 
   def maxTupleSize(args: AlgebraOp) = args.maxTupleSize
 }
 
-object DistinctFunction extends DataSetFunction("distinct") with AcceptsAll with PreservesTypes
- with PreservesSizes with PreservesBindingsPattern {
+object DistinctFunction extends DataSetFunction("distinct") with AcceptsAll
+ with PreservesTypes with PreservesTupleSizes with PreservesBindingsPattern {
 
   def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings) = {
     dataSet.distinct
   }
+
+  def maxCount(args: AlgebraOp, wordNet: WordNetSchema) = args.maxCount(wordNet)
 }
 
-object SortFunction extends DataSetFunction("sort") with AcceptsAll with PreservesTypes
- with PreservesSizes with PreservesBindingsPattern {
+object SortFunction extends DataSetFunction("sort") with AcceptsAll with ReturnsDataSetOfEqualSize
+ with PreservesTypes with PreservesTupleSizes with PreservesBindingsPattern {
 
   def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings) = {
     DataSet.fromBoundPaths(dataSet.toBoundPaths.sortBy(x => x._1)(WQueryListOrdering))
   }
 }
 
-object CountFunction extends DataSetFunction("count") with AcceptsAll with ReturnsSingletonTuples
+object CountFunction extends DataSetFunction("count") with AcceptsAll with ReturnsSingleValue
  with ClearsBindingsPattern {
 
   def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings) = {
@@ -100,8 +115,8 @@ object CountFunction extends DataSetFunction("count") with AcceptsAll with Retur
   def returnType(args: AlgebraOp) = Set(IntegerType)
 }
 
-object LastFunction extends DataSetFunction("last") with AcceptsAll
- with ReturnsSingletonTuples with ClearsBindingsPattern {
+object LastFunction extends DataSetFunction("last") with AcceptsAll with ReturnsSingleValue
+ with ClearsBindingsPattern {
 
   def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings) = {
     DataSet(dataSet.paths.map(x => List(x.last)))
@@ -110,8 +125,8 @@ object LastFunction extends DataSetFunction("last") with AcceptsAll
   def returnType(args: AlgebraOp) = args.rightType(0)
 }
 
-object IntegerSumFunction extends DataSetFunction("sum") with AcceptsTypes
- with ReturnsSingletonTuples with ClearsBindingsPattern {
+object IntegerSumFunction extends DataSetFunction("sum") with AcceptsTypes with ReturnsSingleValue
+ with ClearsBindingsPattern {
 
   def argumentTypes = List(Set(IntegerType))
 
@@ -128,8 +143,8 @@ object IntegerSumFunction extends DataSetFunction("sum") with AcceptsTypes
   def returnType(args: AlgebraOp) = Set(IntegerType)
 }
 
-object FloatSumFunction extends DataSetFunction("sum") with AcceptsNumbers
- with ReturnsSingletonTuples with ClearsBindingsPattern {
+object FloatSumFunction extends DataSetFunction("sum") with AcceptsNumbers with ReturnsSingleValue
+ with ClearsBindingsPattern {
 
   def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings) = {
     var sum: Double = 0
@@ -149,7 +164,8 @@ object FloatSumFunction extends DataSetFunction("sum") with AcceptsNumbers
   def returnType(args: AlgebraOp) = Set(FloatType)
 }
 
-object AvgFunction extends Function("avg") with AcceptsNumbers with ReturnsSingletonTuples with ClearsBindingsPattern {
+object AvgFunction extends Function("avg") with AcceptsNumbers with ReturnsSingleValue
+ with ClearsBindingsPattern {
   def evaluate(op: AlgebraOp, wordNet: WordNet, bindings: Bindings) = {
     val dataSet = op.evaluate(wordNet, bindings)
 
@@ -165,8 +181,8 @@ object AvgFunction extends Function("avg") with AcceptsNumbers with ReturnsSingl
   def returnType(args: AlgebraOp) = Set(FloatType)
 }
 
-object MinFunction extends DataSetFunction("min") with AcceptsAll with PreservesTypes
- with PreservesSizes with PreservesBindingsPattern {
+object MinFunction extends DataSetFunction("min") with AcceptsAll with ReturnsSingleTuple
+ with PreservesTypes with PreservesTupleSizes with PreservesBindingsPattern {
 
   def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings) = {
    SortFunction.evaluate(dataSet, wordNet, bindings)
@@ -174,8 +190,8 @@ object MinFunction extends DataSetFunction("min") with AcceptsAll with Preserves
   }
 }
 
-object MaxFunction extends DataSetFunction("max") with AcceptsAll with PreservesTypes
- with PreservesSizes with PreservesBindingsPattern {
+object MaxFunction extends DataSetFunction("max") with AcceptsAll with ReturnsSingleTuple
+ with PreservesTypes with PreservesTupleSizes with PreservesBindingsPattern {
 
   def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings) = {
    SortFunction.evaluate(dataSet, wordNet, bindings)
@@ -183,7 +199,7 @@ object MaxFunction extends DataSetFunction("max") with AcceptsAll with Preserves
   }
 }
 
-object ShortestFunction extends DataSetFunction("shortest") with AcceptsAll
+object ShortestFunction extends DataSetFunction("shortest") with AcceptsAll with ReturnsSingleTuple
  with PreservesTypes with PreservesBindingsPattern {
 
   def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings) = {
@@ -195,7 +211,7 @@ object ShortestFunction extends DataSetFunction("shortest") with AcceptsAll
   def maxTupleSize(args: AlgebraOp) = Some(args.minTupleSize)
 }
 
-object LongestFunction extends DataSetFunction("longest") with AcceptsAll
+object LongestFunction extends DataSetFunction("longest") with AcceptsAll with ReturnsSingleTuple
  with PreservesTypes with PreservesBindingsPattern {
 
   def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings) = {
@@ -207,7 +223,8 @@ object LongestFunction extends DataSetFunction("longest") with AcceptsAll
   def maxTupleSize(args: AlgebraOp) = args.maxTupleSize
 }
 
-object SizeFunction extends DataSetFunction("size") with AcceptsAll with ReturnsSingletonTuples with ClearsBindingsPattern {
+object SizeFunction extends DataSetFunction("size") with AcceptsAll with ReturnsValueSetOfEqualSize
+ with ClearsBindingsPattern {
   def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings) = {
     DataSet(dataSet.paths.map(path => path.filter(step => !step.isInstanceOf[Arc])).map(path => List(path.size)))
   }
@@ -215,7 +232,8 @@ object SizeFunction extends DataSetFunction("size") with AcceptsAll with Returns
   def returnType(args: AlgebraOp) = Set(IntegerType)
 }
 
-object LengthFunction extends DataSetFunction("length") with AcceptsAll with ReturnsSingletonTuples with ClearsBindingsPattern {
+object LengthFunction extends DataSetFunction("length") with AcceptsAll with ReturnsValueSetOfEqualSize
+ with ClearsBindingsPattern {
   def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings) = {
     DataSet(dataSet.paths.map{path => List(path.size)})
   }
@@ -223,7 +241,8 @@ object LengthFunction extends DataSetFunction("length") with AcceptsAll with Ret
   def returnType(args: AlgebraOp) = Set(IntegerType)
 }
 
-object EmptyFunction extends DataSetFunction("empty") with AcceptsAll with ReturnsSingletonTuples with ClearsBindingsPattern {
+object EmptyFunction extends DataSetFunction("empty") with AcceptsAll with ReturnsSingleValue
+ with ClearsBindingsPattern {
   def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings) = {
     DataSet.fromValue(dataSet.isEmpty)
   }
@@ -231,7 +250,8 @@ object EmptyFunction extends DataSetFunction("empty") with AcceptsAll with Retur
   def returnType(args: AlgebraOp) = Set(BooleanType)
 }
 
-object StringLengthFunction extends DataSetFunction("string_length") with AcceptsTypes with ReturnsSingletonTuples with ClearsBindingsPattern {
+object StringLengthFunction extends DataSetFunction("string_length") with AcceptsTypes with ReturnsValueSetOfEqualSize
+ with ClearsBindingsPattern {
   def argumentTypes = List(Set(StringType))
 
   def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings) = {
@@ -241,7 +261,7 @@ object StringLengthFunction extends DataSetFunction("string_length") with Accept
   def returnType(args: AlgebraOp) = Set(IntegerType)
 }
 
-object SubstringFromFunction extends DataSetFunction("substring") with AcceptsTypes with ReturnsSingletonTuples
+object SubstringFromFunction extends DataSetFunction("substring") with AcceptsTypes with ReturnsValueSetOfEqualSize
  with ClearsBindingsPattern {
 
   def argumentTypes = List(Set(StringType), Set(IntegerType))
@@ -256,7 +276,7 @@ object SubstringFromFunction extends DataSetFunction("substring") with AcceptsTy
   def returnType(args: AlgebraOp) = Set(StringType)
 }
 
-object SubstringFromToFunction extends DataSetFunction("substring") with AcceptsTypes with ReturnsSingletonTuples
+object SubstringFromToFunction extends DataSetFunction("substring") with AcceptsTypes with ReturnsValueSetOfEqualSize
  with ClearsBindingsPattern {
 
   def argumentTypes = List(Set(StringType), Set(IntegerType), Set(IntegerType))
@@ -279,7 +299,7 @@ object SubstringFromToFunction extends DataSetFunction("substring") with Accepts
   def returnType(args: AlgebraOp) = Set(StringType)
 }
 
-object ReplaceFunction extends DataSetFunction("replace") with AcceptsTypes with ReturnsSingletonTuples
+object ReplaceFunction extends DataSetFunction("replace") with AcceptsTypes with ReturnsValueSetOfEqualSize
  with ClearsBindingsPattern {
 
   def argumentTypes = List(Set(StringType), Set(StringType), Set(StringType))
@@ -294,7 +314,8 @@ object ReplaceFunction extends DataSetFunction("replace") with AcceptsTypes with
   def returnType(args: AlgebraOp) = Set(StringType)
 }
 
-object LowerFunction extends DataSetFunction("lower") with AcceptsTypes with ReturnsSingletonTuples with ClearsBindingsPattern {
+object LowerFunction extends DataSetFunction("lower") with AcceptsTypes with ReturnsValueSetOfEqualSize
+ with ClearsBindingsPattern {
   def argumentTypes = List(Set(StringType))
 
   def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings) = {
@@ -307,7 +328,8 @@ object LowerFunction extends DataSetFunction("lower") with AcceptsTypes with Ret
   def returnType(args: AlgebraOp) = Set(StringType)
 }
 
-object UpperFunction extends DataSetFunction("upper") with AcceptsTypes with ReturnsSingletonTuples with ClearsBindingsPattern {
+object UpperFunction extends DataSetFunction("upper") with AcceptsTypes with ReturnsValueSetOfEqualSize
+ with ClearsBindingsPattern {
   def argumentTypes = List(Set(StringType))
 
   def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings) = {
@@ -320,7 +342,8 @@ object UpperFunction extends DataSetFunction("upper") with AcceptsTypes with Ret
   def returnType(args: AlgebraOp) = Set(StringType)
 }
 
-object RangeFunction extends DataSetFunction("range") with AcceptsTypes with ReturnsSingletonTuples with ClearsBindingsPattern {
+object RangeFunction extends DataSetFunction("range") with AcceptsTypes with ReturnsValueSet
+ with ClearsBindingsPattern {
   def argumentTypes = List(Set(IntegerType), Set(IntegerType))
 
   def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings) = {
@@ -331,6 +354,17 @@ object RangeFunction extends DataSetFunction("range") with AcceptsTypes with Ret
   }
 
   def returnType(args: AlgebraOp) = Set(IntegerType)
+
+  def maxCount(args: AlgebraOp, wordNet: WordNetSchema) = args match {
+    // infer the range suze from the arguments structure or assume that it can be from MIN_INT to MAX_INT
+    case JoinOp(ConstantOp(leftSet), ConstantOp(rightSet)) =>
+      if (leftSet.containsSingleValue && rightSet.containsSingleValue)
+        some(rightSet.paths.head.head.asInstanceOf[Int] - leftSet.paths.head.head.asInstanceOf[Int] + 1)
+      else
+        some(BigInt(Int.MaxValue)*2)
+    case _ =>
+      some(BigInt(Int.MaxValue)*2)
+  }
 }
 
 abstract class JavaMethod(override val name: String, method: Method) extends Function(name) {
@@ -383,33 +417,33 @@ object Functions {
   registerFunction(RangeFunction)
 
   registerFunction(new JavaMethod("abs", classOf[Math].getMethod("abs", IntegerType.associatedClass))
-   with AcceptsTypes with ReturnsSingletonTuples with ClearsBindingsPattern {
+   with AcceptsTypes with ReturnsValueSetOfEqualSize with ClearsBindingsPattern {
     def argumentTypes = List(Set(IntegerType))
     def returnType(args: AlgebraOp) = Set(IntegerType)
   })
 
   registerFunction(new JavaMethod("abs", classOf[Math].getMethod("abs", FloatType.associatedClass))
-   with AcceptsNumbers with ReturnsSingletonTuples with ClearsBindingsPattern {
+   with AcceptsNumbers with ReturnsValueSetOfEqualSize with ClearsBindingsPattern {
     def returnType(args: AlgebraOp) = Set(FloatType)
   })
 
   registerFunction(new JavaMethod("ceil", classOf[Math].getMethod("ceil", FloatType.associatedClass))
-   with AcceptsNumbers with ReturnsSingletonTuples with ClearsBindingsPattern {
+   with AcceptsNumbers with ReturnsValueSetOfEqualSize with ClearsBindingsPattern {
     def returnType(args: AlgebraOp) = Set(FloatType)
   })
 
   registerFunction(new JavaMethod("floor", classOf[Math].getMethod("floor", FloatType.associatedClass))
-   with AcceptsNumbers with ReturnsSingletonTuples with ClearsBindingsPattern {
+   with AcceptsNumbers with ReturnsValueSetOfEqualSize with ClearsBindingsPattern {
     def returnType(args: AlgebraOp) = Set(FloatType)
   })
 
   registerFunction(new JavaMethod("log", classOf[Math].getMethod("log", FloatType.associatedClass))
-   with AcceptsNumbers with ReturnsSingletonTuples with ClearsBindingsPattern {
+   with AcceptsNumbers with ReturnsValueSetOfEqualSize with ClearsBindingsPattern {
     def returnType(args: AlgebraOp) = Set(FloatType)
   })
 
   registerFunction(new JavaMethod("power", classOf[Math].getMethod("pow", FloatType.associatedClass, FloatType.associatedClass))
-   with ReturnsSingletonTuples with ClearsBindingsPattern {
+   with ReturnsValueSetOfEqualSize with ClearsBindingsPattern {
     def accepts(args: AlgebraOp) = {
       args.minTupleSize == 2 && args.maxTupleSize == Some(2) &&
         args.leftType(0).subsetOf(DataType.numeric) && args.leftType(1).subsetOf(DataType.numeric)

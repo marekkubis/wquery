@@ -19,6 +19,8 @@ trait WordNetStore {
 
   def getSynset(sense: Sense): Option[Synset]
 
+  // estimates
+
   // updating nodes
   def addSense(sense: Sense, assignments: List[PropertyAssignment])
 

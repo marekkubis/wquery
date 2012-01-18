@@ -23,6 +23,8 @@ sealed abstract class UpdateOp extends AlgebraOp {
   def maxTupleSize = some(0)
 
   def bindingsPattern = BindingsSchema()
+
+  def maxCount(wordNet: WordNetSchema) = some(0)
 }
 
 //
@@ -246,6 +248,8 @@ case class NewSynsetOp(sensesOp: AlgebraOp) extends AlgebraOp {
   def referencedVariables = sensesOp.referencedVariables
 
   def referencesContext = sensesOp.referencesContext
+
+  def maxCount(wordNet: WordNetSchema) = some(1)
 }
 
 class NewSynset(val senses: List[Sense]) extends Synset("synset#" + senses.head.toString)

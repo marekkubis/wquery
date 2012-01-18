@@ -3,10 +3,12 @@ package org.wquery.engine.planner
 import org.wquery.engine.operations._
 import org.wquery.model.{Backward, Forward}
 import org.wquery.engine.{PathVariable, StepVariable, VariableTemplate}
+import scalaz._
+import Scalaz._
 
 sealed abstract class Link(val variables: VariableTemplate) {
   def leftFringe: AlgebraOp
-  def rightFringe: AlgebraOp
+  def rightFringe: List[(AlgebraOp, Option[Condition])]
   def forward(op: AlgebraOp): AlgebraOp
   def backward(op: AlgebraOp): AlgebraOp
 }
@@ -14,7 +16,7 @@ sealed abstract class Link(val variables: VariableTemplate) {
 class RootLink(generator: AlgebraOp, override val variables: VariableTemplate) extends Link(variables) {
   def leftFringe = ConstantOp.empty
 
-  def rightFringe = generator
+  def rightFringe = List((generator, none[Condition]))
 
   def forward(op: AlgebraOp) = generator
 
@@ -28,11 +30,10 @@ class RootLink(generator: AlgebraOp, override val variables: VariableTemplate) e
   override def toString = "r(" + generator + ")"
 }
 
-// class PatternLink(val leftGenerator: Option[AlgebraOp], val pos: Int, val pattern: RelationalPattern, val variables: VariableTemplate, val rightGenerator: Option[AlgebraOp]) extends Link {
-class PatternLink(pos: Int, pattern: RelationalPattern, override val variables: VariableTemplate) extends Link(variables) {
+class PatternLink(pos: Int, pattern: RelationalPattern, override val variables: VariableTemplate, val rightGenerators: List[(AlgebraOp, Condition)]) extends Link(variables) {
   def leftFringe = FringeOp(pattern, Left)
 
-  def rightFringe = FringeOp(pattern, Right)
+  def rightFringe = (FringeOp(pattern, Right), none[Condition])::(rightGenerators.map{ case (a, b) => (a, b.some) })
 
   def forward(op: AlgebraOp) = ExtendOp(op, pos, pattern, Forward, variables)
 

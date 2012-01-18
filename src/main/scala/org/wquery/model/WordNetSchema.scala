@@ -1,8 +1,13 @@
 package org.wquery.model
 
 import org.wquery.WQueryModelException
+import collection.immutable.List
+import scalaz._
+import Scalaz._
 
 class WordNetSchema(store: WordNetStore) {
+  val maxPathSize = 20 // TODO estimate using WordNet content
+
   def relations = store.relations
 
   def getRelation(name: String, arguments: Map[String, Set[DataType]]) = {
@@ -15,4 +20,20 @@ class WordNetSchema(store: WordNetStore) {
   }
 
   def containsRelation(name: String, arguments: Map[String, Set[DataType]]) = getRelation(name, arguments).isDefined
+
+  def extendMaxCount(pathCount: Option[BigInt], pattern: ArcPattern) = {
+    pathCount.map(_ * 2) // TODO estimate using WordNet content
+  }
+
+  def fetchMaxCount(relation: Relation, from: List[(String, List[Any])], to: List[String]) = {
+    10000 // TODO estimate using WordNet content
+  }
+
+  def fringeMaxCount(relations: List[(Relation, String)]): BigInt = {
+    10000 // TODO estimate using WordNet content
+  }
+
+  // extendCount
+
+  // fetchCount
 }
