@@ -26,10 +26,10 @@ class WordNetSchema(store: WordNetStore) {
   }
 
   def fetchMaxCount(relation: Relation, from: List[(String, List[Any])], to: List[String]) = {
-    10000 // TODO estimate using WordNet content
+    from.map{ case (_, l) => if (l.isEmpty) 10000 else l.size }.sum // TODO estimate using WordNet content
   }
 
-  def fringeMaxCount(relations: List[(Relation, String)]): BigInt = {
+  def fringeMaxCount(relations: List[(Relation, String)]) = {
     10000 // TODO estimate using WordNet content
   }
 

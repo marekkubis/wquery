@@ -133,6 +133,22 @@ class PlannerTests extends WQueryTestSuite {
     assert(forwardResult mequal backwardResult)
   }
 
+  @Test def planMoreSelectiveBackwardGenerator() = {
+    val path = planner ffor ("{}.hypernym.{cab:3}") path
+
+    val forwardPlan = path.walkForward(BindingsSchema(), 0, path.links.size - 1)
+    val backwardPlan = path.walkBackward(wquery.wordNet.schema, BindingsSchema(), 0, path.links.size - 1)
+
+    forwardPlan.toString should equal ("SelectOp(ExtendOp(FetchOp(synsets,List((source,List())),List(source)),0,QuantifiedRelationPattern(source&synset^hypernym^destination&synset,{1}),Forward,VariableTemplate(List())),BinaryCondition(in,ContextRefOp(Set(synset)),ProjectOp(ExtendOp(FetchOp(literal,List((destination,List(cab)), (num,List(3))),List(source)),0,RelationUnionPattern(List(source&sense^synset^destination&synset)),Forward,VariableTemplate(List())),ContextRefOp(Set(synset)))))")
+    backwardPlan.toString should equal ("SelectOp(BindOp(ExtendOp(ProjectOp(ExtendOp(FetchOp(literal,List((destination,List(cab)), (num,List(3))),List(source)),0,RelationUnionPattern(List(source&sense^synset^destination&synset)),Forward,VariableTemplate(List())),ContextRefOp(Set(synset))),0,QuantifiedRelationPattern(source&synset^hypernym^destination&synset,{1}),Backward,VariableTemplate(List())),VariableTemplate(List($__a, @_))),BinaryCondition(in,StepVariableRefOp($__a,Set(synset)),FetchOp(synsets,List((source,List())),List(source))))")
+
+    val forwardResult = forwardPlan.evaluate(wquery.wordNet, Bindings())
+    val backwardResult = backwardPlan.evaluate(wquery.wordNet, Bindings())
+
+    emitted(forwardResult) should equal ("{ minicab:1:n } hypernym { cab:3:n hack:5:n taxi:1:n taxicab:1:n }\n{ gypsy cab:1:n } hypernym { cab:3:n hack:5:n taxi:1:n taxicab:1:n }\n")
+    assert(forwardResult mequal backwardResult)
+  }
+
   // {car}.hypernym.{bus}
 
   // {plan}.hypernym$a.meronym[$a={xyz}]

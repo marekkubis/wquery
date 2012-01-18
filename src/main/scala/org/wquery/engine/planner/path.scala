@@ -19,7 +19,7 @@ class Path(val links: List[Link], conditions: Map[Option[Link], List[Condition]]
     val applier = new ConditionApplier(links, conditions, context)
     val path = links.slice(leftPos, rightPos + 1)
     val (generator, condition) = path.last.rightFringe.minBy(_._1.maxCount(wordNet))(WQueryOptionNoneMaxOrdering.BigIntOrdering)
-    
+
     condition.map(applier.skipCondition(_))
     path.foldRight(generator)((link, op) => applier.applyConditions(link.backward(op), link))
   }
@@ -82,7 +82,7 @@ class PathBuilder {
 
     for (condition <- linkConditions) {
       condition matchOrZero {
-        case BinaryCondition("=", leftOp, rightOp) =>
+        case BinaryCondition("in", leftOp, rightOp) =>
           inferGeneratorFromContext(leftOp, rightOp)
             .orElse(inferGeneratorFromContext(rightOp, leftOp))
             .map(generator => buffer.append((generator, condition)))
