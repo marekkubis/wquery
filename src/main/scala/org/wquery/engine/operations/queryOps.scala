@@ -67,7 +67,7 @@ case class IterateOp(bindingOp: AlgebraOp, iteratedOp: AlgebraOp) extends QueryO
 
   def referencesContext = iteratedOp.referencesContext || bindingOp.referencesContext
 
-  def maxCount(wordNet: WordNetSchema) = (bindingOp.maxCount(wordNet) <|*|> iteratedOp.maxCount(wordNet)).map{ case (a, b) => a * b }
+  def maxCount(wordNet: WordNetSchema) = (bindingOp.maxCount(wordNet) |@| iteratedOp.maxCount(wordNet))(_ * _)
 }
 
 case class IfElseOp(conditionOp: AlgebraOp, ifOp: AlgebraOp, elseOp: Option[AlgebraOp]) extends QueryOp {
@@ -112,11 +112,7 @@ case class BlockOp(ops: List[AlgebraOp]) extends QueryOp {
 
   def minTupleSize = ops.map(_.minTupleSize).min
 
-  def maxTupleSize = {
-    val opSizes = ops.map(_.maxTupleSize).flatten
-
-    (opSizes.size == ops.size)??(opSizes.max.some)
-  }
+  def maxTupleSize = ops.map(_.maxTupleSize).sequence.map(_.sum)
 
   def bindingsPattern = {
     // It is assumed that all statements in a block provide same binding schemas
@@ -127,11 +123,7 @@ case class BlockOp(ops: List[AlgebraOp]) extends QueryOp {
 
   def referencesContext = ops.exists(_.referencesContext)
 
-  def maxCount(wordNet: WordNetSchema) = {
-    val opCounts = ops.map(_.maxCount(wordNet)).flatten
-
-    (opCounts.size == ops.size)??(opCounts.max.some)
-  }
+  def maxCount(wordNet: WordNetSchema) = ops.map(_.maxCount(wordNet)).sequence.map(_.sum)
 }
 
 case class AssignmentOp(variables: VariableTemplate, op: AlgebraOp) extends QueryOp {
@@ -212,7 +204,7 @@ case class UnionOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends QueryOp {
 
   def minTupleSize = leftOp.minTupleSize min rightOp.minTupleSize
 
-  def maxTupleSize = (leftOp.maxTupleSize <|*|> rightOp.maxTupleSize).map{ case (a, b) => a max b }
+  def maxTupleSize = (leftOp.maxTupleSize |@| rightOp.maxTupleSize)(_ max _)
 
   def bindingsPattern = BindingsPattern()
 
@@ -220,7 +212,8 @@ case class UnionOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends QueryOp {
 
   def referencesContext = leftOp.referencesContext || rightOp.referencesContext
 
-  def maxCount(wordNet: WordNetSchema) = (leftOp.maxCount(wordNet) <|*|> rightOp.maxCount(wordNet)).map{ case (a, b) => a max b}}
+  def maxCount(wordNet: WordNetSchema) = (leftOp.maxCount(wordNet) |@| rightOp.maxCount(wordNet))(_ max _)
+}
 
 case class ExceptOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends QueryOp {
   def evaluate(wordNet: WordNet, bindings: Bindings) = {
@@ -258,7 +251,7 @@ case class IntersectOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends QueryOp {
 
   def minTupleSize = leftOp.minTupleSize max rightOp.minTupleSize
 
-  def maxTupleSize = (leftOp.maxTupleSize <|*|> rightOp.maxTupleSize).map{ case (a, b) => a min b}
+  def maxTupleSize = (leftOp.maxTupleSize |@| rightOp.maxTupleSize)(_ min _)
 
   def bindingsPattern = BindingsPattern()
 
@@ -266,7 +259,7 @@ case class IntersectOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends QueryOp {
 
   def referencesContext = leftOp.referencesContext || rightOp.referencesContext
 
-  def maxCount(wordNet: WordNetSchema) = (leftOp.maxCount(wordNet) <|*|> rightOp.maxCount(wordNet)).map{ case (a, b) => a min b}
+  def maxCount(wordNet: WordNetSchema) = (leftOp.maxCount(wordNet) |@| rightOp.maxCount(wordNet))(_ min _)
 }
 
 case class JoinOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends QueryOp {
@@ -334,7 +327,7 @@ case class JoinOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends QueryOp {
 
   def minTupleSize = leftOp.minTupleSize + rightOp.minTupleSize
 
-  def maxTupleSize = (leftOp.maxTupleSize <|*|> rightOp.maxTupleSize).map{ case (a, b) => a + b }
+  def maxTupleSize = (leftOp.maxTupleSize |@| rightOp.maxTupleSize)(_ + _)
 
   def bindingsPattern = leftOp.bindingsPattern union rightOp.bindingsPattern
 
@@ -342,7 +335,7 @@ case class JoinOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends QueryOp {
 
   def referencesContext = leftOp.referencesContext || rightOp.referencesContext
 
-  def maxCount(wordNet: WordNetSchema) = (leftOp.maxCount(wordNet) <|*|> rightOp.maxCount(wordNet)).map{ case (a, b) => a * b }
+  def maxCount(wordNet: WordNetSchema) = (leftOp.maxCount(wordNet) |@| rightOp.maxCount(wordNet))(_ * _)
 }
 
 /*
@@ -386,7 +379,7 @@ abstract class BinaryArithmeticOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends
 
   def referencesContext = leftOp.referencesContext || rightOp.referencesContext
 
-  def maxCount(wordNet: WordNetSchema) = (leftOp.maxCount(wordNet) <|*|> rightOp.maxCount(wordNet)).map{ case (a, b) => a * b }
+  def maxCount(wordNet: WordNetSchema) = (leftOp.maxCount(wordNet) |@| rightOp.maxCount(wordNet))(_ * _)
 }
 
 case class AddOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends BinaryArithmeticOp(leftOp, rightOp) {
@@ -608,7 +601,7 @@ case class ProjectOp(op: AlgebraOp, projectOp: AlgebraOp) extends QueryOp {
 
   def referencesContext = op.referencesContext
 
-  def maxCount(wordNet: WordNetSchema) = (op.maxCount(wordNet) <|*|> projectOp.maxCount(wordNet)).map{ case (a, b) => a * b }
+  def maxCount(wordNet: WordNetSchema) = (op.maxCount(wordNet) |@| projectOp.maxCount(wordNet))(_ * _)
 }
 
 case class ExtendOp(op: AlgebraOp, from: Int, pattern: RelationalPattern, direction: Direction, variables: VariableTemplate) extends QueryOp {
@@ -681,7 +674,7 @@ case class ExtendOp(op: AlgebraOp, from: Int, pattern: RelationalPattern, direct
 
   def minTupleSize = op.minTupleSize + pattern.minSize
 
-  def maxTupleSize = (op.maxTupleSize <|*|> pattern.maxSize).map{ case (a, b) => a + b }
+  def maxTupleSize = (op.maxTupleSize |@| pattern.maxSize)(_ + _)
 
   def bindingsPattern = {
     val pattern = op.bindingsPattern

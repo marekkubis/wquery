@@ -84,11 +84,7 @@ case class RelationCompositionPattern(patterns: List[RelationalPattern]) extends
 
   def minSize = patterns.map(_.minSize).sum
 
-  def maxSize = {
-    val patternSizes = patterns.map(_.maxSize).flatten
-
-    (patternSizes.size == patterns.size)??(patternSizes.max.some)
-  }
+  def maxSize = patterns.map(_.maxSize).sequence.map(_.sum)
 
   def sourceType = patterns.head.sourceType
 
@@ -250,7 +246,7 @@ case class QuantifiedRelationPattern(pattern: RelationalPattern, quantifier: Qua
 
   def minSize = pattern.minSize * quantifier.lowerBound
 
-  def maxSize = (pattern.maxSize <|*|> quantifier.upperBound).map{ case (a, b) => a * b }
+  def maxSize = (pattern.maxSize |@| quantifier.upperBound)(_ * _)
 
   def sourceType = pattern.sourceType
 
