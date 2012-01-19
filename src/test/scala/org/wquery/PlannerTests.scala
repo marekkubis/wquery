@@ -133,7 +133,7 @@ class PlannerTests extends WQueryTestSuite {
     assert(forwardResult mequal backwardResult)
   }
 
-  @Test def planMoreSelectiveBackwardGenerator() = {
+  @Test def planPathWithHighlySelectiveNodeFilter() = {
     val path = planner ffor ("{}.hypernym.{cab:3}") path
 
     val forwardPlan = path.walkForward(BindingsSchema(), 0, path.links.size - 1)
@@ -149,8 +149,35 @@ class PlannerTests extends WQueryTestSuite {
     assert(forwardResult mequal backwardResult)
   }
 
-  // {car}.hypernym.{bus}
+  @Test def planPathWithHighlySelectiveContextFilter() = {
+    val path = planner ffor ("{}.hypernym[# = {cab:3}]") path
 
-  // {plan}.hypernym$a.meronym[$a={xyz}]
+    val forwardPlan = path.walkForward(BindingsSchema(), 0, path.links.size - 1)
+    val backwardPlan = path.walkBackward(wquery.wordNet.schema, BindingsSchema(), 0, path.links.size - 1)
 
+    forwardPlan.toString should equal ("SelectOp(ExtendOp(FetchOp(synsets,List((source,List())),List(source)),0,QuantifiedRelationPattern(source&synset^hypernym^destination&synset,{1}),Forward,VariableTemplate(List())),BinaryCondition(=,ContextRefOp(Set(synset)),ProjectOp(ExtendOp(FetchOp(literal,List((destination,List(cab)), (num,List(3))),List(source)),0,RelationUnionPattern(List(source&sense^synset^destination&synset)),Forward,VariableTemplate(List())),ContextRefOp(Set(synset)))))")
+    backwardPlan.toString should equal ("SelectOp(BindOp(ExtendOp(ProjectOp(ExtendOp(FetchOp(literal,List((destination,List(cab)), (num,List(3))),List(source)),0,RelationUnionPattern(List(source&sense^synset^destination&synset)),Forward,VariableTemplate(List())),ContextRefOp(Set(synset))),0,QuantifiedRelationPattern(source&synset^hypernym^destination&synset,{1}),Backward,VariableTemplate(List())),VariableTemplate(List($__a, @_))),BinaryCondition(in,StepVariableRefOp($__a,Set(synset)),FetchOp(synsets,List((source,List())),List(source))))")
+
+    val forwardResult = forwardPlan.evaluate(wquery.wordNet, Bindings())
+    val backwardResult = backwardPlan.evaluate(wquery.wordNet, Bindings())
+
+    emitted(forwardResult) should equal ("{ minicab:1:n } hypernym { cab:3:n hack:5:n taxi:1:n taxicab:1:n }\n{ gypsy cab:1:n } hypernym { cab:3:n hack:5:n taxi:1:n taxicab:1:n }\n")
+    assert(forwardResult mequal backwardResult)
+  }
+
+  @Test def planPathWithHighlySelectiveVariableFilter() = {
+    val path = planner ffor ("{}.hypernym$a[$a = {cab:3}]") path
+
+    val forwardPlan = path.walkForward(BindingsSchema(), 0, path.links.size - 1)
+    val backwardPlan = path.walkBackward(wquery.wordNet.schema, BindingsSchema(), 0, path.links.size - 1)
+
+    forwardPlan.toString should equal ("SelectOp(ExtendOp(FetchOp(synsets,List((source,List())),List(source)),0,QuantifiedRelationPattern(source&synset^hypernym^destination&synset,{1}),Forward,VariableTemplate(List($a))),BinaryCondition(=,StepVariableRefOp($a,Set(synset)),ProjectOp(ExtendOp(FetchOp(literal,List((destination,List(cab)), (num,List(3))),List(source)),0,RelationUnionPattern(List(source&sense^synset^destination&synset)),Forward,VariableTemplate(List())),ContextRefOp(Set(synset)))))")
+    backwardPlan.toString should equal ("SelectOp(BindOp(ExtendOp(ProjectOp(ExtendOp(FetchOp(literal,List((destination,List(cab)), (num,List(3))),List(source)),0,RelationUnionPattern(List(source&sense^synset^destination&synset)),Forward,VariableTemplate(List())),ContextRefOp(Set(synset))),0,QuantifiedRelationPattern(source&synset^hypernym^destination&synset,{1}),Backward,VariableTemplate(List($a))),VariableTemplate(List($__a, @_))),BinaryCondition(in,StepVariableRefOp($__a,Set(synset)),FetchOp(synsets,List((source,List())),List(source))))")
+
+    val forwardResult = forwardPlan.evaluate(wquery.wordNet, Bindings())
+    val backwardResult = backwardPlan.evaluate(wquery.wordNet, Bindings())
+
+    emitted(forwardResult) should equal ("$a={ cab:3:n hack:5:n taxi:1:n taxicab:1:n } { minicab:1:n } hypernym { cab:3:n hack:5:n taxi:1:n taxicab:1:n }\n$a={ cab:3:n hack:5:n taxi:1:n taxicab:1:n } { gypsy cab:1:n } hypernym { cab:3:n hack:5:n taxi:1:n taxicab:1:n }\n")
+    assert(forwardResult mequal backwardResult)
+  }
 }

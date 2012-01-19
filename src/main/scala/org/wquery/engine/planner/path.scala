@@ -67,7 +67,9 @@ class PathBuilder {
       linkBuffer.append(new RootLink(generator, ~linkVariables))
       rootLink = false
     } else {
-      linkBuffer.append(new PatternLink(linkPos.get, linkPattern.get, ~linkVariables, inferGenerators(conditionsList)))
+      val variables = ~linkVariables
+
+      linkBuffer.append(new PatternLink(linkPos.get, linkPattern.get, variables, inferGenerators(conditionsList, variables)))
       linkPos = none
       linkPattern = none
     }
@@ -77,14 +79,23 @@ class PathBuilder {
     linkConditions = new ListBuffer[Condition]
   }
 
-  private def inferGenerators(linkConditions: List[Condition]) = {
+  private def inferGenerators(linkConditions: List[Condition], linkVariables: VariableTemplate) = {
     val buffer = new ListBuffer[(AlgebraOp, Condition)]
 
     for (condition <- linkConditions) {
       condition matchOrZero {
-        case BinaryCondition("in", leftOp, rightOp) =>
-          inferGeneratorFromContext(leftOp, rightOp)
-            .orElse(inferGeneratorFromContext(rightOp, leftOp))
+        case BinaryCondition(op, leftOp, rightOp) if op == "in" || op == "=" =>
+            inferGeneratorFromContextVariable(leftOp, rightOp)
+              .orElse(inferGeneratorFromContextVariable(rightOp, leftOp))
+              .map(generator => buffer.append((generator, condition)))
+      }
+    }
+
+    for (condition <- conditions(none)) {
+      condition matchOrZero {
+        case BinaryCondition(op, leftOp, rightOp) if op == "in" || op == "=" =>
+          inferGeneratorFromStepVariable(linkVariables, leftOp, rightOp)
+            .orElse(inferGeneratorFromStepVariable(linkVariables, rightOp, leftOp))
             .map(generator => buffer.append((generator, condition)))
       }
     }
@@ -92,12 +103,17 @@ class PathBuilder {
     buffer.toList
   }
 
-  private def inferGeneratorFromContext(contextOp: AlgebraOp, generatorOp: AlgebraOp) = {
+  private def inferGeneratorFromContextVariable(contextOp: AlgebraOp, generatorOp: AlgebraOp) = {
     (contextOp matchOrZero {
       case ContextRefOp(_) =>
         some(generatorOp)
-      case StepVariableRefOp(_, _) =>
-        some(generatorOp)
+    }).filterNot(_.referencesContext)
+  }
+
+  private def inferGeneratorFromStepVariable(linkVariables: VariableTemplate, contextOp: AlgebraOp, generatorOp: AlgebraOp) = {
+    (contextOp matchOrZero {
+      case StepVariableRefOp(variable, _) =>
+        (linkVariables.pattern.lastOption.some(_ === variable).none(false))??(some(generatorOp))
     }).filterNot(_.referencesContext)
   }
 

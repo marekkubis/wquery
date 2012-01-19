@@ -160,9 +160,9 @@ trait WQueryParsers extends RegexParsers {
 
   def filter = "[" ~> or_condition <~ "]"
 
-  def or_condition: Parser[OrExpr] = repsep(and_condition, "or") ^^ { OrExpr(_) }
+  def or_condition: Parser[ConditionalExpr] = repsep(and_condition, "or") ^^ { conds => if (conds.size == 1) conds.head else OrExpr(conds) }
 
-  def and_condition = repsep(not_condition, "and") ^^ { AndExpr(_) }
+  def and_condition = repsep(not_condition, "and") ^^ { conds => if (conds.size == 1) conds.head else AndExpr(conds) }
 
   def not_condition = (
     "not" ~> condition ^^ { NotExpr(_) }
