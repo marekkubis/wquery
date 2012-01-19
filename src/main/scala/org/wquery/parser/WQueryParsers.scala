@@ -124,11 +124,14 @@ trait WQueryParsers extends RegexParsers {
 
   def dots = rep1(".") ^^ { _.size - 1 }
 
-  def relation_composition_expr = rep1sep(relation_union_expr, ".") ^^ { RelationCompositionExpr(_) }
+  def relation_composition_expr = rep1sep(relation_union_expr, ".") ^^ { exprs => if (exprs.size == 1) exprs.head else RelationCompositionExpr(exprs) }
 
-  def relation_union_expr: Parser[RelationalExpr] = rep1sep(quantified_relation_expr, "|") ^^ { RelationUnionExpr(_) }
+  def relation_union_expr: Parser[RelationalExpr] = rep1sep(quantified_relation_expr, "|") ^^ { exprs => if (exprs.size == 1) exprs.head else RelationUnionExpr(exprs) }
 
-  def quantified_relation_expr = simple_relation_expr ~ quantifier ^^ { case expr~quant => QuantifiedRelationExpr(expr, quant) }
+  def quantified_relation_expr = simple_relation_expr ~ quantifier ^^ { 
+    case expr~Quantifier(1, Some(1)) => expr
+    case expr~quant => QuantifiedRelationExpr(expr, quant)  
+  }
 
   def simple_relation_expr = (
     "(" ~> relation_composition_expr <~ ")"
@@ -160,9 +163,9 @@ trait WQueryParsers extends RegexParsers {
 
   def filter = "[" ~> or_condition <~ "]"
 
-  def or_condition: Parser[ConditionalExpr] = repsep(and_condition, "or") ^^ { conds => if (conds.size == 1) conds.head else OrExpr(conds) }
+  def or_condition: Parser[ConditionalExpr] = rep1sep(and_condition, "or") ^^ { conds => if (conds.size == 1) conds.head else OrExpr(conds) }
 
-  def and_condition = repsep(not_condition, "and") ^^ { conds => if (conds.size == 1) conds.head else AndExpr(conds) }
+  def and_condition = rep1sep(not_condition, "and") ^^ { conds => if (conds.size == 1) conds.head else AndExpr(conds) }
 
   def not_condition = (
     "not" ~> condition ^^ { NotExpr(_) }

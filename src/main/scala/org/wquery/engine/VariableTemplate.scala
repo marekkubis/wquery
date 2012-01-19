@@ -62,6 +62,8 @@ case class VariableTemplate(pattern: List[Variable]) {
   }
 
   def pathVariableIndexes(tupleSize: Int, shift: Int) = (shift + leftPatternSize, shift + tupleSize - rightPatternSize)
+
+  override def toString = if (pattern.isEmpty) "novars" else pattern.mkString
 }
 
 object VariableTemplate {

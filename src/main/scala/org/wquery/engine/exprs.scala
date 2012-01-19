@@ -645,7 +645,7 @@ case class SenseByWordFormAndSenseNumberAndPosReq(wordForm: String, senseNumber:
 case class ContextByRelationalExprReq(expr: RelationalExpr) extends EvaluableExpr {
   def evaluationPlan(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context) = {
     expr match {
-      case RelationUnionExpr(List(QuantifiedRelationExpr(ArcExpr(List(ArcExprArgument(id, None))),Quantifier(1,Some(1))))) =>
+      case ArcExpr(List(ArcExprArgument(id, None))) =>
         val sourceTypes = if (bindings.areContextVariablesBound) bindings.lookupContextVariableType else DataType.all
 
         if (wordNet.containsRelation(id, Map((Relation.Source, sourceTypes))) || id === "_") {
