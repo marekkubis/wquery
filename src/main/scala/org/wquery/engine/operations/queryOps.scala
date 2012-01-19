@@ -138,7 +138,7 @@ case class AssignmentOp(variables: VariableTemplate, op: AlgebraOp) extends Quer
   def evaluate(wordNet: WordNet, bindings: Bindings) = {
     val result = op.evaluate(wordNet, bindings)
 
-    if (result.pathCount == 1) { // TODO remove this constraint
+    if (result.containsSingleTuple) { // TODO remove this constraint
       val tuple = result.paths.head
       val dataSet = DataSet.fromTuple(tuple).bindVariables(variables)
 
