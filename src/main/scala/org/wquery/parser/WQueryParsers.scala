@@ -103,7 +103,7 @@ trait WQueryParsers extends RegexParsers {
     | path
   )
 
-  def path = generator_subpath ~ rep(subpath) ^^ { case gpath~paths => paths.foldLeft(gpath) { case (expr, steps~projs) => PathExpr(NodeTransformationExpr(expr)::steps, projs) }}
+  def path = generator_subpath ~ rep(subpath) ^^ { case gpath~paths => paths.foldLeft(gpath){ case (expr, steps~projs) => PathExpr(NodeTransformationExpr(expr)::steps, projs) }}
 
   def generator_subpath = generator_step ~ rep(step) ~ rep(projection) ^^ { case gstep~steps~projs => PathExpr(gstep::steps, projs) }
 
