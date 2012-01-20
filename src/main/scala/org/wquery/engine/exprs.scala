@@ -666,12 +666,11 @@ case class ContextByRelationalExprReq(expr: RelationalExpr) extends EvaluableExp
     } else {
       val pattern = expr.evaluationPattern(wordNet, DataType.all)
 
-      val fetches = pattern.sourceType.map {
+      val fetches = pattern.sourceType.collect {
         case SynsetType => FetchOp.synsets
         case SenseType => FetchOp.senses
         case StringType => FetchOp.words
         case POSType => FetchOp.possyms
-        case _ => ConstantOp.empty
       }
 
       val fetchOp = fetches.reduceLeft[AlgebraOp]{ case (left, right) => UnionOp(left, right) }
