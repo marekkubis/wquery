@@ -108,7 +108,7 @@ class InMemoryWordNetStore extends WordNetStore {
     val toMap = to.toMap
 
     for (relation <- relations if relation.arguments.size > 1;
-         source <- relation.argumentNames if (through._1 == "_" || through._1 == source) && through._2.map(_ == relation.demandArgument(source).nodeType).getOrElse(true);
+         source <- relation.argumentNames if (through._1 == ArcPatternArgument.AnyName || through._1 == source) && through._2.map(_ == relation.demandArgument(source).nodeType).getOrElse(true);
          destination <- relation.argumentNames if toMap.isEmpty || toMap.get(destination).map(nodeTypeOption => nodeTypeOption.map(_ == relation.demandArgument(destination).nodeType).getOrElse(true)).getOrElse(false);
          if source != destination)
       buffer.append(extendWithRelationTuples(extensionSet, relation, from, direction, source, List(destination)))
@@ -518,7 +518,7 @@ class InMemoryWordNetStore extends WordNetStore {
     if (!synsets.isEmpty || !senses.isEmpty) {
       val (destination, sources) = if (synsets.isEmpty) (Synset("synset#" + senses.head.toString), Nil) else (synsets.head, synsets.tail)
       val (addAssignments, setAssignments, removeAssignments) = partitionAssignments(assignments)
-      val notSetRelations = relations.filter(relation => relation.name != "_" && !setAssignments.exists(_.pattern.relation.get == relation))
+      val notSetRelations = relations.filter(relation => relation.name != Relation.AnyName && !setAssignments.exists(_.pattern.relation.get == relation))
       val skippedTuples = removeAssignments.map(assignment => (assignment.pattern.relation.get, assignment.tuplesFor(destination))).toMap
       val destinationType = DataType.fromValue(destination)
 

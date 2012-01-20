@@ -27,6 +27,8 @@ case class Relation(name: String, arguments: Set[Argument]) {
 case class Argument(name: String, nodeType: NodeType)
 
 object Relation {
+  val AnyName = "_"
+
   // default argument names
   val Source = "source"
   val Destination = "destination"

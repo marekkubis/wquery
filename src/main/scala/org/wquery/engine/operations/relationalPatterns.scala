@@ -298,7 +298,7 @@ case class ArcRelationalPattern(pattern: ArcPattern) extends RelationalPattern {
   def extend(wordNet: WordNetStore, bindings: Bindings, extensionSet: ExtensionSet, from: Int, direction: Direction) = {
     pattern.relation.map(wordNet.extend(extensionSet, _, from, direction, pattern.source.name, pattern.destinations.map(_.name)))
       .getOrElse(wordNet.extend(extensionSet, from, direction, (pattern.source.name, pattern.source.nodeType),
-        if (pattern.destinations == List(ArcPatternArgument("_", None))) Nil else pattern.destinations.map(dest => (dest.name, dest.nodeType))))
+        if (pattern.destinations == List(ArcPatternArgument.Any)) Nil else pattern.destinations.map(dest => (dest.name, dest.nodeType))))
   }
 
   def fringe(wordNet: WordNetStore, bindings: Bindings, side: Side) = {
@@ -409,7 +409,7 @@ case class VariableRelationalPattern(variable: StepVariable) extends RelationalP
   }
 
   def maxCount(pathCount: Option[BigInt], wordNet: WordNetSchema) = {
-    wordNet.extendMaxCount(pathCount, ArcPattern(None, ArcPatternArgument("_", None), List(ArcPatternArgument("_", None))))
+    wordNet.extendMaxCount(pathCount, ArcPattern(None, ArcPatternArgument.Any, List(ArcPatternArgument.Any)))
   }
 
   def fringeMaxCount(side: Side, wordNet: WordNetSchema) = {
