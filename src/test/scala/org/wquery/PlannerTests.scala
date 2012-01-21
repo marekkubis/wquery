@@ -6,6 +6,7 @@ import Scalaz._
 import engine._
 import operations.{Bindings, BindingsSchema}
 import org.testng.annotations.Test
+import planner.{PlanEvaluator, PathPlanGenerator}
 
 class PlannerTests extends WQueryTestSuite {
 
@@ -15,6 +16,8 @@ class PlannerTests extends WQueryTestSuite {
         pathExpr.createPath(steps, wquery.wordNet.schema, BindingsSchema(), Context())
     }
   }
+
+  def plansFor(query: String) = new PathPlanGenerator(pathFor(query)).plan(wquery.wordNet.schema, BindingsSchema())
 
   private def emitted(dataSet: DataSet) = emitter.emit(Answer(wquery.wordNet, dataSet))
 
@@ -191,5 +194,32 @@ class PlannerTests extends WQueryTestSuite {
       wquery.wordNet.schema.relations.find(_.name == "hypernym"),
       ArcPatternArgument("source", None), List(ArcPatternArgument("destination", None))
     )).get should equal (tuples.of("max(from {}$a emit count($a.hypernym))").asValueOf[Int])
+  }
+
+  @Test def choosePlanForPathWithHighlySelectiveNodeFilter() = {
+    val plans = plansFor("{}.hypernym.{cab:3}")
+    val plan = PlanEvaluator.chooseBest(wquery.wordNet.schema, plans)
+    val result = plan.evaluate(wquery.wordNet, Bindings())
+
+    plan.toString should equal ("SelectOp(BindOp(ExtendOp(ProjectOp(ExtendOp(FetchOp(literal,List((destination,List(cab)), (num,List(3))),List(source)),0,RelationUnionPattern(List(source&sense^synset^destination&synset)),Forward,novars),ContextRefOp(Set(synset))),0,source&synset^hypernym^destination&synset,Backward,novars),$__a@_),BinaryCondition(in,StepVariableRefOp($__a,Set(synset)),FetchOp(synsets,List((source,List())),List(source))))")
+    emitted(result) should equal ("{ gypsy cab:1:n } hypernym { cab:3:n hack:5:n taxi:1:n taxicab:1:n }\n{ minicab:1:n } hypernym { cab:3:n hack:5:n taxi:1:n taxicab:1:n }\n")
+  }
+
+  @Test def choosePlanForPathWithHighlySelectiveGenerator() = {
+    val plans = plansFor("{cab:3}.hypernym")
+    val plan = PlanEvaluator.chooseBest(wquery.wordNet.schema, plans)
+    val result = plan.evaluate(wquery.wordNet, Bindings())
+
+    plan.toString should equal ("ExtendOp(ProjectOp(ExtendOp(FetchOp(literal,List((destination,List(cab)), (num,List(3))),List(source)),0,RelationUnionPattern(List(source&sense^synset^destination&synset)),Forward,novars),ContextRefOp(Set(synset))),0,source&synset^hypernym^destination&synset,Forward,novars)")
+    emitted(result) should equal ("{ cab:3:n hack:5:n taxi:1:n taxicab:1:n } hypernym { car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n }\n")
+  }
+
+  @Test def choosePlanForPathWithHighlySelectiveFilterAndGenerator() = {
+    val plans = plansFor("{cab:3}.hypernym.{car:1}")
+    val plan = PlanEvaluator.chooseBest(wquery.wordNet.schema, plans)
+    val result = plan.evaluate(wquery.wordNet, Bindings())
+
+    plan.toString should equal ("SelectOp(ExtendOp(ProjectOp(ExtendOp(FetchOp(literal,List((destination,List(cab)), (num,List(3))),List(source)),0,RelationUnionPattern(List(source&sense^synset^destination&synset)),Forward,novars),ContextRefOp(Set(synset))),0,source&synset^hypernym^destination&synset,Forward,novars),BinaryCondition(in,ContextRefOp(Set(synset)),ProjectOp(ExtendOp(FetchOp(literal,List((destination,List(car)), (num,List(1))),List(source)),0,RelationUnionPattern(List(source&sense^synset^destination&synset)),Forward,novars),ContextRefOp(Set(synset)))))")
+    emitted(result) should equal ("{ cab:3:n hack:5:n taxi:1:n taxicab:1:n } hypernym { car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n }\n")
   }
 }

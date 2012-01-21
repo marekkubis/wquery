@@ -14,8 +14,10 @@ class WQuery(val wordNet: WordNet) extends Logging {
   val bindings = Bindings()
   val parser = new Object with WQueryParsers
   
-  def execute(input:String): Result = {    
+  def execute(input: String): Result = {
     try {
+      debug("Quer: " + input)
+      
       val expr = parser parse input
       debug("Expr: " + expr)
 

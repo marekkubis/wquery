@@ -534,9 +534,9 @@ case class PathExpr(exprs: List[TransformationExpr], projections: List[Projectio
   def evaluationPlan(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context) = {
     val path = createPath(exprs, wordNet, bindings, context)
     val plans = new PathPlanGenerator(path).plan(wordNet, bindings)
-    val plan = PlanEvaluator.chooseBest(wordNet, plans)
+    // TODO val plan = PlanEvaluator.chooseBest(wordNet, plans)
 
-    projections.foldLeft[AlgebraOp](plan) { (contextOp, expr) =>
+    projections.foldLeft[AlgebraOp](plans.head) { (contextOp, expr) =>
       expr.project(wordNet, bindings, context, contextOp)
     }
   }
