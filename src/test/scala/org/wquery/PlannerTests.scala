@@ -8,21 +8,18 @@ import operations.{Bindings, BindingsSchema}
 import org.testng.annotations.Test
 
 class PlannerTests extends WQueryTestSuite {
-  class PlannerFor {
-    def ffor(query: String) = {
-      (wquery.parser.parse(query): @unchecked) match {
-        case FunctionExpr(sort,FunctionExpr(distinct, ConjunctiveExpr(pathExpr @ PathExpr(steps, _)))) =>
-          pathExpr.createPlanner(steps, wquery.wordNet.schema, BindingsSchema(), Context())
-      }
+
+  def pathFor(query: String) = {
+    (wquery.parser.parse(query): @unchecked) match {
+      case FunctionExpr(sort,FunctionExpr(distinct, ConjunctiveExpr(pathExpr @ PathExpr(steps, _)))) =>
+        pathExpr.createPath(steps, wquery.wordNet.schema, BindingsSchema(), Context())
     }
   }
-
-  val planner = new PlannerFor
 
   private def emitted(dataSet: DataSet) = emitter.emit(Answer(wquery.wordNet, dataSet))
 
   @Test def planSingleTransformation() = {
-    val path = planner ffor ("{car}.hypernym") path
+    val path = pathFor("{car}.hypernym")
 
     val forwardPlan = path.walkForward(BindingsSchema(), 0, path.links.size - 1)
     val backwardPlan = path.walkBackward(wquery.wordNet.schema, BindingsSchema(), 0, path.links.size - 1)
@@ -38,7 +35,7 @@ class PlannerTests extends WQueryTestSuite {
   }
 
   @Test def planInvertedTransformation() = {
-    val path = planner ffor ("{cab}.^hypernym") path
+    val path = pathFor("{cab}.^hypernym")
 
     val forwardPlan = path.walkForward(BindingsSchema(), 0, path.links.size - 1)
     val backwardPlan = path.walkBackward(wquery.wordNet.schema, BindingsSchema(), 0, path.links.size - 1)
@@ -54,7 +51,7 @@ class PlannerTests extends WQueryTestSuite {
   }
 
   @Test def planMultipleTransformations() = {
-    val path = planner ffor ("{}.hypernym.partial_holonym.hypernym") path
+    val path = pathFor("{}.hypernym.partial_holonym.hypernym")
 
     val forwardPlan = path.walkForward(BindingsSchema(), 0, path.links.size - 1)
     val backwardPlan = path.walkBackward(wquery.wordNet.schema, BindingsSchema(), 0, path.links.size - 1)
@@ -70,7 +67,7 @@ class PlannerTests extends WQueryTestSuite {
   }
 
   @Test def planTransformationsUnion() = {
-    val path = planner ffor ("{car}.hypernym|partial_holonym") path
+    val path = pathFor("{car}.hypernym|partial_holonym")
 
     val forwardPlan = path.walkForward(BindingsSchema(), 0, path.links.size - 1)
     val backwardPlan = path.walkBackward(wquery.wordNet.schema, BindingsSchema(), 0, path.links.size - 1)
@@ -86,7 +83,7 @@ class PlannerTests extends WQueryTestSuite {
   }
 
   @Test def planTransformationsComposition() = {
-    val path = planner ffor ("{}.(hypernym.partial_holonym.hypernym)") path
+    val path = pathFor("{}.(hypernym.partial_holonym.hypernym)")
 
     val forwardPlan = path.walkForward(BindingsSchema(), 0, path.links.size - 1)
     val backwardPlan = path.walkBackward(wquery.wordNet.schema, BindingsSchema(), 0, path.links.size - 1)
@@ -102,7 +99,7 @@ class PlannerTests extends WQueryTestSuite {
   }
 
   @Test def planOneOrMoreTransformations() = {
-    val path = planner ffor ("{car:3:n}.hypernym+") path
+    val path = pathFor("{car:3:n}.hypernym+")
 
     val forwardPlan = path.walkForward(BindingsSchema(), 0, path.links.size - 1)
     val backwardPlan = path.walkBackward(wquery.wordNet.schema, BindingsSchema(), 0, path.links.size - 1)
@@ -118,7 +115,7 @@ class PlannerTests extends WQueryTestSuite {
   }
 
   @Test def planZeroOrMoreTransformations() = {
-    val path = planner ffor ("{car:3:n}.hypernym*") path
+    val path = pathFor("{car:3:n}.hypernym*")
 
     val forwardPlan = path.walkForward(BindingsSchema(), 0, path.links.size - 1)
     val backwardPlan = path.walkBackward(wquery.wordNet.schema, BindingsSchema(), 0, path.links.size - 1)
@@ -134,7 +131,7 @@ class PlannerTests extends WQueryTestSuite {
   }
 
   @Test def planPathWithHighlySelectiveNodeFilter() = {
-    val path = planner ffor ("{}.hypernym.{cab:3}") path
+    val path = pathFor("{}.hypernym.{cab:3}")
 
     val forwardPlan = path.walkForward(BindingsSchema(), 0, path.links.size - 1)
     val backwardPlan = path.walkBackward(wquery.wordNet.schema, BindingsSchema(), 0, path.links.size - 1)
@@ -150,7 +147,7 @@ class PlannerTests extends WQueryTestSuite {
   }
 
   @Test def planPathWithHighlySelectiveContextFilter() = {
-    val path = planner ffor ("{}.hypernym[# = {cab:3}]") path
+    val path = pathFor("{}.hypernym[# = {cab:3}]")
 
     val forwardPlan = path.walkForward(BindingsSchema(), 0, path.links.size - 1)
     val backwardPlan = path.walkBackward(wquery.wordNet.schema, BindingsSchema(), 0, path.links.size - 1)
@@ -166,7 +163,7 @@ class PlannerTests extends WQueryTestSuite {
   }
 
   @Test def planPathWithHighlySelectiveVariableFilter() = {
-    val path = planner ffor ("{}.hypernym$a[$a = {cab:3}]") path
+    val path = pathFor("{}.hypernym$a[$a = {cab:3}]")
 
     val forwardPlan = path.walkForward(BindingsSchema(), 0, path.links.size - 1)
     val backwardPlan = path.walkBackward(wquery.wordNet.schema, BindingsSchema(), 0, path.links.size - 1)

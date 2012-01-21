@@ -1,6 +1,6 @@
 package org.wquery.engine
 
-import planner.{PathPlanner, PathBuilder}
+import planner.{PlanEvaluator, PathPlanGenerator, PathBuilder}
 import scalaz._
 import Scalaz._
 import org.wquery.model._
@@ -532,21 +532,23 @@ case class ProjectionExpr(expr: EvaluableExpr) extends Expr {
 
 case class PathExpr(exprs: List[TransformationExpr], projections: List[ProjectionExpr]) extends EvaluableExpr {
   def evaluationPlan(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context) = {
-    val planner = createPlanner(exprs, wordNet, bindings, context)
+    val path = createPath(exprs, wordNet, bindings, context)
+    val plans = new PathPlanGenerator(path).plan(wordNet, bindings)
+    val plan = PlanEvaluator.chooseBest(wordNet, plans)
 
-    projections.foldLeft[AlgebraOp](planner.plan(bindings)) { (contextOp, expr) =>
+    projections.foldLeft[AlgebraOp](plan) { (contextOp, expr) =>
       expr.project(wordNet, bindings, context, contextOp)
     }
   }
 
-  def createPlanner(exprs: List[TransformationExpr], wordNet: WordNetSchema, bindings: BindingsSchema, context: Context) = {
+  def createPath(exprs: List[TransformationExpr], wordNet: WordNetSchema, bindings: BindingsSchema, context: Context) = {
     val builder = new PathBuilder
 
     exprs.foldLeft[AlgebraOp](ConstantOp.empty) { (contextOp, expr) =>
       expr.push(wordNet, bindings, context, contextOp, builder)
     }
 
-    new PathPlanner(builder.build)
+    builder.build
   }
 }
 

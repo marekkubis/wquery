@@ -207,8 +207,10 @@ class InMemoryWordNetStore extends WordNetStore {
   def stats = statsCache.get
 
   private def calculateStats() = {
-    val fetchAllMaxCounts = MMap[(Relation, String), Int]((for (relation <- relations; argument <- relation.argumentNames) yield ((relation, argument), 0)): _*)
-    val extendValueMaxCounts = MMap[(Relation, String), Int]((for (relation <- relations; argument <- relation.argumentNames) yield ((relation, argument), 0)): _*)
+    val fetchAllMaxCounts = MMap[(Relation, String), Int](
+      (for (relation <- relations; argument <- ArcPatternArgument.AnyName::relation.argumentNames) yield ((relation, argument), 0)): _*)
+    val extendValueMaxCounts = MMap[(Relation, String), Int](
+      (for (relation <- relations; argument <- ArcPatternArgument.AnyName::relation.argumentNames) yield ((relation, argument), 0)): _*)
 
     for ((relation, relationSuccessors) <- successors; ((argument, _), argumentSuccessors) <- relationSuccessors) {
       fetchAllMaxCounts((relation, argument)) += argumentSuccessors.size

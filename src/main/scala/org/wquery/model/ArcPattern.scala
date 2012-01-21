@@ -10,6 +10,8 @@ case class ArcPattern(relation: Option[Relation], source: ArcPatternArgument, de
 case class ArcPatternArgument(name: String, nodeType: Option[NodeType]) {
   implicit val ArcPatternArgumentEqual = equalA[ArcPatternArgument]
 
+  def isUnnamed = name == ArcPatternArgument.AnyName
+
   override def toString = name + ~nodeType.map("&" + _)
 }
 

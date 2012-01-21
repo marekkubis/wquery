@@ -13,7 +13,9 @@ class WordNetStats(relations: List[Relation], val fetchAllMaxCounts: Map[(Relati
   }
 
   def extendMaxCount(pathCount: Option[BigInt], pattern: ArcPattern) = {
-    pathCount.map(_ * (for (relation <- pattern.relation.map(List(_)).getOrElse(relations))
-      yield extendValueMaxCounts(relation, pattern.source.name)).sum)
+    pathCount.map(_ * (
+      for (relation <- pattern.relation.map(List(_)).getOrElse(relations);
+        source <- if (pattern.source.isUnnamed) relation.argumentNames else List(pattern.source.name))
+        yield extendValueMaxCounts(relation, pattern.source.name)).sum)
   }
 }
