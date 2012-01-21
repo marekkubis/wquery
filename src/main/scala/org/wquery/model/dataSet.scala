@@ -37,6 +37,13 @@ class DataSet(val paths: List[List[Any]], val pathVars: Map[String, List[(Int, I
     }
   }
 
+  def asValueOf[A]: A = {
+    if (containsSingleValue)
+      paths.head.head.asInstanceOf[A]
+    else
+      throw new RuntimeException("DataSet does not contain single value")
+  }
+
   def leftType(pos: Int): Set[DataType] = paths.filter(pos < _.size).map(tuple => DataType.fromValue(tuple(pos))).toSet
 
   def rightType(pos: Int): Set[DataType] = paths.filter(pos < _.size).map(tuple => DataType.fromValue(tuple(tuple.size - 1 - pos))).toSet

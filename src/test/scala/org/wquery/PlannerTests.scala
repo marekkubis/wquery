@@ -1,6 +1,6 @@
 package org.wquery
 
-import model.DataSet
+import model._
 import scalaz._
 import Scalaz._
 import engine._
@@ -179,5 +179,20 @@ class PlannerTests extends WQueryTestSuite {
 
     emitted(forwardResult) should equal ("$a={ cab:3:n hack:5:n taxi:1:n taxicab:1:n } { minicab:1:n } hypernym { cab:3:n hack:5:n taxi:1:n taxicab:1:n }\n$a={ cab:3:n hack:5:n taxi:1:n taxicab:1:n } { gypsy cab:1:n } hypernym { cab:3:n hack:5:n taxi:1:n taxicab:1:n }\n")
     assert(forwardResult mequal backwardResult)
+  }
+
+  @Test def verifyStats() = {
+    val stats = wquery.wordNet.schema.stats
+
+    stats.fetchMaxCount(WordNet.SynsetSet, List((Relation.Source, Nil)), List(Relation.Source)) should equal (tuples.of("count({})").asValueOf[Int])
+    stats.fetchMaxCount(WordNet.SenseSet, List((Relation.Source, Nil)), List(Relation.Source)) should equal (tuples.of("count(::)").asValueOf[Int])
+    stats.fetchMaxCount(WordNet.WordSet, List((Relation.Source, Nil)), List(Relation.Source)) should equal (tuples.of("count('')").asValueOf[Int])
+    stats.fetchMaxCount(WordNet.PosSet, List((Relation.Source, Nil)), List(Relation.Source)) should equal (tuples.of("count(possyms)").asValueOf[Int])
+    stats.fetchMaxCount(WordNet.SenseToWordFormSenseNumberAndPos, List((Relation.Source, List("cab")),("num", List(3)), ("pos", List("n"))), List(Relation.Source)) should equal (tuples.of("count(cab.senses)").asValueOf[Int])
+
+    stats.extendMaxCount(Some(1), ArcPattern(
+      wquery.wordNet.schema.relations.find(_.name == "hypernym"),
+      ArcPatternArgument("source", None), List(ArcPatternArgument("destination", None))
+    )).get should equal (tuples.of("max(from {}$a emit count($a.hypernym))").asValueOf[Int])
   }
 }

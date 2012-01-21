@@ -764,7 +764,7 @@ case class FetchOp(relation: Relation, from: List[(String, List[Any])], to: List
 
   def referencesContext = false
 
-  def maxCount(wordNet: WordNetSchema) = some(wordNet.fetchMaxCount(relation, from, to))
+  def maxCount(wordNet: WordNetSchema) = some(wordNet.stats.fetchMaxCount(relation, from, to))
 }
 
 object FetchOp {

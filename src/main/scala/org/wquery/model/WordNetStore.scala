@@ -19,7 +19,8 @@ trait WordNetStore {
 
   def getSynset(sense: Sense): Option[Synset]
 
-  // estimates
+  // stats
+  def stats: WordNetStats
 
   // updating nodes
   def addSense(sense: Sense, assignments: List[PropertyAssignment])
@@ -82,10 +83,12 @@ trait WordNetStore {
   val functionalForActions = MMap[(Relation, String), String]()
 
   // helper methods
-  def addSuccessor(pred: Any, relation: Relation, succ: Any) = addLink(relation, Map((Relation.Source, pred), (Relation.Destination, succ)))
+  def addSuccessor(predecessor: Any, relation: Relation, successor: Any) {
+    addLink(relation, Map((Relation.Source, predecessor), (Relation.Destination, successor)))
+  }
 
-  def removeSuccessor(pred: Any, relation: Relation, succ: Any, withDependentNodes: Boolean = false, withCollectionDependentNodes:Boolean = false) = {
-    removeLink(relation, Map((Relation.Source, pred), (Relation.Destination, succ)), withDependentNodes, withCollectionDependentNodes)
+  def removeSuccessor(predecessor: Any, relation: Relation, successor: Any, withDependentNodes: Boolean = false, withCollectionDependentNodes:Boolean = false) {
+    removeLink(relation, Map((Relation.Source, predecessor), (Relation.Destination, successor)), withDependentNodes, withCollectionDependentNodes)
   }
 }
 

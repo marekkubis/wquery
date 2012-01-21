@@ -265,7 +265,7 @@ case class QuantifiedRelationPattern(pattern: RelationalPattern, quantifier: Qua
   }
 
   def maxCount(pathCount: Option[BigInt], wordNet: WordNetSchema) = {
-    (1 to wordNet.maxPathSize).foldLeft(pathCount)((count, _) => pattern.maxCount(count, wordNet))
+    (1 to wordNet.stats.maxPathSize).foldLeft(pathCount)((count, _) => pattern.maxCount(count, wordNet))
   }
 
   def fringeMaxCount(side: Side, wordNet: WordNetSchema) = {
@@ -273,7 +273,8 @@ case class QuantifiedRelationPattern(pattern: RelationalPattern, quantifier: Qua
       pattern.fringeMaxCount(side, wordNet)
     else {
       val fringeTypes = getFringeTypes(side)
-      val domainRelationsMaxCount = wordNet.fringeMaxCount(getFringeDomainRelations(fringeTypes))
+      val domainRelationsMaxCount = (for ((relation, argument) <- getFringeDomainRelations(fringeTypes))
+        yield wordNet.stats.fetchMaxCount(relation, List((argument, Nil)), List(argument))).sum
 
       if (fringeTypes.subsetOf(DataType.domain)) 
         domainRelationsMaxCount 
@@ -340,9 +341,12 @@ case class ArcRelationalPattern(pattern: ArcPattern) extends RelationalPattern {
       .getOrElse(argument.nodeType.map(Set(_)).getOrElse(NodeType.all)).asInstanceOf[Set[DataType]]
   }
 
-  def maxCount(pathCount: Option[BigInt], wordNet: WordNetSchema) = wordNet.extendMaxCount(pathCount, pattern)
+  def maxCount(pathCount: Option[BigInt], wordNet: WordNetSchema) = wordNet.stats.extendMaxCount(pathCount, pattern)
 
-  def fringeMaxCount(side: Side, wordNet: WordNetSchema) = wordNet.fringeMaxCount(createFringeDescription(wordNet.relations, side))
+  def fringeMaxCount(side: Side, wordNet: WordNetSchema) = {
+    (for ((relation, argument) <- createFringeDescription(wordNet.relations, side))
+    yield wordNet.stats.fetchMaxCount(relation, List((argument, Nil)), List(argument))).sum
+  }
 
   private def createFringeDescription(relations: List[Relation], side: Side) = {
     val (fringeName, fringeType) = side match {
@@ -409,12 +413,12 @@ case class VariableRelationalPattern(variable: StepVariable) extends RelationalP
   }
 
   def maxCount(pathCount: Option[BigInt], wordNet: WordNetSchema) = {
-    wordNet.extendMaxCount(pathCount, ArcPattern(None, ArcPatternArgument.Any, List(ArcPatternArgument.Any)))
+    wordNet.stats.extendMaxCount(pathCount, ArcPattern(None, ArcPatternArgument.Any, List(ArcPatternArgument.Any)))
   }
 
   def fringeMaxCount(side: Side, wordNet: WordNetSchema) = {
-    val relations = wordNet.relations.flatMap(relation => relation.argumentNames.map((relation, _)))
-    wordNet.fringeMaxCount(relations)
+    (for (relation <- wordNet.relations; argument <- relation.argumentNames)
+      yield wordNet.stats.fetchMaxCount(relation, List((argument, Nil)), List(argument))).sum
   }
 
   override def toString = variable.toString

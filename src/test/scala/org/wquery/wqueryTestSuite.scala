@@ -1,4 +1,6 @@
 package org.wquery
+
+import engine.{Error, Answer}
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.testng.TestNGSuite
 import org.testng.annotations.BeforeClass
@@ -31,13 +33,24 @@ object WQueryRuntime {
 
 abstract class WQueryTestSuite extends TestNGSuite with ShouldMatchers {  
   var wquery: WQuery = null
-  var emitter: WQueryEmitter = null        
-  
-  class Result {
+  var emitter: WQueryEmitter = null
+
+  class TuplesOf {
+    def of(query: String) = wquery.execute(query) match {
+      case Answer(_, ans) =>
+        ans
+      case Error(err) =>
+        throw new IllegalArgumentException("Query returned error instead of dataset: " + err)
+    }
+  }
+
+  val tuples = new TuplesOf
+
+  class ResultOf {
     def of(query: String) = emitter.emit(wquery.execute(query))
   }
 
-  val result = new Result
+  val result = new ResultOf
 
   @BeforeClass def setUp() {
     wquery = WQueryRuntime.wquery

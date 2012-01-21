@@ -1,17 +1,20 @@
 package org.wquery.model.impl
 
 import collection.mutable.ListBuffer
+import collection.mutable.{Map => MMap}
 import org.wquery.model._
 import org.wquery.{WQueryUpdateBreaksRelationPropertyException, WQueryModelException, WQueryEvaluationException}
 import akka.stm._
 import scalaz._
 import Scalaz._
 import org.wquery.engine.operations.{RelationalPattern, NewSynset, Bindings}
+import org.wquery.utils.Cache
 
 class InMemoryWordNetStore extends WordNetStore {
   private val successors = TransactionalMap[Relation, TransactionalMap[(String, Any), IndexedSeq[Map[String, Any]]]]()
   private val patterns = scala.collection.mutable.Map[Relation, List[RelationalPattern]]()
   private var relationsList = List[Relation]()
+  private val statsCache = new Cache[WordNetStats](calculateStats, 1000)
 
   def relations = relationsList
 
@@ -25,6 +28,7 @@ class InMemoryWordNetStore extends WordNetStore {
       requiredBys(relation) = ∅[Set[String]]
       transitives(relation) = false
       symmetry(relation) = NonSymmetric
+      statsCache.invalidate
     }
   }
 
@@ -35,6 +39,7 @@ class InMemoryWordNetStore extends WordNetStore {
     relationsList = relationsList.filterNot(_ == relation)
     patterns.remove(relation)
     successors.remove(relation)
+    statsCache.invalidate
   }
 
   def setRelations(newRelations: List[Relation], assignments: List[PropertyAssignment]) {
@@ -199,6 +204,20 @@ class InMemoryWordNetStore extends WordNetStore {
     }
   }
 
+  def stats = statsCache.get
+
+  private def calculateStats() = {
+    val fetchAllMaxCounts = MMap[(Relation, String), Int]((for (relation <- relations; argument <- relation.argumentNames) yield ((relation, argument), 0)): _*)
+    val extendValueMaxCounts = MMap[(Relation, String), Int]((for (relation <- relations; argument <- relation.argumentNames) yield ((relation, argument), 0)): _*)
+
+    for ((relation, relationSuccessors) <- successors; ((argument, _), argumentSuccessors) <- relationSuccessors) {
+      fetchAllMaxCounts((relation, argument)) += argumentSuccessors.size
+      extendValueMaxCounts((relation, argument)) = extendValueMaxCounts((relation, argument)) max argumentSuccessors.size
+    }
+
+    new WordNetStats(relations, fetchAllMaxCounts.toMap, extendValueMaxCounts.toMap)
+  }
+
   def addRelationPattern(relation: Relation, pattern: RelationalPattern) {
     if (!(patterns.contains(relation))) {
       patterns(relation) = Nil
@@ -306,6 +325,8 @@ class InMemoryWordNetStore extends WordNetStore {
 
       relationSuccessors((sourceName, sourceValue)) = relationSuccessors((sourceName, sourceValue)) :+ tuple
     }
+
+    statsCache.age
   }
 
   private def containsLink(relation: Relation, tuple: Map[String, Any]) = {
@@ -469,6 +490,7 @@ class InMemoryWordNetStore extends WordNetStore {
     }
 
     handleSymmetryForRemoveLink(relation, tuple, node, symmetricEdge)
+    statsCache.age
   }
 
   private def handleRequiredByPropertyForRemoveLink(relation: Relation, argumentName: String, argumentValue: Any, node: Option[Any], relationSuccessors: Seq[Map[String, Any]]) {
