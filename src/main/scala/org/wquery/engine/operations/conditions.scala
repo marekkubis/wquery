@@ -35,11 +35,35 @@ case class NotCondition(expr: Condition) extends Condition {
 }
 
 case class BinaryCondition(op: String, leftOp: AlgebraOp, rightOp: AlgebraOp) extends Condition {
+  var leftCache: (List[Any], Map[Any, List[Any]]) = null
+  var rightCache: (List[Any], Map[Any, List[Any]]) = null
+  val leftOpIsContextIndependent = leftOp.referencedVariables.isEmpty && !leftOp.referencesContext
+  val rightOpIsContextIndependent = rightOp.referencedVariables.isEmpty && !rightOp.referencesContext
+
   def satisfied(wordNet: WordNet, bindings: Bindings) = {
-    val leftResult = leftOp.evaluate(wordNet, bindings).paths.map(_.last)
-    val rightResult = rightOp.evaluate(wordNet, bindings).paths.map(_.last)
-    val leftGroup = leftResult.groupBy(x => x)
-    val rightGroup = rightResult.groupBy(x => x)
+    val (leftResult, leftGroup) = if (leftCache != null) {
+      leftCache
+    } else {
+      val result = leftOp.evaluate(wordNet, bindings).paths.map(_.last)
+      val group = result.groupBy(x => x)
+
+      if (leftOpIsContextIndependent)
+        leftCache = (result, group)
+
+      (result, group)
+    }
+
+    val (rightResult, rightGroup) = if (rightCache != null) {
+      rightCache
+    } else {
+      val result = rightOp.evaluate(wordNet, bindings).paths.map(_.last)
+      val group = result.groupBy(x => x)
+
+      if (rightOpIsContextIndependent)
+        rightCache = (result, group)
+      
+      (result, group)
+    }
 
     op match {
       case "=" =>
