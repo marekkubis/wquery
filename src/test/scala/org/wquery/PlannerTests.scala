@@ -222,4 +222,13 @@ class PlannerTests extends WQueryTestSuite {
     plan.toString should equal ("SelectOp(ExtendOp(ProjectOp(ExtendOp(FetchOp(literal,List((destination,List(cab)), (num,List(3))),List(source)),0,RelationUnionPattern(List(source&sense^synset^destination&synset)),Forward,novars),ContextRefOp(Set(synset))),0,source&synset^hypernym^destination&synset,Forward,novars),BinaryCondition(in,ContextRefOp(Set(synset)),ProjectOp(ExtendOp(FetchOp(literal,List((destination,List(car)), (num,List(1))),List(source)),0,RelationUnionPattern(List(source&sense^synset^destination&synset)),Forward,novars),ContextRefOp(Set(synset)))))")
     emitted(result) should equal ("{ cab:3:n hack:5:n taxi:1:n taxicab:1:n } hypernym { car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n }\n")
   }
+
+  @Test def choosePlanByHighlySelectiveInnerFilter() = {
+    val plans = plansFor("{}.hypernym.{cab:3}.hypernym")
+    val plan = PlanEvaluator.chooseBest(wquery.wordNet.schema, plans)
+    val result = plan.evaluate(wquery.wordNet, Bindings())
+
+    plan.toString should equal ("SelectOp(BindOp(ExtendOp(ExtendOp(ProjectOp(ExtendOp(FetchOp(literal,List((destination,List(cab)), (num,List(3))),List(source)),0,RelationUnionPattern(List(source&sense^synset^destination&synset)),Forward,novars),ContextRefOp(Set(synset))),0,source&synset^hypernym^destination&synset,Forward,novars),0,source&synset^hypernym^destination&synset,Backward,novars),$__a@_),BinaryCondition(in,StepVariableRefOp($__a,Set(synset)),FetchOp(synsets,List((source,List())),List(source))))")
+    emitted(result) should equal ("{ gypsy cab:1:n } hypernym { cab:3:n hack:5:n taxi:1:n taxicab:1:n } hypernym { car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n }\n{ minicab:1:n } hypernym { cab:3:n hack:5:n taxi:1:n taxicab:1:n } hypernym { car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n }\n")
+  }
 }

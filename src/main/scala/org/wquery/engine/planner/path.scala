@@ -7,7 +7,7 @@ import Scalaz._
 import org.wquery.engine.VariableTemplate
 import org.wquery.model.{WQueryOptionNoneMaxOrdering, WordNetSchema}
 
-class Path(val links: List[Link], conditions: Map[Option[Link], List[Condition]]) {
+class Path(val links: List[Link], val conditions: Map[Option[Link], List[Condition]]) {
   def walkForward(context: BindingsSchema, leftPos: Int, rightPos: Int) = {
     val applier = new ConditionApplier(links, conditions, context)
     val path = links.slice(leftPos, rightPos + 1)
