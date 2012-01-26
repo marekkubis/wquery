@@ -12,8 +12,8 @@ class PathPlanGenerator(path: Path) {
         .sortBy{ case (link, _) => link.rightFringe.minBy(_._1.maxCount(wordNet))._1.maxCount(wordNet) }
         .map{ case (_, pos) => if (pos == 0) -1 else pos }
 
-      for (seed <- seeds.slice(0, 2))
-        yield walkFrom(wordNet, bindings, List(seed))
+      (for (seedSet <- seeds.slice(0, 2).toSet.subsets if seedSet.nonEmpty)
+        yield walkFrom(wordNet, bindings, seedSet.toList.sorted)).toList
     } else {
       List(walkFrom(wordNet, bindings, List(-1)))
     }
@@ -43,6 +43,7 @@ class PathPlanGenerator(path: Path) {
         if (leftWalker.left != leftWalker.right)
           walker.op = NaturalJoinOp(leftWalker.op, walker.op)
 
+        walker.left = leftWalker.left
         walkers.filterNot(_ == leftWalker)
       } else if (walkerPos < walkers.size - 1 && walkers(walkerPos + 1).left == walker.right) {
         val rightWalker = walkers(walkerPos + 1)
@@ -50,6 +51,7 @@ class PathPlanGenerator(path: Path) {
         if (rightWalker.left != rightWalker.right)
           walker.op = NaturalJoinOp(walker.op, rightWalker.op)
 
+        walker.right = rightWalker.right
         walkers.filterNot(_ == rightWalker)
       } else {
         walkers
