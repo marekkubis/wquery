@@ -589,23 +589,23 @@ case class SelectOp(op: AlgebraOp, condition: Condition) extends QueryOp {
   def evaluate(wordNet: WordNet, bindings: Bindings) = {
     val dataSet = op.evaluate(wordNet, bindings)
     val pathVarNames = dataSet.pathVars.keySet
+    val filterPathVarNames = pathVarNames.filter(pathVarName => condition.referencedVariables.contains(PathVariable(pathVarName)))
     val stepVarNames = dataSet.stepVars.keySet
+    val filterStepVarNames = stepVarNames.filter(stepVarName => condition.referencedVariables.contains(StepVariable(stepVarName)))
     val pathBuffer = DataSetBuffers.createPathBuffer
     val pathVarBuffers = DataSetBuffers.createPathVarBuffers(pathVarNames)
     val stepVarBuffers = DataSetBuffers.createStepVarBuffers(stepVarNames)
     val binds = Bindings(bindings, false)
 
-    // TODO OPT here determine which variables are to be used by filter
-
     for (i <- 0 until dataSet.pathCount) {
       val tuple = dataSet.paths(i)
 
-      for (pathVar <- pathVarNames) {
+      for (pathVar <- filterPathVarNames) {
         val varPos = dataSet.pathVars(pathVar)(i)
         binds.bindPathVariable(pathVar, tuple.slice(varPos._1, varPos._2))
       }
 
-      for (stepVar <- stepVarNames) {
+      for (stepVar <- filterStepVarNames) {
         val varPos = dataSet.stepVars(stepVar)(i)
         binds.bindStepVariable(stepVar, tuple(varPos))
       }
@@ -644,22 +644,22 @@ case class ProjectOp(op: AlgebraOp, projectOp: AlgebraOp) extends QueryOp {
     val dataSet = op.evaluate(wordNet, bindings)
     val buffer = new DataSetBuffer
     val pathVarNames = dataSet.pathVars.keys
+    val filterPathVarNames = pathVarNames.filter(pathVarName => projectOp.referencedVariables.contains(PathVariable(pathVarName)))
     val stepVarNames = dataSet.stepVars.keys
+    val filterStepVarNames = stepVarNames.filter(stepVarName => projectOp.referencedVariables.contains(StepVariable(stepVarName)))
     val binds = Bindings(bindings, false)
-
-    // TODO OPT here determine which variables are to be used by projection
 
     for (i <- 0 until dataSet.pathCount) {
       val tuple = dataSet.paths(i)
 
       binds.bindContextVariable(tuple.last)
 
-      for (pathVar <- pathVarNames) {
+      for (pathVar <- filterPathVarNames) {
         val varPos = dataSet.pathVars(pathVar)(i)
         binds.bindPathVariable(pathVar, tuple.slice(varPos._1, varPos._2))
       }
 
-      for (stepVar <- stepVarNames) {
+      for (stepVar <- filterStepVarNames) {
         val varPos = dataSet.stepVars(stepVar)(i)
         binds.bindStepVariable(stepVar, tuple(varPos))
       }
