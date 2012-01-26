@@ -338,6 +338,89 @@ case class JoinOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends QueryOp {
   def maxCount(wordNet: WordNetSchema) = (leftOp.maxCount(wordNet) |@| rightOp.maxCount(wordNet))(_ * _)
 }
 
+case class NaturalJoinOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends QueryOp {
+  def evaluate(wordNet: WordNet, bindings: Bindings) = {
+    val leftSet = leftOp.evaluate(wordNet, bindings)
+    val rightSet = rightOp.evaluate(wordNet, bindings)
+    val leftPathVarNames = leftSet.pathVars.keySet
+    val leftStepVarNames = leftSet.stepVars.keySet
+    val rightPathVarNames = rightSet.pathVars.keySet
+    val rightStepVarNames = rightSet.stepVars.keySet
+    val pathBuffer = DataSetBuffers.createPathBuffer
+    val pathVarBuffers = DataSetBuffers.createPathVarBuffers(leftPathVarNames union rightPathVarNames)
+    val stepVarBuffers = DataSetBuffers.createStepVarBuffers(leftStepVarNames union rightStepVarNames)
+
+    for (i <- 0 until leftSet.pathCount; j <- 0 until rightSet.pathCount) {
+      val leftTuple = leftSet.paths(i)
+      val rightTuple = rightSet.paths(j)
+
+      if (leftTuple.last == rightTuple.head) {
+        pathBuffer.append(leftTuple ++ rightTuple.tail)
+        leftPathVarNames.foreach(x => pathVarBuffers(x).append(leftSet.pathVars(x)(i)))
+        leftStepVarNames.foreach(x => stepVarBuffers(x).append(leftSet.stepVars(x)(i)))
+
+        val offset = leftTuple.size - 1
+
+        rightPathVarNames.foreach { x =>
+          val pos = rightSet.pathVars(x)(j)
+          pathVarBuffers(x).append((pos._1 + offset, pos._2 + offset))
+        }
+
+        for (stepVarName <- rightStepVarNames) {
+          val varPos = rightSet.stepVars(stepVarName)(j)
+
+          if (varPos != 0)
+            stepVarBuffers(stepVarName).append(varPos + offset)
+        }
+      }
+    }
+
+    DataSet.fromBuffers(pathBuffer, pathVarBuffers, stepVarBuffers)
+  }
+
+  def leftType(pos: Int) ={
+    val leftMinSize = leftOp.minTupleSize
+    val leftMaxSize = leftOp.maxTupleSize
+
+    if (pos < leftMinSize) {
+      leftOp.leftType(pos)
+    } else if (leftMaxSize.map(pos < _).getOrElse(true)) { // pos < leftMaxSize or leftMaxSize undefined
+      val rightOpTypes = for (i <- 0 to pos - leftMinSize) yield rightOp.leftType(i + 1)
+
+      (rightOpTypes :+ leftOp.leftType(pos)).flatten.toSet
+    } else { // leftMaxSize defined and pos >= leftMaxSize
+      (for (i <- leftMinSize to leftMaxSize.get) yield rightOp.leftType(pos - i + 1)).flatten.toSet
+    }
+  }
+
+  def rightType(pos: Int) ={
+    val rightMinSize = rightOp.minTupleSize
+    val rightMaxSize = rightOp.maxTupleSize
+
+    if (pos < rightMinSize) {
+      rightOp.rightType(pos)
+    } else if (rightMaxSize.map(pos < _).getOrElse(true)) { // pos < rightMaxSize or rightMaxSize undefined
+      val leftOpTypes = for (i <- 0 to pos - rightMinSize) yield leftOp.rightType(i + 1)
+
+      (leftOpTypes :+ rightOp.rightType(pos)).flatten.toSet
+    } else { // rightMaxSize defined and pos >= rightMaxSize
+      (for (i <- rightMinSize to rightMaxSize.get) yield leftOp.rightType(pos - i + 1)).flatten.toSet
+    }
+  }
+
+  def minTupleSize = leftOp.minTupleSize + rightOp.minTupleSize - 1
+
+  def maxTupleSize = (leftOp.maxTupleSize |@| rightOp.maxTupleSize)(_ + _ - 1)
+
+  def bindingsPattern = leftOp.bindingsPattern union rightOp.bindingsPattern
+
+  def referencedVariables = leftOp.referencedVariables ++ rightOp.referencedVariables
+
+  def referencesContext = leftOp.referencesContext || rightOp.referencesContext
+
+  def maxCount(wordNet: WordNetSchema) = (leftOp.maxCount(wordNet) |@| rightOp.maxCount(wordNet))(_ * _)
+}
+
 /*
  * Arithmetic operations
  */
