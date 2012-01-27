@@ -1,4 +1,4 @@
-package org.wquery.engine.operations
+package org.wquery.engine
 
 trait ProvidesTupleSizes {
   val minTupleSize: Int

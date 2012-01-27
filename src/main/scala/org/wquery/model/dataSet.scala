@@ -1,13 +1,13 @@
 package org.wquery.model
 import scala.collection.mutable.ListBuffer
 import java.lang.IllegalArgumentException
-import org.wquery.engine.VariableTemplate
 import org.wquery.WQueryStepVariableCannotBeBoundException
 import scalaz._
 import Scalaz._
-import org.wquery.engine.operations.ProvidesTupleSizes
+import org.wquery.engine.{ProvidesTypes, VariableTemplate, ProvidesTupleSizes}
 
-class DataSet(val paths: List[List[Any]], val pathVars: Map[String, List[(Int, Int)]], val stepVars: Map[String, List[Int]]) extends ProvidesTupleSizes {
+class DataSet(val paths: List[List[Any]], val pathVars: Map[String, List[(Int, Int)]], val stepVars: Map[String, List[Int]])
+ extends ProvidesTypes with ProvidesTupleSizes {
   val (minTupleSize, maxTupleSize) = {
     val sizes = paths.map(_.size)
     (if (sizes.isEmpty) 0 else sizes.min, some(if (sizes.isEmpty) 0 else sizes.max))

@@ -2,13 +2,11 @@ package org.wquery.engine.operations
 
 import scalaz._
 import Scalaz._
-import org.wquery.engine.Variable
 import org.wquery.model.{WordNetSchema, DataType, DataSet, WordNet}
+import org.wquery.engine.{ProvidesTypes, ProvidesTupleSizes, Variable}
 
-abstract class AlgebraOp extends ProvidesTupleSizes {
+abstract class AlgebraOp extends ProvidesTypes with ProvidesTupleSizes {
   def evaluate(wordNet: WordNet, bindings: Bindings): DataSet
-  def leftType(pos: Int): Set[DataType]
-  def rightType(pos: Int): Set[DataType]
   def bindingsPattern: BindingsPattern
   def referencedVariables: Set[Variable]
   def referencesContext: Boolean

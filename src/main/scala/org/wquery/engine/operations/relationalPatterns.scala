@@ -7,16 +7,12 @@ import collection.mutable.ListBuffer
 import org.wquery.WQueryEvaluationException
 import org.wquery.engine._
 
-sealed abstract class RelationalPattern extends ProvidesTupleSizes {
+sealed abstract class RelationalPattern extends ProvidesTypes with ProvidesTupleSizes {
   def extend(wordNet: WordNetStore, bindings: Bindings, extensionSet: ExtensionSet, from: Int, direction: Direction): ExtendedExtensionSet
 
   def fringe(wordNet: WordNetStore, bindings: Bindings, side: Side): DataSet
 
   def sourceType: Set[DataType]
-
-  def leftType(pos: Int): Set[DataType]
-
-  def rightType(pos: Int): Set[DataType]
 
   def maxCount(pathCount: Option[BigInt], wordNet: WordNetSchema): Option[BigInt]
 
