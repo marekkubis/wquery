@@ -8,18 +8,18 @@ import org.wquery.engine.{ProvidesTypes, VariableTemplate, ProvidesTupleSizes}
 
 class DataSet(val paths: List[List[Any]], val pathVars: Map[String, List[(Int, Int)]], val stepVars: Map[String, List[Int]])
  extends ProvidesTypes with ProvidesTupleSizes {
-  val (minTupleSize, maxTupleSize) = {
+  lazy val (minTupleSize, maxTupleSize) = {
     val sizes = paths.map(_.size)
     (if (sizes.isEmpty) 0 else sizes.min, some(if (sizes.isEmpty) 0 else sizes.max))
   }
         
   val pathCount = paths.size
   val containsSingleTuple = pathCount == 1
-  val containsValues = minTupleSize == 1 && maxTupleSize.get == 1
-  val containsSingleValue = containsSingleTuple && containsValues
+  lazy val containsValues = minTupleSize == 1 && maxTupleSize.get == 1
+  lazy val containsSingleValue = containsSingleTuple && containsValues
   val isEmpty = pathCount == 0
 
-  def isTrue = {
+  lazy val isTrue = {
     if (paths.isEmpty) {
       false
     } else {
