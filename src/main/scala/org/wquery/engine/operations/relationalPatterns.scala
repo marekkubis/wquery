@@ -351,8 +351,8 @@ case class ArcRelationalPattern(pattern: ArcPattern) extends RelationalPattern {
     pattern.relation
       .some(rel => List((rel, fringeName)))
       .none(for (relation <- relations if relation.getArgument(fringeName)
-      .some(arg => fringeType.some(_ == arg.nodeType).none(true))
-      .none(false)) yield (relation, fringeName))
+        .some(arg => fringeType.some(_ == arg.nodeType).none(true))
+        .none(fringeName == ArcPatternArgument.AnyName)) yield (relation, fringeName))
   }
 }
 
