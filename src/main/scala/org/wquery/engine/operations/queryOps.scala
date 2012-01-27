@@ -882,7 +882,7 @@ case class ConstantOp(dataSet: DataSet) extends QueryOp {
 
   val minTupleSize = dataSet.minTupleSize
 
-  val maxTupleSize = some(dataSet.maxTupleSize)
+  val maxTupleSize = dataSet.maxTupleSize
 
   def bindingsPattern = BindingsPattern() // assumed that a constant dataset does not contain variable bindings
 

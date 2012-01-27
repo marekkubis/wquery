@@ -215,7 +215,7 @@ object LongestFunction extends DataSetFunction("longest") with AcceptsAll with R
  with PreservesTypes with PreservesBindingsPattern {
 
   def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings) = {
-    DataSet.fromBoundPaths(dataSet.toBoundPaths.filter(p => p._1.size == dataSet.maxTupleSize))
+    DataSet.fromBoundPaths(dataSet.toBoundPaths.filter(p => p._1.size == dataSet.maxTupleSize.get))
   }
 
   def minTupleSize(args: AlgebraOp) = args.maxTupleSize.getOrElse(args.minTupleSize)

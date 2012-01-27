@@ -5,16 +5,17 @@ import org.wquery.engine.VariableTemplate
 import org.wquery.WQueryStepVariableCannotBeBoundException
 import scalaz._
 import Scalaz._
+import org.wquery.engine.operations.ProvidesTupleSizes
 
-class DataSet(val paths: List[List[Any]], val pathVars: Map[String, List[(Int, Int)]], val stepVars: Map[String, List[Int]]) {
+class DataSet(val paths: List[List[Any]], val pathVars: Map[String, List[(Int, Int)]], val stepVars: Map[String, List[Int]]) extends ProvidesTupleSizes {
   val (minTupleSize, maxTupleSize) = {
     val sizes = paths.map(_.size)
-    (if (sizes.isEmpty) 0 else sizes.min, if (sizes.isEmpty) 0 else sizes.max)
+    (if (sizes.isEmpty) 0 else sizes.min, some(if (sizes.isEmpty) 0 else sizes.max))
   }
         
   val pathCount = paths.size
   val containsSingleTuple = pathCount == 1
-  val containsValues = minTupleSize == 1 && maxTupleSize == 1
+  val containsValues = minTupleSize == 1 && maxTupleSize.get == 1
   val containsSingleValue = containsSingleTuple && containsValues
   val isEmpty = pathCount == 0
 
@@ -22,7 +23,7 @@ class DataSet(val paths: List[List[Any]], val pathVars: Map[String, List[(Int, I
     if (paths.isEmpty) {
       false
     } else {
-      if (maxTupleSize == 1) {
+      if (maxTupleSize.get == 1) {
         val booleans = paths.map { x => 
           if (x.head.isInstanceOf[Boolean]) 
             x.head.asInstanceOf[Boolean] 
@@ -32,7 +33,7 @@ class DataSet(val paths: List[List[Any]], val pathVars: Map[String, List[(Int, I
 
         booleans.forall(x => x)
       } else {
-        maxTupleSize > 1
+        maxTupleSize.get > 1
       }
     }
   }
@@ -48,7 +49,7 @@ class DataSet(val paths: List[List[Any]], val pathVars: Map[String, List[(Int, I
 
   def rightType(pos: Int): Set[DataType] = paths.filter(pos < _.size).map(tuple => DataType.fromValue(tuple(tuple.size - 1 - pos))).toSet
 
-  def types = (for (i <- maxTupleSize - 1 to 0 by -1) yield rightType(i)).toList
+  def types = (for (i <- maxTupleSize.get - 1 to 0 by -1) yield rightType(i)).toList
   
   def toBoundPaths: List[(List[Any], Map[String, (Int, Int)], Map[String, Int])] = {
     val buffer = new ListBuffer[(List[Any], Map[String, (Int, Int)], Map[String, Int])]
