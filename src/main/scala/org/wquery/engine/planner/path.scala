@@ -5,25 +5,8 @@ import org.wquery.engine.operations._
 import scalaz._
 import Scalaz._
 import org.wquery.engine.VariableTemplate
-import org.wquery.model.{WQueryOptionNoneMaxOrdering, WordNetSchema}
 
-class Path(val links: List[Link], val conditions: Map[Option[Link], List[Condition]]) {
-  def walkForward(context: BindingsSchema, leftPos: Int, rightPos: Int) = {
-    val applier = new ConditionApplier(links, conditions, context)
-    val path = links.slice(leftPos, rightPos + 1)
-
-    path.foldLeft(path.head.leftFringe)((op, link) => applier.applyConditions(link.forward(op), link))
-  }
-
-  def walkBackward(wordNet: WordNetSchema, context: BindingsSchema, leftPos: Int, rightPos: Int) = {
-    val applier = new ConditionApplier(links, conditions, context)
-    val path = links.slice(leftPos, rightPos + 1)
-    val (generator, condition) = path.last.rightFringe.minBy(_._1.maxCount(wordNet))(WQueryOptionNoneMaxOrdering.BigIntOrdering)
-
-    condition.map(applier.skipCondition(_))
-    path.foldRight(generator)((link, op) => applier.applyConditions(link.backward(op), link))
-  }
-}
+class Path(val links: List[Link], val conditions: Map[Option[Link], List[Condition]])
 
 class PathBuilder {
   val linkBuffer = new ListBuffer[Link]

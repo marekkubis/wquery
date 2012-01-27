@@ -204,7 +204,7 @@ class InMemoryWordNetStore extends WordNetStore {
     }
   }
 
-  def stats = statsCache.get
+  def stats = statsCache.get // stats are calculated below in calculateStats()
 
   private def calculateStats() = {
     val fetchAllMaxCounts = MMap[(Relation, String), Int](
@@ -226,6 +226,7 @@ class InMemoryWordNetStore extends WordNetStore {
     }
 
     patterns(relation) = patterns(relation) :+ pattern
+    statsCache.invalidate
   }
 
   def addSense(sense: Sense, assignments: List[PropertyAssignment]) = {
