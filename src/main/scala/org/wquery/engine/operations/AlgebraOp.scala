@@ -5,12 +5,10 @@ import Scalaz._
 import org.wquery.engine.Variable
 import org.wquery.model.{WordNetSchema, DataType, DataSet, WordNet}
 
-abstract class AlgebraOp {
+abstract class AlgebraOp extends ProvidesTupleSizes {
   def evaluate(wordNet: WordNet, bindings: Bindings): DataSet
   def leftType(pos: Int): Set[DataType]
   def rightType(pos: Int): Set[DataType]
-  def minTupleSize: Int
-  def maxTupleSize: Option[Int]
   def bindingsPattern: BindingsPattern
   def referencedVariables: Set[Variable]
   def referencesContext: Boolean

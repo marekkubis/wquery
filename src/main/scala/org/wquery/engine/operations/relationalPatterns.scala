@@ -7,14 +7,10 @@ import collection.mutable.ListBuffer
 import org.wquery.WQueryEvaluationException
 import org.wquery.engine._
 
-sealed abstract class RelationalPattern {
+sealed abstract class RelationalPattern extends ProvidesTupleSizes {
   def extend(wordNet: WordNetStore, bindings: Bindings, extensionSet: ExtensionSet, from: Int, direction: Direction): ExtendedExtensionSet
 
   def fringe(wordNet: WordNetStore, bindings: Bindings, side: Side): DataSet
-
-  def minSize: Int
-
-  def maxSize: Option[Int]
 
   def sourceType: Set[DataType]
 
@@ -42,9 +38,9 @@ case class RelationUnionPattern(patterns: List[RelationalPattern]) extends Relat
     buffer.toDataSet.distinct
   }
 
-  def minSize = patterns.map(_.minSize).min
+  val minTupleSize = patterns.map(_.minTupleSize).min
 
-  def maxSize = if (patterns.exists(!_.maxSize.isDefined)) none else patterns.map(_.maxSize).max
+  val maxTupleSize = if (patterns.exists(!_.maxTupleSize.isDefined)) none else patterns.map(_.maxTupleSize).max
 
   def sourceType = patterns.flatMap(_.sourceType).toSet
 
@@ -82,9 +78,9 @@ case class RelationCompositionPattern(patterns: List[RelationalPattern]) extends
     }
   }
 
-  def minSize = patterns.map(_.minSize).sum
+  val minTupleSize = patterns.map(_.minTupleSize).sum
 
-  def maxSize = patterns.map(_.maxSize).sequence.map(_.sum)
+  val maxTupleSize = patterns.map(_.maxTupleSize).sequence.map(_.sum)
 
   def sourceType = patterns.head.sourceType
 
@@ -92,12 +88,12 @@ case class RelationCompositionPattern(patterns: List[RelationalPattern]) extends
 
   private def leftType(patterns: List[RelationalPattern], pos: Int): Set[DataType] = {
     patterns.headOption.map { headPattern =>
-      if (pos < headPattern.minSize)
+      if (pos < headPattern.minTupleSize)
         headPattern.leftType(pos)
-      else if (headPattern.maxSize.map(pos < _).getOrElse(true)) { // pos < maxSize or maxSize undefined
-        headPattern.leftType(pos) union leftType(patterns.tail, pos - headPattern.minSize)
+      else if (headPattern.maxTupleSize.map(pos < _).getOrElse(true)) { // pos < maxSize or maxSize undefined
+        headPattern.leftType(pos) union leftType(patterns.tail, pos - headPattern.minTupleSize)
       } else { // else pos < maxSize and defined
-        leftType(patterns.tail, pos - headPattern.maxSize.get)
+        leftType(patterns.tail, pos - headPattern.maxTupleSize.get)
       }
     }.orZero
   }
@@ -106,12 +102,12 @@ case class RelationCompositionPattern(patterns: List[RelationalPattern]) extends
 
   private def rightType(patterns: List[RelationalPattern], pos: Int): Set[DataType] = {
     patterns.headOption.map { headPattern =>
-      if (pos < headPattern.minSize)
+      if (pos < headPattern.minTupleSize)
         headPattern.rightType(pos)
-      else if (headPattern.maxSize.map(pos < _).getOrElse(true)) { // pos < maxSize or maxSize undefined
-        headPattern.rightType(pos) union rightType(patterns.tail, pos - headPattern.minSize)
+      else if (headPattern.maxTupleSize.map(pos < _).getOrElse(true)) { // pos < maxSize or maxSize undefined
+        headPattern.rightType(pos) union rightType(patterns.tail, pos - headPattern.minTupleSize)
       } else { // else pos < maxSize and defined
-        rightType(patterns.tail, pos - headPattern.maxSize.get)
+        rightType(patterns.tail, pos - headPattern.maxTupleSize.get)
       }
     }.orZero
   }
@@ -244,21 +240,21 @@ case class QuantifiedRelationPattern(pattern: RelationalPattern, quantifier: Qua
     }
   }
 
-  def minSize = pattern.minSize * quantifier.lowerBound
+  val minTupleSize = pattern.minTupleSize * quantifier.lowerBound
 
-  def maxSize = (pattern.maxSize |@| quantifier.upperBound)(_ * _)
+  val maxTupleSize = (pattern.maxTupleSize |@| quantifier.upperBound)(_ * _)
 
   def sourceType = pattern.sourceType
 
-  def leftType(pos: Int) = if (maxSize.map(pos < _).getOrElse(true)) {
-    (for (i <- pattern.minSize to pattern.maxSize.getOrElse(pos + 1))
+  def leftType(pos: Int) = if (maxTupleSize.map(pos < _).getOrElse(true)) {
+    (for (i <- pattern.minTupleSize to pattern.maxTupleSize.getOrElse(pos + 1))
     yield pattern.leftType(if (i > 0) pos % i else 0)).flatten.toSet
   } else {
     Set[DataType]()
   }
 
-  def rightType(pos: Int) = if (maxSize.map(pos < _).getOrElse(true)) {
-    (for (i <- pattern.minSize to pattern.maxSize.getOrElse(pos + 1))
+  def rightType(pos: Int) = if (maxTupleSize.map(pos < _).getOrElse(true)) {
+    (for (i <- pattern.minTupleSize to pattern.maxTupleSize.getOrElse(pos + 1))
     yield pattern.rightType(if (i > 0) pos % i else 0)).flatten.toSet
   } else {
     Set[DataType]()
@@ -306,14 +302,14 @@ case class ArcRelationalPattern(pattern: ArcPattern) extends RelationalPattern {
     wordNet.fringe(createFringeDescription(wordNet.relations, side))
   }
 
-  def minSize = 2*pattern.destinations.size
+  val minTupleSize = 2*pattern.destinations.size
 
-  def maxSize = some(2*pattern.destinations.size)
+  val maxTupleSize = some(2*pattern.destinations.size)
 
   def sourceType = demandArgumentType(pattern.source)
 
   def leftType(pos: Int) = {
-    if (pos < minSize)
+    if (pos < minTupleSize)
       if (pos % 2 == 0) {
         Set(ArcType)
       } else {
@@ -388,9 +384,9 @@ case class VariableRelationalPattern(variable: StepVariable) extends RelationalP
     }.getOrElse(throw new WQueryEvaluationException("Variable " + variable + " is not bound"))
   }
 
-  def minSize = 2
+  val minTupleSize = 2
 
-  def maxSize = some(2)
+  val maxTupleSize = some(2)
 
   def sourceType = DataType.all
 

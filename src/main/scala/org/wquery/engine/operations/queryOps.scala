@@ -18,9 +18,9 @@ case class EmitOp(op: AlgebraOp) extends QueryOp {
 
   def rightType(pos: Int) = op.rightType(pos)
 
-  def minTupleSize = op.minTupleSize
+  val minTupleSize = op.minTupleSize
 
-  def maxTupleSize = op.maxTupleSize
+  val maxTupleSize = op.maxTupleSize
 
   def bindingsPattern = op.bindingsPattern
 
@@ -57,9 +57,9 @@ case class IterateOp(bindingOp: AlgebraOp, iteratedOp: AlgebraOp) extends QueryO
 
   def rightType(pos: Int) = iteratedOp.rightType(pos)
 
-  def minTupleSize = iteratedOp.minTupleSize
+  val minTupleSize = iteratedOp.minTupleSize
 
-  def maxTupleSize = iteratedOp.maxTupleSize
+  val maxTupleSize = iteratedOp.maxTupleSize
 
   def bindingsPattern = iteratedOp.bindingsPattern
 
@@ -82,9 +82,9 @@ case class IfElseOp(conditionOp: AlgebraOp, ifOp: AlgebraOp, elseOp: Option[Alge
 
   def rightType(pos: Int) = ifOp.rightType(pos) ++ elseOp.map(_.rightType(pos)).orZero
 
-  def minTupleSize = elseOp.some(_.minTupleSize.min(ifOp.minTupleSize)).none(ifOp.minTupleSize)
+  val minTupleSize = elseOp.some(_.minTupleSize.min(ifOp.minTupleSize)).none(ifOp.minTupleSize)
 
-  def maxTupleSize = elseOp.map(_.maxTupleSize.map(elseSize => ifOp.maxTupleSize.map(_.max(elseSize))).getOrElse(none)).getOrElse(ifOp.maxTupleSize)
+  val maxTupleSize = elseOp.map(_.maxTupleSize.map(elseSize => ifOp.maxTupleSize.map(_.max(elseSize))).getOrElse(none)).getOrElse(ifOp.maxTupleSize)
 
   def bindingsPattern = elseOp.some(_.bindingsPattern union ifOp.bindingsPattern).none(ifOp.bindingsPattern)
 
@@ -110,9 +110,9 @@ case class BlockOp(ops: List[AlgebraOp]) extends QueryOp {
 
   def rightType(pos: Int) = ops.map(_.rightType(pos)).flatten.toSet
 
-  def minTupleSize = ops.map(_.minTupleSize).min
+  val minTupleSize = ops.map(_.minTupleSize).min
 
-  def maxTupleSize = ops.map(_.maxTupleSize).sequence.map(_.sum)
+  val maxTupleSize = ops.map(_.maxTupleSize).sequence.map(_.sum)
 
   def bindingsPattern = {
     // It is assumed that all statements in a block provide same binding schemas
@@ -150,9 +150,9 @@ case class AssignmentOp(variables: VariableTemplate, op: AlgebraOp) extends Quer
 
   def rightType(pos: Int) = Set.empty
 
-  def minTupleSize = 0
+  val minTupleSize = 0
 
-  def maxTupleSize = some(0)
+  val maxTupleSize = some(0)
 
   def bindingsPattern = BindingsPattern()
 
@@ -177,9 +177,9 @@ case class WhileDoOp(conditionOp: AlgebraOp, iteratedOp: AlgebraOp) extends Quer
 
   def rightType(pos: Int) = iteratedOp.rightType(pos)
 
-  def minTupleSize = iteratedOp.minTupleSize
+  val minTupleSize = iteratedOp.minTupleSize
 
-  def maxTupleSize = iteratedOp.maxTupleSize
+  val maxTupleSize = iteratedOp.maxTupleSize
 
   def bindingsPattern = iteratedOp.bindingsPattern
 
@@ -202,9 +202,9 @@ case class UnionOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends QueryOp {
 
   def rightType(pos: Int) = leftOp.rightType(pos) ++ rightOp.rightType(pos)
 
-  def minTupleSize = leftOp.minTupleSize min rightOp.minTupleSize
+  val minTupleSize = leftOp.minTupleSize min rightOp.minTupleSize
 
-  def maxTupleSize = (leftOp.maxTupleSize |@| rightOp.maxTupleSize)(_ max _)
+  val maxTupleSize = (leftOp.maxTupleSize |@| rightOp.maxTupleSize)(_ max _)
 
   def bindingsPattern = BindingsPattern()
 
@@ -227,9 +227,9 @@ case class ExceptOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends QueryOp {
 
   def rightType(pos: Int) = leftOp.rightType(pos)
 
-  def minTupleSize = leftOp.minTupleSize
+  val minTupleSize = leftOp.minTupleSize
 
-  def maxTupleSize = leftOp.maxTupleSize
+  val maxTupleSize = leftOp.maxTupleSize
 
   def bindingsPattern = BindingsPattern()
 
@@ -249,9 +249,9 @@ case class IntersectOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends QueryOp {
 
   def rightType(pos: Int) = leftOp.rightType(pos) intersect rightOp.rightType(pos)
 
-  def minTupleSize = leftOp.minTupleSize max rightOp.minTupleSize
+  val minTupleSize = leftOp.minTupleSize max rightOp.minTupleSize
 
-  def maxTupleSize = (leftOp.maxTupleSize |@| rightOp.maxTupleSize)(_ min _)
+  val maxTupleSize = (leftOp.maxTupleSize |@| rightOp.maxTupleSize)(_ min _)
 
   def bindingsPattern = BindingsPattern()
 
@@ -325,9 +325,9 @@ case class JoinOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends QueryOp {
     }
   }
 
-  def minTupleSize = leftOp.minTupleSize + rightOp.minTupleSize
+  val minTupleSize = leftOp.minTupleSize + rightOp.minTupleSize
 
-  def maxTupleSize = (leftOp.maxTupleSize |@| rightOp.maxTupleSize)(_ + _)
+  val maxTupleSize = (leftOp.maxTupleSize |@| rightOp.maxTupleSize)(_ + _)
 
   def bindingsPattern = leftOp.bindingsPattern union rightOp.bindingsPattern
 
@@ -408,9 +408,9 @@ case class NaturalJoinOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends QueryOp 
     }
   }
 
-  def minTupleSize = leftOp.minTupleSize + rightOp.minTupleSize - 1
+  val minTupleSize = leftOp.minTupleSize + rightOp.minTupleSize - 1
 
-  def maxTupleSize = (leftOp.maxTupleSize |@| rightOp.maxTupleSize)(_ + _ - 1)
+  val maxTupleSize = (leftOp.maxTupleSize |@| rightOp.maxTupleSize)(_ + _ - 1)
 
   def bindingsPattern = leftOp.bindingsPattern union rightOp.bindingsPattern
 
@@ -452,9 +452,9 @@ abstract class BinaryArithmeticOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends
     Set.empty
   }
 
-  def minTupleSize = 1
+  val minTupleSize = 1
 
-  def maxTupleSize = some(1)
+  val maxTupleSize = some(1)
 
   def bindingsPattern = BindingsPattern()
 
@@ -549,9 +549,9 @@ case class MinusOp(op: AlgebraOp) extends QueryOp {
 
   def rightType(pos: Int) = op.rightType(pos)
 
-  def minTupleSize = 1
+  val minTupleSize = 1
 
-  def maxTupleSize = some(1)
+  val maxTupleSize = some(1)
 
   def bindingsPattern = BindingsPattern()
 
@@ -569,9 +569,9 @@ case class FunctionOp(function: Function, args: AlgebraOp) extends QueryOp {
 
   def rightType(pos: Int) = function.rightType(args, pos)
 
-  def minTupleSize = function.minTupleSize(args)
+  val minTupleSize = function.minTupleSize(args)
 
-  def maxTupleSize = function.maxTupleSize(args)
+  val maxTupleSize = function.maxTupleSize(args)
 
   def bindingsPattern = function.bindingsPattern(args)
 
@@ -626,9 +626,9 @@ case class SelectOp(op: AlgebraOp, condition: Condition) extends QueryOp {
 
   def rightType(pos: Int) = op.rightType(pos)
 
-  def minTupleSize = op.minTupleSize
+  val minTupleSize = op.minTupleSize
 
-  def maxTupleSize = op.maxTupleSize
+  val maxTupleSize = op.maxTupleSize
 
   def bindingsPattern = op.bindingsPattern
 
@@ -674,9 +674,9 @@ case class ProjectOp(op: AlgebraOp, projectOp: AlgebraOp) extends QueryOp {
 
   def rightType(pos: Int) = projectOp.rightType(pos)
 
-  def minTupleSize = projectOp.minTupleSize
+  val minTupleSize = projectOp.minTupleSize
 
-  def maxTupleSize = projectOp.maxTupleSize
+  val maxTupleSize = projectOp.maxTupleSize
 
   def bindingsPattern = projectOp.bindingsPattern
 
@@ -744,20 +744,20 @@ case class ExtendOp(op: AlgebraOp, from: Int, pattern: RelationalPattern, direct
   }
 
   def rightType(pos: Int) = {
-    if (pos < pattern.minSize) {
+    if (pos < pattern.minTupleSize) {
       pattern.rightType(pos)
-    } else if (pattern.maxSize.map(pos < _).getOrElse(true)) { // pos < maxSize or maxSize undefined
-      val extendOpTypes = for (i <- 0 to pos - pattern.minSize) yield op.rightType(i)
+    } else if (pattern.maxTupleSize.map(pos < _).getOrElse(true)) { // pos < maxSize or maxSize undefined
+      val extendOpTypes = for (i <- 0 to pos - pattern.minTupleSize) yield op.rightType(i)
 
       (extendOpTypes :+ pattern.rightType(pos)).flatten.toSet
     } else { // maxSize defined and pos >= maxSize
-      (for (i <- pattern.minSize to pattern.maxSize.get) yield op.rightType(pos - i)).flatten.toSet
+      (for (i <- pattern.minTupleSize to pattern.maxTupleSize.get) yield op.rightType(pos - i)).flatten.toSet
     }
   }
 
-  def minTupleSize = op.minTupleSize + pattern.minSize
+  val minTupleSize = op.minTupleSize + pattern.minTupleSize
 
-  def maxTupleSize = (op.maxTupleSize |@| pattern.maxSize)(_ + _)
+  val maxTupleSize = (op.maxTupleSize |@| pattern.maxTupleSize)(_ + _)
 
   def bindingsPattern = {
     val pattern = op.bindingsPattern
@@ -781,9 +781,9 @@ case class BindOp(op: AlgebraOp, variables: VariableTemplate) extends QueryOp {
 
   def rightType(pos: Int) = op.rightType(pos)
 
-  def minTupleSize = op.minTupleSize
+  val minTupleSize = op.minTupleSize
 
-  def maxTupleSize = op.maxTupleSize
+  val maxTupleSize = op.maxTupleSize
 
   def bindingsPattern = {
     val pattern = op.bindingsPattern
@@ -805,9 +805,9 @@ case class FringeOp(pattern: RelationalPattern, side: Side) extends QueryOp {
 
   def rightType(pos: Int) = (pos == 0).??(pattern.rightType(0))
 
-  def minTupleSize = 1
+  val minTupleSize = 1
 
-  def maxTupleSize = some(1)
+  val maxTupleSize = some(1)
 
   def bindingsPattern = BindingsPattern()
 
@@ -837,9 +837,9 @@ case class FetchOp(relation: Relation, from: List[(String, List[Any])], to: List
       Set.empty
   }
 
-  def minTupleSize = to.size
+  val minTupleSize = to.size
 
-  def maxTupleSize = some(to.size)
+  val maxTupleSize = some(to.size)
 
   def bindingsPattern = BindingsPattern()
 
@@ -880,9 +880,9 @@ case class ConstantOp(dataSet: DataSet) extends QueryOp {
 
   def rightType(pos: Int) = dataSet.rightType(pos)
 
-  def minTupleSize = dataSet.minTupleSize
+  val minTupleSize = dataSet.minTupleSize
 
-  def maxTupleSize = some(dataSet.maxTupleSize)
+  val maxTupleSize = some(dataSet.maxTupleSize)
 
   def bindingsPattern = BindingsPattern() // assumed that a constant dataset does not contain variable bindings
 
@@ -912,9 +912,9 @@ case class ContextRefOp(types: Set[DataType]) extends QueryOp {
 
   def rightType(pos: Int) = if (pos == 0) types else Set.empty
 
-  def minTupleSize = 1
+  val minTupleSize = 1
 
-  def maxTupleSize = some(1)
+  val maxTupleSize = some(1)
 
   def bindingsPattern = BindingsPattern()
 
@@ -932,9 +932,9 @@ case class PathVariableRefOp(variable: PathVariable, types: (AlgebraOp, Int, Int
 
   def rightType(pos: Int) = types._1.rightType(pos + types._3)
 
-  def minTupleSize = types._1.minTupleSize  - types._2
+  val minTupleSize = types._1.minTupleSize  - types._2
 
-  def maxTupleSize = types._1.maxTupleSize.map(_ - types._3)
+  val maxTupleSize = types._1.maxTupleSize.map(_ - types._3)
 
   def bindingsPattern = BindingsPattern()
 
@@ -952,9 +952,9 @@ case class StepVariableRefOp(variable: StepVariable, types: Set[DataType]) exten
 
   def rightType(pos: Int) = if (pos == 0) types else Set.empty
 
-  def minTupleSize = 1
+  val minTupleSize = 1
 
-  def maxTupleSize = some(1)
+  val maxTupleSize = some(1)
 
   def bindingsPattern = BindingsPattern()
 

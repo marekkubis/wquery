@@ -677,7 +677,7 @@ case class ContextByRelationalExprReq(expr: RelationalExpr) extends EvaluableExp
 
       val fetchOp = fetches.reduceLeft[AlgebraOp]{ case (left, right) => UnionOp(left, right) }
 
-      if (pattern.minSize === 0 && pattern.maxSize === Some(0))
+      if (pattern.minTupleSize === 0 && pattern.maxTupleSize === Some(0))
         fetchOp
       else
         ExtendOp(fetchOp , 0, pattern, Forward, VariableTemplate.empty)

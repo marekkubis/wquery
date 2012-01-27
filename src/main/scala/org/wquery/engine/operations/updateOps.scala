@@ -18,9 +18,9 @@ sealed abstract class UpdateOp extends AlgebraOp {
 
   def rightType(pos: Int) = Set.empty
 
-  def minTupleSize = 0
+  val minTupleSize = 0
 
-  def maxTupleSize = some(0)
+  val maxTupleSize = some(0)
 
   def bindingsPattern = BindingsSchema()
 
@@ -239,9 +239,9 @@ case class NewSynsetOp(sensesOp: AlgebraOp) extends AlgebraOp {
 
   def rightType(pos: Int) = if (pos == 0) Set(SynsetType) else Set.empty
 
-  def minTupleSize = 1
+  val minTupleSize = 1
 
-  def maxTupleSize = some(1)
+  val maxTupleSize = some(1)
 
   def bindingsPattern = BindingsPattern()
 
