@@ -194,7 +194,7 @@ class GridHandler(wordnet: WordNet) extends DefaultHandler with Logging {
 
     // create semantic relations successors       
     for ((synset, relname, reldest) <- ilrRelationsTuples) {      
-      val relation = wordnet.schema.demandRelation(relname, IMap((Relation.Source, ISet[DataType](SynsetType))))
+      val relation = wordnet.store.schema.demandRelation(relname, IMap((Relation.Source, ISet[DataType](SynsetType))))
 
       relation.destinationType.map { dt =>
         dt match {
@@ -238,7 +238,7 @@ class GridHandler(wordnet: WordNet) extends DefaultHandler with Logging {
     
     // create successors
     for ((synset, relname, reldest) <- genericRelationsTuples) {
-      val relation = wordnet.schema.demandRelation(relname, IMap((Relation.Source, ISet[DataType](SynsetType))))
+      val relation = wordnet.store.schema.demandRelation(relname, IMap((Relation.Source, ISet[DataType](SynsetType))))
 
       relation.destinationType.map { dt =>
         dt match {

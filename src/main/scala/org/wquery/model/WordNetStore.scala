@@ -19,6 +19,9 @@ trait WordNetStore {
 
   def getSynset(sense: Sense): Option[Synset]
 
+  // schema
+  def schema: WordNetSchema
+
   // stats
   def stats: WordNetStats
 

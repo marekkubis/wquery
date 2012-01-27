@@ -257,7 +257,7 @@ class NewSynset(val senses: List[Sense]) extends Synset("synset#" + senses.head.
 
 case class CreateRelationFromPatternOp(name: String, pattern: RelationalPattern, sourceType: NodeType, destinationType: NodeType) extends UpdateOp {
   def update(wordNet: WordNet, bindings: Bindings) {
-    wordNet.schema.getRelation(name, Map((Relation.Source, pattern.sourceType))).map(wordNet.store.removeRelation(_))
+    wordNet.store.schema.getRelation(name, Map((Relation.Source, pattern.sourceType))).map(wordNet.store.removeRelation(_))
 
     val relation = Relation.binary(name, sourceType, destinationType)
 

@@ -1,6 +1,6 @@
 package org.wquery.model
 
-class WordNetStats(relations: List[Relation], val fetchAllMaxCounts: Map[(Relation, String), Int], val extendValueMaxCounts: Map[(Relation, String), Int]) {
+class WordNetStats(relations: List[Relation], val fetchAllMaxCounts: Map[(Relation, String), BigInt], val extendValueMaxCounts: Map[(Relation, String), BigInt]) {
   val maxPathSize = 20 // TODO estimate using WordNet content
 
   def fetchMaxCount(relation: Relation, from: List[(String, List[Any])], to: List[String]) = {

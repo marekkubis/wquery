@@ -1,8 +1,6 @@
 package org.wquery.model
 
 class WordNet(val store: WordNetStore) {
-  val schema = new WordNetSchema(store)
-
   for (relation <- WordNet.relations)
     store.addRelation(relation)
 

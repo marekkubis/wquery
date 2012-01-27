@@ -101,9 +101,9 @@ class LmfHandler(wordNet: WordNet) extends DefaultHandler with Logging {
 
   private def createSynsetRelations {
     for ((sourceSynsetId, relationName, destinationSynsetId) <- synsetRelationsTuples) {
-      val relation = wordNet.schema.getRelation(relationName, IMap((Relation.Source, Set[DataType](SynsetType)))).getOrElse {
+      val relation = wordNet.store.schema.getRelation(relationName, IMap((Relation.Source, Set[DataType](SynsetType)))).getOrElse {
         wordNet.store.addRelation(Relation.binary(relationName, SynsetType, SynsetType))
-        wordNet.schema.demandRelation(relationName, IMap((Relation.Source, Set[DataType](SynsetType))))
+        wordNet.store.schema.demandRelation(relationName, IMap((Relation.Source, Set[DataType](SynsetType))))
       }
 
       relation.destinationType.map { dt =>
@@ -129,9 +129,9 @@ class LmfHandler(wordNet: WordNet) extends DefaultHandler with Logging {
 
   private def createStringRelations {
     for ((sourceSynsetId, relationName, destination) <- stringRelationsTuples) {
-      val relation = wordNet.schema.getRelation(relationName, IMap((Relation.Source, Set[DataType](SynsetType)))).getOrElse {
+      val relation = wordNet.store.schema.getRelation(relationName, IMap((Relation.Source, Set[DataType](SynsetType)))).getOrElse {
         wordNet.store.addRelation(Relation.binary(relationName, SynsetType, StringType))
-        wordNet.schema.demandRelation(relationName, IMap((Relation.Source, Set[DataType](SynsetType))))
+        wordNet.store.schema.demandRelation(relationName, IMap((Relation.Source, Set[DataType](SynsetType))))
       }
 
       relation.destinationType.map { dt =>

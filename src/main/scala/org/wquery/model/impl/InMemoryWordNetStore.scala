@@ -16,6 +16,8 @@ class InMemoryWordNetStore extends WordNetStore {
   private var relationsList = List[Relation]()
   private val statsCache = new Cache[WordNetStats](calculateStats, 1000)
 
+  val schema = new WordNetSchema(this)
+
   def relations = relationsList
 
   def addRelation(relation: Relation) {
@@ -207,14 +209,29 @@ class InMemoryWordNetStore extends WordNetStore {
   def stats = statsCache.get // stats are calculated below in calculateStats()
 
   private def calculateStats() = {
-    val fetchAllMaxCounts = MMap[(Relation, String), Int](
-      (for (relation <- relations; argument <- ArcPatternArgument.AnyName::relation.argumentNames) yield ((relation, argument), 0)): _*)
-    val extendValueMaxCounts = MMap[(Relation, String), Int](
-      (for (relation <- relations; argument <- ArcPatternArgument.AnyName::relation.argumentNames) yield ((relation, argument), 0)): _*)
+    val fetchAllMaxCounts = MMap[(Relation, String), BigInt](
+      (for (relation <- relations; argument <- ArcPatternArgument.AnyName::relation.argumentNames) yield ((relation, argument), BigInt(0))): _*)
+    val extendValueMaxCounts = MMap[(Relation, String), BigInt](
+      (for (relation <- relations; argument <- ArcPatternArgument.AnyName::relation.argumentNames) yield ((relation, argument), BigInt(0))): _*)
 
     for ((relation, relationSuccessors) <- successors; ((argument, _), argumentSuccessors) <- relationSuccessors) {
       fetchAllMaxCounts((relation, argument)) += argumentSuccessors.size
       extendValueMaxCounts((relation, argument)) = extendValueMaxCounts((relation, argument)) max argumentSuccessors.size
+    }
+
+    for (((relation, argument), count) <- fetchAllMaxCounts if argument != ArcPatternArgument.AnyName)
+      fetchAllMaxCounts((relation, ArcPatternArgument.AnyName)) += count
+
+    for (((relation, argument), count) <- extendValueMaxCounts if argument != ArcPatternArgument.AnyName)
+      extendValueMaxCounts((relation, ArcPatternArgument.AnyName)) += count
+
+    // TODO provide precise statistics for patterns using RelationalPattern.fetchMaxCount etc.
+    val fetchAnyRelationMaxCount = (for (((_, argument), count) <- fetchAllMaxCounts if argument == ArcPatternArgument.AnyName) yield count).sum
+    val extendAnyRelationMaxCount = (for (((_, argument), count) <- extendValueMaxCounts if argument == ArcPatternArgument.AnyName) yield count).sum
+
+    for ((relation, _) <- patterns; argument <- relation.argumentNames) {
+      fetchAllMaxCounts((relation, argument)) = fetchAnyRelationMaxCount
+      extendValueMaxCounts((relation, argument)) = extendAnyRelationMaxCount
     }
 
     new WordNetStats(relations, fetchAllMaxCounts.toMap, extendValueMaxCounts.toMap)
