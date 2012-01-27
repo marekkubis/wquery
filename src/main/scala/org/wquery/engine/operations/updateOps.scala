@@ -5,6 +5,7 @@ import Scalaz._
 import org.wquery.model._
 import org.wquery.WQueryInvalidValueSpecifiedForRelationPropertyException
 import scala.collection.mutable.{Map => MMap}
+import org.wquery.engine.Variable
 
 sealed abstract class UpdateOp extends AlgebraOp {
   def update(wordNet: WordNet, bindings: Bindings)
@@ -33,9 +34,9 @@ sealed abstract class UpdateOp extends AlgebraOp {
 
 
 sealed abstract class TupleUpdateOp(val leftOp: AlgebraOp, val relationalPattern: ArcRelationalPattern, val rightOp: AlgebraOp) extends UpdateOp {
-  def referencedVariables = leftOp.referencedVariables ++ rightOp.referencedVariables
+  val referencedVariables = leftOp.referencedVariables ++ rightOp.referencedVariables
 
-  def referencesContext = leftOp.referencesContext || rightOp.referencesContext
+  val referencesContext = leftOp.referencesContext || rightOp.referencesContext
 
   def update(wordNet: WordNet, bindings: Bindings) {
     val leftSet = leftOp.evaluate(wordNet, bindings)
@@ -80,15 +81,15 @@ case class SetTuplesOp(leftOp:AlgebraOp, relationalPattern: ArcRelationalPattern
     }
   }
 
-  def referencedVariables = leftOp.referencedVariables ++ rightOp.referencedVariables
+  val referencedVariables = leftOp.referencedVariables ++ rightOp.referencedVariables
 
-  def referencesContext = leftOp.referencesContext || rightOp.referencesContext
+  val referencesContext = leftOp.referencesContext || rightOp.referencesContext
 }
 
 sealed abstract class WordNetUpdateWithAssignmentsOp[A](val valuesOp: AlgebraOp, val patterns: List[PropertyAssignmentPattern]) extends UpdateOp {
-  def referencedVariables = patterns.foldLeft(valuesOp.referencedVariables)((l, r) => l ++ r.referencedVariables)
+  val referencedVariables = patterns.foldLeft(valuesOp.referencedVariables)((l, r) => l ++ r.referencedVariables)
 
-  def referencesContext = valuesOp.referencesContext || patterns.exists(_.referencesContext)
+  val referencesContext = valuesOp.referencesContext || patterns.exists(_.referencesContext)
 
   def update(wordNet: WordNet, bindings: Bindings) {
     updateWithAssignments(wordNet, bindings, patterns.map(_.evaluatePattern(wordNet, bindings)))
@@ -110,9 +111,9 @@ case class PropertyAssignmentPattern(relationalPattern: ArcRelationalPattern, op
     PropertyAssignment(relationalPattern.pattern, op, valuesOp.evaluate(wordNet, bindings))
   }
 
-  def referencedVariables = valuesOp.referencedVariables
+  val referencedVariables = valuesOp.referencedVariables
 
-  def referencesContext = valuesOp.referencesContext
+  val referencesContext = valuesOp.referencesContext
 }
 
 case class AddSensesOp(override val valuesOp: AlgebraOp, override val patterns: List[PropertyAssignmentPattern]) extends WordNetUpdateWithValuesOp[Sense](valuesOp, patterns) {
@@ -245,9 +246,9 @@ case class NewSynsetOp(sensesOp: AlgebraOp) extends AlgebraOp {
 
   def bindingsPattern = BindingsPattern()
 
-  def referencedVariables = sensesOp.referencedVariables
+  val referencedVariables = sensesOp.referencedVariables
 
-  def referencesContext = sensesOp.referencesContext
+  val referencesContext = sensesOp.referencesContext
 
   def maxCount(wordNet: WordNetSchema) = some(1)
 }
@@ -264,15 +265,15 @@ case class CreateRelationFromPatternOp(name: String, pattern: RelationalPattern,
     wordNet.store.addRelationPattern(relation, pattern)
   }
 
-  def referencedVariables = Set.empty
+  val referencedVariables = ∅[Set[Variable]]
 
-  def referencesContext = false
+  val referencesContext = false
 }
 
 case class RelationUpdateOp(arcsOp: AlgebraOp, op: String, property: String, action: Boolean, valuesOp: AlgebraOp) extends UpdateOp {
-  def referencedVariables = arcsOp.referencedVariables ++ valuesOp.referencedVariables
+  val referencedVariables = arcsOp.referencedVariables ++ valuesOp.referencedVariables
 
-  def referencesContext = arcsOp.referencesContext || valuesOp.referencesContext
+  val referencesContext = arcsOp.referencesContext || valuesOp.referencesContext
 
   def update(wordNet: WordNet, bindings: Bindings) = {
     val arcs = arcsOp.evaluate(wordNet, bindings).paths.map(_.last.asInstanceOf[Arc])

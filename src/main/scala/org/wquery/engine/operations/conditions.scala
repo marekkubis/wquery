@@ -2,43 +2,39 @@ package org.wquery.engine.operations
 
 import org.wquery.WQueryEvaluationException
 import org.wquery.model.{WQueryListOrdering, DataType, StringType, WordNet}
-import org.wquery.engine.Variable
+import org.wquery.engine.{ContainsReferences, Variable}
 
-sealed abstract class Condition {
+sealed abstract class Condition extends ContainsReferences {
   def satisfied(wordNet: WordNet, bindings: Bindings): Boolean
-  def referencedVariables: Set[Variable]
-  def referencesContext: Boolean
 }
 
 case class OrCondition(exprs: List[Condition]) extends Condition {
   def satisfied(wordNet: WordNet, bindings: Bindings) = exprs.exists(_.satisfied(wordNet, bindings))
 
-  def referencedVariables = exprs.foldLeft(Set.empty[Variable])((vars, expr) => vars union expr.referencedVariables)
+  val referencedVariables = exprs.foldLeft(Set.empty[Variable])((vars, expr) => vars union expr.referencedVariables)
 
-  def referencesContext = exprs.exists(_.referencesContext)
+  val referencesContext = exprs.exists(_.referencesContext)
 }
 
 case class AndCondition(exprs: List[Condition]) extends Condition {
   def satisfied(wordNet: WordNet, bindings: Bindings) = exprs.forall(_.satisfied(wordNet, bindings))
 
-  def referencedVariables = exprs.foldLeft(Set.empty[Variable])((vars, expr) => vars union expr.referencedVariables)
+  val referencedVariables = exprs.foldLeft(Set.empty[Variable])((vars, expr) => vars union expr.referencedVariables)
 
-  def referencesContext = exprs.exists(_.referencesContext)
+  val referencesContext = exprs.exists(_.referencesContext)
 }
 
 case class NotCondition(expr: Condition) extends Condition {
   def satisfied(wordNet: WordNet, bindings: Bindings) = !expr.satisfied(wordNet, bindings)
 
-  def referencedVariables = expr.referencedVariables
+  val referencedVariables = expr.referencedVariables
 
-  def referencesContext = expr.referencesContext
+  val referencesContext = expr.referencesContext
 }
 
 case class BinaryCondition(op: String, leftOp: AlgebraOp, rightOp: AlgebraOp) extends Condition {
   var leftCache: (List[Any], Map[Any, List[Any]]) = null
   var rightCache: (List[Any], Map[Any, List[Any]]) = null
-  val leftOpIsContextIndependent = leftOp.referencedVariables.isEmpty && !leftOp.referencesContext
-  val rightOpIsContextIndependent = rightOp.referencedVariables.isEmpty && !rightOp.referencesContext
 
   def satisfied(wordNet: WordNet, bindings: Bindings) = {
     val (leftResult, leftGroup) = if (leftCache != null) {
@@ -47,7 +43,7 @@ case class BinaryCondition(op: String, leftOp: AlgebraOp, rightOp: AlgebraOp) ex
       val result = leftOp.evaluate(wordNet, bindings).paths.map(_.last)
       val group = result.groupBy(x => x)
 
-      if (leftOpIsContextIndependent)
+      if (leftOp.referencedVariables.isEmpty && !leftOp.referencesContext)
         leftCache = (result, group)
 
       (result, group)
@@ -59,7 +55,7 @@ case class BinaryCondition(op: String, leftOp: AlgebraOp, rightOp: AlgebraOp) ex
       val result = rightOp.evaluate(wordNet, bindings).paths.map(_.last)
       val group = result.groupBy(x => x)
 
-      if (rightOpIsContextIndependent)
+      if (rightOp.referencedVariables.isEmpty && !rightOp.referencesContext)
         rightCache = (result, group)
       
       (result, group)
@@ -124,9 +120,9 @@ case class BinaryCondition(op: String, leftOp: AlgebraOp, rightOp: AlgebraOp) ex
     }
   }
 
-  def referencedVariables = leftOp.referencedVariables union rightOp.referencedVariables
+  val referencedVariables = leftOp.referencedVariables union rightOp.referencedVariables
 
-  def referencesContext = leftOp.referencesContext || rightOp.referencesContext
+  val referencesContext = leftOp.referencesContext || rightOp.referencesContext
 }
 
 case class RightFringeCondition(op: AlgebraOp) extends Condition {
@@ -136,7 +132,7 @@ case class RightFringeCondition(op: AlgebraOp) extends Condition {
     !lastSteps.isEmpty && lastSteps.forall(x => x.isInstanceOf[Boolean] && x.asInstanceOf[Boolean])
   }
 
-  def referencedVariables = op.referencedVariables
+  val referencedVariables = op.referencedVariables
 
-  def referencesContext = op.referencesContext
+  val referencesContext = op.referencesContext
 }

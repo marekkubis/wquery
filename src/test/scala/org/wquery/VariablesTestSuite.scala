@@ -74,7 +74,7 @@ class VariablesTestSuite extends WQueryTestSuite {
   
   @Test def tooManyRightSideStepVariables() = result of ("{car}.hypernym$a$b@P$c$x$y") should startWith ("ERROR: Variable $c cannot be bound")
 
-  @Test def tooManyStepVariables() = result of ("{car}.hypernym$a$b$c$d@P$x$y$z") should startWith ("ERROR: Variable $c cannot be bound")
+  @Test def tooManyStepVariables() = result of ("{car}.hypernym$a$b$c@P$x$y$z") should startWith ("ERROR: Variable $c cannot be bound")
   
   @Test def duplicatedVariables() = result of ("{car}.hypernym$a$a") should startWith ("ERROR: Variable list $a$a contains duplicated variable names")
       
