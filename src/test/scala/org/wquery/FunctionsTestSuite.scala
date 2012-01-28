@@ -49,6 +49,10 @@ class FunctionsTestSuite extends WQueryTestSuite {
   @Test def testPowerFloat() = result of ("power(2.0, 3.0)") should equal ("8.0\n")
 
   @Test def testPowerInt() = result of ("power(2, 3)") should equal ("8.0\n")
+
+  @Test def testInt() = result of ("int(2.0)") should equal ("2\n")
+
+  @Test def testFloat() = result of ("float(2)") should equal ("2.0\n")
     
   // string functions
    

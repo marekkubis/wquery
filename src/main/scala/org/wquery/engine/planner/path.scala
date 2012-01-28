@@ -5,6 +5,7 @@ import org.wquery.engine.operations._
 import scalaz._
 import Scalaz._
 import org.wquery.engine.VariableTemplate
+import org.wquery.model.{FloatType, IntegerType}
 
 class Path(val links: List[Link], val conditions: Map[Option[Link], List[Condition]])
 
@@ -52,7 +53,7 @@ class PathBuilder {
     } else {
       val variables = ~linkVariables
 
-      linkBuffer.append(new PatternLink(linkPos.get, linkPattern.get, variables, inferGenerators(conditionsList, variables)))
+      linkBuffer.append(new PatternLink(linkPos.get, linkPattern.get, variables, inferGenerators(linkPattern.get, conditionsList, variables)))
       linkPos = none
       linkPattern = none
     }
@@ -62,7 +63,7 @@ class PathBuilder {
     linkConditions = new ListBuffer[Condition]
   }
 
-  private def inferGenerators(linkConditions: List[Condition], linkVariables: VariableTemplate) = {
+  private def inferGenerators(linkPattern: RelationalPattern, linkConditions: List[Condition], linkVariables: VariableTemplate) = {
     val buffer = new ListBuffer[(AlgebraOp, Condition)]
 
     for (condition <- linkConditions) {
@@ -70,7 +71,7 @@ class PathBuilder {
         case BinaryCondition(op, leftOp, rightOp) if op == "in" || op == "=" =>
             inferGeneratorFromContextVariable(leftOp, rightOp)
               .orElse(inferGeneratorFromContextVariable(rightOp, leftOp))
-              .map(generator => buffer.append((generator, condition)))
+              .map(generator => buffer.append((adjustGeneratorTypeToPattern(linkPattern, generator), condition)))
       }
     }
 
@@ -79,7 +80,7 @@ class PathBuilder {
         case BinaryCondition(op, leftOp, rightOp) if op == "in" || op == "=" =>
           inferGeneratorFromStepVariable(linkVariables, leftOp, rightOp)
             .orElse(inferGeneratorFromStepVariable(linkVariables, rightOp, leftOp))
-            .map(generator => buffer.append((generator, condition)))
+            .map(generator => buffer.append((adjustGeneratorTypeToPattern(linkPattern, generator), condition)))
       }
     }
 
@@ -98,6 +99,15 @@ class PathBuilder {
       case StepVariableRefOp(variable, _) =>
         (linkVariables.pattern.lastOption.some(_ === variable).none(false))??(some(generatorOp))
     }).filterNot(_.containsReferences)
+  }
+
+  private def adjustGeneratorTypeToPattern(linkPattern: RelationalPattern, generatorOp: AlgebraOp) = {
+    if (linkPattern.rightType(0) == Set(IntegerType) && generatorOp.rightType(0).contains(FloatType))
+      FunctionOp(IntFunction, generatorOp)
+    else if (linkPattern.rightType(0) == Set(FloatType) && generatorOp.rightType(0).contains(IntegerType))
+      FunctionOp(IntFunction, generatorOp)
+    else
+      generatorOp
   }
 
   def build = {
