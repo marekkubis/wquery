@@ -21,8 +21,7 @@ class ConditionApplier(links: List[Link], conditions: Map[Option[Link], List[Con
 
     for (condition <- candidateConditions) {
       if (condition.referencedVariables.forall{ variable =>
-        alreadyBoundVariables.contains(variable) || currentLink.variables.variables.contains(variable) ||
-          (context.isBound(variable) && !pathVariables.contains(variable)) || variable === StepVariable.ContextVariable
+        alreadyBoundVariables.contains(variable) || (context.isBound(variable) && !pathVariables.contains(variable)) || variable === StepVariable.ContextVariable
       }) {
         appliedConditions += condition
         op = SelectOp(if (condition.referencedVariables.contains(StepVariable.ContextVariable)) BindOp(op, VariableTemplate(List(StepVariable.ContextVariable))) else op, condition)
