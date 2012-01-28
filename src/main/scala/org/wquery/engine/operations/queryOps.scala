@@ -707,7 +707,7 @@ case class ExtendOp(op: AlgebraOp, from: Int, pattern: RelationalPattern, direct
           (0, path.size)
         case Backward =>
           pathBuffer.append(extension ++ path)
-          (extensionSize, 0)
+          (extensionSize, 1)
       }
 
       for (pathVar <- dataSetPathVarNames) {
