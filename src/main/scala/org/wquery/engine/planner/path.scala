@@ -90,14 +90,14 @@ class PathBuilder {
     (contextOp matchOrZero {
       case ContextRefOp(_) =>
         some(generatorOp)
-    }).filterNot(_.referencesContext)
+    }).filterNot(_.containsReferences)
   }
 
   private def inferGeneratorFromStepVariable(linkVariables: VariableTemplate, contextOp: AlgebraOp, generatorOp: AlgebraOp) = {
     (contextOp matchOrZero {
       case StepVariableRefOp(variable, _) =>
         (linkVariables.pattern.lastOption.some(_ === variable).none(false))??(some(generatorOp))
-    }).filterNot(_.referencesContext)
+    }).filterNot(_.containsReferences)
   }
 
   def build = {

@@ -43,7 +43,7 @@ case class BinaryCondition(op: String, leftOp: AlgebraOp, rightOp: AlgebraOp) ex
       val result = leftOp.evaluate(wordNet, bindings).paths.map(_.last)
       val group = result.groupBy(x => x)
 
-      if (leftOp.referencedVariables.isEmpty && !leftOp.referencesContext)
+      if (!leftOp.containsReferences)
         leftCache = (result, group)
 
       (result, group)
@@ -55,7 +55,7 @@ case class BinaryCondition(op: String, leftOp: AlgebraOp, rightOp: AlgebraOp) ex
       val result = rightOp.evaluate(wordNet, bindings).paths.map(_.last)
       val group = result.groupBy(x => x)
 
-      if (rightOp.referencedVariables.isEmpty && !rightOp.referencesContext)
+      if (!rightOp.containsReferences)
         rightCache = (result, group)
       
       (result, group)
