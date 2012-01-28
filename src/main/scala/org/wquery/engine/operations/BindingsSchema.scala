@@ -1,11 +1,8 @@
 package org.wquery.engine.operations
 
 import org.wquery.model._
-import org.wquery.WQueryEvaluationException
 
 class BindingsSchema(val parent: Option[BindingsSchema], updatesParent: Boolean) extends BindingsPattern {
-  private var contextOp: Option[AlgebraOp] = None
-
   override def bindStepVariableType(name: String, types: Set[DataType]) {
     if (updatesParent && parent.map(_.lookupStepVariableType(name).isDefined).getOrElse(false)) {
       parent.get.bindStepVariableType(name, types)
@@ -22,27 +19,15 @@ class BindingsSchema(val parent: Option[BindingsSchema], updatesParent: Boolean)
     }
   }
 
-  def bindContextOp(op: AlgebraOp) = contextOp = Some(op)
-
   override def lookupStepVariableType(name: String): Option[Set[DataType]] = {
     super.lookupStepVariableType(name)
       .orElse(parent.flatMap(_.lookupStepVariableType(name)))
-      .orElse(contextOp.map(op => op.bindingsPattern.lookupStepVariableType(name)).getOrElse(None))
   }
 
   override def lookupPathVariableType(name: String): Option[(AlgebraOp, Int, Int)] = {
     super.lookupPathVariableType(name)
       .orElse(parent.flatMap(_.lookupPathVariableType(name)))
-      .orElse(contextOp.map(op => op.bindingsPattern.lookupPathVariableType(name)).getOrElse(None))
   }
-
-  def lookupContextVariableType: Set[DataType] = {
-    contextOp.map(_.rightType(0))
-      .getOrElse(parent.map(_.lookupContextVariableType)
-        .getOrElse{throw new WQueryEvaluationException("Operator # placed outside of a filter")})
-  }
-
-  def areContextVariablesBound: Boolean = contextOp.isDefined || parent.map(_.areContextVariablesBound).getOrElse(false)
 
   override def union(pattern: BindingsPattern) = {
     val sum = new BindingsSchema(parent, false)

@@ -2,9 +2,9 @@ package org.wquery.engine.operations
 
 import org.wquery.WQueryEvaluationException
 import org.wquery.model.{WQueryListOrdering, DataType, StringType, WordNet}
-import org.wquery.engine.{ContainsReferences, Variable}
+import org.wquery.engine.{ReferencesVariables, Variable}
 
-sealed abstract class Condition extends ContainsReferences {
+sealed abstract class Condition extends ReferencesVariables {
   def satisfied(wordNet: WordNet, bindings: Bindings): Boolean
 }
 
@@ -12,24 +12,18 @@ case class OrCondition(exprs: List[Condition]) extends Condition {
   def satisfied(wordNet: WordNet, bindings: Bindings) = exprs.exists(_.satisfied(wordNet, bindings))
 
   val referencedVariables = exprs.foldLeft(Set.empty[Variable])((vars, expr) => vars union expr.referencedVariables)
-
-  val referencesContext = exprs.exists(_.referencesContext)
 }
 
 case class AndCondition(exprs: List[Condition]) extends Condition {
   def satisfied(wordNet: WordNet, bindings: Bindings) = exprs.forall(_.satisfied(wordNet, bindings))
 
   val referencedVariables = exprs.foldLeft(Set.empty[Variable])((vars, expr) => vars union expr.referencedVariables)
-
-  val referencesContext = exprs.exists(_.referencesContext)
 }
 
 case class NotCondition(expr: Condition) extends Condition {
   def satisfied(wordNet: WordNet, bindings: Bindings) = !expr.satisfied(wordNet, bindings)
 
   val referencedVariables = expr.referencedVariables
-
-  val referencesContext = expr.referencesContext
 }
 
 case class BinaryCondition(op: String, leftOp: AlgebraOp, rightOp: AlgebraOp) extends Condition {
@@ -43,7 +37,7 @@ case class BinaryCondition(op: String, leftOp: AlgebraOp, rightOp: AlgebraOp) ex
       val result = leftOp.evaluate(wordNet, bindings).paths.map(_.last)
       val group = result.groupBy(x => x)
 
-      if (!leftOp.containsReferences)
+      if (leftOp.referencedVariables.isEmpty)
         leftCache = (result, group)
 
       (result, group)
@@ -55,7 +49,7 @@ case class BinaryCondition(op: String, leftOp: AlgebraOp, rightOp: AlgebraOp) ex
       val result = rightOp.evaluate(wordNet, bindings).paths.map(_.last)
       val group = result.groupBy(x => x)
 
-      if (!rightOp.containsReferences)
+      if (rightOp.referencedVariables.isEmpty)
         rightCache = (result, group)
       
       (result, group)
@@ -121,8 +115,6 @@ case class BinaryCondition(op: String, leftOp: AlgebraOp, rightOp: AlgebraOp) ex
   }
 
   val referencedVariables = leftOp.referencedVariables union rightOp.referencedVariables
-
-  val referencesContext = leftOp.referencesContext || rightOp.referencesContext
 }
 
 case class RightFringeCondition(op: AlgebraOp) extends Condition {
@@ -133,6 +125,4 @@ case class RightFringeCondition(op: AlgebraOp) extends Condition {
   }
 
   val referencedVariables = op.referencedVariables
-
-  val referencesContext = op.referencesContext
 }

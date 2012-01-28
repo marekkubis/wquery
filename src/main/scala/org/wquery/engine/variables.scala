@@ -17,3 +17,7 @@ case class PathVariable(override val name: String) extends Variable(name) {
 object Variable {
   implicit val VariableEqual = equalA[Variable]
 }
+
+object StepVariable {
+  val ContextVariable = StepVariable("__#")
+}

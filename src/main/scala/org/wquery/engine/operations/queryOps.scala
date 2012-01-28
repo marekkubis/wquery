@@ -26,8 +26,6 @@ case class EmitOp(op: AlgebraOp) extends QueryOp {
 
   val referencedVariables = op.referencedVariables
 
-  val referencesContext = op.referencesContext
-
   def maxCount(wordNet: WordNetSchema) = op.maxCount(wordNet)
 }
 
@@ -65,8 +63,6 @@ case class IterateOp(bindingOp: AlgebraOp, iteratedOp: AlgebraOp) extends QueryO
 
   val referencedVariables = (iteratedOp.referencedVariables -- bindingOp.bindingsPattern.variables) ++ bindingOp.referencedVariables
 
-  val referencesContext = iteratedOp.referencesContext || bindingOp.referencesContext
-
   def maxCount(wordNet: WordNetSchema) = (bindingOp.maxCount(wordNet) |@| iteratedOp.maxCount(wordNet))(_ * _)
 }
 
@@ -89,8 +85,6 @@ case class IfElseOp(conditionOp: AlgebraOp, ifOp: AlgebraOp, elseOp: Option[Alge
   def bindingsPattern = elseOp.some(_.bindingsPattern union ifOp.bindingsPattern).none(ifOp.bindingsPattern)
 
   val referencedVariables = conditionOp.referencedVariables ++ ifOp.referencedVariables ++ elseOp.map(_.referencedVariables).orZero
-
-  val referencesContext = conditionOp.referencesContext || ifOp.referencesContext || elseOp.some(_.referencesContext).none(false)
 
   def maxCount(wordNet: WordNetSchema) = elseOp.some(op => (op.maxCount(wordNet)<|*|>ifOp.maxCount(wordNet)).map{ case (a,b) => a max b}).none(ifOp.maxCount(wordNet))
 }
@@ -120,8 +114,6 @@ case class BlockOp(ops: List[AlgebraOp]) extends QueryOp {
   }
 
   val referencedVariables = ops.map(_.referencedVariables).asMA.sum
-
-  val referencesContext = ops.exists(_.referencesContext)
 
   def maxCount(wordNet: WordNetSchema) = ops.map(_.maxCount(wordNet)).sequence.map(_.sum)
 }
@@ -158,8 +150,6 @@ case class AssignmentOp(variables: VariableTemplate, op: AlgebraOp) extends Quer
 
   val referencedVariables = op.referencedVariables
 
-  val referencesContext = op.referencesContext
-
   def maxCount(wordNet: WordNetSchema) = some(0)
 }
 
@@ -185,8 +175,6 @@ case class WhileDoOp(conditionOp: AlgebraOp, iteratedOp: AlgebraOp) extends Quer
 
   val referencedVariables = conditionOp.referencedVariables ++ iteratedOp.referencedVariables
 
-  val referencesContext = conditionOp.referencesContext || iteratedOp.referencesContext
-
   def maxCount(wordNet: WordNetSchema) = none
 }
 
@@ -209,8 +197,6 @@ case class UnionOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends QueryOp {
   def bindingsPattern = BindingsPattern()
 
   val referencedVariables = leftOp.referencedVariables ++ rightOp.referencedVariables
-
-  val referencesContext = leftOp.referencesContext || rightOp.referencesContext
 
   def maxCount(wordNet: WordNetSchema) = (leftOp.maxCount(wordNet) |@| rightOp.maxCount(wordNet))(_ max _)
 }
@@ -235,8 +221,6 @@ case class ExceptOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends QueryOp {
 
   val referencedVariables = leftOp.referencedVariables ++ rightOp.referencedVariables
 
-  val referencesContext = leftOp.referencesContext || rightOp.referencesContext
-
   def maxCount(wordNet: WordNetSchema) = leftOp.maxCount(wordNet)
 }
 
@@ -256,8 +240,6 @@ case class IntersectOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends QueryOp {
   def bindingsPattern = BindingsPattern()
 
   val referencedVariables = leftOp.referencedVariables ++ rightOp.referencedVariables
-
-  val referencesContext = leftOp.referencesContext || rightOp.referencesContext
 
   def maxCount(wordNet: WordNetSchema) = (leftOp.maxCount(wordNet) |@| rightOp.maxCount(wordNet))(_ min _)
 }
@@ -332,8 +314,6 @@ case class JoinOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends QueryOp {
   def bindingsPattern = leftOp.bindingsPattern union rightOp.bindingsPattern
 
   val referencedVariables = leftOp.referencedVariables ++ rightOp.referencedVariables
-
-  val referencesContext = leftOp.referencesContext || rightOp.referencesContext
 
   def maxCount(wordNet: WordNetSchema) = (leftOp.maxCount(wordNet) |@| rightOp.maxCount(wordNet))(_ * _)
 }
@@ -416,8 +396,6 @@ case class NaturalJoinOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends QueryOp 
 
   val referencedVariables = leftOp.referencedVariables ++ rightOp.referencedVariables
 
-  val referencesContext = leftOp.referencesContext || rightOp.referencesContext
-
   def maxCount(wordNet: WordNetSchema) = (leftOp.maxCount(wordNet) |@| rightOp.maxCount(wordNet))(_ * _)
 }
 
@@ -459,8 +437,6 @@ abstract class BinaryArithmeticOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends
   def bindingsPattern = BindingsPattern()
 
   val referencedVariables = leftOp.referencedVariables ++ rightOp.referencedVariables
-
-  val referencesContext = leftOp.referencesContext || rightOp.referencesContext
 
   def maxCount(wordNet: WordNetSchema) = (leftOp.maxCount(wordNet) |@| rightOp.maxCount(wordNet))(_ * _)
 }
@@ -557,8 +533,6 @@ case class MinusOp(op: AlgebraOp) extends QueryOp {
 
   val referencedVariables = op.referencedVariables
 
-  val referencesContext = op.referencesContext
-
   def maxCount(wordNet: WordNetSchema) = op.maxCount(wordNet)
 }
 
@@ -576,8 +550,6 @@ case class FunctionOp(function: Function, args: AlgebraOp) extends QueryOp {
   def bindingsPattern = function.bindingsPattern(args)
 
   val referencedVariables = args.referencedVariables
-
-  val referencesContext = args.referencesContext
 
   def maxCount(wordNet: WordNetSchema) = function.maxCount(args, wordNet)
 }
@@ -610,8 +582,6 @@ case class SelectOp(op: AlgebraOp, condition: Condition) extends QueryOp {
         binds.bindStepVariable(stepVar, tuple(varPos))
       }
 
-      binds.bindContextVariable(tuple.last)
-
       if (condition.satisfied(wordNet, binds)) {
         pathBuffer.append(tuple)
         pathVarNames.foreach(x => pathVarBuffers(x).append(dataSet.pathVars(x)(i)))
@@ -634,8 +604,6 @@ case class SelectOp(op: AlgebraOp, condition: Condition) extends QueryOp {
 
   val referencedVariables = op.referencedVariables ++ (condition.referencedVariables -- op.bindingsPattern.variables)
 
-  val referencesContext = op.referencesContext
-
   def maxCount(wordNet: WordNetSchema) = op.maxCount(wordNet)
 }
 
@@ -651,8 +619,6 @@ case class ProjectOp(op: AlgebraOp, projectOp: AlgebraOp) extends QueryOp {
 
     for (i <- 0 until dataSet.pathCount) {
       val tuple = dataSet.paths(i)
-
-      binds.bindContextVariable(tuple.last)
 
       for (pathVar <- filterPathVarNames) {
         val varPos = dataSet.pathVars(pathVar)(i)
@@ -681,8 +647,6 @@ case class ProjectOp(op: AlgebraOp, projectOp: AlgebraOp) extends QueryOp {
   def bindingsPattern = projectOp.bindingsPattern
 
   val referencedVariables = op.referencedVariables ++ (projectOp.referencedVariables -- op.bindingsPattern.variables)
-
-  val referencesContext = op.referencesContext
 
   def maxCount(wordNet: WordNetSchema) = (op.maxCount(wordNet) |@| projectOp.maxCount(wordNet))(_ * _)
 }
@@ -767,8 +731,6 @@ case class ExtendOp(op: AlgebraOp, from: Int, pattern: RelationalPattern, direct
 
   val referencedVariables = op.referencedVariables
 
-  val referencesContext = op.referencesContext
-
   def maxCount(wordNet: WordNetSchema) = pattern.maxCount(op.maxCount(wordNet), wordNet)
 }
 
@@ -793,8 +755,6 @@ case class BindOp(op: AlgebraOp, variables: VariableTemplate) extends QueryOp {
 
   val referencedVariables = op.referencedVariables
 
-  val referencesContext = op.referencesContext
-
   def maxCount(wordNet: WordNetSchema) = op.maxCount(wordNet)
 }
 
@@ -812,8 +772,6 @@ case class FringeOp(pattern: RelationalPattern, side: Side) extends QueryOp {
   def bindingsPattern = BindingsPattern()
 
   val referencedVariables = ∅[Set[Variable]]
-
-  val referencesContext = false
 
   def maxCount(wordNet: WordNetSchema) = some(pattern.fringeMaxCount(side, wordNet))
 }
@@ -844,8 +802,6 @@ case class FetchOp(relation: Relation, from: List[(String, List[Any])], to: List
   def bindingsPattern = BindingsPattern()
 
   val referencedVariables = ∅[Set[Variable]]
-
-  val referencesContext = false
 
   def maxCount(wordNet: WordNetSchema) = some(wordNet.stats.fetchMaxCount(relation, from, to))
 }
@@ -888,8 +844,6 @@ case class ConstantOp(dataSet: DataSet) extends QueryOp {
 
   val referencedVariables = ∅[Set[Variable]]
 
-  val referencesContext = false
-
   def maxCount(wordNet: WordNetSchema) = some(dataSet.pathCount)
 }
 
@@ -902,29 +856,6 @@ object ConstantOp {
 /*
  * Reference operations
  */
-case class ContextRefOp(types: Set[DataType]) extends QueryOp {
-  def evaluate(wordNet: WordNet, bindings: Bindings) = {
-    bindings.lookupContextVariable.map(DataSet.fromValue(_))
-      .getOrElse(throw new WQueryEvaluationException("Context is not bound"))
-  }
-
-  def leftType(pos: Int) = if (pos == 0) types else Set.empty
-
-  def rightType(pos: Int) = if (pos == 0) types else Set.empty
-
-  val minTupleSize = 1
-
-  val maxTupleSize = some(1)
-
-  def bindingsPattern = BindingsPattern()
-
-  val referencedVariables = ∅[Set[Variable]]
-
-  val referencesContext = true
-
-  def maxCount(wordNet: WordNetSchema) = some(1)
-}
-
 case class PathVariableRefOp(variable: PathVariable, types: (AlgebraOp, Int, Int)) extends QueryOp {
   def evaluate(wordNet: WordNet, bindings: Bindings) = bindings.lookupPathVariable(variable.name).map(DataSet.fromTuple(_)).get
 
@@ -939,8 +870,6 @@ case class PathVariableRefOp(variable: PathVariable, types: (AlgebraOp, Int, Int
   def bindingsPattern = BindingsPattern()
 
   val referencedVariables = Set[Variable](variable)
-
-  val referencesContext = false
 
   def maxCount(wordNet: WordNetSchema) = some(1)
 }
@@ -959,8 +888,6 @@ case class StepVariableRefOp(variable: StepVariable, types: Set[DataType]) exten
   def bindingsPattern = BindingsPattern()
 
   val referencedVariables = Set[Variable](variable)
-
-  val referencesContext = false
 
   def maxCount(wordNet: WordNetSchema) = some(1)
 }

@@ -1,10 +1,10 @@
 package org.wquery.engine.planner
 
 import collection.mutable.{Map, Set}
-import org.wquery.engine.Variable
 import scalaz._
 import Scalaz._
-import org.wquery.engine.operations.{SelectOp, AlgebraOp, BindingsSchema, Condition}
+import org.wquery.engine.operations._
+import org.wquery.engine.{StepVariable, VariableTemplate, Variable}
 
 class ConditionApplier(links: List[Link], conditions: Map[Option[Link], List[Condition]], context: BindingsSchema) {
   val appliedConditions = Set[Condition]()
@@ -20,11 +20,12 @@ class ConditionApplier(links: List[Link], conditions: Map[Option[Link], List[Con
     val candidateConditions = (~conditions.get(none) ++ ~conditions.get(some(currentLink))).filterNot(appliedConditions.contains)
 
     for (condition <- candidateConditions) {
-      if (condition.referencedVariables.forall { variable =>
-        alreadyBoundVariables.contains(variable) || currentLink.variables.variables.contains(variable) || (context.isBound(variable) && !pathVariables.contains(variable))
+      if (condition.referencedVariables.forall{ variable =>
+        alreadyBoundVariables.contains(variable) || currentLink.variables.variables.contains(variable) ||
+          (context.isBound(variable) && !pathVariables.contains(variable)) || variable === StepVariable.ContextVariable
       }) {
         appliedConditions += condition
-        op = SelectOp(op, condition)
+        op = SelectOp(if (condition.referencedVariables.contains(StepVariable.ContextVariable)) BindOp(op, VariableTemplate(List(StepVariable.ContextVariable))) else op, condition)
       }
     }
 

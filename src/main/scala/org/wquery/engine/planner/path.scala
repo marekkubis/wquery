@@ -4,8 +4,8 @@ import collection.mutable.{ListBuffer, Map}
 import org.wquery.engine.operations._
 import scalaz._
 import Scalaz._
-import org.wquery.engine.VariableTemplate
 import org.wquery.model.{FloatType, IntegerType}
+import org.wquery.engine.{StepVariable, VariableTemplate}
 
 class Path(val links: List[Link], val conditions: Map[Option[Link], List[Condition]])
 
@@ -32,7 +32,7 @@ class PathBuilder {
   }
 
   def appendCondition(condition: Condition) {
-    if (condition.referencesContext)
+    if (condition.referencedVariables.contains(StepVariable.ContextVariable))
       linkConditions.append(condition)
     else
       conditions(none) = condition::conditions(none)
@@ -89,16 +89,16 @@ class PathBuilder {
 
   private def inferGeneratorFromContextVariable(contextOp: AlgebraOp, generatorOp: AlgebraOp) = {
     (contextOp matchOrZero {
-      case ContextRefOp(_) =>
+      case StepVariableRefOp(StepVariable.ContextVariable, _) =>
         some(generatorOp)
-    }).filterNot(_.containsReferences)
+    }).filter(_.referencedVariables.isEmpty)
   }
 
   private def inferGeneratorFromStepVariable(linkVariables: VariableTemplate, contextOp: AlgebraOp, generatorOp: AlgebraOp) = {
     (contextOp matchOrZero {
       case StepVariableRefOp(variable, _) =>
         (linkVariables.pattern.lastOption.some(_ === variable).none(false))??(some(generatorOp))
-    }).filterNot(_.containsReferences)
+    }).filter(_.referencedVariables.isEmpty)
   }
 
   private def adjustGeneratorTypeToPattern(linkPattern: RelationalPattern, generatorOp: AlgebraOp) = {

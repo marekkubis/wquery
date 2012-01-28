@@ -242,7 +242,7 @@ trait WQueryParsers extends RegexParsers {
   def float_generator = floatNum ^^ { value => AlgebraExpr(ConstantOp.fromValue(value)) }
   def sequence_generator = integerNum ~ ".." ~ integerNum ^^ { case left~_~right => AlgebraExpr(ConstantOp(DataSet.fromList((left to right).toList))) }
   def integer_generator = integerNum ^^ { value => AlgebraExpr(ConstantOp.fromValue(value)) }
-  def back_generator = "#" ^^ { x => ContextReferenceReq() }
+  def back_generator = "#" ^^^ { ContextByVariableReq(StepVariable.ContextVariable) }
   def filter_generator = filter ^^ { BooleanByFilterReq(_) }
   def empty_set_generator = "<>" ^^ { _ => AlgebraExpr(ConstantOp.empty) }
   def expr_generator = "(" ~> expr <~ ")"

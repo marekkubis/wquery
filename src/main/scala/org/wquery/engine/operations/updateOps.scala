@@ -36,8 +36,6 @@ sealed abstract class UpdateOp extends AlgebraOp {
 sealed abstract class TupleUpdateOp(val leftOp: AlgebraOp, val relationalPattern: ArcRelationalPattern, val rightOp: AlgebraOp) extends UpdateOp {
   val referencedVariables = leftOp.referencedVariables ++ rightOp.referencedVariables
 
-  val referencesContext = leftOp.referencesContext || rightOp.referencesContext
-
   def update(wordNet: WordNet, bindings: Bindings) {
     val leftSet = leftOp.evaluate(wordNet, bindings)
     val rightSet = rightOp.evaluate(wordNet, bindings)
@@ -82,14 +80,10 @@ case class SetTuplesOp(leftOp:AlgebraOp, relationalPattern: ArcRelationalPattern
   }
 
   val referencedVariables = leftOp.referencedVariables ++ rightOp.referencedVariables
-
-  val referencesContext = leftOp.referencesContext || rightOp.referencesContext
 }
 
 sealed abstract class WordNetUpdateWithAssignmentsOp[A](val valuesOp: AlgebraOp, val patterns: List[PropertyAssignmentPattern]) extends UpdateOp {
   val referencedVariables = patterns.foldLeft(valuesOp.referencedVariables)((l, r) => l ++ r.referencedVariables)
-
-  val referencesContext = valuesOp.referencesContext || patterns.exists(_.referencesContext)
 
   def update(wordNet: WordNet, bindings: Bindings) {
     updateWithAssignments(wordNet, bindings, patterns.map(_.evaluatePattern(wordNet, bindings)))
@@ -112,8 +106,6 @@ case class PropertyAssignmentPattern(relationalPattern: ArcRelationalPattern, op
   }
 
   val referencedVariables = valuesOp.referencedVariables
-
-  val referencesContext = valuesOp.referencesContext
 }
 
 case class AddSensesOp(override val valuesOp: AlgebraOp, override val patterns: List[PropertyAssignmentPattern]) extends WordNetUpdateWithValuesOp[Sense](valuesOp, patterns) {
@@ -248,8 +240,6 @@ case class NewSynsetOp(sensesOp: AlgebraOp) extends AlgebraOp {
 
   val referencedVariables = sensesOp.referencedVariables
 
-  val referencesContext = sensesOp.referencesContext
-
   def maxCount(wordNet: WordNetSchema) = some(1)
 }
 
@@ -266,14 +256,10 @@ case class CreateRelationFromPatternOp(name: String, pattern: RelationalPattern,
   }
 
   val referencedVariables = ∅[Set[Variable]]
-
-  val referencesContext = false
 }
 
 case class RelationUpdateOp(arcsOp: AlgebraOp, op: String, property: String, action: Boolean, valuesOp: AlgebraOp) extends UpdateOp {
   val referencedVariables = arcsOp.referencedVariables ++ valuesOp.referencedVariables
-
-  val referencesContext = arcsOp.referencesContext || valuesOp.referencesContext
 
   def update(wordNet: WordNet, bindings: Bindings) = {
     val arcs = arcsOp.evaluate(wordNet, bindings).paths.map(_.last.asInstanceOf[Arc])
