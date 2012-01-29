@@ -5,6 +5,7 @@ import scalaz._
 import Scalaz._
 import org.wquery.engine.operations._
 import org.wquery.engine.{PathVariable, StepVariable, VariableTemplate, Variable}
+import org.wquery.model.{SenseType, POSType, SynsetType, StringType}
 
 class ConditionApplier(links: List[Link], conditions: Map[Option[Link], List[Condition]], bindings: BindingsSchema) {
   val appliedConditions = Set[Condition]()
@@ -38,7 +39,7 @@ class ConditionApplier(links: List[Link], conditions: Map[Option[Link], List[Con
         alreadyBoundVariables.contains(variable) || (bindings.isBound(variable) && !pathVariables.contains(variable)) || variable === StepVariable.ContextVariable
       }) {
         appliedConditions += condition
-        op = SelectOp(op, condition)
+        op = ConditionApplier.applyIfNotRedundant(op, condition)
       }
     }
 
@@ -49,5 +50,32 @@ class ConditionApplier(links: List[Link], conditions: Map[Option[Link], List[Con
     conditions.get(some(link)).orZero
       .filterNot(appliedConditions.contains(_))
       .exists(_.referencedVariables.contains(StepVariable.ContextVariable))
+  }
+}
+
+object ConditionApplier {
+  def applyIfNotRedundant(op: AlgebraOp, condition: Condition) = {
+    val isConditionRedundant = condition matchOrZero {
+      case BinaryCondition("in", leftOp, rightOp) =>
+        iSRedundantStepVariableFilter(leftOp, rightOp) || iSRedundantStepVariableFilter(rightOp, leftOp)
+    }
+
+    if (isConditionRedundant)
+      op
+    else
+      SelectOp(op, condition)
+  }
+
+  private def iSRedundantStepVariableFilter(variableOp: AlgebraOp, redundantOp: AlgebraOp) = {
+    (variableOp, redundantOp) matchOrZero {
+      case (StepVariableRefOp(_, types), FetchOp.synsets) if types == Set(SynsetType) =>
+        true
+      case (StepVariableRefOp(_, types), FetchOp.senses) if types == Set(SenseType) =>
+        true
+      case (StepVariableRefOp(_, types), FetchOp.words) if types == Set(StringType) =>
+        true
+      case (StepVariableRefOp(_, types), FetchOp.possyms) if types == Set(POSType) =>
+        true
+    }
   }
 }

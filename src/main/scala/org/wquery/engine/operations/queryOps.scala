@@ -807,13 +807,13 @@ case class FetchOp(relation: Relation, from: List[(String, List[Any])], to: List
 }
 
 object FetchOp {
-  def words = FetchOp(WordNet.WordSet, List((Relation.Source, Nil)), List(Relation.Source))
+  val words = FetchOp(WordNet.WordSet, List((Relation.Source, Nil)), List(Relation.Source))
 
-  def senses = FetchOp(WordNet.SenseSet, List((Relation.Source, Nil)), List(Relation.Source))
+  val senses = FetchOp(WordNet.SenseSet, List((Relation.Source, Nil)), List(Relation.Source))
 
-  def synsets = FetchOp(WordNet.SynsetSet, List((Relation.Source, Nil)), List(Relation.Source))
+  val synsets = FetchOp(WordNet.SynsetSet, List((Relation.Source, Nil)), List(Relation.Source))
 
-  def possyms = FetchOp(WordNet.PosSet, List((Relation.Source, Nil)), List(Relation.Source))
+  val possyms = FetchOp(WordNet.PosSet, List((Relation.Source, Nil)), List(Relation.Source))
 
   def wordByValue(value: String)
     = FetchOp(WordNet.WordSet, List((Relation.Source, List(value))), List(Relation.Source))

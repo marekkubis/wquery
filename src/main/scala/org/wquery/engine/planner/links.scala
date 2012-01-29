@@ -24,7 +24,7 @@ class RootLink(generator: AlgebraOp, override val variables: VariableTemplate) e
     val template = VariableTemplate(List(StepVariable("__f"), PathVariable.Unnamed))
     val condition = BinaryCondition("in", StepVariableRefOp(StepVariable("__f"), generator.leftType(0)), generator)
 
-    SelectOp(BindOp(op, template), condition)
+    ConditionApplier.applyIfNotRedundant(BindOp(op, template), condition)
   }
 
   override def toString = "r(" + generator + ")"
