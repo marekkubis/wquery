@@ -374,15 +374,8 @@ case class FilterTransformationExpr(conditionalExpr: ConditionalExpr) extends Tr
 case class NodeTransformationExpr(generator: EvaluableExpr) extends TransformationExpr {
   def push(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context, op: AlgebraOp, plan: PathBuilder) = {
     if (op /== ConstantOp.empty) {
-      val filterBindings = BindingsSchema(bindings union op.bindingsPattern, false)
-
-      filterBindings.bindStepVariableType(StepVariable.ContextVariable.name, op.rightType(0))
-
-      val condition = BinaryCondition("in", StepVariableRefOp(StepVariable.ContextVariable, op.rightType(0)), generator.evaluationPlan(wordNet, filterBindings, context))
-      val filteredOp = if (condition.referencedVariables.contains(StepVariable.ContextVariable)) BindOp(op, VariableTemplate(List(StepVariable.ContextVariable))) else op
-
-      plan.appendCondition(condition)
-      SelectOp(filteredOp, condition)
+      FilterTransformationExpr(BinaryConditionalExpr("in", ContextByVariableReq(StepVariable.ContextVariable), generator))
+        .push(wordNet, bindings, context, op, plan)
     } else {
       val generateOp = generator.evaluationPlan(wordNet, bindings, context)
       plan.createRootLink(generateOp)
