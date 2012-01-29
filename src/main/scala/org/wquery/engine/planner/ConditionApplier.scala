@@ -6,7 +6,7 @@ import Scalaz._
 import org.wquery.engine.operations._
 import org.wquery.engine.{StepVariable, VariableTemplate, Variable}
 
-class ConditionApplier(links: List[Link], conditions: Map[Option[Link], List[Condition]], context: BindingsSchema) {
+class ConditionApplier(links: List[Link], conditions: Map[Option[Link], List[Condition]], bindings: BindingsSchema) {
   val appliedConditions = Set[Condition]()
   val pathVariables = links.map(_.variables.variables).asMA.sum
   val alreadyBoundVariables = Set[Variable]()
@@ -18,13 +18,20 @@ class ConditionApplier(links: List[Link], conditions: Map[Option[Link], List[Con
 
     alreadyBoundVariables ++= currentLink.variables.variables
     val candidateConditions = (~conditions.get(none) ++ ~conditions.get(some(currentLink))).filterNot(appliedConditions.contains)
+    var contextAlreadyReferenced = false
 
     for (condition <- candidateConditions) {
       if (condition.referencedVariables.forall{ variable =>
-        alreadyBoundVariables.contains(variable) || (context.isBound(variable) && !pathVariables.contains(variable)) || variable === StepVariable.ContextVariable
+        alreadyBoundVariables.contains(variable) || (bindings.isBound(variable) && !pathVariables.contains(variable)) || variable === StepVariable.ContextVariable
       }) {
         appliedConditions += condition
-        op = SelectOp(if (condition.referencedVariables.contains(StepVariable.ContextVariable)) BindOp(op, VariableTemplate(List(StepVariable.ContextVariable))) else op, condition)
+
+        if (condition.referencedVariables.contains(StepVariable.ContextVariable) && !contextAlreadyReferenced) {
+          op = BindOp(op, VariableTemplate(List(StepVariable.ContextVariable)))
+          contextAlreadyReferenced = true
+        }
+
+        op = SelectOp(op, condition)
       }
     }
 
