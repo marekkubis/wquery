@@ -1,6 +1,6 @@
 package org.wquery.engine
 
-import planner.{PlanEvaluator, PathPlanGenerator, PathBuilder}
+import planner.{ConditionApplier, PlanEvaluator, PathPlanGenerator, PathBuilder}
 import scalaz._
 import Scalaz._
 import org.wquery.model._
@@ -367,7 +367,7 @@ case class FilterTransformationExpr(conditionalExpr: ConditionalExpr) extends Tr
     val filteredOp = if (condition.referencedVariables.contains(StepVariable.ContextVariable)) BindOp(op, VariableTemplate(List(StepVariable.ContextVariable))) else op
 
     plan.appendCondition(condition)
-    SelectOp(filteredOp, condition)
+    ConditionApplier.applyIfNotRedundant(filteredOp, condition)
   }
 }
 
@@ -693,14 +693,14 @@ case class WordFormByRegexReq(regex: String) extends EvaluableExpr {
   def evaluationPlan(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context) = {
     val filteredVariable = StepVariable("__r")
 
-    SelectOp(BindOp(FetchOp.words, VariableTemplate(List(filteredVariable))), BinaryConditionalExpr("=~", AlgebraExpr(StepVariableRefOp(filteredVariable, Set(StringType))),
+    ConditionApplier.applyIfNotRedundant(BindOp(FetchOp.words, VariableTemplate(List(filteredVariable))), BinaryConditionalExpr("=~", AlgebraExpr(StepVariableRefOp(filteredVariable, Set(StringType))),
       AlgebraExpr(ConstantOp.fromValue(regex))).conditionPlan(wordNet, bindings, context))
   }
 }
 
 case class BooleanByFilterReq(conditionalExpr: ConditionalExpr) extends EvaluableExpr {
   def evaluationPlan(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context) = {
-    IfElseOp(SelectOp(ConstantOp.fromValue(true), conditionalExpr.conditionPlan(wordNet, bindings, context)),
+    IfElseOp(ConditionApplier.applyIfNotRedundant(ConstantOp.fromValue(true), conditionalExpr.conditionPlan(wordNet, bindings, context)),
       ConstantOp.fromValue(true), Some(ConstantOp.fromValue(false)))
   }
 }
