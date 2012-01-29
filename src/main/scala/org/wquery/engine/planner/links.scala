@@ -21,8 +21,8 @@ class RootLink(generator: AlgebraOp, override val variables: VariableTemplate) e
   def forward(op: AlgebraOp) = generator
 
   def backward(op: AlgebraOp) = {
-    val template = VariableTemplate(List(StepVariable("__a"), PathVariable("_")))
-    val condition = BinaryCondition("in", StepVariableRefOp(StepVariable("__a"), generator.leftType(0)), generator)
+    val template = VariableTemplate(List(StepVariable("__f"), PathVariable.Unnamed))
+    val condition = BinaryCondition("in", StepVariableRefOp(StepVariable("__f"), generator.leftType(0)), generator)
 
     SelectOp(BindOp(op, template), condition)
   }
