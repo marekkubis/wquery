@@ -3,7 +3,8 @@ package org.wquery.engine.planner
 import org.wquery.engine.operations._
 import scalaz._
 import Scalaz._
-import org.wquery.model.WordNetSchema
+import org.wquery.model.{Forward, Backward, WordNetSchema}
+import org.wquery.engine.{VariableTemplate, StepVariable, PathVariable}
 
 class PathPlanGenerator(path: Path) {
   def plan(wordNet: WordNetSchema, bindings: BindingsSchema) = {
@@ -80,10 +81,17 @@ class PathWalker(wordNet: WordNetSchema, links: List[Link], applier: ConditionAp
   def walkedEntirePath = left < 0 && right >= links.size - 1
 
   private def nextOps = {
-    val backwardOp = (left >= 0) ?? some(links(left).backward(op))
+    val backwardOp = (left >= 0) ?? some(links(left).backward(prependContextIfReferenced(links(left), op)))
     val forwardOp = (right < links.size - 1) ?? some(links(right + 1).forward(op))
 
     (backwardOp, forwardOp)
+  }
+  
+  private def prependContextIfReferenced(link: Link, algebraOp: AlgebraOp) = {
+    if (applier.hasContextDependentConditions(links(left)))
+      BindOp(algebraOp, VariableTemplate(List(StepVariable.ContextVariable, PathVariable.Unnamed)))
+    else
+      algebraOp
   }
 
   private def hasLowerMaxCount(leftOp: AlgebraOp, rightOp: AlgebraOp) = {
@@ -105,17 +113,17 @@ class PathWalker(wordNet: WordNetSchema, links: List[Link], applier: ConditionAp
     nextOps match {
       case (Some(backwardOp), Some(forwardOp)) =>
         if (hasLowerMaxCount(backwardOp, forwardOp)) {
-          op = applier.applyConditions(backwardOp, links(left))
+          op = applier.applyConditions(backwardOp, links(left), Backward)
           left -= 1
         } else {
-          op = applier.applyConditions(forwardOp, links(right + 1))
+          op = applier.applyConditions(forwardOp, links(right + 1), Forward)
           right += 1
         }
       case (Some(backwardOp), None) =>
-        op = applier.applyConditions(backwardOp, links(left))
+        op = applier.applyConditions(backwardOp, links(left), Backward)
         left -= 1
       case (None, Some(forwardOp)) =>
-        op = applier.applyConditions(forwardOp, links(right + 1))
+        op = applier.applyConditions(forwardOp, links(right + 1), Forward)
         right += 1
       case _ =>
         op

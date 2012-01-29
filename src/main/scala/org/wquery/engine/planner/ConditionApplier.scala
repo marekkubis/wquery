@@ -4,6 +4,7 @@ import collection.mutable.{Map, Set}
 import scalaz._
 import Scalaz._
 import org.wquery.engine.operations._
+import org.wquery.model.{Forward, Direction}
 import org.wquery.engine.{StepVariable, VariableTemplate, Variable}
 
 class ConditionApplier(links: List[Link], conditions: Map[Option[Link], List[Condition]], bindings: BindingsSchema) {
@@ -13,24 +14,26 @@ class ConditionApplier(links: List[Link], conditions: Map[Option[Link], List[Con
 
   def skipCondition(condition: Condition) = appliedConditions += condition
 
-  def applyConditions(inputOp: AlgebraOp, currentLink: Link) = {
+  def hasContextDependentConditions(link: Link) = {
+    conditions.get(some(link)).orZero
+      .filterNot(appliedConditions.contains(_))
+      .exists(_.referencedVariables.contains(StepVariable.ContextVariable))
+  }
+
+  def applyConditions(inputOp: AlgebraOp, link: Link, direction: Direction) = {
     var op = inputOp
+    val linkConditions = (~conditions.get(none) ++ ~conditions.get(some(link))).filterNot(appliedConditions.contains)
 
-    alreadyBoundVariables ++= currentLink.variables.variables
-    val candidateConditions = (~conditions.get(none) ++ ~conditions.get(some(currentLink))).filterNot(appliedConditions.contains)
-    var contextAlreadyReferenced = false
+    alreadyBoundVariables ++= link.variables.variables
 
-    for (condition <- candidateConditions) {
+    if (hasContextDependentConditions(link) && direction == Forward)
+      op = BindOp(op, VariableTemplate(List(StepVariable.ContextVariable)))
+
+    for (condition <- linkConditions) {
       if (condition.referencedVariables.forall{ variable =>
         alreadyBoundVariables.contains(variable) || (bindings.isBound(variable) && !pathVariables.contains(variable)) || variable === StepVariable.ContextVariable
       }) {
         appliedConditions += condition
-
-        if (condition.referencedVariables.contains(StepVariable.ContextVariable) && !contextAlreadyReferenced) {
-          op = BindOp(op, VariableTemplate(List(StepVariable.ContextVariable)))
-          contextAlreadyReferenced = true
-        }
-
         op = SelectOp(op, condition)
       }
     }

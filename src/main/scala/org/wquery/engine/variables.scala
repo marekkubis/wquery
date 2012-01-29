@@ -20,4 +20,9 @@ object Variable {
 
 object StepVariable {
   val ContextVariable = StepVariable("__#")
+  val Unnamed = StepVariable("_")
+}
+
+object PathVariable {
+  val Unnamed = PathVariable("_")
 }

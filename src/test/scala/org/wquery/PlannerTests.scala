@@ -194,4 +194,14 @@ class PlannerTests extends WQueryTestSuite {
     // TODO test the best plan after introducing cost estimates
     emitted(result) should equal ("$a={ car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n } { bus:4:n jalopy:1:n heap:3:n } hypernym { car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n } ^hypernym { ambulance:1:n }\n")
   }
+
+  @Test def backwardPlanWithTraverseThroughFilter() {
+    val plans = plansFor("{}.hypernym[max(last(senses.sensenum)) > 2].hypernym.{car}")
+    val plan = PlanEvaluator.chooseBest(wquery.wordNet.store.schema, plans)
+    val result = plan.evaluate(wquery.wordNet, Bindings())
+
+    plan.toString should equal ("SelectOp(BindOp(SelectOp(ExtendOp(BindOp(ExtendOp(ProjectOp(ExtendOp(FetchOp(words,List((source,List(car))),List(source)),0,RelationUnionPattern(List(source&string^synsets^destination&synset)),Forward,$__p),StepVariableRefOp($__p,Set(synset))),0,source&synset^hypernym^destination&synset,Backward,novars),$__#@_),0,source&synset^hypernym^destination&synset,Backward,novars),BinaryCondition(>,FunctionOp(max,FunctionOp(last,ExtendOp(ExtendOp(StepVariableRefOp($__#,Set(synset)),0,source&synset^senses^destination&sense,Forward,novars),0,source&sense^sensenum^destination&integer,Forward,novars))),ConstantOp(List(List(2))))),$__a@_),BinaryCondition(in,StepVariableRefOp($__a,Set(synset)),FetchOp(synsets,List((source,List())),List(source))))")
+    emitted(result) should equal ("{ shooting brake:1:n } hypernym { beach wagon:1:n station wagon:1:n wagon:5:n estate car:1:n beach waggon:1:n station waggon:1:n waggon:2:n } hypernym { car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n }\n{ gypsy cab:1:n } hypernym { cab:3:n hack:5:n taxi:1:n taxicab:1:n } hypernym { car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n }\n{ minicab:1:n } hypernym { cab:3:n hack:5:n taxi:1:n taxicab:1:n } hypernym { car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n }\n{ brougham:2:n } hypernym { sedan:1:n saloon:3:n } hypernym { car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n }\n")
+  }
+
 }
