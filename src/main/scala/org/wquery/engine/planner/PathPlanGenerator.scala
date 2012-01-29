@@ -7,26 +7,23 @@ import org.wquery.model.WordNetSchema
 
 class PathPlanGenerator(path: Path) {
   def plan(wordNet: WordNetSchema, bindings: BindingsSchema) = {
-    if (!isTreePath(path)) {
-      val seeds = path.links.zipWithIndex
+    val seeds = if (!isTreePath(path)) {
+      path.links.zipWithIndex
         .sortBy{ case (link, _) => link.rightFringe.minBy(_._1.maxCount(wordNet))._1.maxCount(wordNet) }
-        .map{ case (_, pos) => if (pos == 0) -1 else pos }
-
-      (for (seedSet <- seeds.slice(0, 2).toSet.subsets if seedSet.nonEmpty)
-        yield walkFrom(wordNet, bindings, seedSet.toList.sorted)).toList
+        .map{ case (_, pos) => if (pos == 0) -1 else pos }.slice(0, 2)
     } else {
-      List(walkFrom(wordNet, bindings, List(-1)))
+      List(-1)
     }
+
+    (for (seedSet <- seeds.toSet.subsets if seedSet.nonEmpty) yield {
+      val applier = new ConditionApplier(path.links, path.conditions, bindings)
+      val walkers = seedSet.toList.sorted.map(new PathWalker(wordNet, path.links, applier, _))
+
+      walk(wordNet, bindings, walkers)
+    }).toList
   }
 
   private def isTreePath(path: Path) = path.links.exists(link => link.isInstanceOf[PatternLink] && link.asInstanceOf[PatternLink].pos > 0)
-
-  private def walkFrom(wordNet: WordNetSchema, bindings: BindingsSchema, seeds: List[Int]) = {
-    val applier = new ConditionApplier(path.links, path.conditions, bindings)
-    val walkers = seeds.map(new PathWalker(wordNet, path.links, applier, _))
-
-    walk(wordNet, bindings, walkers)
-  }
 
   private def walk(wordNet: WordNetSchema, bindings: BindingsSchema, walkers: List[PathWalker]): AlgebraOp = {
     if (walkers.size == 1 && walkers.head.walkedEntirePath) {
