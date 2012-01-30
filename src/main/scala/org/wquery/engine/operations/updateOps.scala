@@ -26,6 +26,8 @@ sealed abstract class UpdateOp extends AlgebraOp {
   def bindingsPattern = BindingsSchema()
 
   def maxCount(wordNet: WordNetSchema) = some(0)
+
+  def cost(wordNet: WordNetSchema) = some(1) // TODO implement cost model for update operations
 }
 
 //
@@ -241,6 +243,8 @@ case class NewSynsetOp(sensesOp: AlgebraOp) extends AlgebraOp {
   val referencedVariables = sensesOp.referencedVariables
 
   def maxCount(wordNet: WordNetSchema) = some(1)
+
+  def cost(wordNet: WordNetSchema) = maxSize(wordNet)
 }
 
 class NewSynset(val senses: List[Sense]) extends Synset("synset#" + senses.head.toString)

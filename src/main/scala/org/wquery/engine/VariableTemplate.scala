@@ -3,6 +3,7 @@ package org.wquery.engine
 import scalaz._
 import Scalaz._
 import org.wquery.{WQueryStepVariableCannotBeBoundException, WQueryEvaluationException}
+import org.wquery.utils.IntOptionW._
 
 case class VariableTemplate(pattern: List[Variable]) {
   val variables = pattern.filterNot(_.isUnnamed).toSet
@@ -62,6 +63,12 @@ case class VariableTemplate(pattern: List[Variable]) {
   }
 
   def pathVariableIndexes(tupleSize: Int, shift: Int) = (shift + leftPatternSize, shift + tupleSize - rightPatternSize)
+
+  def variablesMaxSize(maxTupleSize: Option[Int]) = {
+    pathVariableName
+      .some(_ => maxTupleSize - pathVariablePosition.get - (pattern.size - (pathVariablePosition.get + 1)))
+      .none(some(0)) + some(stepVariableNames.size)
+  }
 
   override def toString = if (pattern.isEmpty) "novars" else pattern.mkString
 }
