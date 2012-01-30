@@ -9,6 +9,7 @@ abstract class AlgebraOp extends ProvidesTypes with ProvidesTupleSizes with Refe
   def evaluate(wordNet: WordNet, bindings: Bindings): DataSet
   def bindingsPattern: BindingsPattern
   def maxCount(wordNet: WordNetSchema): Option[BigInt]
+//  def cost(wordNet: WordNetSchema): Option[BigInt]
 }
 
 object AlgebraOp {

@@ -6,6 +6,7 @@ import org.wquery.model._
 import collection.mutable.ListBuffer
 import org.wquery.WQueryEvaluationException
 import org.wquery.engine._
+import org.wquery.utils.IntOptionW._
 
 sealed abstract class RelationalPattern extends ProvidesTypes with ProvidesTupleSizes {
   def extend(wordNet: WordNetStore, bindings: Bindings, extensionSet: ExtensionSet, from: Int, direction: Direction): ExtendedExtensionSet
@@ -238,7 +239,7 @@ case class QuantifiedRelationPattern(pattern: RelationalPattern, quantifier: Qua
 
   val minTupleSize = pattern.minTupleSize * quantifier.lowerBound
 
-  val maxTupleSize = (pattern.maxTupleSize |@| quantifier.upperBound)(_ * _)
+  val maxTupleSize = pattern.maxTupleSize * quantifier.upperBound
 
   def sourceType = pattern.sourceType
 
