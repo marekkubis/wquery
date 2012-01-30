@@ -8,9 +8,14 @@ import org.wquery.model.WordNetSchema
 class PathPlanGenerator(path: Path) {
   def plan(wordNet: WordNetSchema, bindings: BindingsSchema) = {
     val seeds = if (!isTreePath(path)) {
-      path.links.zipWithIndex
-        .sortBy{ case (link, _) => link.rightFringe.minBy(_._1.maxCount(wordNet))._1.maxCount(wordNet) }
-        .map{ case (_, pos) => if (pos == 0) -1 else pos }.slice(0, 2)
+      val seedSizeThreshold = BigInt(math.round(math.sqrt(wordNet.stats.domainSize.toDouble)))
+
+      val (below, above) = path.links.zipWithIndex
+        .map{ case (link, pos) => (link, pos, link.rightFringe.minBy(_._1.maxCount(wordNet))._1.maxCount(wordNet)) }
+        .partition(_._3.some(_ <= seedSizeThreshold).none(false))
+
+      // return all seeds that have cost lower than or equal to threshold plus one seed above threshold
+      (below ++ (if (above.isEmpty) Nil else List(above.minBy(_._3)))).map{ case (_, pos, _) => if (pos == 0) -1 else pos }
     } else {
       List(-1)
     }
