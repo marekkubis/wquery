@@ -765,7 +765,7 @@ case class ExtendOp(op: AlgebraOp, from: Int, pattern: RelationalPattern, direct
 
   val referencedVariables = op.referencedVariables
 
-  def maxCount(wordNet: WordNetSchema) = pattern.maxCount(op.maxCount(wordNet), wordNet)
+  def maxCount(wordNet: WordNetSchema) = pattern.maxCount(op.maxCount(wordNet), wordNet, direction)
 
   def cost(wordNet: WordNetSchema) = {
     op.cost(wordNet) + maxSize(wordNet) + maxCount(wordNet)*(variables.variablesMaxSize(maxTupleSize)).map(BigInt(_))

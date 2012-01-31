@@ -114,7 +114,7 @@ class InMemoryWordNetStore extends WordNetStore {
     val buffer = new ExtensionSetBuffer(extensionSet, direction)
     val toMap = to.toMap
 
-    for (relation <- relations if relation.arguments.size > 1;
+    for (relation <- relations if relation.isTraversable;
          source <- relation.argumentNames if (through._1 == ArcPatternArgument.AnyName || through._1 == source) && through._2.map(_ == relation.demandArgument(source).nodeType).getOrElse(true);
          destination <- relation.argumentNames if toMap.isEmpty || toMap.get(destination).map(nodeTypeOption => nodeTypeOption.map(_ == relation.demandArgument(destination).nodeType).getOrElse(true)).getOrElse(false);
          if source != destination)

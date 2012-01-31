@@ -15,7 +15,7 @@ sealed abstract class RelationalPattern extends ProvidesTypes with ProvidesTuple
 
   def sourceType: Set[DataType]
 
-  def maxCount(pathCount: Option[BigInt], wordNet: WordNetSchema): Option[BigInt]
+  def maxCount(pathCount: Option[BigInt], wordNet: WordNetSchema, direction: Direction): Option[BigInt]
 
   def fringeMaxCount(side: Side, wordNet: WordNetSchema): BigInt
 }
@@ -45,7 +45,7 @@ case class RelationUnionPattern(patterns: List[RelationalPattern]) extends Relat
 
   def rightType(pos: Int) = patterns.flatMap(_.rightType(pos)).toSet
 
-  def maxCount(pathCount: Option[BigInt], wordNet: WordNetSchema) = patterns.map(_.maxCount(pathCount, wordNet)).sequence.map(_.sum)
+  def maxCount(pathCount: Option[BigInt], wordNet: WordNetSchema, direction: Direction) = patterns.map(_.maxCount(pathCount, wordNet, direction)).sequence.map(_.sum)
 
   def fringeMaxCount(side: Side, wordNet: WordNetSchema) = patterns.map(_.fringeMaxCount(side, wordNet)).sum
 }
@@ -109,8 +109,13 @@ case class RelationCompositionPattern(patterns: List[RelationalPattern]) extends
     }.orZero
   }
 
-  def maxCount(pathCount: Option[BigInt], wordNet: WordNetSchema) = {
-    patterns.tail.foldLeft(patterns.head.maxCount(pathCount, wordNet))((pathCount, pattern) => pattern.maxCount(pathCount, wordNet))
+  def maxCount(pathCount: Option[BigInt], wordNet: WordNetSchema, direction: Direction) = {
+    direction match {
+      case Forward =>
+        patterns.tail.foldLeft(patterns.head.maxCount(pathCount, wordNet, direction))((pathCount, pattern) => pattern.maxCount(pathCount, wordNet, direction))
+      case Backward =>
+        patterns.dropRight(1).foldRight(patterns.last.maxCount(pathCount, wordNet, direction))((pattern, pathCount) => pattern.maxCount(pathCount, wordNet, direction))
+    }
   }
 
   def fringeMaxCount(side: Side, wordNet: WordNetSchema) = {
@@ -257,8 +262,8 @@ case class QuantifiedRelationPattern(pattern: RelationalPattern, quantifier: Qua
     Set[DataType]()
   }
 
-  def maxCount(pathCount: Option[BigInt], wordNet: WordNetSchema) = {
-    (1 to wordNet.stats.maxPathSize).foldLeft(pathCount)((count, _) => pattern.maxCount(count, wordNet))
+  def maxCount(pathCount: Option[BigInt], wordNet: WordNetSchema, direction: Direction) = {
+    (1 to wordNet.stats.maxPathSize).foldLeft(pathCount)((count, _) => pattern.maxCount(count, wordNet, direction))
   }
 
   def fringeMaxCount(side: Side, wordNet: WordNetSchema) = {
@@ -334,7 +339,7 @@ case class ArcRelationalPattern(pattern: ArcPattern) extends RelationalPattern {
       .getOrElse(argument.nodeType.map(Set(_)).getOrElse(NodeType.all)).asInstanceOf[Set[DataType]]
   }
 
-  def maxCount(pathCount: Option[BigInt], wordNet: WordNetSchema) = wordNet.stats.extendMaxCount(pathCount, pattern)
+  def maxCount(pathCount: Option[BigInt], wordNet: WordNetSchema, direction: Direction) = wordNet.stats.extendMaxCount(pathCount, pattern, direction)
 
   def fringeMaxCount(side: Side, wordNet: WordNetSchema) = {
     (for ((relation, argument) <- createFringeDescription(wordNet.relations, side))
@@ -405,8 +410,8 @@ case class VariableRelationalPattern(variable: StepVariable) extends RelationalP
       Set.empty
   }
 
-  def maxCount(pathCount: Option[BigInt], wordNet: WordNetSchema) = {
-    wordNet.stats.extendMaxCount(pathCount, ArcPattern(None, ArcPatternArgument.Any, List(ArcPatternArgument.Any)))
+  def maxCount(pathCount: Option[BigInt], wordNet: WordNetSchema, direction: Direction) = {
+    wordNet.stats.extendMaxCount(pathCount, ArcPattern(None, ArcPatternArgument.Any, List(ArcPatternArgument.Any)), direction)
   }
 
   def fringeMaxCount(side: Side, wordNet: WordNetSchema) = {

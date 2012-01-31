@@ -12,6 +12,8 @@ case class Relation(name: String, arguments: Set[Argument]) {
 
   val argumentNames = Relation.Source :: (arguments.map(_.name) - Relation.Source - Relation.Destination).toList.sortWith((x, y) => x < y) ++ argumentsByName.get(Relation.Destination).toList.map(_.name)
 
+  def isTraversable = arguments.size > 1
+
   def demandArgument(argument: String) = {
     argumentsByName.getOrElse(argument, throw new WQueryModelException("Relation '" + name + "' does not have argument '" + argument + "'"))
   }

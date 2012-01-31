@@ -14,10 +14,18 @@ class WordNetStats(relations: List[Relation], val fetchAllMaxCounts: Map[(Relati
     }).min
   }
 
-  def extendMaxCount(pathCount: Option[BigInt], pattern: ArcPattern) = {
-    pathCount.map(_ * (
-      for (relation <- pattern.relation.map(List(_)).getOrElse(relations);
-        source <- if (pattern.source.isUnnamed) relation.argumentNames else List(pattern.source.name))
-        yield extendValueMaxCounts(relation, pattern.source.name)).sum)
+  def extendMaxCount(pathCount: Option[BigInt], pattern: ArcPattern, direction: Direction) = {
+    val sources = direction match {
+      case Forward =>
+        List(pattern.source.name)
+      case Backward =>
+        pattern.destinations.map(_.name)
+    }
+
+    val extendMaxCount = (for (relation <- pattern.relation.map(List(_)).getOrElse(relations.filter(_.isTraversable));
+         source <- if (pattern.source.isUnnamed) relation.argumentNames else sources)
+    yield extendValueMaxCounts(relation, source)).sum
+
+    pathCount.map(_ * extendMaxCount)
   }
 }

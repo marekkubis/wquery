@@ -45,8 +45,10 @@ class PlannerTests extends WQueryTestSuite {
 
   @Test def planMultipleTransformations() {
     val plans = plansFor("{}.hypernym.partial_holonym.hypernym")
+    println(plans)
     val forwardPlan = plans.find(_.toString == "BindOp(ExtendOp(ExtendOp(ExtendOp(FringeOp(source&synset^partial_holonym^destination&synset,Left),0,source&synset^partial_holonym^destination&synset,Forward,novars),0,source&synset^hypernym^destination&synset,Forward,novars),0,source&synset^hypernym^destination&synset,Backward,novars),$__f@_)").get
-    val backwardPlan = plans.find(_.toString == "BindOp(ExtendOp(ExtendOp(ExtendOp(FringeOp(source&synset^partial_holonym^destination&synset,Right),0,source&synset^hypernym^destination&synset,Forward,novars),0,source&synset^partial_holonym^destination&synset,Backward,novars),0,source&synset^hypernym^destination&synset,Backward,novars),$__f@_)").get
+    val backwardPlan = plans.find(_.toString == "BindOp(ExtendOp(ExtendOp(ExtendOp(FringeOp(source&synset^partial_holonym^destination&synset,Right),0,source&synset^partial_holonym^destination&synset,Backward,novars),0,source&synset^hypernym^destination&synset,Forward,novars),0,source&synset^hypernym^destination&synset,Backward,novars),$__f@_)").get
+
     val forwardResult = forwardPlan.evaluate(wquery.wordNet, Bindings())
     val backwardResult = backwardPlan.evaluate(wquery.wordNet, Bindings())
 
@@ -142,7 +144,12 @@ class PlannerTests extends WQueryTestSuite {
     stats.extendMaxCount(some(1), ArcPattern(
       wquery.wordNet.store.schema.relations.find(_.name == "hypernym"),
       ArcPatternArgument("source", None), List(ArcPatternArgument("destination", None))
-    )).get should equal (tuples.of("max(from {}$a emit count($a.hypernym))").asValueOf[Int])
+    ), Forward).get should equal (tuples.of("max(from {}$a emit count($a.hypernym))").asValueOf[Int])
+
+    stats.extendMaxCount(some(1), ArcPattern(
+      wquery.wordNet.store.schema.relations.find(_.name == "hypernym"),
+      ArcPatternArgument("source", None), List(ArcPatternArgument("destination", None))
+    ), Backward).get should equal (tuples.of("max(from {}$a emit count($a.^hypernym))").asValueOf[Int])
   }
 
   @Test def choosePlanForPathWithHighlySelectiveNodeFilter() {
@@ -186,7 +193,7 @@ class PlannerTests extends WQueryTestSuite {
     val plan = PlanEvaluator.chooseBest(wquery.wordNet.store.schema, plans)
     val result = plan.evaluate(wquery.wordNet, Bindings())
 
-    plan.toString should equal ("SelectOp(BindOp(ExtendOp(ExtendOp(ProjectOp(ExtendOp(FetchOp(literal,List((destination,List(bus)), (num,List(4))),List(source)),0,RelationUnionPattern(List(source&sense^synset^destination&synset)),Forward,$__p),StepVariableRefOp($__p,Set(synset))),0,source&synset^hypernym^destination&synset,Forward,$a),0,destination&synset^hypernym^source&synset,Forward,novars),$__#),BinaryCondition(in,StepVariableRefOp($__#,Set(synset)),ProjectOp(ExtendOp(FetchOp(literal,List((destination,List(ambulance)), (num,List(1))),List(source)),0,RelationUnionPattern(List(source&sense^synset^destination&synset)),Forward,$__p),StepVariableRefOp($__p,Set(synset)))))")
+    plan.toString should equal ("NaturalJoinOp(ExtendOp(ProjectOp(ExtendOp(FetchOp(literal,List((destination,List(bus)), (num,List(4))),List(source)),0,RelationUnionPattern(List(source&sense^synset^destination&synset)),Forward,$__p),StepVariableRefOp($__p,Set(synset))),0,source&synset^hypernym^destination&synset,Forward,$a),ExtendOp(ProjectOp(ExtendOp(FetchOp(literal,List((destination,List(ambulance)), (num,List(1))),List(source)),0,RelationUnionPattern(List(source&sense^synset^destination&synset)),Forward,$__p),StepVariableRefOp($__p,Set(synset))),0,destination&synset^hypernym^source&synset,Backward,novars))")
     emitted(result) should equal ("$a={ car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n } { bus:4:n jalopy:1:n heap:3:n } hypernym { car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n } ^hypernym { ambulance:1:n }\n")
   }
 
@@ -195,8 +202,8 @@ class PlannerTests extends WQueryTestSuite {
     val plan = PlanEvaluator.chooseBest(wquery.wordNet.store.schema, plans)
     val result = plan.evaluate(wquery.wordNet, Bindings())
 
-    plan.toString should equal ("BindOp(SelectOp(ExtendOp(BindOp(ExtendOp(ProjectOp(ExtendOp(FetchOp(words,List((source,List(car))),List(source)),0,RelationUnionPattern(List(source&string^synsets^destination&synset)),Forward,$__p),StepVariableRefOp($__p,Set(synset))),0,source&synset^hypernym^destination&synset,Backward,novars),$__#@_),0,source&synset^hypernym^destination&synset,Backward,novars),BinaryCondition(>,FunctionOp(max,FunctionOp(last,ExtendOp(ExtendOp(StepVariableRefOp($__#,Set(synset)),0,source&synset^senses^destination&sense,Forward,novars),0,source&sense^sensenum^destination&integer,Forward,novars))),ConstantOp(List(List(2))))),$__f@_)")
-    emitted(result) should equal ("{ shooting brake:1:n } hypernym { beach wagon:1:n station wagon:1:n wagon:5:n estate car:1:n beach waggon:1:n station waggon:1:n waggon:2:n } hypernym { car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n }\n{ gypsy cab:1:n } hypernym { cab:3:n hack:5:n taxi:1:n taxicab:1:n } hypernym { car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n }\n{ minicab:1:n } hypernym { cab:3:n hack:5:n taxi:1:n taxicab:1:n } hypernym { car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n }\n{ brougham:2:n } hypernym { sedan:1:n saloon:3:n } hypernym { car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n }\n")
+    plan.toString should equal ("BindOp(SelectOp(ExtendOp(BindOp(SelectOp(BindOp(ExtendOp(FringeOp(source&synset^hypernym^destination&synset,Left),0,source&synset^hypernym^destination&synset,Forward,novars),$__#),BinaryCondition(in,StepVariableRefOp($__#,Set(synset)),ProjectOp(ExtendOp(FetchOp(words,List((source,List(car))),List(source)),0,RelationUnionPattern(List(source&string^synsets^destination&synset)),Forward,$__p),StepVariableRefOp($__p,Set(synset))))),$__#@_),0,source&synset^hypernym^destination&synset,Backward,novars),BinaryCondition(>,FunctionOp(max,FunctionOp(last,ExtendOp(ExtendOp(StepVariableRefOp($__#,Set(synset)),0,source&synset^senses^destination&sense,Forward,novars),0,source&sense^sensenum^destination&integer,Forward,novars))),ConstantOp(List(List(2))))),$__f@_)")
+    emitted(result) should equal ("{ brougham:2:n } hypernym { sedan:1:n saloon:3:n } hypernym { car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n }\n{ gypsy cab:1:n } hypernym { cab:3:n hack:5:n taxi:1:n taxicab:1:n } hypernym { car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n }\n{ minicab:1:n } hypernym { cab:3:n hack:5:n taxi:1:n taxicab:1:n } hypernym { car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n }\n{ shooting brake:1:n } hypernym { beach wagon:1:n station wagon:1:n wagon:5:n estate car:1:n beach waggon:1:n station waggon:1:n waggon:2:n } hypernym { car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n }\n")
   }
 
 }
