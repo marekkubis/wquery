@@ -36,8 +36,7 @@ class PathPlanGenerator(path: Path) {
     if (walkers.size == 1 && walkers.head.walkedEntirePath) {
       walkers.head.op
     } else {
-      val walker = walkers.minBy(_.nextOp.maxCount(wordNet))
-      val walkerPos = walkers.indexOf(walker)
+      val (walker, walkerPos) = walkers.zipWithIndex.minBy(_._1.nextOp.maxCount(wordNet))
 
       walker.step
 

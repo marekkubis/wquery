@@ -4,15 +4,14 @@ import org.wquery.model.WordNetSchema
 import org.wquery.engine.operations.{AlgebraOp, Condition}
 import scalaz._
 import Scalaz._
+import org.wquery.utils.BigIntOptionW
 
 class PathWalker(wordNet: WordNetSchema, links: List[Link], applier: ConditionApplier, pos: Int) {
-  var op = {
+  var (op, seedCondition) = {
     val leftOps = (pos < links.size - 1) ?? List((links(pos + 1).leftFringe, none[Condition]))
     val rightOps = (pos >= 0) ?? links(pos).rightFringe
-    val (fringeOp, condition) = (leftOps ++ rightOps).minBy(_._1.maxCount(wordNet))
 
-    condition.map(applier.skipCondition(_))
-    fringeOp
+    (leftOps ++ rightOps).minBy(_._1.cost(wordNet))(BigIntOptionW.NoneMaxOrdering)
   }
 
   var left = pos
@@ -43,6 +42,11 @@ class PathWalker(wordNet: WordNetSchema, links: List[Link], applier: ConditionAp
   }
 
   def step {
+    seedCondition.map{ condition =>
+      applier.skipCondition(condition)
+      seedCondition = none
+    }
+
     nextOps match {
       case (Some(backwardOp), Some(forwardOp)) =>
         if (hasLowerMaxCount(backwardOp, forwardOp)) {

@@ -6,7 +6,7 @@ import org.wquery.utils.Logging
 
 object PlanEvaluator extends Logging {
   def chooseBest(wordNet: WordNetSchema, plans: List[AlgebraOp]) = {  
-    debug(plans.map(p => (p, p.maxCount(wordNet))).toString)
-    plans.minBy(_.maxCount(wordNet))  // TODO maxCost/maxMemorySize
+    debug(plans.map(p => (p, p.cost(wordNet))).toString)
+    plans.minBy(_.cost(wordNet))
   }
 }
