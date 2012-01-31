@@ -11,7 +11,7 @@ class PathWalker(wordNet: WordNetSchema, links: List[Link], applier: ConditionAp
     val leftOps = (pos < links.size - 1) ?? List((links(pos + 1).leftFringe, none[Condition]))
     val rightOps = (pos >= 0) ?? links(pos).rightFringe
 
-    (leftOps ++ rightOps).minBy(_._1.cost(wordNet))(BigIntOptionW.NoneMaxOrdering)
+    (leftOps ++ rightOps).minBy(_._1.maxCount(wordNet))(BigIntOptionW.NoneMaxOrdering)
   }
 
   var left = pos

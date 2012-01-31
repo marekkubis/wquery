@@ -17,7 +17,7 @@ class PathPlanGenerator(path: Path) {
         .partition(_._3 <= seedSizeThreshold)
 
       // return all seeds that have cost lower than or equal to threshold plus one seed above threshold
-      (below ++ (if (above.isEmpty) Nil else List(above.minBy(_._3)))).map{ case (_, pos, _) => if (pos == 0) -1 else pos }
+      (below ++ (if (above.isEmpty) Nil else List(above.minBy(_._3)(BigIntOptionW.NoneMaxOrdering)))).map{ case (_, pos, _) => if (pos == 0) -1 else pos }
     } else {
       List(-1)
     }
@@ -36,7 +36,7 @@ class PathPlanGenerator(path: Path) {
     if (walkers.size == 1 && walkers.head.walkedEntirePath) {
       walkers.head.op
     } else {
-      val (walker, walkerPos) = walkers.zipWithIndex.minBy(_._1.nextOp.maxCount(wordNet))
+      val (walker, walkerPos) = walkers.zipWithIndex.minBy(_._1.nextOp.cost(wordNet))(BigIntOptionW.NoneMaxOrdering)
 
       walker.step
 
