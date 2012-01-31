@@ -581,7 +581,7 @@ case class FunctionOp(function: Function, args: AlgebraOp) extends QueryOp {
 
   def maxCount(wordNet: WordNetSchema) = function.maxCount(args, wordNet)
 
-  def cost(wordNet: WordNetSchema) = args.cost(wordNet) // TODO + function.cost(wordNet, args)
+  def cost(wordNet: WordNetSchema) = args.cost(wordNet) + function.cost(args, wordNet)
 }
 
 /*
