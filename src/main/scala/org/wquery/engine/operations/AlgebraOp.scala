@@ -5,10 +5,10 @@ import Scalaz._
 import org.wquery.model.{WordNetSchema, DataSet, WordNet}
 import org.wquery.engine.{ProvidesSize, ReferencesVariables, ProvidesTypes, ProvidesTupleSizes}
 
-abstract class AlgebraOp extends ProvidesTypes with ProvidesTupleSizes with ProvidesSize with ReferencesVariables {
+abstract class AlgebraOp extends ProvidesTypes with ProvidesTupleSizes with ProvidesSize
+ with ReferencesVariables with HasCost {
   def evaluate(wordNet: WordNet, bindings: Bindings): DataSet
   def bindingsPattern: BindingsPattern
-  def cost(wordNet: WordNetSchema): Option[BigInt]
 }
 
 object AlgebraOp {
