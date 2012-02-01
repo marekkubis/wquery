@@ -636,7 +636,7 @@ case class SelectOp(op: AlgebraOp, condition: Condition) extends QueryOp {
 
   def maxCount(wordNet: WordNetSchema) = op.maxCount(wordNet)
 
-  def cost(wordNet: WordNetSchema) = op.cost(wordNet) + op.maxCount(wordNet)*condition.cost(wordNet) // + op.maxCount(wordNet)*op.maxTupleSize*condition.selectivity(wordNet)
+  def cost(wordNet: WordNetSchema) = op.cost(wordNet) + op.maxCount(wordNet)*condition.cost(wordNet) + op.maxCount(wordNet).map(count => (BigDecimal(count)*BigDecimal(condition.selectivity(wordNet))).toBigInt)*op.maxTupleSize.map(BigInt(_))
 }
 
 case class ProjectOp(op: AlgebraOp, projectOp: AlgebraOp) extends QueryOp {

@@ -9,7 +9,7 @@ import org.wquery.utils.BigIntOptionW._
 
 sealed abstract class Condition extends ReferencesVariables with HasCost {
   def satisfied(wordNet: WordNet, bindings: Bindings): Boolean
-  // TODO selectivity
+  def selectivity(wordNet: WordNetSchema): Double
 }
 
 case class OrCondition(exprs: List[Condition]) extends Condition {
@@ -18,6 +18,8 @@ case class OrCondition(exprs: List[Condition]) extends Condition {
   val referencedVariables = exprs.foldLeft(Set.empty[Variable])((vars, expr) => vars union expr.referencedVariables)
 
   def cost(wordNet: WordNetSchema) = exprs.map(_.cost(wordNet)).sequence.map(_.sum)
+
+  def selectivity(wordNet: WordNetSchema) = exprs.map(_.selectivity(wordNet)).max
 }
 
 case class AndCondition(exprs: List[Condition]) extends Condition {
@@ -26,6 +28,8 @@ case class AndCondition(exprs: List[Condition]) extends Condition {
   val referencedVariables = exprs.foldLeft(Set.empty[Variable])((vars, expr) => vars union expr.referencedVariables)
 
   def cost(wordNet: WordNetSchema) = exprs.map(_.cost(wordNet)).sequence.map(_.sum)
+
+  def selectivity(wordNet: WordNetSchema) = exprs.map(_.selectivity(wordNet)).min
 }
 
 case class NotCondition(expr: Condition) extends Condition {
@@ -34,6 +38,8 @@ case class NotCondition(expr: Condition) extends Condition {
   val referencedVariables = expr.referencedVariables
 
   def cost(wordNet: WordNetSchema) = expr.cost(wordNet)
+
+  def selectivity(wordNet: WordNetSchema) = 1 - expr.selectivity(wordNet)
 }
 
 case class BinaryCondition(op: String, leftOp: AlgebraOp, rightOp: AlgebraOp) extends Condition {
@@ -127,6 +133,9 @@ case class BinaryCondition(op: String, leftOp: AlgebraOp, rightOp: AlgebraOp) ex
   val referencedVariables = leftOp.referencedVariables union rightOp.referencedVariables
 
   def cost(wordNet: WordNetSchema) = (leftOp.cost(wordNet) + rightOp.cost(wordNet))*some(2) // op cost + grouping cost
+
+  def selectivity(wordNet: WordNetSchema) = 0.5 //TODO extend estimation
+
 }
 
 case class RightFringeCondition(op: AlgebraOp) extends Condition {
@@ -139,4 +148,6 @@ case class RightFringeCondition(op: AlgebraOp) extends Condition {
   val referencedVariables = op.referencedVariables
 
   def cost(wordNet: WordNetSchema) = op.cost(wordNet)
+
+  def selectivity(wordNet: WordNetSchema) = 0.5
 }
