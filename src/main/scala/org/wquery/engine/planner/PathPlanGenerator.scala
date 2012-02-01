@@ -9,22 +9,20 @@ import org.wquery.utils.BigIntOptionW
 
 class PathPlanGenerator(path: Path) {
   def plan(wordNet: WordNetSchema, bindings: BindingsSchema) = {
-    val seeds = if (!isTreePath(path)) {
+    val seeds = (-1::(1 until path.links.size).toList).map(new Seed(wordNet, path.links, _))
+
+    val selectedSeeds = if (!isTreePath(path)) {
       val seedSizeThreshold = some(BigInt(math.round(math.sqrt(wordNet.stats.domainSize.toDouble))))
+      val (below, above) = seeds.partition(_.op.cost(wordNet) <= seedSizeThreshold)
 
-      val (below, above) = path.links.zipWithIndex
-        .map{ case (link, pos) => (link, pos, link.rightFringe.minBy(_._1.maxCount(wordNet))(BigIntOptionW.NoneMaxOrdering)._1.maxCount(wordNet)) }
-        .partition(_._3 <= seedSizeThreshold)
-
-      // return all seeds that have cost lower than or equal to threshold plus one seed above threshold
-      (below ++ (if (above.isEmpty) Nil else List(above.minBy(_._3)(BigIntOptionW.NoneMaxOrdering)))).map{ case (_, pos, _) => if (pos == 0) -1 else pos }
+      (below ++ (if (above.isEmpty) Nil else List(above.minBy(_.op.cost(wordNet))(BigIntOptionW.NoneMaxOrdering))))
     } else {
-      List(-1)
+      seeds.headOption.toList
     }
 
-    (for (seedSet <- seeds.toSet.subsets if seedSet.nonEmpty) yield {
+    (for (seedSet <- selectedSeeds.toSet.subsets if seedSet.nonEmpty) yield {
       val applier = new ConditionApplier(path.links, path.conditions, bindings)
-      val walkers = seedSet.toList.sorted.map(new PathWalker(wordNet, path.links, applier, _))
+      val walkers = seedSet.toList.sortBy(_.pos).map(new PathWalker(_, applier))
 
       walk(wordNet, bindings, walkers)
     }).toList
