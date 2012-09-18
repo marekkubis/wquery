@@ -28,7 +28,3 @@
    * This software comes with a copy of Argot library (see docs/licenses/argot-LICENSE.txt and http://software.clapper.org/argot/).
 
    * This software comes with a copy of Grizzled Scala library (see docs/licenses/grizzled-scala-LICENSE.txt and http://software.clapper.org/grizzled-scala/).
-
-   * This software comes with a copy of Jetty Web Container (see docs/licenses/jetty-LICENSE.txt, docs/licenses/jetty-NOTICE.txt and http://jetty.codehaus.org/).
-     Jetty Web Container comes with a copy of Servlet Specification API (see docs/licenses/servlet-api-LICENSE.txt).
-     The source code of Servlet Specification API can be found at http://search.maven.org/remotecontent?filepath=org/mortbay/jetty/servlet-api/2.5-20081211/servlet-api-2.5-20081211-sources.jar.

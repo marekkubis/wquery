@@ -25,11 +25,6 @@
             <filtered>true</filtered>
         </file>
         <file>
-            <source>src/main/assembly/template/wservice</source>
-            <outputDirectory>/</outputDirectory>
-            <filtered>true</filtered>
-        </file>
-        <file>
             <source>src/main/assembly/template/wconsole.bat</source>
             <outputDirectory>/</outputDirectory>
             <filtered>true</filtered>
@@ -40,12 +35,6 @@
             <outputDirectory>/</outputDirectory>
             <filtered>true</filtered>
             <lineEnding>crlf</lineEnding>            
-        </file>
-        <file>
-            <source>src/main/assembly/template/wservice.bat</source>
-            <outputDirectory>/</outputDirectory>
-            <filtered>true</filtered>
-            <lineEnding>crlf</lineEnding>
         </file>
 
         <!-- README -->

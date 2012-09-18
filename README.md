@@ -29,7 +29,3 @@ Third-party libraries
  * This code depends on Argot library (see [argot-LICENSE.txt](wquery/blob/master/src/main/assembly/template/docs/licenses/argot-LICENSE.txt) and http://software.clapper.org/argot/).
 
  * This code depends on Grizzled Scala library (see [grizzled-scala-LICENSE.txt](wquery/blob/master/src/main/assembly/template/docs/licenses/grizzled-scala-LICENSE.txt) and http://software.clapper.org/grizzled-scala/).
-
- * This code depends on Jetty Web Container (see [jetty-LICENSE.txt](wquery/blob/master/src/main/assembly/template/docs/licenses/jetty-LICENSE.txt), [jetty-NOTICE.txt](wquery/blob/master/src/main/assembly/template/docs/licenses/jetty-NOTICE.txt) and http://jetty.codehaus.org/).
-
- * This code depends on Servlet Specification API (see [servlet-api-LICENSE.txt](wquery/blob/master/src/main/assembly/template/docs/licenses/servlet-api-LICENSE.txt)).
