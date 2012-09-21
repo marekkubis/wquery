@@ -20,9 +20,15 @@ class ArithmeticsTestSuite extends WQueryTestSuite {
     
   @Test def testIntDivInt() = result of ("7 div 3") should equal ("2\n")
 
+  @Test def testIntDivFloatInt() = result of ("7.1 div 2") should equal ("3.0\n")
+
+  @Test def testIntDivIntFloat() = result of ("7 div 2.1") should equal ("3.0\n")
+
+  @Test def testIntDivFloatFloat() = result of ("7.1 div 2.1") should equal ("3.0\n")
+
   @Test def testIntDivisionInt() = result of ("7 / 3") should startWith ("2.33")
     
-  @Test def testIntModInt() = result of ("7 % 3") should equal ("1\n")    
+  @Test def testIntModInt() = result of ("7 mod 3") should equal ("1\n")
 
   @Test def testIntPlusString() = result of ("2 + `a`") should startWith ("ERROR: Operator '+' requires paths that end with float or integer values")  
 
@@ -34,7 +40,7 @@ class ArithmeticsTestSuite extends WQueryTestSuite {
     
   @Test def testFloatDivInt() = result of ("7.0 / 3") should startWith ("2.33")
     
-  @Test def testFloatModInt() = result of ("7.0 % 3") should equal ("1.0\n")
+  @Test def testFloatModInt() = result of ("7.0 mod 3") should equal ("1.0\n")
 
   @Test def testEmptyDataSetArithmOperation() = result of ("zzzz.senses.sensenum/2") should equal ("(no result)\n")
 }

@@ -308,7 +308,7 @@ case class BinaryArithmeticExpr(op: String, left: EvaluableExpr, right: Evaluabl
           DivOp(leftOp, rightOp)
         case "div" =>
           IntDivOp(leftOp, rightOp)
-        case "%" =>
+        case "mod" =>
           ModOp(leftOp, rightOp)
       }
     } else {

@@ -520,7 +520,13 @@ case class DivOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends BinaryArithmetic
 }
 
 case class IntDivOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends BinaryArithmeticOp(leftOp, rightOp) {
-  def combine(leftVal: Any, rightVal: Any) = (leftVal, rightVal) match {
+  def combine(leftVal: Any, rightVal: Any): Any = (leftVal, rightVal) match {
+    case (leftVal: Double, rightVal: Double) =>
+      (leftVal - leftVal % rightVal) / rightVal
+    case (leftVal: Double, rightVal: Int) =>
+      (leftVal - leftVal % rightVal) / rightVal
+    case (leftVal: Int, rightVal: Double) =>
+      (leftVal - leftVal % rightVal) / rightVal
     case (leftVal: Int, rightVal: Int) =>
       leftVal / rightVal
   }
