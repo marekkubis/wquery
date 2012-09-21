@@ -441,12 +441,6 @@ case class QuantifiedRelationExpr(expr: RelationalExpr, quantifier: Quantifier) 
   }
 }
 
-case class VariableRelationalExpr(variable: StepVariable) extends RelationalExpr {
-  def evaluationPattern(wordNet: WordNetSchema, sourceTypes: Set[DataType]) = {
-    VariableRelationalPattern(variable)
-  }
-}
-
 case class ArcExpr(ids: List[ArcExprArgument]) extends RelationalExpr {
   def creationPattern(wordNet: WordNetSchema) = {
     if (ids.size > 1 && ids(0).nodeType.isDefined && ids.exists(_.name === Relation.Source) && ids(1).nodeType.isEmpty && (ids(1).name /== Relation.AnyName) && ids.tail.tail.forall(_.nodeType.isDefined)) {

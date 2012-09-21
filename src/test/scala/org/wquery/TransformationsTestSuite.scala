@@ -88,12 +88,6 @@ class TransformationsTestSuite extends WQueryTestSuite {
 
   @Test def testWrongDestinationTypeSpecifier0() = result of ("car:1:n.destination^senses^source&zzz") should startWith ("ERROR: Datatype 'zzz' not found")
 
-  @Test def testArcVariableTransformation() = {
-    result of ("$r:=\\hypernym") should equal ("(no result)\n")
-    result of ("$r") should equal ("hypernym\n")
-    result of ("{car:1:n}.\\$r") should equal ("{ car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n } hypernym { motor vehicle:1:n automotive vehicle:1:n }\n")
-  }
-
   @Test def testAnyRelationTransformation() = result of ("count({car:2:n}._)") should equal ("21\n")
 
   @Test def testAnyRelationTransformationBySourceAndDestination() = result of ("count({car:2:n}.source^_^destination)") should equal ("12\n")

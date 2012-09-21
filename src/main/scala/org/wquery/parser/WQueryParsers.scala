@@ -134,7 +134,6 @@ trait WQueryParsers extends RegexParsers {
   def simple_relation_expr = (
     "(" ~> relation_composition_expr <~ ")"
     | arc_expr
-    | "\\" ~> step_var_decl ^^ { VariableRelationalExpr(_) }
   )
 
   def arc_expr = (
