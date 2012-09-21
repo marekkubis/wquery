@@ -23,8 +23,8 @@ class PlannerTests extends WQueryTestSuite {
 
   @Test def planSingleTransformation() {
     val plans = plansFor("{car}.hypernym")
-    val forwardPlan = plans.find(_.toString == "ExtendOp(ProjectOp(ExtendOp(FetchOp(words,List((source,List(car))),List(source)),0,RelationUnionPattern(List(source&string^synsets^destination&synset)),Forward,$__p),StepVariableRefOp($__p,Set(synset))),0,source&synset^hypernym^destination&synset,Forward,novars)").get
-    val backwardPlan = plans.find(_.toString == "SelectOp(BindOp(ExtendOp(FringeOp(source&synset^hypernym^destination&synset,Right),0,source&synset^hypernym^destination&synset,Backward,novars),$__f@_),BinaryCondition(in,StepVariableRefOp($__f,Set(synset)),ProjectOp(ExtendOp(FetchOp(words,List((source,List(car))),List(source)),0,RelationUnionPattern(List(source&string^synsets^destination&synset)),Forward,$__p),StepVariableRefOp($__p,Set(synset)))))").get
+    val forwardPlan = plans.find(_.toString == "ExtendOp(ProjectOp(ExtendOp(FetchOp(words,List((source,List(car))),List(source)),RelationUnionPattern(List(source&string^synsets^destination&synset)),Forward,$__p),StepVariableRefOp($__p,Set(synset))),source&synset^hypernym^destination&synset,Forward,novars)").get
+    val backwardPlan = plans.find(_.toString == "SelectOp(BindOp(ExtendOp(FringeOp(source&synset^hypernym^destination&synset,Right),source&synset^hypernym^destination&synset,Backward,novars),$__f@_),BinaryCondition(in,StepVariableRefOp($__f,Set(synset)),ProjectOp(ExtendOp(FetchOp(words,List((source,List(car))),List(source)),RelationUnionPattern(List(source&string^synsets^destination&synset)),Forward,$__p),StepVariableRefOp($__p,Set(synset)))))").get
     val forwardResult = forwardPlan.evaluate(wquery.wordNet, Bindings())
     val backwardResult = backwardPlan.evaluate(wquery.wordNet, Bindings())
 
@@ -34,8 +34,8 @@ class PlannerTests extends WQueryTestSuite {
 
   @Test def planInvertedTransformation() {
     val plans = plansFor("{cab}.^hypernym")
-    val forwardPlan = plans.find(_.toString == "ExtendOp(ProjectOp(ExtendOp(FetchOp(words,List((source,List(cab))),List(source)),0,RelationUnionPattern(List(source&string^synsets^destination&synset)),Forward,$__p),StepVariableRefOp($__p,Set(synset))),0,destination&synset^hypernym^source&synset,Forward,novars)").get
-    val backwardPlan = plans.find(_.toString == "SelectOp(BindOp(ExtendOp(FringeOp(destination&synset^hypernym^source&synset,Right),0,destination&synset^hypernym^source&synset,Backward,novars),$__f@_),BinaryCondition(in,StepVariableRefOp($__f,Set(synset)),ProjectOp(ExtendOp(FetchOp(words,List((source,List(cab))),List(source)),0,RelationUnionPattern(List(source&string^synsets^destination&synset)),Forward,$__p),StepVariableRefOp($__p,Set(synset)))))").get
+    val forwardPlan = plans.find(_.toString == "ExtendOp(ProjectOp(ExtendOp(FetchOp(words,List((source,List(cab))),List(source)),RelationUnionPattern(List(source&string^synsets^destination&synset)),Forward,$__p),StepVariableRefOp($__p,Set(synset))),destination&synset^hypernym^source&synset,Forward,novars)").get
+    val backwardPlan = plans.find(_.toString == "SelectOp(BindOp(ExtendOp(FringeOp(destination&synset^hypernym^source&synset,Right),destination&synset^hypernym^source&synset,Backward,novars),$__f@_),BinaryCondition(in,StepVariableRefOp($__f,Set(synset)),ProjectOp(ExtendOp(FetchOp(words,List((source,List(cab))),List(source)),RelationUnionPattern(List(source&string^synsets^destination&synset)),Forward,$__p),StepVariableRefOp($__p,Set(synset)))))").get
     val forwardResult = forwardPlan.evaluate(wquery.wordNet, Bindings())
     val backwardResult = backwardPlan.evaluate(wquery.wordNet, Bindings())
 
@@ -48,14 +48,14 @@ class PlannerTests extends WQueryTestSuite {
     val plan = PlanEvaluator.chooseBest(wquery.wordNet.store.schema, plans)
     val result = plan.evaluate(wquery.wordNet, Bindings())
 
-    plan.toString should equal ("ExtendOp(ExtendOp(ExtendOp(FetchOp(synsets,List((source,List())),List(source)),0,source&synset^hypernym^destination&synset,Forward,novars),0,source&synset^partial_holonym^destination&synset,Forward,novars),0,source&synset^hypernym^destination&synset,Forward,novars)")
+    plan.toString should equal ("ExtendOp(ExtendOp(ExtendOp(FetchOp(synsets,List((source,List())),List(source)),source&synset^hypernym^destination&synset,Forward,novars),source&synset^partial_holonym^destination&synset,Forward,novars),source&synset^hypernym^destination&synset,Forward,novars)")
     emitted(result) should equal ("{ person:2:n } hypernym { human body:1:n physical body:1:n material body:1:n soma:3:n build:2:n figure:2:n physique:2:n anatomy:2:n shape:3:n bod:1:n chassis:1:n frame:3:n form:5:n flesh:2:n } partial_holonym { person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n } hypernym { organism:1:n being:2:n }\n{ person:2:n } hypernym { human body:1:n physical body:1:n material body:1:n soma:3:n build:2:n figure:2:n physique:2:n anatomy:2:n shape:3:n bod:1:n chassis:1:n frame:3:n form:5:n flesh:2:n } partial_holonym { person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n } hypernym { causal agent:1:n cause:4:n causal agency:1:n }\n{ compartment:2:n } hypernym { room:1:n } partial_holonym { building:1:n edifice:1:n } hypernym { structure:1:n construction:4:n }\n")
   }
 
   @Test def planTransformationsUnion() {
     val plans = plansFor("{car}.hypernym|partial_holonym")
-    val forwardPlan = plans.find(_.toString == "ExtendOp(ProjectOp(ExtendOp(FetchOp(words,List((source,List(car))),List(source)),0,RelationUnionPattern(List(source&string^synsets^destination&synset)),Forward,$__p),StepVariableRefOp($__p,Set(synset))),0,RelationUnionPattern(List(source&synset^hypernym^destination&synset, source&synset^partial_holonym^destination&synset)),Forward,novars)").get
-    val backwardPlan = plans.find(_.toString == "SelectOp(BindOp(ExtendOp(FringeOp(RelationUnionPattern(List(source&synset^hypernym^destination&synset, source&synset^partial_holonym^destination&synset)),Right),0,RelationUnionPattern(List(source&synset^hypernym^destination&synset, source&synset^partial_holonym^destination&synset)),Backward,novars),$__f@_),BinaryCondition(in,StepVariableRefOp($__f,Set(synset)),ProjectOp(ExtendOp(FetchOp(words,List((source,List(car))),List(source)),0,RelationUnionPattern(List(source&string^synsets^destination&synset)),Forward,$__p),StepVariableRefOp($__p,Set(synset)))))").get
+    val forwardPlan = plans.find(_.toString == "ExtendOp(ProjectOp(ExtendOp(FetchOp(words,List((source,List(car))),List(source)),RelationUnionPattern(List(source&string^synsets^destination&synset)),Forward,$__p),StepVariableRefOp($__p,Set(synset))),RelationUnionPattern(List(source&synset^hypernym^destination&synset, source&synset^partial_holonym^destination&synset)),Forward,novars)").get
+    val backwardPlan = plans.find(_.toString == "SelectOp(BindOp(ExtendOp(FringeOp(RelationUnionPattern(List(source&synset^hypernym^destination&synset, source&synset^partial_holonym^destination&synset)),Right),RelationUnionPattern(List(source&synset^hypernym^destination&synset, source&synset^partial_holonym^destination&synset)),Backward,novars),$__f@_),BinaryCondition(in,StepVariableRefOp($__f,Set(synset)),ProjectOp(ExtendOp(FetchOp(words,List((source,List(car))),List(source)),RelationUnionPattern(List(source&string^synsets^destination&synset)),Forward,$__p),StepVariableRefOp($__p,Set(synset)))))").get
 
     val forwardResult = forwardPlan.evaluate(wquery.wordNet, Bindings())
     val backwardResult = backwardPlan.evaluate(wquery.wordNet, Bindings())
@@ -69,14 +69,14 @@ class PlannerTests extends WQueryTestSuite {
     val plan = PlanEvaluator.chooseBest(wquery.wordNet.store.schema, plans)
     val result = plan.evaluate(wquery.wordNet, Bindings())
 
-    plan.toString should equal ("ExtendOp(FetchOp(synsets,List((source,List())),List(source)),0,RelationCompositionPattern(List(source&synset^hypernym^destination&synset, source&synset^partial_holonym^destination&synset, source&synset^hypernym^destination&synset)),Forward,novars)")
+    plan.toString should equal ("ExtendOp(FetchOp(synsets,List((source,List())),List(source)),RelationCompositionPattern(List(source&synset^hypernym^destination&synset, source&synset^partial_holonym^destination&synset, source&synset^hypernym^destination&synset)),Forward,novars)")
     emitted(result) should equal ("{ person:2:n } hypernym { human body:1:n physical body:1:n material body:1:n soma:3:n build:2:n figure:2:n physique:2:n anatomy:2:n shape:3:n bod:1:n chassis:1:n frame:3:n form:5:n flesh:2:n } partial_holonym { person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n } hypernym { organism:1:n being:2:n }\n{ person:2:n } hypernym { human body:1:n physical body:1:n material body:1:n soma:3:n build:2:n figure:2:n physique:2:n anatomy:2:n shape:3:n bod:1:n chassis:1:n frame:3:n form:5:n flesh:2:n } partial_holonym { person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n } hypernym { causal agent:1:n cause:4:n causal agency:1:n }\n{ compartment:2:n } hypernym { room:1:n } partial_holonym { building:1:n edifice:1:n } hypernym { structure:1:n construction:4:n }\n")
   }
 
   @Test def planOneOrMoreTransformations() {
     val plans = plansFor("{car:3:n}.hypernym+")
-    val forwardPlan = plans.find(_.toString == "ExtendOp(ProjectOp(ExtendOp(FetchOp(literal,List((destination,List(car)), (num,List(3)), (pos,List(n))),List(source)),0,RelationUnionPattern(List(source&sense^synset^destination&synset)),Forward,$__p),StepVariableRefOp($__p,Set(synset))),0,QuantifiedRelationPattern(source&synset^hypernym^destination&synset,{1,}),Forward,novars)").get
-    val backwardPlan = plans.find(_.toString == "SelectOp(BindOp(ExtendOp(FringeOp(QuantifiedRelationPattern(source&synset^hypernym^destination&synset,{1,}),Right),0,QuantifiedRelationPattern(source&synset^hypernym^destination&synset,{1,}),Backward,novars),$__f@_),BinaryCondition(in,StepVariableRefOp($__f,Set(synset)),ProjectOp(ExtendOp(FetchOp(literal,List((destination,List(car)), (num,List(3)), (pos,List(n))),List(source)),0,RelationUnionPattern(List(source&sense^synset^destination&synset)),Forward,$__p),StepVariableRefOp($__p,Set(synset)))))").get
+    val forwardPlan = plans.find(_.toString == "ExtendOp(ProjectOp(ExtendOp(FetchOp(literal,List((destination,List(car)), (num,List(3)), (pos,List(n))),List(source)),RelationUnionPattern(List(source&sense^synset^destination&synset)),Forward,$__p),StepVariableRefOp($__p,Set(synset))),QuantifiedRelationPattern(source&synset^hypernym^destination&synset,{1,}),Forward,novars)").get
+    val backwardPlan = plans.find(_.toString == "SelectOp(BindOp(ExtendOp(FringeOp(QuantifiedRelationPattern(source&synset^hypernym^destination&synset,{1,}),Right),QuantifiedRelationPattern(source&synset^hypernym^destination&synset,{1,}),Backward,novars),$__f@_),BinaryCondition(in,StepVariableRefOp($__f,Set(synset)),ProjectOp(ExtendOp(FetchOp(literal,List((destination,List(car)), (num,List(3)), (pos,List(n))),List(source)),RelationUnionPattern(List(source&sense^synset^destination&synset)),Forward,$__p),StepVariableRefOp($__p,Set(synset)))))").get
     val forwardResult = forwardPlan.evaluate(wquery.wordNet, Bindings())
     val backwardResult = backwardPlan.evaluate(wquery.wordNet, Bindings())
 
@@ -86,8 +86,8 @@ class PlannerTests extends WQueryTestSuite {
 
   @Test def planZeroOrMoreTransformations() {
     val plans = plansFor("{car:3:n}.hypernym*")
-    val forwardPlan = plans.find(_.toString == "ExtendOp(ProjectOp(ExtendOp(FetchOp(literal,List((destination,List(car)), (num,List(3)), (pos,List(n))),List(source)),0,RelationUnionPattern(List(source&sense^synset^destination&synset)),Forward,$__p),StepVariableRefOp($__p,Set(synset))),0,QuantifiedRelationPattern(source&synset^hypernym^destination&synset,{0,}),Forward,novars)").get
-    val backwardPlan = plans.find(_.toString == "SelectOp(BindOp(ExtendOp(FringeOp(QuantifiedRelationPattern(source&synset^hypernym^destination&synset,{0,}),Right),0,QuantifiedRelationPattern(source&synset^hypernym^destination&synset,{0,}),Backward,novars),$__f@_),BinaryCondition(in,StepVariableRefOp($__f,Set(synset)),ProjectOp(ExtendOp(FetchOp(literal,List((destination,List(car)), (num,List(3)), (pos,List(n))),List(source)),0,RelationUnionPattern(List(source&sense^synset^destination&synset)),Forward,$__p),StepVariableRefOp($__p,Set(synset)))))").get
+    val forwardPlan = plans.find(_.toString == "ExtendOp(ProjectOp(ExtendOp(FetchOp(literal,List((destination,List(car)), (num,List(3)), (pos,List(n))),List(source)),RelationUnionPattern(List(source&sense^synset^destination&synset)),Forward,$__p),StepVariableRefOp($__p,Set(synset))),QuantifiedRelationPattern(source&synset^hypernym^destination&synset,{0,}),Forward,novars)").get
+    val backwardPlan = plans.find(_.toString == "SelectOp(BindOp(ExtendOp(FringeOp(QuantifiedRelationPattern(source&synset^hypernym^destination&synset,{0,}),Right),QuantifiedRelationPattern(source&synset^hypernym^destination&synset,{0,}),Backward,novars),$__f@_),BinaryCondition(in,StepVariableRefOp($__f,Set(synset)),ProjectOp(ExtendOp(FetchOp(literal,List((destination,List(car)), (num,List(3)), (pos,List(n))),List(source)),RelationUnionPattern(List(source&sense^synset^destination&synset)),Forward,$__p),StepVariableRefOp($__p,Set(synset)))))").get
     val forwardResult = forwardPlan.evaluate(wquery.wordNet, Bindings())
     val backwardResult = backwardPlan.evaluate(wquery.wordNet, Bindings())
 
@@ -97,8 +97,8 @@ class PlannerTests extends WQueryTestSuite {
 
   @Test def planPathWithHighlySelectiveNodeFilter() {
     val plans = plansFor("{}.hypernym.{cab:3}")
-    val forwardPlan = plans.find(_.toString == "SelectOp(BindOp(ExtendOp(FetchOp(synsets,List((source,List())),List(source)),0,source&synset^hypernym^destination&synset,Forward,novars),$__#),BinaryCondition(in,StepVariableRefOp($__#,Set(synset)),ProjectOp(ExtendOp(FetchOp(literal,List((destination,List(cab)), (num,List(3))),List(source)),0,RelationUnionPattern(List(source&sense^synset^destination&synset)),Forward,$__p),StepVariableRefOp($__p,Set(synset)))))").get
-    val backwardPlan = plans.find(_.toString == "BindOp(ExtendOp(ProjectOp(ExtendOp(FetchOp(literal,List((destination,List(cab)), (num,List(3))),List(source)),0,RelationUnionPattern(List(source&sense^synset^destination&synset)),Forward,$__p),StepVariableRefOp($__p,Set(synset))),0,source&synset^hypernym^destination&synset,Backward,novars),$__f@_)").get
+    val forwardPlan = plans.find(_.toString == "SelectOp(BindOp(ExtendOp(FetchOp(synsets,List((source,List())),List(source)),source&synset^hypernym^destination&synset,Forward,novars),$__#),BinaryCondition(in,StepVariableRefOp($__#,Set(synset)),ProjectOp(ExtendOp(FetchOp(literal,List((destination,List(cab)), (num,List(3))),List(source)),RelationUnionPattern(List(source&sense^synset^destination&synset)),Forward,$__p),StepVariableRefOp($__p,Set(synset)))))").get
+    val backwardPlan = plans.find(_.toString == "BindOp(ExtendOp(ProjectOp(ExtendOp(FetchOp(literal,List((destination,List(cab)), (num,List(3))),List(source)),RelationUnionPattern(List(source&sense^synset^destination&synset)),Forward,$__p),StepVariableRefOp($__p,Set(synset))),source&synset^hypernym^destination&synset,Backward,novars),$__f@_)").get
     val forwardResult = forwardPlan.evaluate(wquery.wordNet, Bindings())
     val backwardResult = backwardPlan.evaluate(wquery.wordNet, Bindings())
 
@@ -108,8 +108,8 @@ class PlannerTests extends WQueryTestSuite {
 
   @Test def planPathWithHighlySelectiveContextFilter() {
     val plans = plansFor("{}.hypernym[# = {cab:3}]")
-    val forwardPlan = plans.find(_.toString == "SelectOp(BindOp(ExtendOp(FetchOp(synsets,List((source,List())),List(source)),0,source&synset^hypernym^destination&synset,Forward,novars),$__#),BinaryCondition(=,StepVariableRefOp($__#,Set(synset)),ProjectOp(ExtendOp(FetchOp(literal,List((destination,List(cab)), (num,List(3))),List(source)),0,RelationUnionPattern(List(source&sense^synset^destination&synset)),Forward,$__p),StepVariableRefOp($__p,Set(synset)))))").get
-    val backwardPlan = plans.find(_.toString == "BindOp(ExtendOp(ProjectOp(ExtendOp(FetchOp(literal,List((destination,List(cab)), (num,List(3))),List(source)),0,RelationUnionPattern(List(source&sense^synset^destination&synset)),Forward,$__p),StepVariableRefOp($__p,Set(synset))),0,source&synset^hypernym^destination&synset,Backward,novars),$__f@_)").get
+    val forwardPlan = plans.find(_.toString == "SelectOp(BindOp(ExtendOp(FetchOp(synsets,List((source,List())),List(source)),source&synset^hypernym^destination&synset,Forward,novars),$__#),BinaryCondition(=,StepVariableRefOp($__#,Set(synset)),ProjectOp(ExtendOp(FetchOp(literal,List((destination,List(cab)), (num,List(3))),List(source)),RelationUnionPattern(List(source&sense^synset^destination&synset)),Forward,$__p),StepVariableRefOp($__p,Set(synset)))))").get
+    val backwardPlan = plans.find(_.toString == "BindOp(ExtendOp(ProjectOp(ExtendOp(FetchOp(literal,List((destination,List(cab)), (num,List(3))),List(source)),RelationUnionPattern(List(source&sense^synset^destination&synset)),Forward,$__p),StepVariableRefOp($__p,Set(synset))),source&synset^hypernym^destination&synset,Backward,novars),$__f@_)").get
     val forwardResult = forwardPlan.evaluate(wquery.wordNet, Bindings())
     val backwardResult = backwardPlan.evaluate(wquery.wordNet, Bindings())
 
@@ -119,8 +119,8 @@ class PlannerTests extends WQueryTestSuite {
 
   @Test def planPathWithHighlySelectiveVariableFilter() {
     val plans = plansFor("{}.hypernym$a[$a = {cab:3}]")
-    val forwardPlan = plans.find(_.toString == "SelectOp(ExtendOp(FetchOp(synsets,List((source,List())),List(source)),0,source&synset^hypernym^destination&synset,Forward,$a),BinaryCondition(=,StepVariableRefOp($a,Set(synset)),ProjectOp(ExtendOp(FetchOp(literal,List((destination,List(cab)), (num,List(3))),List(source)),0,RelationUnionPattern(List(source&sense^synset^destination&synset)),Forward,$__p),StepVariableRefOp($__p,Set(synset)))))").get
-    val backwardPlan = plans.find(_.toString == "BindOp(ExtendOp(ProjectOp(ExtendOp(FetchOp(literal,List((destination,List(cab)), (num,List(3))),List(source)),0,RelationUnionPattern(List(source&sense^synset^destination&synset)),Forward,$__p),StepVariableRefOp($__p,Set(synset))),0,source&synset^hypernym^destination&synset,Backward,$a),$__f@_)").get
+    val forwardPlan = plans.find(_.toString == "SelectOp(ExtendOp(FetchOp(synsets,List((source,List())),List(source)),source&synset^hypernym^destination&synset,Forward,$a),BinaryCondition(=,StepVariableRefOp($a,Set(synset)),ProjectOp(ExtendOp(FetchOp(literal,List((destination,List(cab)), (num,List(3))),List(source)),RelationUnionPattern(List(source&sense^synset^destination&synset)),Forward,$__p),StepVariableRefOp($__p,Set(synset)))))").get
+    val backwardPlan = plans.find(_.toString == "BindOp(ExtendOp(ProjectOp(ExtendOp(FetchOp(literal,List((destination,List(cab)), (num,List(3))),List(source)),RelationUnionPattern(List(source&sense^synset^destination&synset)),Forward,$__p),StepVariableRefOp($__p,Set(synset))),source&synset^hypernym^destination&synset,Backward,$a),$__f@_)").get
     val forwardResult = forwardPlan.evaluate(wquery.wordNet, Bindings())
     val backwardResult = backwardPlan.evaluate(wquery.wordNet, Bindings())
 
@@ -153,7 +153,7 @@ class PlannerTests extends WQueryTestSuite {
     val plan = PlanEvaluator.chooseBest(wquery.wordNet.store.schema, plans)
     val result = plan.evaluate(wquery.wordNet, Bindings())
 
-    plan.toString should equal ("BindOp(ExtendOp(ProjectOp(ExtendOp(FetchOp(literal,List((destination,List(cab)), (num,List(3))),List(source)),0,RelationUnionPattern(List(source&sense^synset^destination&synset)),Forward,$__p),StepVariableRefOp($__p,Set(synset))),0,source&synset^hypernym^destination&synset,Backward,novars),$__f@_)")
+    plan.toString should equal ("BindOp(ExtendOp(ProjectOp(ExtendOp(FetchOp(literal,List((destination,List(cab)), (num,List(3))),List(source)),RelationUnionPattern(List(source&sense^synset^destination&synset)),Forward,$__p),StepVariableRefOp($__p,Set(synset))),source&synset^hypernym^destination&synset,Backward,novars),$__f@_)")
     emitted(result) should equal ("{ gypsy cab:1:n } hypernym { cab:3:n hack:5:n taxi:1:n taxicab:1:n }\n{ minicab:1:n } hypernym { cab:3:n hack:5:n taxi:1:n taxicab:1:n }\n")
   }
 
@@ -162,7 +162,7 @@ class PlannerTests extends WQueryTestSuite {
     val plan = PlanEvaluator.chooseBest(wquery.wordNet.store.schema, plans)
     val result = plan.evaluate(wquery.wordNet, Bindings())
 
-    plan.toString should equal ("ExtendOp(ProjectOp(ExtendOp(FetchOp(literal,List((destination,List(cab)), (num,List(3))),List(source)),0,RelationUnionPattern(List(source&sense^synset^destination&synset)),Forward,$__p),StepVariableRefOp($__p,Set(synset))),0,source&synset^hypernym^destination&synset,Forward,novars)")
+    plan.toString should equal ("ExtendOp(ProjectOp(ExtendOp(FetchOp(literal,List((destination,List(cab)), (num,List(3))),List(source)),RelationUnionPattern(List(source&sense^synset^destination&synset)),Forward,$__p),StepVariableRefOp($__p,Set(synset))),source&synset^hypernym^destination&synset,Forward,novars)")
     emitted(result) should equal ("{ cab:3:n hack:5:n taxi:1:n taxicab:1:n } hypernym { car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n }\n")
   }
 
@@ -171,7 +171,7 @@ class PlannerTests extends WQueryTestSuite {
     val plan = PlanEvaluator.chooseBest(wquery.wordNet.store.schema, plans)
     val result = plan.evaluate(wquery.wordNet, Bindings())
 
-    plan.toString should equal ("SelectOp(BindOp(ExtendOp(ProjectOp(ExtendOp(FetchOp(literal,List((destination,List(cab)), (num,List(3))),List(source)),0,RelationUnionPattern(List(source&sense^synset^destination&synset)),Forward,$__p),StepVariableRefOp($__p,Set(synset))),0,source&synset^hypernym^destination&synset,Forward,novars),$__#),BinaryCondition(in,StepVariableRefOp($__#,Set(synset)),ProjectOp(ExtendOp(FetchOp(literal,List((destination,List(car)), (num,List(1))),List(source)),0,RelationUnionPattern(List(source&sense^synset^destination&synset)),Forward,$__p),StepVariableRefOp($__p,Set(synset)))))")
+    plan.toString should equal ("SelectOp(BindOp(ExtendOp(ProjectOp(ExtendOp(FetchOp(literal,List((destination,List(cab)), (num,List(3))),List(source)),RelationUnionPattern(List(source&sense^synset^destination&synset)),Forward,$__p),StepVariableRefOp($__p,Set(synset))),source&synset^hypernym^destination&synset,Forward,novars),$__#),BinaryCondition(in,StepVariableRefOp($__#,Set(synset)),ProjectOp(ExtendOp(FetchOp(literal,List((destination,List(car)), (num,List(1))),List(source)),RelationUnionPattern(List(source&sense^synset^destination&synset)),Forward,$__p),StepVariableRefOp($__p,Set(synset)))))")
     emitted(result) should equal ("{ cab:3:n hack:5:n taxi:1:n taxicab:1:n } hypernym { car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n }\n")
   }
 
@@ -180,7 +180,7 @@ class PlannerTests extends WQueryTestSuite {
     val plan = PlanEvaluator.chooseBest(wquery.wordNet.store.schema, plans)
     val result = plan.evaluate(wquery.wordNet, Bindings())
 
-    plan.toString should equal ("BindOp(ExtendOp(ExtendOp(ProjectOp(ExtendOp(FetchOp(literal,List((destination,List(cab)), (num,List(3))),List(source)),0,RelationUnionPattern(List(source&sense^synset^destination&synset)),Forward,$__p),StepVariableRefOp($__p,Set(synset))),0,source&synset^hypernym^destination&synset,Forward,novars),0,source&synset^hypernym^destination&synset,Backward,novars),$__f@_)")
+    plan.toString should equal ("BindOp(ExtendOp(ExtendOp(ProjectOp(ExtendOp(FetchOp(literal,List((destination,List(cab)), (num,List(3))),List(source)),RelationUnionPattern(List(source&sense^synset^destination&synset)),Forward,$__p),StepVariableRefOp($__p,Set(synset))),source&synset^hypernym^destination&synset,Forward,novars),source&synset^hypernym^destination&synset,Backward,novars),$__f@_)")
     emitted(result) should equal ("{ gypsy cab:1:n } hypernym { cab:3:n hack:5:n taxi:1:n taxicab:1:n } hypernym { car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n }\n{ minicab:1:n } hypernym { cab:3:n hack:5:n taxi:1:n taxicab:1:n } hypernym { car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n }\n")
   }
 
@@ -189,7 +189,7 @@ class PlannerTests extends WQueryTestSuite {
     val plan = PlanEvaluator.chooseBest(wquery.wordNet.store.schema, plans)
     val result = plan.evaluate(wquery.wordNet, Bindings())
 
-    plan.toString should equal ("NaturalJoinOp(ExtendOp(ProjectOp(ExtendOp(FetchOp(literal,List((destination,List(bus)), (num,List(4))),List(source)),0,RelationUnionPattern(List(source&sense^synset^destination&synset)),Forward,$__p),StepVariableRefOp($__p,Set(synset))),0,source&synset^hypernym^destination&synset,Forward,$a),ExtendOp(ProjectOp(ExtendOp(FetchOp(literal,List((destination,List(ambulance)), (num,List(1))),List(source)),0,RelationUnionPattern(List(source&sense^synset^destination&synset)),Forward,$__p),StepVariableRefOp($__p,Set(synset))),0,destination&synset^hypernym^source&synset,Backward,novars))")
+    plan.toString should equal ("NaturalJoinOp(ExtendOp(ProjectOp(ExtendOp(FetchOp(literal,List((destination,List(bus)), (num,List(4))),List(source)),RelationUnionPattern(List(source&sense^synset^destination&synset)),Forward,$__p),StepVariableRefOp($__p,Set(synset))),source&synset^hypernym^destination&synset,Forward,$a),ExtendOp(ProjectOp(ExtendOp(FetchOp(literal,List((destination,List(ambulance)), (num,List(1))),List(source)),RelationUnionPattern(List(source&sense^synset^destination&synset)),Forward,$__p),StepVariableRefOp($__p,Set(synset))),destination&synset^hypernym^source&synset,Backward,novars))")
     emitted(result) should equal ("$a={ car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n } { bus:4:n jalopy:1:n heap:3:n } hypernym { car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n } ^hypernym { ambulance:1:n }\n")
   }
 
@@ -198,7 +198,7 @@ class PlannerTests extends WQueryTestSuite {
     val plan = PlanEvaluator.chooseBest(wquery.wordNet.store.schema, plans)
     val result = plan.evaluate(wquery.wordNet, Bindings())
 
-    plan.toString should equal ("SelectOp(BindOp(ExtendOp(SelectOp(BindOp(ExtendOp(FetchOp(synsets,List((source,List())),List(source)),0,source&synset^hypernym^destination&synset,Forward,novars),$__#),BinaryCondition(>,FunctionOp(max,FunctionOp(last,ExtendOp(ExtendOp(StepVariableRefOp($__#,Set(synset)),0,source&synset^senses^destination&sense,Forward,novars),0,source&sense^sensenum^destination&integer,Forward,novars))),ConstantOp(List(List(2))))),0,source&synset^hypernym^destination&synset,Forward,novars),$__#),BinaryCondition(in,StepVariableRefOp($__#,Set(synset)),ProjectOp(ExtendOp(FetchOp(words,List((source,List(car))),List(source)),0,RelationUnionPattern(List(source&string^synsets^destination&synset)),Forward,$__p),StepVariableRefOp($__p,Set(synset)))))")
+    plan.toString should equal ("SelectOp(BindOp(ExtendOp(SelectOp(BindOp(ExtendOp(FetchOp(synsets,List((source,List())),List(source)),source&synset^hypernym^destination&synset,Forward,novars),$__#),BinaryCondition(>,FunctionOp(max,FunctionOp(last,ExtendOp(ExtendOp(StepVariableRefOp($__#,Set(synset)),source&synset^senses^destination&sense,Forward,novars),source&sense^sensenum^destination&integer,Forward,novars))),ConstantOp(List(List(2))))),source&synset^hypernym^destination&synset,Forward,novars),$__#),BinaryCondition(in,StepVariableRefOp($__#,Set(synset)),ProjectOp(ExtendOp(FetchOp(words,List((source,List(car))),List(source)),RelationUnionPattern(List(source&string^synsets^destination&synset)),Forward,$__p),StepVariableRefOp($__p,Set(synset)))))")
     emitted(result) should equal ("{ minicab:1:n } hypernym { cab:3:n hack:5:n taxi:1:n taxicab:1:n } hypernym { car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n }\n{ gypsy cab:1:n } hypernym { cab:3:n hack:5:n taxi:1:n taxicab:1:n } hypernym { car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n }\n{ brougham:2:n } hypernym { sedan:1:n saloon:3:n } hypernym { car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n }\n{ shooting brake:1:n } hypernym { beach wagon:1:n station wagon:1:n wagon:5:n estate car:1:n beach waggon:1:n station waggon:1:n waggon:2:n } hypernym { car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n }\n")
   }
 

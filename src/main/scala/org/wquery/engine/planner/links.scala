@@ -30,14 +30,14 @@ class RootLink(generator: AlgebraOp, override val variables: VariableTemplate) e
   override def toString = "r(" + generator + ")"
 }
 
-class PatternLink(val pos: Int, pattern: RelationalPattern, override val variables: VariableTemplate, rightGenerators: List[(AlgebraOp, Condition)]) extends Link(variables) {
+class PatternLink(pattern: RelationalPattern, override val variables: VariableTemplate, rightGenerators: List[(AlgebraOp, Condition)]) extends Link(variables) {
   def leftFringe = FringeOp(pattern, Left)
 
   def rightFringe = (FringeOp(pattern, Right), none[Condition])::(rightGenerators.map{ case (a, b) => (a, b.some) })
 
-  def forward(op: AlgebraOp) = ExtendOp(op, pos, pattern, Forward, variables)
+  def forward(op: AlgebraOp) = ExtendOp(op, pattern, Forward, variables)
 
-  def backward(op: AlgebraOp) = ExtendOp(op, pos, pattern, Backward, variables)
+  def backward(op: AlgebraOp) = ExtendOp(op, pattern, Backward, variables)
 
-  override def toString = "p(" + List(pos, pattern, variables).mkString(",") + ")"
+  override def toString = "p(" + List(pattern, variables).mkString(",") + ")"
 }

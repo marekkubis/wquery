@@ -9,7 +9,7 @@ import org.wquery.engine._
 import org.wquery.utils.IntOptionW._
 
 sealed abstract class RelationalPattern extends ProvidesTypes with ProvidesTupleSizes {
-  def extend(wordNet: WordNetStore, bindings: Bindings, extensionSet: ExtensionSet, from: Int, direction: Direction): ExtendedExtensionSet
+  def extend(wordNet: WordNetStore, bindings: Bindings, extensionSet: ExtensionSet, direction: Direction): ExtendedExtensionSet
 
   def fringe(wordNet: WordNetStore, bindings: Bindings, side: Side): DataSet
 
@@ -21,10 +21,10 @@ sealed abstract class RelationalPattern extends ProvidesTypes with ProvidesTuple
 }
 
 case class RelationUnionPattern(patterns: List[RelationalPattern]) extends RelationalPattern {
-  def extend(wordNet: WordNetStore, bindings: Bindings, extensionSet: ExtensionSet, from: Int, direction: Direction) = {
+  def extend(wordNet: WordNetStore, bindings: Bindings, extensionSet: ExtensionSet, direction: Direction) = {
     val buffer = new ExtensionSetBuffer(extensionSet, direction)
 
-    patterns.foreach(expr => buffer.append(expr.extend(wordNet, bindings, extensionSet, from, direction)))
+    patterns.foreach(expr => buffer.append(expr.extend(wordNet, bindings, extensionSet, direction)))
     buffer.toExtensionSet
   }
 
@@ -51,18 +51,18 @@ case class RelationUnionPattern(patterns: List[RelationalPattern]) extends Relat
 }
 
 case class RelationCompositionPattern(patterns: List[RelationalPattern]) extends RelationalPattern {
-  def extend(wordNet: WordNetStore, bindings: Bindings, extensionSet: ExtensionSet, from: Int, direction: Direction) = {
+  def extend(wordNet: WordNetStore, bindings: Bindings, extensionSet: ExtensionSet, direction: Direction) = {
     direction match {
       case Forward =>
-        val headSet = patterns.head.extend(wordNet, bindings, extensionSet, from, direction)
+        val headSet = patterns.head.extend(wordNet, bindings, extensionSet, direction)
 
-        patterns.tail.foldLeft(headSet)((dataSet, expr) => expr.extend(wordNet, bindings, dataSet, 0, direction))
+        patterns.tail.foldLeft(headSet)((dataSet, expr) => expr.extend(wordNet, bindings, dataSet, direction))
       case Backward =>
         val tailSet = patterns.tail.foldRight(extensionSet){ case (expr, dataSet) =>
-          expr.extend(wordNet, bindings, dataSet, 0, direction)
+          expr.extend(wordNet, bindings, dataSet, direction)
         }
 
-        patterns.head.extend(wordNet, bindings, tailSet, from, direction)
+        patterns.head.extend(wordNet, bindings, tailSet, direction)
     }
   }
 
@@ -129,13 +129,13 @@ case class RelationCompositionPattern(patterns: List[RelationalPattern]) extends
 }
 
 case class QuantifiedRelationPattern(pattern: RelationalPattern, quantifier: Quantifier) extends RelationalPattern {
-  def extend(wordNet: WordNetStore, bindings: Bindings, extensionSet: ExtensionSet, from: Int, direction: Direction) = {
-    val lowerExtensionSet = (1 to quantifier.lowerBound).foldLeft(extensionSet)((x, _) => pattern.extend(wordNet, bindings, x, from, direction))
+  def extend(wordNet: WordNetStore, bindings: Bindings, extensionSet: ExtensionSet, direction: Direction) = {
+    val lowerExtensionSet = (1 to quantifier.lowerBound).foldLeft(extensionSet)((x, _) => pattern.extend(wordNet, bindings, x, direction))
 
     if (some(quantifier.lowerBound) != quantifier.upperBound)
       direction match {
         case Forward =>
-          computeClosureForward(wordNet, bindings, lowerExtensionSet, from, direction, quantifier.upperBound.map(_ - quantifier.lowerBound))
+          computeClosureForward(wordNet, bindings, lowerExtensionSet, direction, quantifier.upperBound.map(_ - quantifier.lowerBound))
         case Backward =>
           computeClosureBackward(wordNet, bindings, lowerExtensionSet, direction, quantifier.upperBound.map(_ - quantifier.lowerBound))
       }
@@ -162,11 +162,11 @@ case class QuantifiedRelationPattern(pattern: RelationalPattern, quantifier: Qua
     }
   }
 
-  private def computeClosureForward(wordNet: WordNetStore, bindings: Bindings, extensionSet: ExtensionSet, from: Int, direction: Direction, limit: Option[Int]) = {
+  private def computeClosureForward(wordNet: WordNetStore, bindings: Bindings, extensionSet: ExtensionSet, direction: Direction, limit: Option[Int]) = {
     val builder = new ExtensionSetBuilder(extensionSet, direction)
 
     for (i <- 0 until extensionSet.size) {
-      val source = extensionSet.right(i, from)
+      val source = extensionSet.right(i)
       builder.extend(i, Nil)
 
       for (cnode <- closeTupleForward(wordNet, bindings, List(source), Set(source), limit))
@@ -192,7 +192,7 @@ case class QuantifiedRelationPattern(pattern: RelationalPattern, quantifier: Qua
 
   private def closeTupleForward(wordNet: WordNetStore, bindings: Bindings, source: List[Any], forbidden: Set[Any], limit: Option[Int]): Seq[List[Any]] = {
     if (limit.getOrElse(1) > 0) {
-      val transformed = pattern.extend(wordNet, bindings, new DataExtensionSet(DataSet.fromList(source)), 0, Forward)
+      val transformed = pattern.extend(wordNet, bindings, new DataExtensionSet(DataSet.fromList(source)), Forward)
       val filtered = transformed.extensions.filter{ case (_, extension) => !forbidden.contains(extension.last)}.map(_._2)
 
       if (filtered.isEmpty) {
@@ -218,7 +218,7 @@ case class QuantifiedRelationPattern(pattern: RelationalPattern, quantifier: Qua
 
   private def closeTupleBackward(wordNet: WordNetStore, bindings: Bindings, source: List[Any], forbidden: Set[Any], limit: Option[Int]): Seq[List[Any]] = {
     if (limit.getOrElse(1) > 0) {
-      val transformed = pattern.extend(wordNet, bindings, new DataExtensionSet(DataSet.fromList(source)), 0, Backward)
+      val transformed = pattern.extend(wordNet, bindings, new DataExtensionSet(DataSet.fromList(source)), Backward)
       val filtered = transformed.extensions.filter{ case (_, extension) => !forbidden.contains(extension.head)}.map(_._2)
 
       if (filtered.isEmpty) {
@@ -294,9 +294,9 @@ case class QuantifiedRelationPattern(pattern: RelationalPattern, quantifier: Qua
 }
 
 case class ArcRelationalPattern(pattern: ArcPattern) extends RelationalPattern {
-  def extend(wordNet: WordNetStore, bindings: Bindings, extensionSet: ExtensionSet, from: Int, direction: Direction) = {
-    pattern.relation.map(wordNet.extend(extensionSet, _, from, direction, pattern.source.name, pattern.destinations.map(_.name)))
-      .getOrElse(wordNet.extend(extensionSet, from, direction, (pattern.source.name, pattern.source.nodeType),
+  def extend(wordNet: WordNetStore, bindings: Bindings, extensionSet: ExtensionSet, direction: Direction) = {
+    pattern.relation.map(wordNet.extend(extensionSet, _, direction, pattern.source.name, pattern.destinations.map(_.name)))
+      .getOrElse(wordNet.extend(extensionSet, direction, (pattern.source.name, pattern.source.nodeType),
         if (pattern.destinations == List(ArcPatternArgument.Any)) Nil else pattern.destinations.map(dest => (dest.name, dest.nodeType))))
   }
 
@@ -363,10 +363,10 @@ case class ArcRelationalPattern(pattern: ArcPattern) extends RelationalPattern {
 }
 
 case class VariableRelationalPattern(variable: StepVariable) extends RelationalPattern {
-  def extend(wordNet: WordNetStore, bindings: Bindings, extensionSet: ExtensionSet, from: Int, direction: Direction) = {
+  def extend(wordNet: WordNetStore, bindings: Bindings, extensionSet: ExtensionSet, direction: Direction) = {
     bindings.lookupStepVariable(variable.name).map {
       case Arc(relation, source, destination) =>
-        wordNet.extend(extensionSet, relation, from, direction, source, List(destination))
+        wordNet.extend(extensionSet, relation, direction, source, List(destination))
       case _ =>
         throw new WQueryEvaluationException("Cannot extend a path using a non-arc value of variable " + variable)
     }.getOrElse(throw new WQueryEvaluationException("Variable " + variable + " is not bound"))

@@ -120,9 +120,7 @@ trait WQueryParsers extends RegexParsers {
     | bind_trans
   )
 
-  def relation_trans = dots ~ relation_union_expr ^^ { case pos~expr => RelationTransformationExpr(pos, expr) }
-
-  def dots = rep1(".") ^^ { _.size - 1 }
+  def relation_trans = "." ~> relation_union_expr ^^ { RelationTransformationExpr(_) }
 
   def relation_composition_expr = rep1sep(relation_union_expr, ".") ^^ { exprs => if (exprs.size == 1) exprs.head else RelationCompositionExpr(exprs) }
 

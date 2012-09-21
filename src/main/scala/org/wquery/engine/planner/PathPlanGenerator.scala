@@ -10,15 +10,9 @@ import org.wquery.utils.BigIntOptionW
 class PathPlanGenerator(path: Path) {
   def plan(wordNet: WordNetSchema, bindings: BindingsSchema) = {
     val seeds = (-1::(1 until path.links.size).toList).map(new Seed(wordNet, path.links, _))
-
-    val selectedSeeds = if (!isTreePath(path)) {
-      val seedSizeThreshold = some(BigInt(math.round(math.sqrt(wordNet.stats.domainSize.toDouble))))
-      val (below, above) = seeds.partition(_.op.cost(wordNet) <= seedSizeThreshold)
-
-      (below ++ (if (above.isEmpty) Nil else List(above.minBy(_.op.cost(wordNet))(BigIntOptionW.NoneMaxOrdering))))
-    } else {
-      seeds.headOption.toList
-    }
+    val seedSizeThreshold = some(BigInt(math.round(math.sqrt(wordNet.stats.domainSize.toDouble))))
+    val (below, above) = seeds.partition(_.op.cost(wordNet) <= seedSizeThreshold)
+    val selectedSeeds = (below ++ (if (above.isEmpty) Nil else List(above.minBy(_.op.cost(wordNet))(BigIntOptionW.NoneMaxOrdering))))
 
     (for (seedSet <- selectedSeeds.toSet.subsets if seedSet.nonEmpty) yield {
       val applier = new ConditionApplier(path.links, path.conditions, bindings)
@@ -27,8 +21,6 @@ class PathPlanGenerator(path: Path) {
       walk(wordNet, bindings, walkers)
     }).toList
   }
-
-  private def isTreePath(path: Path) = path.links.exists(link => link.isInstanceOf[PatternLink] && link.asInstanceOf[PatternLink].pos > 0)
 
   private def walk(wordNet: WordNetSchema, bindings: BindingsSchema, walkers: List[PathWalker]): AlgebraOp = {
     if (walkers.size == 1 && walkers.head.walkedEntirePath) {

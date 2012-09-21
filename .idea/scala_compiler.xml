@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ScalacSettings">
+    <option name="COMPILER_LIBRARY_NAME" value="Maven: org.scala-lang:scala-compiler-bundle:2.9.2" />
+    <option name="COMPILER_LIBRARY_LEVEL" value="Project" />
+    <option name="MAXIMUM_HEAP_SIZE" value="2048" />
+    <option name="VM_PARAMETERS" value="-Xms1536m -Xss1m -server" />
+  </component>
+</project>
+

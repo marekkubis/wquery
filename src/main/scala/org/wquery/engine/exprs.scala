@@ -349,11 +349,11 @@ sealed abstract class TransformationExpr extends Expr {
   def push(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context, op: AlgebraOp, plan: PathBuilder): AlgebraOp
 }
 
-case class RelationTransformationExpr(pos: Int, expr: RelationalExpr) extends TransformationExpr {
+case class RelationTransformationExpr(expr: RelationalExpr) extends TransformationExpr {
   def push(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context, op: AlgebraOp, plan: PathBuilder) = {
-    val pattern = expr.evaluationPattern(wordNet, op.rightType(pos))
-    plan.appendLink(pos, pattern)
-    ExtendOp(op, pos, pattern, Forward, VariableTemplate.empty)
+    val pattern = expr.evaluationPattern(wordNet, op.rightType(0))
+    plan.appendLink(pattern)
+    ExtendOp(op, pattern, Forward, VariableTemplate.empty)
   }
 }
 
@@ -390,8 +390,8 @@ case class BindTransformationExpr(variables: VariableTemplate) extends Transform
       plan.appendVariables(variables)
 
       op match {
-        case ExtendOp(extendedOp, pos, pattern, direction, VariableTemplate.empty) =>
-          ExtendOp(extendedOp, pos, pattern, direction, variables)
+        case ExtendOp(extendedOp, pattern, direction, VariableTemplate.empty) =>
+          ExtendOp(extendedOp, pattern, direction, variables)
         case _ =>
           BindOp(op, variables)
       }
@@ -633,7 +633,7 @@ case class SynsetByExprReq(expr: EvaluableExpr) extends EvaluableExpr {
         }}.toList
 
         val projectedVariable = StepVariable("__p")
-        ProjectOp(ExtendOp(op, 0, RelationUnionPattern(patterns), Forward, VariableTemplate(List(projectedVariable))), StepVariableRefOp(projectedVariable, Set(SynsetType)))
+        ProjectOp(ExtendOp(op, RelationUnionPattern(patterns), Forward, VariableTemplate(List(projectedVariable))), StepVariableRefOp(projectedVariable, Set(SynsetType)))
       } else {
         throw new WQueryStaticCheckException("{...} requires an expression that generates either senses or word forms")
       }
@@ -668,7 +668,7 @@ case class ContextByRelationalExprReq(expr: RelationalExpr) extends EvaluableExp
 
   private def extendBasedEvaluationPlan(wordNet: WordNetSchema, bindings: BindingsSchema) = {
     bindings.lookupStepVariableType(StepVariable.ContextVariable.name).map{ contextType =>
-      ExtendOp(StepVariableRefOp(StepVariable.ContextVariable, contextType), 0, expr.evaluationPattern(wordNet, contextType), Forward, VariableTemplate.empty)
+      ExtendOp(StepVariableRefOp(StepVariable.ContextVariable, contextType), expr.evaluationPattern(wordNet, contextType), Forward, VariableTemplate.empty)
     }.getOrElse {
       val pattern = expr.evaluationPattern(wordNet, DataType.all)
 
@@ -684,7 +684,7 @@ case class ContextByRelationalExprReq(expr: RelationalExpr) extends EvaluableExp
       if (pattern.minTupleSize === 0 && pattern.maxTupleSize === Some(0))
         fetchOp
       else
-        ExtendOp(fetchOp , 0, pattern, Forward, VariableTemplate.empty)
+        ExtendOp(fetchOp, pattern, Forward, VariableTemplate.empty)
     }
   }
 }

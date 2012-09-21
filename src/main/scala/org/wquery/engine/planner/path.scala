@@ -15,7 +15,6 @@ class PathBuilder {
   var rootGenerator = none[AlgebraOp]
   var rootLink = true
   var linkVariables = none[VariableTemplate]
-  var linkPos = none[Int]
   var linkPattern = none[RelationalPattern]
   var linkConditions = new ListBuffer[Condition]
 
@@ -25,9 +24,8 @@ class PathBuilder {
     rootGenerator = generator.some
   }
 
-  def appendLink(pos: Int, pattern: RelationalPattern) {
+  def appendLink(pattern: RelationalPattern) {
     flushLink
-    linkPos = pos.some
     linkPattern = pattern.some
   }
 
@@ -53,8 +51,7 @@ class PathBuilder {
     } else {
       val variables = ~linkVariables
 
-      linkBuffer.append(new PatternLink(linkPos.get, linkPattern.get, variables, inferGenerators(linkPattern.get, conditionsList, variables)))
-      linkPos = none
+      linkBuffer.append(new PatternLink(linkPattern.get, variables, inferGenerators(linkPattern.get, conditionsList, variables)))
       linkPattern = none
     }
 

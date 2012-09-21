@@ -5,7 +5,7 @@ import collection.mutable.ListBuffer
 trait ExtensionSet {
   def size: Int
   def leftOrShift(pathPos: Int, pos: Int): Either[Int, Any]
-  def rightOrShift(pathPos: Int, pos: Int): Either[Int, Any]
+  def rightOrShift(pathPos: Int): Either[Int, Any]
   def extension(pathPos: Int): (Int, List[Any])
 
   def extensions = (0 until size).map(extension(_))
@@ -19,12 +19,12 @@ trait ExtensionSet {
     }
   }
 
-  def right(pathPos: Int, pos: Int) = {
-    rightOrShift(pathPos, pos) match {
+  def right(pathPos: Int) = {
+    rightOrShift(pathPos) match {
       case Right(obj) =>
         obj
       case _ =>
-        throw new IllegalArgumentException("Right reference (" + pos + ") too far for path " + pathPos)
+        throw new IllegalArgumentException("Right reference too far for path " + pathPos)
     }
   }
 }
@@ -37,12 +37,7 @@ class DataExtensionSet(dataSet: DataSet) extends ExtensionSet {
     if (pos < path.size) Right(path(pos)) else Left(path.size)
   }
 
-  def rightOrShift(pathPos: Int, pos: Int) = {
-    val path = dataSet.paths(pathPos)
-    val index = path.size - 1 - pos
-
-    if (index < path.size) Right(path(index)) else Left(path.size)
-  }
+  def rightOrShift(pathPos: Int) = Right(dataSet.paths(pathPos).last)
 
   def extension(pathPos: Int) = (pathPos, Nil)
 }
@@ -61,17 +56,12 @@ class LeftExtendedExtensionSet(override val parent: ExtensionSet, override val e
       parent.leftOrShift(parentPos, pos - extension.size)
   }
 
-  def rightOrShift(pathPos: Int, pos: Int) = {
+  def rightOrShift(pathPos: Int) = {
     val (parentPos, extension) = extensionsList(pathPos)
 
-    parent.rightOrShift(parentPos, pos) match {
+    parent.rightOrShift(parentPos) match {
       case Left(shift) =>
-        val index = pos - shift
-
-        if (index < extension.size)
-          Right(extension(extension.size - 1 - index))
-        else
-          Left(shift + extension.size)
+        Right(extension(extension.size - 1 + shift))
       case right =>
         right
     }
@@ -102,13 +92,9 @@ class RightExtendedExtensionSet(override val parent: ExtensionSet, override val 
     }
   }
 
-  def rightOrShift(pathPos: Int, pos: Int) = {
+  def rightOrShift(pathPos: Int) = {
     val (parentPos, extension) = extensionsList(pathPos)
-
-    if (pos < extension.size)
-      Right(extension(extension.size - 1 - pos))
-    else
-      parent.rightOrShift(parentPos, pos - extension.size)
+    Right(extension.last)
   }
 
   def extension(pathPos: Int) = {

@@ -11,9 +11,9 @@ trait WordNetStore {
 
   def fringe(relation: List[(Relation, String)], distinct: Boolean = true): DataSet
 
-  def extend(extensionSet: ExtensionSet, relation: Relation, from: Int, direction: Direction, through: String, to: List[String]): ExtendedExtensionSet
+  def extend(extensionSet: ExtensionSet, relation: Relation, direction: Direction, through: String, to: List[String]): ExtendedExtensionSet
 
-  def extend(extensionSet: ExtensionSet, from: Int, direction: Direction, through: (String, Option[NodeType]), to: List[(String, Option[NodeType])]): ExtendedExtensionSet
+  def extend(extensionSet: ExtensionSet, direction: Direction, through: (String, Option[NodeType]), to: List[(String, Option[NodeType])]): ExtendedExtensionSet
 
   def getSenses(synset: Synset): List[Sense]
 
