@@ -113,6 +113,135 @@ object SortFunction extends DataSetFunction("sort") with AcceptsAll with Returns
   def cost(args: AlgebraOp, wordNet: WordNetSchema) = args.maxCount(wordNet).map(cost => cost*cost)
 }
 
+object MinFunction extends DataSetFunction("min") with AcceptsAll with ReturnsSingleTuple
+with PreservesTypes with PreservesTupleSizes with PreservesBindingsPattern {
+
+  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings) = {
+    if (!dataSet.isEmpty) {
+      val sorted = dataSet.toBoundPaths.sortBy(x => x._1)(WQueryListOrdering)
+      val minValue = sorted.head._1
+
+      var count = 0
+
+      while (count < sorted.size && sorted(count)._1 == minValue) {
+        count += 1
+      }
+
+      DataSet.fromBoundPaths(sorted.take(count))
+    } else {
+      dataSet
+    }
+  }
+
+  def cost(args: AlgebraOp, wordNet: WordNetSchema) = args.maxCount(wordNet).map(cost => cost*cost)
+}
+
+object MaxFunction extends DataSetFunction("max") with AcceptsAll with ReturnsSingleTuple
+with PreservesTypes with PreservesTupleSizes with PreservesBindingsPattern {
+
+  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings) = {
+    if (!dataSet.isEmpty) {
+      val sorted = dataSet.toBoundPaths.sortBy(x => x._1)(WQueryListOrdering)
+      val maxValue = sorted.last._1
+
+      var count = sorted.size - 2
+
+      while (count >= 0 && sorted(count)._1 == maxValue) {
+        count -= 1
+      }
+
+      DataSet.fromBoundPaths(sorted.drop(count + 1))
+    } else {
+      dataSet
+    }
+  }
+
+  def cost(args: AlgebraOp, wordNet: WordNetSchema) = args.maxCount(wordNet).map(cost => cost*cost)
+}
+
+abstract class ByFunction(name: String) extends DataSetFunction(name) with ReturnsDataSetOfSimilarSize {
+  def accepts(args: AlgebraOp) = args.minTupleSize > 0 && args.rightType(0) == Set(IntegerType)
+
+  def leftType(args: AlgebraOp, pos: Int) = {
+    if (args.maxTupleSize.some(pos < _ - 1 ).none(true))
+      args.leftType(pos)
+    else
+      Set.empty
+  }
+
+  def rightType(args: AlgebraOp, pos: Int) = {
+    if (args.maxTupleSize.some(pos < _ - 1 ).none(true))
+      args.rightType(pos)
+    else
+      Set.empty
+  }
+
+  def minTupleSize(args: AlgebraOp) = args.minTupleSize - 1
+
+  def maxTupleSize(args: AlgebraOp) = args.maxTupleSize.map(_ - 1)
+
+  def bindingsPattern(args: AlgebraOp) = args.bindingsPattern
+}
+
+object SortByFunction extends ByFunction("sortby") with ReturnsDataSetOfSimilarSize {
+  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings) = {
+    if (!dataSet.isEmpty) {
+      val argNum = dataSet.paths.head.last.asInstanceOf[Int] - 1
+      val sorted = dataSet.toBoundPaths.sortBy(x => x._1(argNum))(WQueryOrdering)
+
+      DataSet.fromBoundPaths(sorted.map{ case (x, y, z) => (x.dropRight(1), y, z) })
+    } else {
+      dataSet
+    }
+  }
+
+  def cost(args: AlgebraOp, wordNet: WordNetSchema) = args.maxCount(wordNet).map(cost => cost*cost)
+}
+
+object MinByFunction extends ByFunction("minby") with ReturnsDataSetOfSimilarSize {
+  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings) = {
+    if (!dataSet.isEmpty) {
+      val argNum = dataSet.paths.head.last.asInstanceOf[Int] - 1
+      val sorted = dataSet.toBoundPaths.sortBy(x => x._1(argNum))(WQueryOrdering)
+      val minValue = sorted.head._1(argNum)
+
+      var count = 0
+
+      while (count < sorted.size && sorted(count)._1(argNum) == minValue) {
+        count += 1
+      }
+
+      DataSet.fromBoundPaths(sorted.take(count).map{ case (x, y, z) => (x.dropRight(1), y, z) })
+    } else {
+      dataSet
+    }
+  }
+
+  def cost(args: AlgebraOp, wordNet: WordNetSchema) = args.maxCount(wordNet).map(cost => cost*cost)
+}
+
+object MaxByFunction extends ByFunction("maxby") with ReturnsDataSetOfSimilarSize {
+  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings) = {
+    if (!dataSet.isEmpty) {
+      val argNum = dataSet.paths.head.last.asInstanceOf[Int] - 1
+      val sorted = dataSet.toBoundPaths.sortBy(x => x._1(argNum))(WQueryOrdering)
+      val maxValue = sorted.last._1(argNum)
+
+      var count = sorted.size - 2
+
+      while (count >= 0 && sorted(count)._1(argNum) == maxValue) {
+        count -= 1
+      }
+
+      DataSet.fromBoundPaths(sorted.drop(count + 1).map{ case (x, y, z) => (x.dropRight(1), y, z) })
+    } else {
+      dataSet
+    }
+  }
+
+  def cost(args: AlgebraOp, wordNet: WordNetSchema) = args.maxCount(wordNet).map(cost => cost*cost)
+}
+
 object CountFunction extends DataSetFunction("count") with AcceptsAll with ReturnsSingleValue
  with ClearsBindingsPattern with CountProportionalCost {
 
@@ -187,28 +316,6 @@ object AvgFunction extends Function("avg") with AcceptsNumbers with ReturnsSingl
   }
 
   def returnType(args: AlgebraOp) = Set(FloatType)
-}
-
-object MinFunction extends DataSetFunction("min") with AcceptsAll with ReturnsSingleTuple
- with PreservesTypes with PreservesTupleSizes with PreservesBindingsPattern {
-
-  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings) = {
-   SortFunction.evaluate(dataSet, wordNet, bindings)
-     .paths.headOption.map(x => DataSet(List(x))).orZero
-  }
-
-  def cost(args: AlgebraOp, wordNet: WordNetSchema) = SortFunction.cost(args, wordNet)
-}
-
-object MaxFunction extends DataSetFunction("max") with AcceptsAll with ReturnsSingleTuple
- with PreservesTypes with PreservesTupleSizes with PreservesBindingsPattern {
-
-  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings) = {
-   SortFunction.evaluate(dataSet, wordNet, bindings)
-     .paths.lastOption.map(x => DataSet(List(x))).orZero
-  }
-
-  def cost(args: AlgebraOp, wordNet: WordNetSchema) = SortFunction.cost(args, wordNet)
 }
 
 object ShortestFunction extends DataSetFunction("shortest") with AcceptsAll with ReturnsSingleTuple
@@ -437,13 +544,16 @@ object Functions {
 
   registerFunction(DistinctFunction)
   registerFunction(SortFunction)
+  registerFunction(MinFunction)
+  registerFunction(MaxFunction)
+  registerFunction(SortByFunction)
+  registerFunction(MinByFunction)
+  registerFunction(MaxByFunction)
   registerFunction(CountFunction)
   registerFunction(LastFunction)
   registerFunction(IntegerSumFunction)
   registerFunction(FloatSumFunction)
   registerFunction(AvgFunction)
-  registerFunction(MinFunction)
-  registerFunction(MaxFunction)
   registerFunction(ShortestFunction)
   registerFunction(LongestFunction)
   registerFunction(SizeFunction)

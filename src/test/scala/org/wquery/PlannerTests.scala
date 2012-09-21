@@ -194,11 +194,11 @@ class PlannerTests extends WQueryTestSuite {
   }
 
   @Test def backwardPlanWithTraverseThroughFilter() {
-    val plans = plansFor("{}.hypernym[max(last(senses.sensenum)) > 2].hypernym.{car}")
+    val plans = plansFor("{}.hypernym[distinct(max(last(senses.sensenum))) > 2].hypernym.{car}")
     val plan = PlanEvaluator.chooseBest(wquery.wordNet.store.schema, plans)
     val result = plan.evaluate(wquery.wordNet, Bindings())
 
-    plan.toString should equal ("SelectOp(BindOp(ExtendOp(SelectOp(BindOp(ExtendOp(FetchOp(synsets,List((source,List())),List(source)),source&synset^hypernym^destination&synset,Forward,novars),$__#),BinaryCondition(>,FunctionOp(max,FunctionOp(last,ExtendOp(ExtendOp(StepVariableRefOp($__#,Set(synset)),source&synset^senses^destination&sense,Forward,novars),source&sense^sensenum^destination&integer,Forward,novars))),ConstantOp(List(List(2))))),source&synset^hypernym^destination&synset,Forward,novars),$__#),BinaryCondition(in,StepVariableRefOp($__#,Set(synset)),ProjectOp(ExtendOp(FetchOp(words,List((source,List(car))),List(source)),RelationUnionPattern(List(source&string^synsets^destination&synset)),Forward,$__p),StepVariableRefOp($__p,Set(synset)))))")
+    plan.toString should equal ("SelectOp(BindOp(ExtendOp(SelectOp(BindOp(ExtendOp(FetchOp(synsets,List((source,List())),List(source)),source&synset^hypernym^destination&synset,Forward,novars),$__#),BinaryCondition(>,FunctionOp(distinct,FunctionOp(max,FunctionOp(last,ExtendOp(ExtendOp(StepVariableRefOp($__#,Set(synset)),source&synset^senses^destination&sense,Forward,novars),source&sense^sensenum^destination&integer,Forward,novars)))),ConstantOp(List(List(2))))),source&synset^hypernym^destination&synset,Forward,novars),$__#),BinaryCondition(in,StepVariableRefOp($__#,Set(synset)),ProjectOp(ExtendOp(FetchOp(words,List((source,List(car))),List(source)),RelationUnionPattern(List(source&string^synsets^destination&synset)),Forward,$__p),StepVariableRefOp($__p,Set(synset)))))")
     emitted(result) should equal ("{ minicab:1:n } hypernym { cab:3:n hack:5:n taxi:1:n taxicab:1:n } hypernym { car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n }\n{ gypsy cab:1:n } hypernym { cab:3:n hack:5:n taxi:1:n taxicab:1:n } hypernym { car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n }\n{ brougham:2:n } hypernym { sedan:1:n saloon:3:n } hypernym { car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n }\n{ shooting brake:1:n } hypernym { beach wagon:1:n station wagon:1:n wagon:5:n estate car:1:n beach waggon:1:n station waggon:1:n waggon:2:n } hypernym { car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n }\n")
   }
 
