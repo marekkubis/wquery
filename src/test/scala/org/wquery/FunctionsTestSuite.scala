@@ -90,4 +90,10 @@ class FunctionsTestSuite extends WQueryTestSuite {
 
   @Test def testFlatten() = result of ("flatten(1,2,3 union 4,5 union 6,7)") should equal ("1\n2\n3\n4\n5\n6\n7\n")
 
+  @Test def testArcName() = result of ("arcname(\\hypernym)") should equal ("hypernym\n")
+
+  @Test def testSourceName() = result of ("srcname(\\hypernym)") should equal ("source\n")
+
+  @Test def testDestinationName() = result of ("dstname(\\hypernym)") should equal ("destination\n")
+
 }

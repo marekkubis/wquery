@@ -597,6 +597,39 @@ with ClearsBindingsPattern with CountProportionalCost {
   def returnType(args: AlgebraOp) = Set(FloatType)
 }
 
+object ArcNameFunction extends DataSetFunction("arcname") with AcceptsTypes with ReturnsValueSetOfSimilarSize
+with ClearsBindingsPattern with CountProportionalCost {
+  def argumentTypes = List(Set(ArcType))
+
+  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings) = {
+    DataSet(dataSet.paths.map(tuple => List(tuple.last.asInstanceOf[Arc].relation.name)))
+  }
+
+  def returnType(args: AlgebraOp) = Set(StringType)
+}
+
+object SourceNameFunction extends DataSetFunction("srcname") with AcceptsTypes with ReturnsValueSetOfSimilarSize
+with ClearsBindingsPattern with CountProportionalCost {
+  def argumentTypes = List(Set(ArcType))
+
+  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings) = {
+    DataSet(dataSet.paths.map(tuple => List(tuple.last.asInstanceOf[Arc].from)))
+  }
+
+  def returnType(args: AlgebraOp) = Set(StringType)
+}
+
+object DestinationNameFunction extends DataSetFunction("dstname") with AcceptsTypes with ReturnsValueSetOfSimilarSize
+with ClearsBindingsPattern with CountProportionalCost {
+  def argumentTypes = List(Set(ArcType))
+
+  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings) = {
+    DataSet(dataSet.paths.map(tuple => List(tuple.last.asInstanceOf[Arc].to)))
+  }
+
+  def returnType(args: AlgebraOp) = Set(StringType)
+}
+
 abstract class JavaMethod(override val name: String, method: Method) extends Function(name)
  with ReturnsValueSetOfSimilarSize with ClearsBindingsPattern with CountProportionalCost {
   def evaluate(args: AlgebraOp, wordNet: WordNet, bindings: Bindings) = {
@@ -654,6 +687,9 @@ object Functions {
   registerFunction(RangeFunction)
   registerFunction(IntFunction)
   registerFunction(FloatFunction)
+  registerFunction(ArcNameFunction)
+  registerFunction(SourceNameFunction)
+  registerFunction(DestinationNameFunction)
 
   registerFunction(new JavaMethod("abs", classOf[Math].getMethod("abs", IntegerType.associatedClass)) with AcceptsTypes {
     def argumentTypes = List(Set(IntegerType))
