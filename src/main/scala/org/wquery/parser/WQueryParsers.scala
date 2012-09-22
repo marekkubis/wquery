@@ -58,7 +58,7 @@ trait WQueryParsers extends RegexParsers {
   def split = "split" ~> expr ~ rep(with_clause) ^^ { case expr~withs => SplitExpr(expr, withs) }
 
   def assignment = (
-     var_decls ~ ":=" ~ multipath_expr ^^ { case vdecls~_~mexpr => VariableAssignmentExpr(vdecls, mexpr) }
+     set_var_decl ~ ":=" ~ multipath_expr ^^ { case vdecl~_~mexpr => VariableAssignmentExpr(vdecl, mexpr) }
      | "wordnet" ~> notQuotedString ~ assignment_op ~ multipath_expr ~ rep(with_clause) ^^ { case prop~op~rexpr~withs => WordNetUpdateExpr(prop, op, rexpr, withs) }
      | notQuotedString ~ ":=" ~ relation_union_expr  ^^ { case name~_~rexpr => RelationAssignmentExpr(name, rexpr) }
      | multipath_expr ~ arc_expr ~ assignment_op ~ multipath_expr ^^ { case lexpr~prop~op~rexpr => UpdateExpr(lexpr, prop, op, rexpr) }
@@ -181,7 +181,7 @@ trait WQueryParsers extends RegexParsers {
 
   def node_trans = "." ~> non_rel_expr_generator ^^ { NodeTransformationExpr(_) }
 
-  def bind_trans = var_decls ^^ { BindTransformationExpr(_) }
+  def bind_trans = rep1(step_var_decl|path_var_decl) ^^ { vars => BindTransformationExpr(VariableTemplate(vars)) }
 
   // generators
   def generator = (
@@ -247,15 +247,15 @@ trait WQueryParsers extends RegexParsers {
   def arc_generator = "\\" ~> arc_expr ^^ { ArcByArcExprReq(_) }
 
   // variables
-  def var_decls = rep1(var_decl) ^^ { VariableTemplate(_) }
-
   def var_decl = (
     step_var_decl
     | path_var_decl
+    | set_var_decl
   )
 
   def step_var_decl = "$" ~> notQuotedString ^^ { StepVariable(_) }
-  def path_var_decl = "@" ~> notQuotedString ^^ { PathVariable(_) }
+  def path_var_decl = "@" ~> notQuotedString ^^ { TupleVariable(_) }
+  def set_var_decl = "%" ~> notQuotedString ^^ { SetVariable(_) }
 
   // literals
   def alphaLit = (

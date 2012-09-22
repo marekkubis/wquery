@@ -3,8 +3,10 @@ package org.wquery.engine.operations
 import scala.collection.mutable.Map
 import scalaz._
 import Scalaz._
+import org.wquery.model.DataSet
 
 class Bindings(parent: Option[Bindings], updatesParent: Boolean) {
+  val setVariables = Map[String, DataSet]()
   val pathVariables = Map[String, List[Any]]()
   val stepVariables = Map[String, Any]()
 
@@ -23,6 +25,16 @@ class Bindings(parent: Option[Bindings], updatesParent: Boolean) {
       pathVariables(name) = value
     }
   }
+
+  def bindSetVariable(name: String, value: DataSet) {
+    if (updatesParent && parent.some(_.lookupSetVariable(name).isDefined).none(false)) {
+      parent.get.bindSetVariable(name, value)
+    } else {
+      setVariables(name) = value
+    }
+  }
+
+  def lookupSetVariable(name: String): Option[DataSet] = setVariables.get(name).orElse(parent.flatMap(_.lookupSetVariable(name)))
 
   def lookupPathVariable(name: String): Option[List[Any]] = pathVariables.get(name).orElse(parent.flatMap(_.lookupPathVariable(name)))
 

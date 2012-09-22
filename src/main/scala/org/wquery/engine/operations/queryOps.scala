@@ -128,24 +128,11 @@ case class BlockOp(ops: List[AlgebraOp]) extends QueryOp {
   def cost(wordNet: WordNetSchema) = ops.map(_.cost(wordNet)).sequence.map(_.sum)*some(2)
 }
 
-case class AssignmentOp(variables: VariableTemplate, op: AlgebraOp) extends QueryOp {
+case class AssignmentOp(variable: SetVariable, op: AlgebraOp) extends QueryOp {
   def evaluate(wordNet: WordNet, bindings: Bindings) = {
     val result = op.evaluate(wordNet, bindings)
-
-    if (result.containsSingleTuple) { // TODO remove this constraint
-      val tuple = result.paths.head
-      val dataSet = DataSet.fromTuple(tuple).bindVariables(variables)
-
-      dataSet.pathVars.keys.foreach { pathVar =>
-        val varPos = dataSet.pathVars(pathVar)(0)
-        bindings.bindPathVariable(pathVar, tuple.slice(varPos._1, varPos._2))
-      }
-
-      dataSet.stepVars.keys.foreach(stepVar => bindings.bindStepVariable(stepVar, tuple(dataSet.stepVars(stepVar)(0))))
-      DataSet.empty
-    } else {
-      throw new WQueryEvaluationException("A multipath expression in an assignment should contain exactly one tuple")
-    }
+    bindings.bindSetVariable(variable.name, result)
+    DataSet.empty
   }
 
   def leftType(pos: Int) = Set.empty
@@ -162,7 +149,7 @@ case class AssignmentOp(variables: VariableTemplate, op: AlgebraOp) extends Quer
 
   def maxCount(wordNet: WordNetSchema) = some(0)
 
-  def cost(wordNet: WordNetSchema) = variables.variablesMaxSize(op.maxTupleSize).map(BigInt(_))
+  def cost(wordNet: WordNetSchema) = op.cost(wordNet)
 }
 
 case class WhileDoOp(conditionOp: AlgebraOp, iteratedOp: AlgebraOp) extends QueryOp {
@@ -597,7 +584,7 @@ case class SelectOp(op: AlgebraOp, condition: Condition) extends QueryOp {
   def evaluate(wordNet: WordNet, bindings: Bindings) = {
     val dataSet = op.evaluate(wordNet, bindings)
     val pathVarNames = dataSet.pathVars.keySet
-    val filterPathVarNames = pathVarNames.filter(pathVarName => condition.referencedVariables.contains(PathVariable(pathVarName)))
+    val filterPathVarNames = pathVarNames.filter(pathVarName => condition.referencedVariables.contains(TupleVariable(pathVarName)))
     val stepVarNames = dataSet.stepVars.keySet
     val filterStepVarNames = stepVarNames.filter(stepVarName => condition.referencedVariables.contains(StepVariable(stepVarName)))
     val pathBuffer = DataSetBuffers.createPathBuffer
@@ -650,7 +637,7 @@ case class ProjectOp(op: AlgebraOp, projectOp: AlgebraOp) extends QueryOp {
     val dataSet = op.evaluate(wordNet, bindings)
     val buffer = new DataSetBuffer
     val pathVarNames = dataSet.pathVars.keys
-    val filterPathVarNames = pathVarNames.filter(pathVarName => projectOp.referencedVariables.contains(PathVariable(pathVarName)))
+    val filterPathVarNames = pathVarNames.filter(pathVarName => projectOp.referencedVariables.contains(TupleVariable(pathVarName)))
     val stepVarNames = dataSet.stepVars.keys
     val filterStepVarNames = stepVarNames.filter(stepVarName => projectOp.referencedVariables.contains(StepVariable(stepVarName)))
     val binds = Bindings(bindings, false)
@@ -910,7 +897,27 @@ object ConstantOp {
 /*
  * Reference operations
  */
-case class PathVariableRefOp(variable: PathVariable, types: (AlgebraOp, Int, Int)) extends QueryOp {
+case class SetVariableRefOp(variable: SetVariable, op: AlgebraOp) extends QueryOp {
+  def evaluate(wordNet: WordNet, bindings: Bindings) = bindings.lookupSetVariable(variable.name).get
+
+  def leftType(pos: Int) = op.leftType(pos)
+
+  def rightType(pos: Int) = op.rightType(pos)
+
+  val minTupleSize = op.minTupleSize
+
+  val maxTupleSize = op.maxTupleSize
+
+  def bindingsPattern = BindingsPattern()
+
+  val referencedVariables = Set[Variable](variable)
+
+  def maxCount(wordNet: WordNetSchema) = op.maxCount(wordNet)
+
+  def cost(wordNet: WordNetSchema) = maxSize(wordNet)
+}
+
+case class PathVariableRefOp(variable: TupleVariable, types: (AlgebraOp, Int, Int)) extends QueryOp {
   def evaluate(wordNet: WordNet, bindings: Bindings) = bindings.lookupPathVariable(variable.name).map(DataSet.fromTuple(_)).get
 
   def leftType(pos: Int) = types._1.leftType(pos + types._2)

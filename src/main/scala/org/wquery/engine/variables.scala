@@ -6,12 +6,18 @@ sealed abstract class Variable(val name: String) {
   val isUnnamed = name == "_"
 }
 
-case class StepVariable(override val name: String) extends Variable(name) {
+sealed abstract class PathVariable(override val name: String) extends Variable(name)
+
+case class StepVariable(override val name: String) extends PathVariable(name) {
   override def toString = "$" + name
 }
 
-case class PathVariable(override val name: String) extends Variable(name) {
+case class TupleVariable(override val name: String) extends PathVariable(name) {
   override def toString = "@" + name
+}
+
+case class SetVariable(override val name: String) extends Variable(name) {
+  override def toString = "%" + name
 }
 
 object Variable {
@@ -23,6 +29,6 @@ object StepVariable {
   val Unnamed = StepVariable("_")
 }
 
-object PathVariable {
-  val Unnamed = PathVariable("_")
+object TupleVariable {
+  val Unnamed = TupleVariable("_")
 }

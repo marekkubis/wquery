@@ -2,7 +2,7 @@ package org.wquery.engine.planner
 
 import org.wquery.engine.operations._
 import org.wquery.model.{Backward, Forward}
-import org.wquery.engine.{PathVariable, StepVariable, VariableTemplate}
+import org.wquery.engine.{TupleVariable, StepVariable, VariableTemplate}
 import scalaz._
 import Scalaz._
 
@@ -21,7 +21,7 @@ class RootLink(generator: AlgebraOp, override val variables: VariableTemplate) e
   def forward(op: AlgebraOp) = generator
 
   def backward(op: AlgebraOp) = {
-    val template = VariableTemplate(List(StepVariable("__f"), PathVariable.Unnamed))
+    val template = VariableTemplate(List(StepVariable("__f"), TupleVariable.Unnamed))
     val condition = BinaryCondition("in", StepVariableRefOp(StepVariable("__f"), generator.leftType(0)), generator)
 
     ConditionApplier.applyIfNotRedundant(BindOp(op, template), condition)

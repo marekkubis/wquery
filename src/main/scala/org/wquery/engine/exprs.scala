@@ -80,12 +80,11 @@ case class SplitExpr(expr: EvaluableExpr, withs: List[PropertyAssignmentExpr]) e
   }
 }
 
-case class VariableAssignmentExpr(variables: VariableTemplate, expr: EvaluableExpr) extends EvaluableExpr {
+case class VariableAssignmentExpr(variable: SetVariable, expr: EvaluableExpr) extends EvaluableExpr {
   def evaluationPlan(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context) = {
     val op = expr.evaluationPlan(wordNet, bindings, context)
-
-    bindings.bindVariablesTypes(variables, op)
-    AssignmentOp(variables, op)
+    bindings.bindSetVariableType(variable.name, op)
+    AssignmentOp(variable, op)
   }
 }
 
@@ -701,12 +700,16 @@ case class BooleanByFilterReq(conditionalExpr: ConditionalExpr) extends Evaluabl
 
 case class ContextByVariableReq(variable: Variable) extends EvaluableExpr {
   def evaluationPlan(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context) = variable match {
-    case variable @ PathVariable(name) =>
+    case variable @ SetVariable(name) =>
+      bindings.lookupSetVariableType(name).map(SetVariableRefOp(variable, _))
+        .getOrElse(throw new WQueryStaticCheckException("A reference to unknown variable " + variable + " found"))
+    case variable @ TupleVariable(name) =>
       bindings.lookupPathVariableType(name).map(PathVariableRefOp(variable, _))
         .getOrElse(throw new WQueryStaticCheckException("A reference to unknown variable " + variable + " found"))
     case variable @ StepVariable(name) =>
       bindings.lookupStepVariableType(name).map(StepVariableRefOp(variable, _))
         .getOrElse(throw new WQueryStaticCheckException("A reference to unknown variable " + variable + " found"))
+
   }
 }
 

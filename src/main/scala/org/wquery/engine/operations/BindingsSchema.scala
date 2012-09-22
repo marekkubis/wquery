@@ -19,6 +19,14 @@ class BindingsSchema(val parent: Option[BindingsSchema], updatesParent: Boolean)
     }
   }
 
+  override def bindSetVariableType(name: String, op: AlgebraOp) {
+    if (updatesParent && parent.map(_.lookupPathVariableType(name).isDefined).getOrElse(false)) {
+      parent.get.bindSetVariableType(name, op)
+    } else {
+      super.bindSetVariableType(name, op)
+    }
+  }
+
   override def lookupStepVariableType(name: String): Option[Set[DataType]] = {
     super.lookupStepVariableType(name)
       .orElse(parent.flatMap(_.lookupStepVariableType(name)))
@@ -27,6 +35,11 @@ class BindingsSchema(val parent: Option[BindingsSchema], updatesParent: Boolean)
   override def lookupPathVariableType(name: String): Option[(AlgebraOp, Int, Int)] = {
     super.lookupPathVariableType(name)
       .orElse(parent.flatMap(_.lookupPathVariableType(name)))
+  }
+
+  override def lookupSetVariableType(name: String): Option[AlgebraOp] = {
+    super.lookupSetVariableType(name)
+      .orElse(parent.flatMap(_.lookupSetVariableType(name)))
   }
 
   override def union(pattern: BindingsPattern) = {

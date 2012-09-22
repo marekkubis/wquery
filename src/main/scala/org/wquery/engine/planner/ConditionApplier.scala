@@ -4,7 +4,7 @@ import collection.mutable.{Map, Set}
 import scalaz._
 import Scalaz._
 import org.wquery.engine.operations._
-import org.wquery.engine.{PathVariable, StepVariable, VariableTemplate, Variable}
+import org.wquery.engine.{TupleVariable, StepVariable, VariableTemplate, Variable}
 import org.wquery.model.{SenseType, POSType, SynsetType, StringType}
 
 class ConditionApplier(links: List[Link], conditions: Map[Option[Link], List[Condition]], bindings: BindingsSchema) {
@@ -14,7 +14,7 @@ class ConditionApplier(links: List[Link], conditions: Map[Option[Link], List[Con
 
   def prependContextIfReferenced(link: Link, algebraOp: AlgebraOp) = {
     if (hasContextDependentConditions(link))
-      BindOp(algebraOp, VariableTemplate(List(StepVariable.ContextVariable, PathVariable.Unnamed)))
+      BindOp(algebraOp, VariableTemplate(List(StepVariable.ContextVariable, TupleVariable.Unnamed)))
     else
       algebraOp
   }
