@@ -48,7 +48,7 @@ class GeneratorsTestSuite extends WQueryTestSuite {
 
   @Test def test0Dot5EMinus2Double() = result of ("0.5e-2") should startWith ("0.005")
     
-  @Test def test3To8Sequence() = result of ("3..8") should equal ("3\n4\n5\n6\n7\n8\n")
+  @Test def testConstantSequence() = result of ("3..8") should equal ("3\n4\n5\n6\n7\n8\n")
 
   @Test def testFilter() = result of ("[1 = 1]") should equal ("true\n")    
     

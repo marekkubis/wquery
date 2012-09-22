@@ -597,7 +597,7 @@ with ClearsBindingsPattern with CountProportionalCost {
   def returnType(args: AlgebraOp) = Set(FloatType)
 }
 
-object ArcNameFunction extends DataSetFunction("arcname") with AcceptsTypes with ReturnsValueSetOfSimilarSize
+object ArcNameFunction extends DataSetFunction("arc_name") with AcceptsTypes with ReturnsValueSetOfSimilarSize
 with ClearsBindingsPattern with CountProportionalCost {
   def argumentTypes = List(Set(ArcType))
 
@@ -608,7 +608,7 @@ with ClearsBindingsPattern with CountProportionalCost {
   def returnType(args: AlgebraOp) = Set(StringType)
 }
 
-object SourceNameFunction extends DataSetFunction("srcname") with AcceptsTypes with ReturnsValueSetOfSimilarSize
+object ArcSourceFunction extends DataSetFunction("arc_src") with AcceptsTypes with ReturnsValueSetOfSimilarSize
 with ClearsBindingsPattern with CountProportionalCost {
   def argumentTypes = List(Set(ArcType))
 
@@ -619,7 +619,7 @@ with ClearsBindingsPattern with CountProportionalCost {
   def returnType(args: AlgebraOp) = Set(StringType)
 }
 
-object DestinationNameFunction extends DataSetFunction("dstname") with AcceptsTypes with ReturnsValueSetOfSimilarSize
+object ArcDestinationFunction extends DataSetFunction("arc_dst") with AcceptsTypes with ReturnsValueSetOfSimilarSize
 with ClearsBindingsPattern with CountProportionalCost {
   def argumentTypes = List(Set(ArcType))
 
@@ -688,8 +688,8 @@ object Functions {
   registerFunction(IntFunction)
   registerFunction(FloatFunction)
   registerFunction(ArcNameFunction)
-  registerFunction(SourceNameFunction)
-  registerFunction(DestinationNameFunction)
+  registerFunction(ArcSourceFunction)
+  registerFunction(ArcDestinationFunction)
 
   registerFunction(new JavaMethod("abs", classOf[Math].getMethod("abs", IntegerType.associatedClass)) with AcceptsTypes {
     def argumentTypes = List(Set(IntegerType))
