@@ -83,23 +83,11 @@ case class BinaryCondition(op: String, leftOp: AlgebraOp, rightOp: AlgebraOp) ex
       case "pin" =>
         leftGroup.forall{ case (left, leftValues) => rightGroup.get(left).map(rightValues => leftValues.size <= rightValues.size).getOrElse(false) } && leftResult.size < rightResult.size
       case "=~" =>
-        if (rightResult.size == 1) {
-          // element context
-          if (DataType.fromValue(rightResult.head) == StringType) {
-            val regex = rightResult.head.asInstanceOf[String].r
+        val regexps = rightResult.collect{ case pattern: String => pattern.r }
 
-            leftGroup.forall {
-              case (elem: String, _) =>
-                regex.findFirstIn(elem).isDefined
-            }
-          } else {
-            throw new WQueryEvaluationException("The rightSet side of '" + op +
-              "' should return exactly one character string value")
-          }
-        } else if (rightResult.isEmpty) {
-          throw new WQueryEvaluationException("The rightSet side of '" + op + "' returns no values")
-        } else { // rightResult.pathCount > 0
-          throw new WQueryEvaluationException("The rightSet side of '" + op + "' returns more than one values")
+        leftGroup.forall {
+          case (elem: String, _) =>
+            regexps.forall(_.findFirstIn(elem).isDefined)
         }
       case _ =>
         if (leftResult.size == 1 && rightResult.size == 1) {

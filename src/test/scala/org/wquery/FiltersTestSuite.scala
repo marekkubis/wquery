@@ -64,8 +64,10 @@ class FiltersTestSuite extends WQueryTestSuite {
     
   @Test def testRegexMatchesTrue() = result of ("[person.senses.word =~ `^per`]") should equal ("true\n")
     
-  @Test def testRegexMatchesFalse() = result of ("[{person}.words =~ `^per`]") should equal ("false\n")    
-    
+  @Test def testRegexMatchesFalse() = result of ("[{person}.words =~ `^per`]") should equal ("false\n")
+
+  @Test def testRegexMatchesMultipleTrue() = result of ("[person.senses.word =~ (`^per` union `son$`)]") should equal ("true\n")
+
   // <= 
     
   // >=
