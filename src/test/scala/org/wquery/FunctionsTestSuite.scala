@@ -82,4 +82,6 @@ class FunctionsTestSuite extends WQueryTestSuite {
 
   @Test def testMaxBy() = result of ("maxby((10..15,2 union 23..25,1 union 1..9,3),2)") should equal ("1 3\n2 3\n3 3\n4 3\n5 3\n6 3\n7 3\n8 3\n9 3\n")
 
+  @Test def testProd() = result of ("prod(1..3,3)") should equal ("1 1 1\n1 1 2\n1 1 3\n1 2 3\n1 3 3\n2 3 3\n3 3 3\n")
+
 }

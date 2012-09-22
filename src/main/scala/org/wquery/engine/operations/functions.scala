@@ -93,8 +93,60 @@ trait PreservesTupleSizes {
   def maxTupleSize(args: AlgebraOp) = args.maxTupleSize
 }
 
+object ProdFunction extends DataSetFunction("prod") with AcceptsAll with ReturnsDataSetOfSimilarSize
+with ClearsBindingsPattern {
+
+  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings) = {
+    if (!dataSet.isEmpty) {
+      val argNum = dataSet.paths.head.last.asInstanceOf[Int]
+      val counters = Array.fill(argNum)(0)
+      val lastIndex = dataSet.pathCount - 1
+      val paths = dataSet.paths.map(_.init)
+      val pathBuffer = DataSetBuffers.createPathBuffer
+      var stop = false
+
+      do {
+        val tupleBuffer = new ListBuffer[Any]
+
+        for (i <- 0 until argNum) {
+          tupleBuffer.appendAll(paths(counters(i)))
+        }
+
+        pathBuffer.append(tupleBuffer.toList)
+
+        val incIndex = counters.lastIndexWhere(_ < lastIndex)
+
+        if (incIndex != -1)
+          counters(incIndex) += 1
+        else
+          stop = true
+      } while (!stop)
+
+      DataSet(pathBuffer.toList)
+    } else {
+      dataSet
+    }
+  }
+
+  def leftType(args: AlgebraOp, pos: Int) = {
+    (for (i <- args.minTupleSize to args.maxTupleSize.getOrElse(pos + 1))
+    yield args.leftType(if (i > 0) pos % i else 0)).flatten.toSet
+  }
+
+  def rightType(args: AlgebraOp, pos: Int) = {
+    (for (i <- args.minTupleSize to args.maxTupleSize.getOrElse(pos + 1))
+    yield args.rightType(if (i > 0) pos % i else 0)).flatten.toSet
+  }
+
+  def minTupleSize(args: AlgebraOp) = args.minTupleSize - 1
+
+  def maxTupleSize(args: AlgebraOp) = None
+
+  def cost(args: AlgebraOp, wordNet: WordNetSchema) = args.maxCount(wordNet).map(cost => cost*cost)
+}
+
 object DistinctFunction extends DataSetFunction("distinct") with AcceptsAll
- with PreservesTypes with PreservesTupleSizes with PreservesBindingsPattern with ReturnsDataSetOfSimilarSize {
+with PreservesTypes with PreservesTupleSizes with PreservesBindingsPattern with ReturnsDataSetOfSimilarSize {
 
   def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings) = {
     dataSet.distinct
@@ -542,6 +594,7 @@ object Functions {
 
   def findFunctionsByName(name: String) = functions.get(name)
 
+  registerFunction(ProdFunction)
   registerFunction(DistinctFunction)
   registerFunction(SortFunction)
   registerFunction(MinFunction)
