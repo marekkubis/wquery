@@ -60,7 +60,9 @@ class FunctionsTestSuite extends WQueryTestSuite {
     
   // string functions
    
-  @Test def testLength() = result of ("string_length(person)") should equal ("6\n")
+  @Test def testStringLength() = result of ("string_length(person)") should equal ("6\n")
+
+  @Test def testStringSplit() = result of ("string_split((`a s d f` union `x y z`),` `)") should equal ("a s d f\nx y z\n")
 
   @Test def testSubstringFrom() = result of ("substring(person, 2)") should equal ("rson\n")    
     

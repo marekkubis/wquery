@@ -436,6 +436,21 @@ object StringLengthFunction extends DataSetFunction("string_length") with Accept
   def returnType(args: AlgebraOp) = Set(IntegerType)
 }
 
+object StringSplitFunction extends DataSetFunction("string_split") with AcceptsTypes with ReturnsValueSetOfSimilarSize
+with ClearsBindingsPattern with CountProportionalCost {
+
+  def argumentTypes = List(Set(StringType), Set(StringType))
+
+  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings) = {
+    DataSet(dataSet.paths.map(tuple => (tuple: @unchecked) match {
+      case List(word: String, delimiter: String) =>
+        word.split(delimiter).toList
+    }))
+  }
+
+  def returnType(args: AlgebraOp) = Set(StringType)
+}
+
 object SubstringFromFunction extends DataSetFunction("substring") with AcceptsTypes with ReturnsValueSetOfSimilarSize
  with ClearsBindingsPattern with CountProportionalCost {
 
@@ -613,6 +628,7 @@ object Functions {
   registerFunction(LengthFunction)
   registerFunction(EmptyFunction)
   registerFunction(StringLengthFunction)
+  registerFunction(StringSplitFunction)
   registerFunction(SubstringFromFunction)
   registerFunction(SubstringFromToFunction)
   registerFunction(ReplaceFunction)
