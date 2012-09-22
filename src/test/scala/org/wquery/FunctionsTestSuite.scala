@@ -86,4 +86,8 @@ class FunctionsTestSuite extends WQueryTestSuite {
 
   @Test def testProd() = result of ("prod(1..3,3)") should equal ("1 1 1\n1 1 2\n1 1 3\n1 2 3\n1 3 3\n2 3 3\n3 3 3\n")
 
+  @Test def testDistinct() = result of ("emit distinct(1..3 union 1..4)") should equal ("1\n2\n3\n4\n")
+
+  @Test def testFlatten() = result of ("flatten(1,2,3 union 4,5 union 6,7)") should equal ("1\n2\n3\n4\n5\n6\n7\n")
+
 }

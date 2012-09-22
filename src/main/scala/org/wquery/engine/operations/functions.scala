@@ -155,6 +155,22 @@ with PreservesTypes with PreservesTupleSizes with PreservesBindingsPattern with 
   def cost(args: AlgebraOp, wordNet: WordNetSchema) = args.maxCount(wordNet).map(cost => cost*cost)
 }
 
+object FlattenFunction extends DataSetFunction("flatten") with AcceptsAll with ReturnsValueSet with ClearsBindingsPattern {
+  def returnType(args: AlgebraOp) = {
+    args.maxTupleSize
+      .some(size => (for (i <- 0 until size) yield args.leftType(i)).flatten.toSet)
+      .none(DataType.all)
+  }
+
+  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings) = {
+    DataSet(dataSet.paths.flatten.map(x => List(x)))
+  }
+
+  def maxCount(args: AlgebraOp, wordNet: WordNetSchema) = (args.maxTupleSize <|*|> args.maxCount(wordNet)).map{ case (l, r) => l * r }
+
+  def cost(args: AlgebraOp, wordNet: WordNetSchema) = args.cost(wordNet)
+}
+
 object SortFunction extends DataSetFunction("sort") with AcceptsAll with ReturnsDataSetOfSimilarSize
  with PreservesTypes with PreservesTupleSizes with PreservesBindingsPattern {
 
@@ -611,6 +627,7 @@ object Functions {
 
   registerFunction(ProdFunction)
   registerFunction(DistinctFunction)
+  registerFunction(FlattenFunction)
   registerFunction(SortFunction)
   registerFunction(MinFunction)
   registerFunction(MaxFunction)
