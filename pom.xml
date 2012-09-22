@@ -61,9 +61,9 @@
 			</snapshots>
 		</repository>
 		<repository>
-			<id>scala-tools.org</id>
+			<id>scala-tools</id>
 			<name>Scala-tools Maven2 Repository</name>
-			<url>http://scala-tools.org/repo-releases</url>
+			<url>https://oss.sonatype.org/content/groups/scala-tools/</url>
 		</repository>
         <repository>
             <id>undercover</id>
@@ -77,12 +77,12 @@
 	</repositories>
 	
 	<pluginRepositories>
-		<pluginRepository>
-			<id>scala-tools.org</id>
-			<name>Scala-tools Maven2 Repository</name>
-			<url>http://scala-tools.org/repo-releases</url>
-		</pluginRepository>
-		<pluginRepository>
+        <pluginRepository>
+            <id>scala-tools</id>
+            <name>Scala-tools Maven2 Repository</name>
+            <url>https://oss.sonatype.org/content/groups/scala-tools/</url>
+        </pluginRepository>
+        <pluginRepository>
             <id>undercover</id>
             <url>http://zact.googlecode.com/svn/maven/repository</url>
 		</pluginRepository>
@@ -170,7 +170,7 @@
 		    <plugin>
 		        <groupId>org.scala-tools</groupId>
 		        <artifactId>maven-scala-plugin</artifactId>
-		        <version>2.15.1</version>
+		        <version>2.15.2</version>
 				<executions>
 					<execution>
 						<goals>
@@ -189,7 +189,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>2.3.2</version>
+				<version>2.5.1</version>
 				<configuration>
 					<source>1.6</source>
 					<target>1.6</target>
@@ -198,7 +198,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>2.7.2</version>
+				<version>2.12.2</version>
 				<configuration>
                     <suiteXmlFiles>
                         <suiteXmlFile>testng.xml</suiteXmlFile>
@@ -214,7 +214,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
-				<version>2.3.1</version>
+				<version>2.4</version>
 				<configuration>
 					<archive>
 						<manifest>
@@ -228,12 +228,12 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
-                <version>2.1.2</version>
+                <version>2.2</version>
             </plugin>
             <plugin>
 			    <groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-assembly-plugin</artifactId>
-				<version>2.2</version>
+				<version>2.3</version>
 				<configuration>
 				    <filters>
                         <filter>src/main/resources/wquery.properties</filter>
@@ -257,7 +257,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-deploy-plugin</artifactId>
-                <version>2.5</version>
+                <version>2.7</version>
                 <configuration>
                     <skip>true</skip>
                 </configuration>
@@ -265,12 +265,12 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-release-plugin</artifactId>
-                <version>2.1</version>
+                <version>2.3.2</version>
             </plugin>
 			<plugin>
 				<groupId>com.agilejava.docbkx</groupId>
 				<artifactId>docbkx-maven-plugin</artifactId>
-				<version>2.0.11</version>
+				<version>2.0.14</version>
 				<configuration>
                     <sourceDirectory>src/site/docbook</sourceDirectory>
                     <targetDirectory>target/site/</targetDirectory>                    
@@ -295,12 +295,12 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-site-plugin</artifactId>
-				<version>3.0-beta-3</version>
+				<version>3.1</version>
 			</plugin>
 			<plugin>
 				<groupId>com.github.github</groupId>
 				<artifactId>downloads-maven-plugin</artifactId>
-				<version>0.3</version>
+				<version>0.6</version>
 				<configuration>
 					<description>${project.name} ${project.version} release</description>
 					<override>true</override>
@@ -320,7 +320,7 @@
 			<plugin>
 				<groupId>com.github.github</groupId>
 				<artifactId>site-maven-plugin</artifactId>
-				<version>0.3</version>
+				<version>0.7</version>
 				<configuration>
 					<message>${project.name} ${project.version} site</message>
 				</configuration>
@@ -340,7 +340,7 @@
             <plugin>
               <groupId>org.apache.maven.plugins</groupId>
               <artifactId>maven-project-info-reports-plugin</artifactId>
-              <version>2.3.1</version>
+              <version>2.5</version>
               <configuration>
                 <dependencyDetailsEnabled>false</dependencyDetailsEnabled>
                 <dependencyLocationsEnabled>false</dependencyLocationsEnabled>
@@ -349,12 +349,12 @@
 			<plugin>
 				<groupId>org.scala-tools</groupId>
 				<artifactId>maven-scala-plugin</artifactId>
-				<version>2.15.1</version>
+				<version>2.15.2</version>
 			</plugin>
             <plugin>
 				<groupId>undercover</groupId>
 				<artifactId>undercover-maven-plugin</artifactId>
-				<version>0.8.3</version>
+				<version>0.8.4</version>
 				<configuration>
 				    <excludes>
                         <exclude>**/*TestSuite</exclude>
