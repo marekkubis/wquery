@@ -64,8 +64,6 @@ class FunctionsTestSuite extends WQueryTestSuite {
 
   @Test def testStringSplit() = result of ("string_split((`a s d f` union `x y z`),` `)") should equal ("a s d f\nx y z\n")
 
-  @Test def testSubstringFrom() = result of ("substring(person, 2)") should equal ("rson\n")    
-    
   @Test def testSubstringFromTo() = result of ("substring(person, 2, 4)") should equal ("rs\n")
 
   @Test def testReplace() = result of ("replace(person, `r..n`, `t`)") should equal ("pet\n")

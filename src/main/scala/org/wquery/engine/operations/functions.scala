@@ -33,14 +33,14 @@ trait AcceptsAll {
 }
 
 trait AcceptsNumbers {
-  def accepts(args: AlgebraOp) = args.minTupleSize == 1 && args.maxTupleSize == Some(1) && args.rightType(0).subsetOf(DataType.numeric)
+  def accepts(args: AlgebraOp) = args.rightType(0).subsetOf(DataType.numeric)
 }
 
 trait AcceptsTypes {
   def argumentTypes: List[Set[DataType]]
 
   def accepts(args: AlgebraOp) = {
-    args.minTupleSize == argumentTypes.size && args.maxTupleSize == Some(argumentTypes.size) &&
+    args.minTupleSize >= argumentTypes.size &&
       argumentTypes.zipWithIndex.forall{ case (dataType, pos) => args.leftType(pos) == dataType }
   }
 }
@@ -339,7 +339,7 @@ object IntegerSumFunction extends DataSetFunction("sum") with AcceptsTypes with 
     var sum: Int = 0
 
     for (tuple <- dataSet.paths) {
-        sum += tuple.head.asInstanceOf[Int]
+        sum += tuple.last.asInstanceOf[Int]
     }
 
     DataSet.fromValue(sum)
@@ -355,10 +355,10 @@ object FloatSumFunction extends DataSetFunction("sum") with AcceptsNumbers with 
     var sum: Double = 0
 
     for (tuple <- dataSet.paths) {
-      (tuple: @unchecked) match {
-        case List(value:Double) =>
+      tuple.last match {
+        case value:Double =>
           sum += value
-        case List(value:Int) =>
+        case value:Int =>
           sum += value
       }
     }
@@ -453,29 +453,14 @@ object StringLengthFunction extends DataSetFunction("string_length") with Accept
 }
 
 object StringSplitFunction extends DataSetFunction("string_split") with AcceptsTypes with ReturnsValueSetOfSimilarSize
-with ClearsBindingsPattern with CountProportionalCost {
+ with ClearsBindingsPattern with CountProportionalCost {
 
   def argumentTypes = List(Set(StringType), Set(StringType))
 
   def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings) = {
-    DataSet(dataSet.paths.map(tuple => (tuple: @unchecked) match {
+    DataSet(dataSet.paths.map(tuple => (tuple.takeRight(2): @unchecked) match {
       case List(word: String, delimiter: String) =>
         word.split(delimiter).toList
-    }))
-  }
-
-  def returnType(args: AlgebraOp) = Set(StringType)
-}
-
-object SubstringFromFunction extends DataSetFunction("substring") with AcceptsTypes with ReturnsValueSetOfSimilarSize
- with ClearsBindingsPattern with CountProportionalCost {
-
-  def argumentTypes = List(Set(StringType), Set(IntegerType))
-
-  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings) = {
-    DataSet(dataSet.paths.map(tuple => (tuple: @unchecked) match {
-      case List(word: String, index: Int) =>
-        List[Any](if (index < word.size) word.substring(index) else "")
     }))
   }
 
@@ -488,7 +473,7 @@ object SubstringFromToFunction extends DataSetFunction("substring") with Accepts
   def argumentTypes = List(Set(StringType), Set(IntegerType), Set(IntegerType))
 
   def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings) = {
-    DataSet(dataSet.paths.map(tuple => (tuple: @unchecked) match {
+    DataSet(dataSet.paths.map(tuple => (tuple.takeRight(3): @unchecked) match {
       case List(word: String, left: Int, right: Int) =>
         List[Any](
           if (left < word.length) {
@@ -511,7 +496,7 @@ object ReplaceFunction extends DataSetFunction("replace") with AcceptsTypes with
   def argumentTypes = List(Set(StringType), Set(StringType), Set(StringType))
 
   def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings) = {
-    DataSet(dataSet.paths.map(tuple => (tuple: @unchecked) match {
+    DataSet(dataSet.paths.map(tuple => (tuple.takeRight(3): @unchecked) match {
       case List(word: String, pattern: String, replacement: String) =>
         List[Any](word.replaceFirst(pattern, replacement))
     }))
@@ -525,8 +510,8 @@ object LowerFunction extends DataSetFunction("lower") with AcceptsTypes with Ret
   def argumentTypes = List(Set(StringType))
 
   def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings) = {
-    DataSet(dataSet.paths.map(tuple => (tuple: @unchecked) match {
-      case List(word: String) =>
+    DataSet(dataSet.paths.map(tuple => tuple.last match {
+      case word: String =>
         List[Any](word.toLowerCase)
     }))
   }
@@ -539,8 +524,8 @@ object UpperFunction extends DataSetFunction("upper") with AcceptsTypes with Ret
   def argumentTypes = List(Set(StringType))
 
   def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings) = {
-    DataSet(dataSet.paths.map(tuple => (tuple: @unchecked) match {
-      case List(word: String) =>
+    DataSet(dataSet.paths.map(tuple => tuple.last match {
+      case word: String =>
         List[Any](word.toUpperCase)
     }))
   }
@@ -553,7 +538,7 @@ object RangeFunction extends DataSetFunction("range") with AcceptsTypes with Ret
   def argumentTypes = List(Set(IntegerType), Set(IntegerType))
 
   def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings) = {
-    DataSet(dataSet.paths.flatMap(tuple => (tuple: @unchecked) match {
+    DataSet(dataSet.paths.flatMap(tuple => (tuple.takeRight(2): @unchecked) match {
       case List(left: Int, right: Int) =>
         (left to right).map(List(_))
     }))
@@ -638,8 +623,10 @@ abstract class JavaMethod(override val name: String, method: Method) extends Fun
     val invocationArgs = new Array[AnyRef](method.getParameterTypes.size)
 
     for (tuple <- argsValues.paths) {
+      val offset = tuple.size - invocationArgs.size
+
       for (i <- 0 until invocationArgs.size)
-        invocationArgs(i) = tuple(i).asInstanceOf[AnyRef]
+        invocationArgs(i) = tuple(offset + i).asInstanceOf[AnyRef]
 
       buffer.append(List(method.invoke(null, invocationArgs: _*)))
     }
@@ -679,7 +666,6 @@ object Functions {
   registerFunction(EmptyFunction)
   registerFunction(StringLengthFunction)
   registerFunction(StringSplitFunction)
-  registerFunction(SubstringFromFunction)
   registerFunction(SubstringFromToFunction)
   registerFunction(ReplaceFunction)
   registerFunction(LowerFunction)
