@@ -3,6 +3,6 @@ import org.wquery.model.WordNet
 
 trait WordNetLoader {
   def canLoad(url:String): Boolean
-  
+
   def load(url:String, wordNet: WordNet)
 }

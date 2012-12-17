@@ -1,3 +1,6 @@
+// scalastyle:off null
+// scalastyle:off multiple.string.literals
+
 package org.wquery.loader
 
 import org.wquery.utils.Logging
@@ -94,7 +97,7 @@ class LmfHandler(wordNet: WordNet) extends DefaultHandler with Logging {
 
   private def createSynsets {
     for ((synsetId, senses) <- sensesBySynsetId) {
-      synsetsById(synsetId) = wordNet.store.addSynset(Some(synsetId), senses.toList, Nil, moveSenses = false)
+      synsetsById(synsetId) = wordNet.store.addSynset(Some(synsetId), senses.toList, moveSenses = false)
     }
     info("Synsets loaded")
   }

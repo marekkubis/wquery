@@ -36,7 +36,9 @@ class ConditionApplier(links: List[Link], conditions: Map[Option[Link], List[Con
 
     for (condition <- linkConditions) {
       if (condition.referencedVariables.forall{ variable =>
-        alreadyBoundVariables.contains(variable) || (bindings.isBound(variable) && !pathVariables.contains(variable)) || variable === StepVariable.ContextVariable
+        alreadyBoundVariables.contains(variable) ||
+          (bindings.isBound(variable) && !pathVariables.contains(variable)) ||
+          variable === StepVariable.ContextVariable
       }) {
         appliedConditions += condition
         op = ConditionApplier.applyIfNotRedundant(op, condition)

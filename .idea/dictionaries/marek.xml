@@ -1,9 +1,12 @@
 <component name="ProjectDictionaryState">
   <dictionary name="marek">
     <words>
+      <w>cyclomatic</w>
       <w>dataset</w>
       <w>multi</w>
       <w>parenthesed</w>
+      <w>scalariform</w>
+      <w>scalastyle</w>
       <w>synset</w>
       <w>synsets</w>
       <w>traversable</w>

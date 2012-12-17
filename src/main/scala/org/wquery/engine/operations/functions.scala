@@ -1,3 +1,5 @@
+// scalastyle:off number.of.types
+
 package org.wquery.engine.operations
 
 import collection.mutable.ListBuffer
@@ -6,10 +8,11 @@ import scalaz._
 import Scalaz._
 import org.wquery.model._
 import org.wquery.utils.BigIntOptionW._
+import org.wquery.engine.Context
 
 abstract class Function(val name: String) {
   def accepts(args: AlgebraOp): Boolean
-  def evaluate(args: AlgebraOp, wordNet: WordNet, bindings: Bindings): DataSet
+  def evaluate(args: AlgebraOp, wordNet: WordNet, bindings: Bindings, context: Context): DataSet
   def leftType(args: AlgebraOp, pos: Int): Set[DataType]
   def rightType(args: AlgebraOp, pos: Int): Set[DataType]
   def minTupleSize(args: AlgebraOp): Int
@@ -21,10 +24,10 @@ abstract class Function(val name: String) {
 }
 
 abstract class DataSetFunction(override val name: String) extends Function(name) {
-  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings): DataSet
+  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings, context: Context): DataSet
 
-  def evaluate(args: AlgebraOp, wordNet: WordNet, bindings: Bindings) = {
-    evaluate(args.evaluate(wordNet, bindings), wordNet, bindings)
+  def evaluate(args: AlgebraOp, wordNet: WordNet, bindings: Bindings, context: Context) = {
+    evaluate(args.evaluate(wordNet, bindings, context), wordNet, bindings, context)
   }
 }
 
@@ -96,7 +99,7 @@ trait PreservesTupleSizes {
 object ProdFunction extends DataSetFunction("prod") with AcceptsAll with ReturnsDataSetOfSimilarSize
 with ClearsBindingsPattern {
 
-  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings) = {
+  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
     if (!dataSet.isEmpty) {
       val argNum = dataSet.paths.head.last.asInstanceOf[Int]
       val counters = Array.fill(argNum)(0)
@@ -148,7 +151,7 @@ with ClearsBindingsPattern {
 object DistinctFunction extends DataSetFunction("distinct") with AcceptsAll
 with PreservesTypes with PreservesTupleSizes with PreservesBindingsPattern with ReturnsDataSetOfSimilarSize {
 
-  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings) = {
+  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
     dataSet.distinct
   }
 
@@ -162,7 +165,7 @@ object FlattenFunction extends DataSetFunction("flatten") with AcceptsAll with R
       .none(DataType.all)
   }
 
-  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings) = {
+  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
     DataSet(dataSet.paths.flatten.map(x => List(x)))
   }
 
@@ -174,7 +177,7 @@ object FlattenFunction extends DataSetFunction("flatten") with AcceptsAll with R
 object SortFunction extends DataSetFunction("sort") with AcceptsAll with ReturnsDataSetOfSimilarSize
  with PreservesTypes with PreservesTupleSizes with PreservesBindingsPattern {
 
-  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings) = {
+  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
     DataSet.fromBoundPaths(dataSet.toBoundPaths.sortBy(x => x._1)(WQueryListOrdering))
   }
 
@@ -184,7 +187,7 @@ object SortFunction extends DataSetFunction("sort") with AcceptsAll with Returns
 object MinFunction extends DataSetFunction("min") with AcceptsAll with ReturnsSingleTuple
 with PreservesTypes with PreservesTupleSizes with PreservesBindingsPattern {
 
-  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings) = {
+  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
     if (!dataSet.isEmpty) {
       val sorted = dataSet.toBoundPaths.sortBy(x => x._1)(WQueryListOrdering)
       val minValue = sorted.head._1
@@ -207,7 +210,7 @@ with PreservesTypes with PreservesTupleSizes with PreservesBindingsPattern {
 object MaxFunction extends DataSetFunction("max") with AcceptsAll with ReturnsSingleTuple
 with PreservesTypes with PreservesTupleSizes with PreservesBindingsPattern {
 
-  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings) = {
+  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
     if (!dataSet.isEmpty) {
       val sorted = dataSet.toBoundPaths.sortBy(x => x._1)(WQueryListOrdering)
       val maxValue = sorted.last._1
@@ -252,7 +255,7 @@ abstract class ByFunction(name: String) extends DataSetFunction(name) with Retur
 }
 
 object SortByFunction extends ByFunction("sortby") with ReturnsDataSetOfSimilarSize {
-  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings) = {
+  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
     if (!dataSet.isEmpty) {
       val argNum = dataSet.paths.head.last.asInstanceOf[Int] - 1
       val sorted = dataSet.toBoundPaths.sortBy(x => x._1(argNum))(WQueryOrdering)
@@ -267,7 +270,7 @@ object SortByFunction extends ByFunction("sortby") with ReturnsDataSetOfSimilarS
 }
 
 object MinByFunction extends ByFunction("minby") with ReturnsDataSetOfSimilarSize {
-  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings) = {
+  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
     if (!dataSet.isEmpty) {
       val argNum = dataSet.paths.head.last.asInstanceOf[Int] - 1
       val sorted = dataSet.toBoundPaths.sortBy(x => x._1(argNum))(WQueryOrdering)
@@ -289,7 +292,7 @@ object MinByFunction extends ByFunction("minby") with ReturnsDataSetOfSimilarSiz
 }
 
 object MaxByFunction extends ByFunction("maxby") with ReturnsDataSetOfSimilarSize {
-  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings) = {
+  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
     if (!dataSet.isEmpty) {
       val argNum = dataSet.paths.head.last.asInstanceOf[Int] - 1
       val sorted = dataSet.toBoundPaths.sortBy(x => x._1(argNum))(WQueryOrdering)
@@ -313,7 +316,7 @@ object MaxByFunction extends ByFunction("maxby") with ReturnsDataSetOfSimilarSiz
 object CountFunction extends DataSetFunction("count") with AcceptsAll with ReturnsSingleValue
  with ClearsBindingsPattern with CountProportionalCost {
 
-  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings) = {
+  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
     DataSet.fromValue(dataSet.paths.size)
   }
 
@@ -323,7 +326,7 @@ object CountFunction extends DataSetFunction("count") with AcceptsAll with Retur
 object LastFunction extends DataSetFunction("last") with AcceptsAll with ReturnsSingleValue
  with ClearsBindingsPattern with CountProportionalCost {
 
-  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings) = {
+  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
     DataSet(dataSet.paths.map(x => List(x.last)))
   }
 
@@ -335,7 +338,7 @@ object IntegerSumFunction extends DataSetFunction("sum") with AcceptsTypes with 
 
   def argumentTypes = List(Set(IntegerType))
 
-  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings) = {
+  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
     var sum: Int = 0
 
     for (tuple <- dataSet.paths) {
@@ -351,7 +354,7 @@ object IntegerSumFunction extends DataSetFunction("sum") with AcceptsTypes with 
 object FloatSumFunction extends DataSetFunction("sum") with AcceptsNumbers with ReturnsSingleValue
  with ClearsBindingsPattern with CountProportionalCost {
 
-  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings) = {
+  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
     var sum: Double = 0
 
     for (tuple <- dataSet.paths) {
@@ -371,14 +374,14 @@ object FloatSumFunction extends DataSetFunction("sum") with AcceptsNumbers with 
 
 object AvgFunction extends Function("avg") with AcceptsNumbers with ReturnsSingleValue
  with ClearsBindingsPattern with CountProportionalCost {
-  def evaluate(op: AlgebraOp, wordNet: WordNet, bindings: Bindings) = {
-    val dataSet = op.evaluate(wordNet, bindings)
+  def evaluate(op: AlgebraOp, wordNet: WordNet, bindings: Bindings, context: Context) = {
+    val dataSet = op.evaluate(wordNet, bindings, context)
 
     if (op.rightType(0) == Set(IntegerType)) {
-      DataSet.fromValue(IntegerSumFunction.evaluate(dataSet, wordNet, bindings)
+      DataSet.fromValue(IntegerSumFunction.evaluate(dataSet, wordNet, bindings, context)
         .paths.head.head.asInstanceOf[Int].toDouble / dataSet.paths.size)
     } else {
-      DataSet.fromValue(FloatSumFunction.evaluate(dataSet, wordNet, bindings)
+      DataSet.fromValue(FloatSumFunction.evaluate(dataSet, wordNet, bindings, context)
         .paths.head.head.asInstanceOf[Double] / dataSet.paths.size)
     }
   }
@@ -389,7 +392,7 @@ object AvgFunction extends Function("avg") with AcceptsNumbers with ReturnsSingl
 object ShortestFunction extends DataSetFunction("shortest") with AcceptsAll with ReturnsSingleTuple
  with PreservesTypes with PreservesBindingsPattern {
 
-  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings) = {
+  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
     DataSet.fromBoundPaths(dataSet.toBoundPaths.filter(p => p._1.size == dataSet.minTupleSize))
   }
 
@@ -403,7 +406,7 @@ object ShortestFunction extends DataSetFunction("shortest") with AcceptsAll with
 object LongestFunction extends DataSetFunction("longest") with AcceptsAll with ReturnsSingleTuple
  with PreservesTypes with PreservesBindingsPattern {
 
-  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings) = {
+  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
     DataSet.fromBoundPaths(dataSet.toBoundPaths.filter(p => p._1.size == dataSet.maxTupleSize.get))
   }
 
@@ -416,7 +419,7 @@ object LongestFunction extends DataSetFunction("longest") with AcceptsAll with R
 
 object SizeFunction extends DataSetFunction("size") with AcceptsAll with ReturnsValueSetOfSimilarSize
  with ClearsBindingsPattern with CountProportionalCost {
-  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings) = {
+  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
     DataSet(dataSet.paths.map(path => path.filter(step => !step.isInstanceOf[Arc])).map(path => List(path.size)))
   }
 
@@ -425,7 +428,7 @@ object SizeFunction extends DataSetFunction("size") with AcceptsAll with Returns
 
 object LengthFunction extends DataSetFunction("length") with AcceptsAll with ReturnsValueSetOfSimilarSize
  with ClearsBindingsPattern with CountProportionalCost {
-  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings) = {
+  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
     DataSet(dataSet.paths.map{path => List(path.size)})
   }
 
@@ -434,7 +437,7 @@ object LengthFunction extends DataSetFunction("length") with AcceptsAll with Ret
 
 object EmptyFunction extends DataSetFunction("empty") with AcceptsAll with ReturnsSingleValue
  with ClearsBindingsPattern with CountProportionalCost {
-  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings) = {
+  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
     DataSet.fromValue(dataSet.isEmpty)
   }
 
@@ -445,7 +448,7 @@ object StringLengthFunction extends DataSetFunction("string_length") with Accept
  with ClearsBindingsPattern with CountProportionalCost {
   def argumentTypes = List(Set(StringType))
 
-  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings) = {
+  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
     DataSet(dataSet.paths.map(tuple => List(tuple.last.asInstanceOf[String].size)))
   }
 
@@ -457,7 +460,7 @@ object StringSplitFunction extends DataSetFunction("string_split") with AcceptsT
 
   def argumentTypes = List(Set(StringType), Set(StringType))
 
-  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings) = {
+  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
     DataSet(dataSet.paths.map(tuple => (tuple.takeRight(2): @unchecked) match {
       case List(word: String, delimiter: String) =>
         word.split(delimiter).toList
@@ -472,7 +475,7 @@ object SubstringFromToFunction extends DataSetFunction("substring") with Accepts
 
   def argumentTypes = List(Set(StringType), Set(IntegerType), Set(IntegerType))
 
-  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings) = {
+  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
     DataSet(dataSet.paths.map(tuple => (tuple.takeRight(3): @unchecked) match {
       case List(word: String, left: Int, right: Int) =>
         List[Any](
@@ -495,7 +498,7 @@ object ReplaceFunction extends DataSetFunction("replace") with AcceptsTypes with
 
   def argumentTypes = List(Set(StringType), Set(StringType), Set(StringType))
 
-  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings) = {
+  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
     DataSet(dataSet.paths.map(tuple => (tuple.takeRight(3): @unchecked) match {
       case List(word: String, pattern: String, replacement: String) =>
         List[Any](word.replaceFirst(pattern, replacement))
@@ -509,7 +512,7 @@ object LowerFunction extends DataSetFunction("lower") with AcceptsTypes with Ret
  with ClearsBindingsPattern with CountProportionalCost {
   def argumentTypes = List(Set(StringType))
 
-  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings) = {
+  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
     DataSet(dataSet.paths.map(tuple => tuple.last match {
       case word: String =>
         List[Any](word.toLowerCase)
@@ -523,7 +526,7 @@ object UpperFunction extends DataSetFunction("upper") with AcceptsTypes with Ret
  with ClearsBindingsPattern with CountProportionalCost {
   def argumentTypes = List(Set(StringType))
 
-  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings) = {
+  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
     DataSet(dataSet.paths.map(tuple => tuple.last match {
       case word: String =>
         List[Any](word.toUpperCase)
@@ -537,7 +540,7 @@ object RangeFunction extends DataSetFunction("range") with AcceptsTypes with Ret
  with ClearsBindingsPattern with CountProportionalCost {
   def argumentTypes = List(Set(IntegerType), Set(IntegerType))
 
-  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings) = {
+  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
     DataSet(dataSet.paths.flatMap(tuple => (tuple.takeRight(2): @unchecked) match {
       case List(left: Int, right: Int) =>
         (left to right).map(List(_))
@@ -560,7 +563,7 @@ object RangeFunction extends DataSetFunction("range") with AcceptsTypes with Ret
 
 object IntFunction extends DataSetFunction("int") with AcceptsAll with ReturnsValueSetOfSimilarSize
 with ClearsBindingsPattern with CountProportionalCost {
-  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings) = {
+  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
     DataSet(dataSet.paths.collect{
       case List(value: Double) => List(value.toInt)
       case path @ List(value: Int) => path
@@ -572,7 +575,7 @@ with ClearsBindingsPattern with CountProportionalCost {
 
 object FloatFunction extends DataSetFunction("float") with AcceptsAll with ReturnsValueSetOfSimilarSize
 with ClearsBindingsPattern with CountProportionalCost {
-  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings) = {
+  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
     DataSet(dataSet.paths.collect{
       case List(value: Int) => List(value.toDouble)
       case path @ List(value: Double) => path
@@ -586,7 +589,7 @@ object ArcNameFunction extends DataSetFunction("arc_name") with AcceptsTypes wit
 with ClearsBindingsPattern with CountProportionalCost {
   def argumentTypes = List(Set(ArcType))
 
-  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings) = {
+  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
     DataSet(dataSet.paths.map(tuple => List(tuple.last.asInstanceOf[Arc].relation.name)))
   }
 
@@ -597,7 +600,7 @@ object ArcSourceFunction extends DataSetFunction("arc_src") with AcceptsTypes wi
 with ClearsBindingsPattern with CountProportionalCost {
   def argumentTypes = List(Set(ArcType))
 
-  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings) = {
+  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
     DataSet(dataSet.paths.map(tuple => List(tuple.last.asInstanceOf[Arc].from)))
   }
 
@@ -608,7 +611,7 @@ object ArcDestinationFunction extends DataSetFunction("arc_dst") with AcceptsTyp
 with ClearsBindingsPattern with CountProportionalCost {
   def argumentTypes = List(Set(ArcType))
 
-  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings) = {
+  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
     DataSet(dataSet.paths.map(tuple => List(tuple.last.asInstanceOf[Arc].to)))
   }
 
@@ -617,8 +620,8 @@ with ClearsBindingsPattern with CountProportionalCost {
 
 abstract class JavaMethod(override val name: String, method: Method) extends Function(name)
  with ReturnsValueSetOfSimilarSize with ClearsBindingsPattern with CountProportionalCost {
-  def evaluate(args: AlgebraOp, wordNet: WordNet, bindings: Bindings) = {
-    val argsValues = args.evaluate(wordNet, bindings)
+  def evaluate(args: AlgebraOp, wordNet: WordNet, bindings: Bindings, context: Context) = {
+    val argsValues = args.evaluate(wordNet, bindings, context)
     val buffer = new ListBuffer[List[Any]]()
     val invocationArgs = new Array[AnyRef](method.getParameterTypes.size)
 
@@ -628,7 +631,9 @@ abstract class JavaMethod(override val name: String, method: Method) extends Fun
       for (i <- 0 until invocationArgs.size)
         invocationArgs(i) = tuple(offset + i).asInstanceOf[AnyRef]
 
+      // scalastyle:off null
       buffer.append(List(method.invoke(null, invocationArgs: _*)))
+      // scalastyle:on null
     }
 
     DataSet(buffer.toList)

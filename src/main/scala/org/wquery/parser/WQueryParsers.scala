@@ -1,3 +1,6 @@
+// scalastyle:off multiple.string.literals
+// scalastyle:off number.of.methods
+
 package org.wquery.parser
 import org.wquery.{WQueryParsingErrorException, WQueryParsingFailureException}
 import scala.util.parsing.combinator.RegexParsers
@@ -43,7 +46,7 @@ trait WQueryParsers extends RegexParsers {
     iterator
     | emission
     | merge
-    | split
+    | update
     | assignment
     | ifelse
     | whiledo
@@ -53,22 +56,23 @@ trait WQueryParsers extends RegexParsers {
 
   def emission = "emit" ~> multipath_expr ^^ { EmissionExpr(_) }
 
-  def merge = "merge" ~> expr ~ rep(with_clause) ^^ { case expr~withs => MergeExpr(expr, withs) }
+  def merge = "merge" ~> expr ^^ { expr => MergeExpr(expr) }
 
-  def split = "split" ~> expr ~ rep(with_clause) ^^ { case expr~withs => SplitExpr(expr, withs) }
-
-  def assignment = (
-     set_var_decl ~ ":=" ~ multipath_expr ^^ { case vdecl~_~mexpr => VariableAssignmentExpr(vdecl, mexpr) }
-     | "wordnet" ~> notQuotedString ~ assignment_op ~ multipath_expr ~ rep(with_clause) ^^ { case prop~op~rexpr~withs => WordNetUpdateExpr(prop, op, rexpr, withs) }
-     | notQuotedString ~ ":=" ~ relation_union_expr  ^^ { case name~_~rexpr => RelationAssignmentExpr(name, rexpr) }
-     | multipath_expr ~ arc_expr ~ assignment_op ~ multipath_expr ^^ { case lexpr~prop~op~rexpr => UpdateExpr(lexpr, prop, op, rexpr) }
+  def update = "update" ~> (
+    rel_spec ~ update_op ~ multipath_expr ^^ { case spec~op~expr => UpdateExpr(None, spec, op, expr) }
+    | multipath_expr ~ rel_spec ~ update_op ~ multipath_expr ^^ { case lexpr~spec~op~rexpr => UpdateExpr(Some(lexpr), spec, op, rexpr) }
   )
 
-  def assignment_op = ("+="|"-="|":=")
+  def rel_spec = rep1sep(rel_spec_arg, "^") ^^ { RelationSpecification(_) }
 
-  def with_clause = "with" ~> property_assignment
+  def rel_spec_arg = (
+    var_decl ^^ { VariableRelationSpecificationArgument(_) }
+    | notQuotedString ^^ { ConstantRelationSpecificationArgument(_) }
+  )
 
-  def property_assignment = arc_expr ~ assignment_op ~ multipath_expr ^^ { case arc~op~expr => PropertyAssignmentExpr(arc, op, expr) }
+  def update_op = ("+="|"-="|":=")
+
+  def assignment = set_var_decl ~ ":=" ~ multipath_expr ^^ { case vdecl~_~mexpr => VariableAssignmentExpr(vdecl, mexpr) }
 
   def ifelse = "if" ~> multipath_expr ~ imp_expr ~ opt("else" ~> imp_expr) ^^ {
     case cexpr ~ iexpr ~ eexpr => IfElseExpr(cexpr, iexpr, eexpr)
@@ -103,7 +107,9 @@ trait WQueryParsers extends RegexParsers {
     | path
   )
 
-  def path = generator_subpath ~ rep(subpath) ^^ { case gpath~paths => paths.foldLeft(gpath){ case (expr, steps~projs) => PathExpr(NodeTransformationExpr(expr)::steps, projs) }}
+  def path = generator_subpath ~ rep(subpath) ^^ {
+    case gpath~paths => paths.foldLeft(gpath){ case (expr, steps~projs) => PathExpr(NodeTransformationExpr(expr)::steps, projs) }
+  }
 
   def generator_subpath = generator_step ~ rep(step) ~ rep(projection) ^^ { case gstep~steps~projs => PathExpr(gstep::steps, projs) }
 
@@ -124,11 +130,13 @@ trait WQueryParsers extends RegexParsers {
 
   def relation_composition_expr = rep1sep(relation_union_expr, ".") ^^ { exprs => if (exprs.size == 1) exprs.head else RelationCompositionExpr(exprs) }
 
-  def relation_union_expr: Parser[RelationalExpr] = rep1sep(quantified_relation_expr, "|") ^^ { exprs => if (exprs.size == 1) exprs.head else RelationUnionExpr(exprs) }
+  def relation_union_expr: Parser[RelationalExpr] = rep1sep(quantified_relation_expr, "|") ^^ {
+    exprs => if (exprs.size == 1) exprs.head else RelationUnionExpr(exprs)
+  }
 
-  def quantified_relation_expr = simple_relation_expr ~ quantifier ^^ { 
+  def quantified_relation_expr = simple_relation_expr ~ quantifier ^^ {
     case expr~Quantifier(1, Some(1)) => expr
-    case expr~quant => QuantifiedRelationExpr(expr, quant)  
+    case expr~quant => QuantifiedRelationExpr(expr, quant)
   }
 
   def simple_relation_expr = (
@@ -264,7 +272,10 @@ trait WQueryParsers extends RegexParsers {
     | notQuotedString
   )
 
-  def floatNum: Parser[Double] = "([0-9]+(([eE][+-]?[0-9]+)|\\.(([0-9]+[eE][+-]?[0-9]+)|([eE][+-]?[0-9]+)|([0-9]+))))|(\\.[0-9]+([eE][+-]?[0-9]+)?)".r ^^ { _.toDouble }
+  def floatNum: Parser[Double] = {
+    "([0-9]+(([eE][+-]?[0-9]+)|\\.(([0-9]+[eE][+-]?[0-9]+)|([eE][+-]?[0-9]+)|([0-9]+))))|(\\.[0-9]+([eE][+-]?[0-9]+)?)".r ^^ { _.toDouble }
+  }
+
   def integerNum: Parser[Int] = "[0-9]+".r ^^ { _.toInt }
   def doubleQuotedString: Parser[String] = "\"(\\\\\"|[^\"])*?\"".r ^^ { x => x.substring(1, x.length - 1).replaceAll("\\\"","\"") }
   def backQuotedString: Parser[String] = "`(\\\\`|[^`])*?`".r ^^ { x => x.substring(1, x.length - 1).replaceAll("\\`","`") }

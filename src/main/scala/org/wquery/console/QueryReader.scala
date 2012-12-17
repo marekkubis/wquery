@@ -1,3 +1,6 @@
+// scalastyle:off return
+// scalastyle:off cyclomatic.complexity
+
 package org.wquery.console
 import java.io.{BufferedReader, Reader}
 
@@ -8,17 +11,17 @@ class QueryReader(reader: Reader) {
   def close { in.close }
 
   def isEof = eof
-  
+
   def readQuery = {
-    val builder = new StringBuilder    
+    val builder = new StringBuilder
     var stop = false
-    
-    while (!stop) {       
+
+    while (!stop) {
       in.read match {
-        case -1 => 
+        case -1 =>
           eof = true
-        case ';' => 
-          stop = true          
+        case ';' =>
+          stop = true
         case '-' =>
           in.mark(1)
           in.read() match {
@@ -29,22 +32,22 @@ class QueryReader(reader: Reader) {
               in.reset
           }
         case '/' =>
-          in.mark(1)          
-          in.read() match {            
+          in.mark(1)
+          in.read() match {
             case '*' =>
-              eof = skipMultiLineComment()  
+              eof = skipMultiLineComment()
             case _ =>
               builder append '/'
               in.reset
           }
         case chr =>
-          builder append chr.asInstanceOf[Char]  
+          builder append chr.asInstanceOf[Char]
       }
-      
+
       if (eof)
         stop = true
     }
-    
+
     val query = builder.toString
 
     if (query.trim == "")
@@ -52,7 +55,7 @@ class QueryReader(reader: Reader) {
     else
       Some(query)
   }
-  
+
   private def skipSingleLineComment(): Boolean = {
     do {
       in.read match {
@@ -61,24 +64,24 @@ class QueryReader(reader: Reader) {
         case _ =>
       }
     } while (true)
-      
+
     false
-  }  
-  
+  }
+
   private def skipMultiLineComment(): Boolean = {
     do {
       in.read match {
         case -1 => return true
-        case '*' => 
+        case '*' =>
           in.read match {
             case -1 =>  return true
             case '/' => return false
-            case _ =>  
-          }                        
+            case _ =>
+          }
         case _ =>
       }
     } while (true)
-      
+
     false
-  }  
+  }
 }

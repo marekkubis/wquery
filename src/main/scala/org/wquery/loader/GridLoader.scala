@@ -1,3 +1,6 @@
+// scalastyle:off null
+// scalastyle:off multiple.string.literals
+
 package org.wquery.loader
 import javax.xml.parsers.SAXParserFactory
 import java.io.File
@@ -24,47 +27,47 @@ class GridLoader extends WordNetLoader with Logging {
 class GridHandler(wordnet: WordNet) extends DefaultHandler with Logging {
   // parser attributes
   private var locator: Locator = null
-  
+
   // global attributes
   private val synsetsById = Map[String, Synset]()
-  private val ilrRelationsTuples = new ListBuffer[(Synset, String, String)]()    
+  private val ilrRelationsTuples = new ListBuffer[(Synset, String, String)]()
   private val genericRelationsTuples = new ListBuffer[(Synset, String, String)]()
-  
+
   // per synset attributes
   private var synsetId: String = null
   private var synsetPos: String = null
-  private var synsetIlrRelationsTuples: ListBuffer[(String, String)] = null    
+  private var synsetIlrRelationsTuples: ListBuffer[(String, String)] = null
   private var synsetGenericRelationsTuples: ListBuffer[(String, String)] = null
-  private var synsetSenses: ListBuffer[(String, String)] = null 
-  
+  private var synsetSenses: ListBuffer[(String, String)] = null
+
   // per subtag attributes
-  private var literalSense: String = null  
+  private var literalSense: String = null
   private var ilrType: String = null
   private var text = new StringBuilder
   private var previousText: StringBuilder = null
 
-  override def setDocumentLocator(loc: Locator) { locator = loc } 
-    
+  override def setDocumentLocator(loc: Locator) { locator = loc }
+
   override def startElement(uri: String, localName: String, tagName: String, attributes: Attributes) {
-    pushText       
-        
+    pushText
+
     tagName match {
       case "SYNSET" =>
         synsetId = null
-        synsetPos = null    
-        synsetIlrRelationsTuples = new ListBuffer[(String, String)]    
-        synsetGenericRelationsTuples = new ListBuffer[(String, String)]        
-        synsetSenses = new ListBuffer[(String, String)]        
+        synsetPos = null
+        synsetIlrRelationsTuples = new ListBuffer[(String, String)]
+        synsetGenericRelationsTuples = new ListBuffer[(String, String)]
+        synsetSenses = new ListBuffer[(String, String)]
       case "LITERAL" =>
         literalSense = attributes.getValue("sense")
       case "ILR" =>
         ilrType = attributes.getValue("type")
       case _ =>
         // skip
-    }    
+    }
   }
-    
-  override def characters(chars: Array[Char], start: Int, length: Int) {      
+
+  override def characters(chars: Array[Char], start: Int, length: Int) {
     text.appendAll(chars, start, length)
   }
 
@@ -74,13 +77,13 @@ class GridHandler(wordnet: WordNet) extends DefaultHandler with Logging {
         endSynsetTag
       case tagName =>
         val content = text.toString.trim
-        
+
         tagName match {
           case "ID" =>
             synsetId = content
           case "POS" =>
-            synsetPos = content            
-            endGenericTag("POS", content)            
+            synsetPos = content
+            endGenericTag("POS", content)
           case "LITERAL" =>
             synsetSenses += ((content, literalSense))
             literalSense = null
@@ -92,10 +95,10 @@ class GridHandler(wordnet: WordNet) extends DefaultHandler with Logging {
           case "TYPE" =>
             ilrType = content
           case tagName =>
-            endGenericTag(tagName, content)          
+            endGenericTag(tagName, content)
         }
     }
-      
+
     tagName match {
       case "SENSE" =>
         popText
@@ -103,19 +106,19 @@ class GridHandler(wordnet: WordNet) extends DefaultHandler with Logging {
         popText
       case _ =>
         pushText
-    }        
+    }
   }
 
   private def pushText {
     previousText = text
-    text = new StringBuilder        
+    text = new StringBuilder
   }
-    
+
   private def popText {
     text = previousText
-  }    
-  
-  private def endSynsetTag {    
+  }
+
+  private def endSynsetTag {
     if (synsetId == null) {
       locatedWarn("SYNSET tag does not contain ID subtag")
     } else {
@@ -123,9 +126,9 @@ class GridHandler(wordnet: WordNet) extends DefaultHandler with Logging {
         locatedWarn("SYNSET '" + synsetId + "' does not contain POS tag - 'x' symbol used as the POS tag value")
         synsetPos = "x"
       }
-      
+
       val senses = new ListBuffer[Sense]
-      
+
       synsetSenses.toList.zipWithIndex.foreach {case ((content, literalSense), index) =>
         try {
           if (literalSense != null) {
@@ -135,13 +138,13 @@ class GridHandler(wordnet: WordNet) extends DefaultHandler with Logging {
           }
         } catch {
           case ex: NumberFormatException =>
-            warnInvalidSubtag("LITERAL", content, "sense") 
+            warnInvalidSubtag("LITERAL", content, "sense")
         }
       }
 
-      val synset = wordnet.store.addSynset(Some(synsetId), senses.toList, Nil, moveSenses = false)
+      val synset = wordnet.store.addSynset(Some(synsetId), senses.toList, moveSenses = false)
       synsetsById(synset.id) = synset
-      
+
       for ((ilrType, content) <- synsetIlrRelationsTuples) {
         val ilrName = if (ilrType == null || ilrType.trim.isEmpty) {
           warnInvalidSubtag("ILR", content, "type")
@@ -152,12 +155,12 @@ class GridHandler(wordnet: WordNet) extends DefaultHandler with Logging {
 
         ilrRelationsTuples += ((synset, ilrName, content))
       }
-      
+
       for ((tagName, content) <- synsetGenericRelationsTuples) {
         genericRelationsTuples += ((synset, tagName, content))
-      }      
+      }
     }
-  }  
+  }
 
   private def endGenericTag(tagName: String, content: String) {
     tagName.toLowerCase match {
@@ -171,17 +174,17 @@ class GridHandler(wordnet: WordNet) extends DefaultHandler with Logging {
         synsetGenericRelationsTuples += ((relName, content))
     }
   }
-    
+
   override def endDocument {
-    info("Synsets loaded") 
-    createIlrRelations    
-    createGenericRelations 
+    info("Synsets loaded")
+    createIlrRelations
+    createGenericRelations
   }
-    
+
   private def createIlrRelations {
     // create semantic relations names
     val ilrRelationsNames = Set[String]()
-    
+
     for ((synset, relname, reldest) <- ilrRelationsTuples) {
       ilrRelationsNames += relname
     }
@@ -192,8 +195,8 @@ class GridHandler(wordnet: WordNet) extends DefaultHandler with Logging {
       wordnet.store.addRelation(relation)
     }
 
-    // create semantic relations successors       
-    for ((synset, relname, reldest) <- ilrRelationsTuples) {      
+    // create semantic relations successors
+    for ((synset, relname, reldest) <- ilrRelationsTuples) {
       val relation = wordnet.store.schema.demandRelation(relname, IMap((Relation.Source, ISet[DataType](SynsetType))))
 
       relation.destinationType.map { dt =>
@@ -204,7 +207,8 @@ class GridHandler(wordnet: WordNet) extends DefaultHandler with Logging {
                 wordnet.store.addSuccessor(synset, relation, destination)
               } catch {
                 case e: WQueryUpdateBreaksRelationPropertyException =>
-                  warn("ILR tag with type '" + relname + "' found in synset '" + synset.id + "' that points to synset '" + reldest + "' breaks property '" + e.property + "' of relation '" + e.relation.name + "'")
+                  warn("ILR tag with type '" + relname + "' found in synset '" + synset.id + "' that points to synset '" + reldest +
+                    "' breaks property '" + e.property + "' of relation '" + e.relation.name + "'")
               }
             }.getOrElse(warn("ILR tag with type '" + relname + "' found in synset '" + synset.id + "' points to unknown synset '" + reldest + "'"))
           case dtype =>
@@ -213,29 +217,29 @@ class GridHandler(wordnet: WordNet) extends DefaultHandler with Logging {
       }.getOrElse(throw new RuntimeException("Relation '" + relname + "' has no destination type"))
 
     }
-    
-    info("ILR relations loaded")    
+
+    info("ILR relations loaded")
   }
-  
-  private def createGenericRelations {    
+
+  private def createGenericRelations {
     // create relations datatypes
-    val genericRelationsDestTypes = Map[String, NodeType]()    
-    
+    val genericRelationsDestTypes = Map[String, NodeType]()
+
     for ((synset, relname, reldest) <- genericRelationsTuples) {
       val dtype = getType(reldest)
-      
-      if (!genericRelationsDestTypes.contains(relname) || 
+
+      if (!genericRelationsDestTypes.contains(relname) ||
             rankType(genericRelationsDestTypes(relname)) < rankType(dtype)) {
-        genericRelationsDestTypes(relname) = dtype          
-      }      
-    }    
+        genericRelationsDestTypes(relname) = dtype
+      }
+    }
 
     // create relations
     for ((relname, dtype) <- genericRelationsDestTypes) {
       val relation = Relation.binary(relname, SynsetType, dtype)
       wordnet.store.addRelation(relation)
     }
-    
+
     // create successors
     for ((synset, relname, reldest) <- genericRelationsTuples) {
       val relation = wordnet.store.schema.demandRelation(relname, IMap((Relation.Source, ISet[DataType](SynsetType))))
@@ -258,9 +262,9 @@ class GridHandler(wordnet: WordNet) extends DefaultHandler with Logging {
       }.getOrElse(throw new RuntimeException("Relation '" + relname + "' has no destination type"))
     }
 
-    info("non-ILR relations loaded")    
+    info("non-ILR relations loaded")
   }
-    
+
   private def getType(destination: String): NodeType = {
     synsetsById.get(destination).map(_ => SynsetType).getOrElse(
       try {
@@ -284,6 +288,7 @@ class GridHandler(wordnet: WordNet) extends DefaultHandler with Logging {
     )
   }
 
+  // scalastyle:off magic.number
   private def rankType(dtype: NodeType) = dtype match {
     case SynsetType => 0
     case SenseType => 1
@@ -292,13 +297,14 @@ class GridHandler(wordnet: WordNet) extends DefaultHandler with Logging {
     case FloatType => 4
     case POSType => 5
     case StringType => 6
-  } 
-  
-  private def warnInvalidSubtag(tag: String, content: String, attr: String) 
-    = locatedWarn(tag + " tag with content '" + content + "' found in synset '" + synsetId + 
+  }
+  // scalastyle:on magic.number
+
+  private def warnInvalidSubtag(tag: String, content: String, attr: String)
+    = locatedWarn(tag + " tag with content '" + content + "' found in synset '" + synsetId +
                     "' does not have valid " + attr.toUpperCase + " subtag" +
                     " nor '" + attr.toUpperCase + "' attribute")
-    
-  private def locatedWarn(message: String) 
+
+  private def locatedWarn(message: String)
     = warn("(" + locator.getLineNumber + ", " + locator.getColumnNumber + ") " + message)
 }

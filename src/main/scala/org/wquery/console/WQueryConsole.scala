@@ -1,3 +1,5 @@
+// scalastyle:off regex
+
 package org.wquery.console
 import org.wquery.{WQueryProperties, WQuery}
 import org.wquery.utils.Logging
@@ -11,8 +13,10 @@ import java.io.{StringReader, FileReader, Reader}
 object WQueryConsole extends Logging {
   val WQueryBanner = "WQuery " + WQueryProperties.version + "\n" + WQueryProperties.copyright
   val argsParser = new ArgotParser("wquery", preUsage = Some(WQueryBanner))
-  val quietOption = argsParser.flag[Boolean](List("q", "quiet"), "Silent mode")(convert = convertFlag)
-  val emitterOption = argsParser.option[WQueryEmitter](List("e", "emitter"), "class", "Emitter class to be used (by default " + classOf[PlainWQueryEmitter].getName + ")") {
+  val quietOption = argsParser.flag[Boolean](List("q", "quiet"),
+    "Silent mode")(convert = convertFlag)
+  val emitterOption = argsParser.option[WQueryEmitter](List("e", "emitter"), "class",
+    "Emitter class to be used (by default " + classOf[PlainWQueryEmitter].getName + ")") {
     (className, opt) =>
       try {
         Class.forName(className).newInstance.asInstanceOf[WQueryEmitter]
@@ -21,9 +25,12 @@ object WQueryConsole extends Logging {
          argsParser.usage("Unable to load emitter " + className + " (" + e.getClass.getName + ").")
       }
   }
-  val commandOption = argsParser.multiOption[String](List("c", "command"), "query", "Command mode i.e. executes the submitted query and exits")
-  val wordnetParameter = argsParser.parameter[String]("wordnet", "Wordnet to be loaded", false)
-  val queryParameter = argsParser.multiParameter[String]("queries", "File containing queries to be executed after loading the wordnet", true)
+  val commandOption = argsParser.multiOption[String](List("c", "command"), "query",
+    "Command mode i.e. executes the submitted query and exits")
+  val wordnetParameter = argsParser.parameter[String]("wordnet",
+    "Wordnet to be loaded", false)
+  val queryParameter = argsParser.multiParameter[String]("queries",
+    "File containing queries to be executed after loading the wordnet", true)
 
   def main(args: Array[String]) {
     try {

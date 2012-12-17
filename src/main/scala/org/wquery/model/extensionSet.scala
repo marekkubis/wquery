@@ -46,7 +46,8 @@ sealed abstract class ExtendedExtensionSet(val parent: ExtensionSet, val extensi
   def size = extensionsList.size
 }
 
-class LeftExtendedExtensionSet(override val parent: ExtensionSet, override val extensionsList: List[(Int,  List[Any])]) extends ExtendedExtensionSet(parent, extensionsList) {
+class LeftExtendedExtensionSet(override val parent: ExtensionSet, override val extensionsList: List[(Int,  List[Any])])
+  extends ExtendedExtensionSet(parent, extensionsList) {
   def leftOrShift(pathPos: Int, pos: Int) = {
     val (parentPos, extension) = extensionsList(pathPos)
 
@@ -75,7 +76,8 @@ class LeftExtendedExtensionSet(override val parent: ExtensionSet, override val e
   }
 }
 
-class RightExtendedExtensionSet(override val parent: ExtensionSet, override val extensionsList: List[(Int,  List[Any])]) extends ExtendedExtensionSet(parent, extensionsList) {
+class RightExtendedExtensionSet(override val parent: ExtensionSet, override val extensionsList: List[(Int,  List[Any])])
+  extends ExtendedExtensionSet(parent, extensionsList) {
   def leftOrShift(pathPos: Int, pos: Int) = {
     val (parentPos, extension) = extensionsList(pathPos)
 
@@ -127,7 +129,7 @@ class ExtensionSetBuffer(parent: ExtensionSet, direction: Direction) {
         extensionSets.append(extensionSet)
       else
         throw new IllegalArgumentException("ExtensionSetBuffer: extensionSet.parent != parent")
-      
+
       extensionSet match {
         case _: LeftExtendedExtensionSet =>
           if (direction == Forward)

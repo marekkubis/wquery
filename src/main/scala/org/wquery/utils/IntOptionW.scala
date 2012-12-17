@@ -1,3 +1,5 @@
+// scalastyle:off spaces.after.plus
+
 package org.wquery.utils
 import scalaz._
 import Scalaz._

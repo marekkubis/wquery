@@ -22,7 +22,9 @@ class InMemoryWordNetStore extends WordNetStore {
 
   def addRelation(relation: Relation) {
     if (!relations.contains(relation)) {
-      relationsList = (relationsList :+ relation).sortWith((l, r) => l.name < r.name || l.name == r.name && l.arguments.size < r.arguments.size || l.name == r.name && l.arguments.size == r.arguments.size && l.sourceType < r.sourceType)
+      relationsList = (relationsList :+ relation)
+        .sortWith((l, r) => l.name < r.name || l.name == r.name && l.arguments.size < r.arguments.size ||
+          l.name == r.name && l.arguments.size == r.arguments.size && l.sourceType < r.sourceType)
       successors(relation) = TransactionalMap[(String, Any), IndexedSeq[Map[String, Any]]]()
       dependent(relation) = ∅[Set[String]]
       collectionDependent(relation) = ∅[Set[String]]
@@ -44,7 +46,7 @@ class InMemoryWordNetStore extends WordNetStore {
     statsCache.invalidate
   }
 
-  def setRelations(newRelations: List[Relation], assignments: List[PropertyAssignment]) {
+  def setRelations(newRelations: List[Relation]) {
     if (WordNet.relations.exists(relation => !newRelations.contains(relation)))
       throw new WQueryModelException("Assignment removes a mandatory relation")
 
@@ -84,7 +86,8 @@ class InMemoryWordNetStore extends WordNetStore {
     DataSet(buffer.toList)
   }
 
-  private def appendDestinationTuples(destinationMaps: Seq[Map[String, Any]], destinations: List[(String, List[Any])], to: List[String], relation: Relation, buffer: ListBuffer[List[Any]]) {
+  private def appendDestinationTuples(destinationMaps: Seq[Map[String, Any]], destinations: List[(String, List[Any])],
+                                      to: List[String], relation: Relation, buffer: ListBuffer[List[Any]]) {
     for (destinationMap <- destinationMaps) {
       if (destinations.forall(dest => destinationMap.contains(dest._1) && (dest._2.isEmpty || dest._2.contains(destinationMap(dest._1))))) {
         val tupleBuffer = new ListBuffer[Any]
@@ -110,13 +113,17 @@ class InMemoryWordNetStore extends WordNetStore {
     if (distinct) buffer.toDataSet.distinct else buffer.toDataSet
   }
 
-  def extend(extensionSet: ExtensionSet, direction: Direction, through: (String, Option[NodeType]), to: List[(String, Option[NodeType])]): ExtendedExtensionSet = {
+  def extend(extensionSet: ExtensionSet, direction: Direction, through: (String, Option[NodeType]),
+             to: List[(String, Option[NodeType])]): ExtendedExtensionSet = {
     val buffer = new ExtensionSetBuffer(extensionSet, direction)
     val toMap = to.toMap
 
     for (relation <- relations if relation.isTraversable;
-         source <- relation.argumentNames if (through._1 == ArcPatternArgument.AnyName || through._1 == source) && through._2.map(_ == relation.demandArgument(source).nodeType).getOrElse(true);
-         destination <- relation.argumentNames if toMap.isEmpty || toMap.get(destination).map(nodeTypeOption => nodeTypeOption.map(_ == relation.demandArgument(destination).nodeType).getOrElse(true)).getOrElse(false);
+         source <- relation.argumentNames if (through._1 == ArcPatternArgument.AnyName || through._1 == source) &&
+            through._2.map(_ == relation.demandArgument(source).nodeType).getOrElse(true);
+         destination <- relation.argumentNames if toMap.isEmpty ||
+            toMap.get(destination)
+              .map(nodeTypeOption => nodeTypeOption.map(_ == relation.demandArgument(destination).nodeType).getOrElse(true)).getOrElse(false)
          if source != destination)
       buffer.append(extendWithRelationTuples(extensionSet, relation, direction, source, List(destination)))
 
@@ -193,7 +200,8 @@ class InMemoryWordNetStore extends WordNetStore {
     builder.build
   }
 
-  private def extendWithPatterns(extensionSet: ExtensionSet, relation: Relation, direction: Direction, through: String, to: List[String], buffer: ExtensionSetBuffer) {
+  private def extendWithPatterns(extensionSet: ExtensionSet, relation: Relation, direction: Direction,
+                                 through: String, to: List[String], buffer: ExtensionSetBuffer) {
     if (patterns.contains(relation)) {
       if (through == Relation.Source && to.size == 1 && to.head == Relation.Destination) {
         patterns(relation).foreach( pattern =>
@@ -246,14 +254,14 @@ class InMemoryWordNetStore extends WordNetStore {
     statsCache.invalidate
   }
 
-  def addSense(sense: Sense, assignments: List[PropertyAssignment]) = {
-    addSynset(None, List(sense), assignments)
+  private def addSense(sense: Sense) {
+    addSynset(None, List(sense))
   }
 
-  def addSynset(synsetId: Option[String], senses: List[Sense], assignments: List[PropertyAssignment], moveSenses: Boolean = true) = {
+  def addSynset(synsetId: Option[String], senses: List[Sense], moveSenses: Boolean = true) = {
     val synset = new Synset(synsetId.getOrElse("synset#" + senses.head))
 
-    addNode(SynsetType, synset, assignments)
+    addNode(SynsetType, synset)
     addSuccessor(synset.id, WordNet.IdToSynset, synset)
     addSuccessor(synset, WordNet.SynsetToId, synset.id)
 
@@ -261,23 +269,23 @@ class InMemoryWordNetStore extends WordNetStore {
       if (moveSenses) {
         getSynset(sense)
           .map(synsetSense => moveSense(sense, synsetSense, synset))
-          .getOrElse(createSense(sense, synset, assignments))
+          .getOrElse(createSense(sense, synset))
       } else {
-        createSense(sense, synset, assignments)
+        createSense(sense, synset)
       }
     }
 
     synset
   }
 
-  private def createSense(sense: Sense, synset: Synset, patterns: List[PropertyAssignment]) {
+  private def createSense(sense: Sense, synset: Synset) {
     if (!isWord(sense.wordForm))
-      addNode(StringType, sense.wordForm, patterns)
+      addNode(StringType, sense.wordForm)
 
     if (!isPartOfSpeechSymbol(sense.pos))
-      addNode(POSType, sense.pos, patterns)
+      addNode(POSType, sense.pos)
 
-    addNode(SenseType, sense, patterns)
+    addNode(SenseType, sense)
     addSuccessor(sense, WordNet.SenseToWordForm, sense.wordForm)
     addSuccessor(sense, WordNet.SenseToSenseNumber, sense.senseNumber)
     addSuccessor(sense, WordNet.SenseToPos, sense.pos)
@@ -286,12 +294,13 @@ class InMemoryWordNetStore extends WordNetStore {
     addSuccessor(sense.wordForm, WordNet.WordFormToSenses, sense)
     addSuccessor(sense, WordNet.SenseToSynset, synset)
     addSuccessor(sense.wordForm, WordNet.WordFormToSynsets, synset)
-    addLink(WordNet.SenseToWordFormSenseNumberAndPos, Map((Relation.Source, sense), (Relation.Destination, sense.wordForm), ("num", sense.senseNumber), ("pos", sense.pos)))
+    addLink(WordNet.SenseToWordFormSenseNumberAndPos,
+      Map((Relation.Source, sense), (Relation.Destination, sense.wordForm), ("num", sense.senseNumber), ("pos", sense.pos)))
   }
 
-  def addWord(word: String, patterns: List[PropertyAssignment]) = addNode(StringType, word, patterns)
+  def addWord(word: String) { addNode(StringType, word) }
 
-  def addPartOfSpeechSymbol(pos: String, patterns: List[PropertyAssignment]) = if (!isPartOfSpeechSymbol(pos)) addNode(POSType, pos, patterns)
+  def addPartOfSpeechSymbol(pos: String) { if (!isPartOfSpeechSymbol(pos)) addNode(POSType, pos) }
 
   private def isWord(word: String) = {
     successors(WordNet.WordSet).get(Relation.Source, word).map(!_.isEmpty).getOrElse(false)
@@ -301,32 +310,64 @@ class InMemoryWordNetStore extends WordNetStore {
     successors(WordNet.PosSet).get(Relation.Source, pos).map(!_.isEmpty).getOrElse(false)
   }
 
-  private def addNode(nodeType: NodeType, node: Any, assignments: List[PropertyAssignment]) = atomic {
+  private def addNode(nodeType: NodeType, node: Any) = atomic {
     val relation = WordNet.dataTypesRelations(nodeType)
 
-    for ((relation, argument) <- getRequiredBys(nodeType)) {
-      if (!assignments.exists(assignment => assignment.pattern.relation.get == relation && assignment.pattern.source.name == argument && assignment.op != "-="))
-        throw new WQueryModelException("A new " + nodeType + " does not fulfil required by constrains of the relation '" + relation + "' on the argument '" + argument + "'")
-    }
-
     addLink(relation, Map((Relation.Source, node)))
+  }
 
-    for (assignment <- assignments) {
-      val tuples = assignment.tuplesFor(node)
+  def addTuple(relation: Relation, tuple: Map[String, Any]) = atomic {
+    relation match {
+      case WordNet.SynsetSet =>
+        val synset = tuple(Relation.Source).asInstanceOf[NewSynset]
+        addSynset(Some(synset.id), synset.senses)
+      case WordNet.SenseSet =>
+        addSense(tuple(Relation.Source).asInstanceOf[Sense])
+      case WordNet.WordSet =>
+        addWord(tuple(Relation.Source).asInstanceOf[String])
+      case WordNet.PosSet =>
+        addPartOfSpeechSymbol(tuple(Relation.Source).asInstanceOf[String])
+      case WordNet.Meta.Relations =>
 
-      assignment.op match {
-        case "+=" =>
-          tuples.foreach(addLink(assignment.pattern.relation.get, _))
-        case ":=" =>
-          setLinks(assignment.pattern.relation.get, assignment.pattern.source.name, node, tuples)
-        case "-=" =>
-          tuples.foreach(removeLink(assignment.pattern.relation.get, _, true))
-      }
+      case _ =>
+        addLink(relation, tuple)
     }
   }
 
-  private def getRequiredBys(requiredType: NodeType) = {
-    relations.flatMap(relation => requiredBys(relation).filter(name => relation.demandArgument(name).nodeType == requiredType).map(name => (relation, name)))
+  def removeTuple(relation: Relation, tuple: Map[String, Any], withDependentNodes: Boolean = true,
+                  withCollectionDependentNodes: Boolean = true) = atomic {
+    relation match {
+      case WordNet.SynsetSet =>
+        removeSynset(tuple(Relation.Source).asInstanceOf[Synset])
+      case WordNet.SenseSet =>
+        removeSense(tuple(Relation.Source).asInstanceOf[Sense])
+      case WordNet.WordSet =>
+        removeWord(tuple(Relation.Source).asInstanceOf[String])
+      case WordNet.PosSet =>
+        removePartOfSpeechSymbol(tuple(Relation.Source).asInstanceOf[String])
+      case WordNet.Meta.Relations =>
+
+      case _ =>
+        removeLink(relation, tuple, withDependentNodes, withCollectionDependentNodes)
+    }
+  }
+
+  def setTuples(relation: Relation, sourceNames: List[String], sources: List[List[Any]],
+                destinationNames: List[String], destinations: List[List[Any]]) = atomic {
+    relation match {
+      case WordNet.SynsetSet =>
+        setSynsets(destinations.map(_.head.asInstanceOf[Synset]))
+      case WordNet.SenseSet =>
+        setSenses(destinations.map(_.head.asInstanceOf[Sense]))
+      case WordNet.WordSet =>
+        setWords(destinations.map(_.head.asInstanceOf[String]))
+      case WordNet.PosSet =>
+        setPartOfSpeechSymbols(destinations.map(_.head.asInstanceOf[String]))
+      case WordNet.Meta.Relations =>
+
+      case _ =>
+        setLinks(relation, sourceNames, sources, destinationNames, destinations)
+    }
   }
 
   def addLink(relation: Relation, tuple: Map[String, Any]) = atomic {
@@ -436,7 +477,9 @@ class InMemoryWordNetStore extends WordNetStore {
                destination <- follow(relation, Relation.Source, obj, Relation.Destination)) {
             addEdge(relation, Map((Relation.Source, source), (Relation.Destination, destination)))
           }
-        } else if (transitivesActions(relation) == Relation.Preserve && !follow(relation, Relation.Destination, obj, Relation.Source).isEmpty && !follow(relation, Relation.Source, obj, Relation.Destination).isEmpty) {
+        } else if (transitivesActions(relation) == Relation.Preserve &&
+            !follow(relation, Relation.Destination, obj, Relation.Source).isEmpty &&
+            !follow(relation, Relation.Source, obj, Relation.Destination).isEmpty) {
           throw new WQueryUpdateBreaksRelationPropertyException(Relation.Transitivity, relation)
         }
       }
@@ -446,29 +489,30 @@ class InMemoryWordNetStore extends WordNetStore {
     }
   }
 
-  def setSynsets(synsets: List[Synset], assignments: List[PropertyAssignment]) {
+  def setSynsets(synsets: List[Synset]) {
     val (newSynsets, preservedSynsets) = synsets.partition(_.isInstanceOf[NewSynset])
     val preservedSynsetsSet = preservedSynsets.toSet
-    val removedSynsets = fetch(WordNet.SynsetSet, List((Relation.Source, Nil)), List(Relation.Source)).paths.map(_.last.asInstanceOf[Synset]).filterNot(preservedSynsetsSet.contains(_))
+    val removedSynsets = fetch(WordNet.SynsetSet, List((Relation.Source, Nil)),
+      List(Relation.Source)).paths.map(_.last.asInstanceOf[Synset]).filterNot(preservedSynsetsSet.contains(_))
 
-    newSynsets.foreach(synset => addSynset(None, synset.asInstanceOf[NewSynset].senses, assignments))
+    newSynsets.foreach(synset => addSynset(None, synset.asInstanceOf[NewSynset].senses))
     removedSynsets.foreach(removeSynset(_))
   }
 
-  def setSenses(newSenses: List[Sense], assignments: List[PropertyAssignment]) = {
-    setNodes[Sense](newSenses, WordNet.SenseSet, assignments, addSense, removeSense)
+  def setSenses(newSenses: List[Sense]) = {
+    setNodes[Sense](newSenses, WordNet.SenseSet, addSense, removeSense)
   }
 
-  def setPartOfSpeechSymbols(newPartOfSpeechSymbols: List[String], assignments: List[PropertyAssignment]) = {
-    setNodes[String](newPartOfSpeechSymbols, WordNet.PosSet, assignments, addPartOfSpeechSymbol, removePartOfSpeechSymbol)
+  def setPartOfSpeechSymbols(newPartOfSpeechSymbols: List[String]) = {
+    setNodes[String](newPartOfSpeechSymbols, WordNet.PosSet, addPartOfSpeechSymbol, removePartOfSpeechSymbol)
   }
 
-  def setWords(newWords: List[String], assignments: List[PropertyAssignment]) = {
-    setNodes[String](newWords, WordNet.WordSet, assignments, addWord, removeWord)
+  def setWords(newWords: List[String]) = {
+    setNodes[String](newWords, WordNet.WordSet, addWord, removeWord)
   }
 
-  private def setNodes[A](newNodes: List[A], nodesRelation: Relation, assignments: List[PropertyAssignment],
-                  addFunction: ((A, List[PropertyAssignment]) => Unit),
+  private def setNodes[A](newNodes: List[A], nodesRelation: Relation,
+                  addFunction: (A => Unit),
                   removeFunction: (A => Unit)) {
     val nodesSet = fetch(nodesRelation, List((Relation.Source, Nil)), List(Relation.Source)).paths.map(_.last.asInstanceOf[A]).toSet
     val newNodesSet = newNodes.toSet
@@ -477,10 +521,10 @@ class InMemoryWordNetStore extends WordNetStore {
       removeFunction(node)
 
     for (node <- newNodesSet if (!nodesSet.contains(node)))
-      addFunction(node, assignments)
+      addFunction(node)
   }
 
-  def removeLink(relation: Relation, tuple: Map[String, Any], withDependentNodes: Boolean, withCollectionDependentNodes: Boolean) = atomic {
+  def removeLink(relation: Relation, tuple: Map[String, Any], withDependentNodes: Boolean = true, withCollectionDependentNodes: Boolean = true) = atomic {
     removeLinkByNode(relation, tuple, None, withDependentNodes = withDependentNodes, withCollectionDependentNodes = withCollectionDependentNodes)
   }
 
@@ -513,7 +557,8 @@ class InMemoryWordNetStore extends WordNetStore {
     statsCache.age
   }
 
-  private def handleRequiredByPropertyForRemoveLink(relation: Relation, argumentName: String, argumentValue: Any, node: Option[Any], relationSuccessors: Seq[Map[String, Any]]) {
+  private def handleRequiredByPropertyForRemoveLink(relation: Relation, argumentName: String, argumentValue: Any,
+                                                    node: Option[Any], relationSuccessors: Seq[Map[String, Any]]) {
     if (requiredBys(relation).contains(argumentName) && node != Some(argumentValue)) {
       if (relationSuccessors.isEmpty)
         throw new WQueryUpdateBreaksRelationPropertyException(Relation.RequiredBy, relation, argumentName)
@@ -524,7 +569,8 @@ class InMemoryWordNetStore extends WordNetStore {
     if (relation.arguments.size == 2 && relation.sourceType == relation.destinationType.get && !symmetricEdge)
     symmetry(relation) match {
       case Symmetric =>
-        removeLinkByNode(relation, Map((Relation.Source, tuple(Relation.Destination)),(Relation.Destination, tuple(Relation.Source))), node, symmetricEdge = true)
+        removeLinkByNode(relation,
+          Map((Relation.Source, tuple(Relation.Destination)),(Relation.Destination, tuple(Relation.Source))), node, symmetricEdge = true)
       case _ =>
         // do nothing
     }
@@ -532,7 +578,8 @@ class InMemoryWordNetStore extends WordNetStore {
 
   def removeMatchingLinks(relation: Relation, tuple: Map[String, Any]) = atomic { removeMatchingLinksByNode(relation, tuple, None, true, true) }
 
-  def removeMatchingLinksByNode(relation: Relation, tuple: Map[String, Any], node: Option[Any], withDependentNodes: Boolean, withCollectionDependentNodes: Boolean) = atomic {
+  def removeMatchingLinksByNode(relation: Relation, tuple: Map[String, Any], node: Option[Any],
+                                withDependentNodes: Boolean, withCollectionDependentNodes: Boolean) = atomic {
     val relationSuccessors = successors(relation)
 
     for ((sourceName, sourceValue) <- tuple if (relationSuccessors.contains(sourceName, sourceValue))) {
@@ -542,45 +589,65 @@ class InMemoryWordNetStore extends WordNetStore {
     }
   }
 
-  def setLinks(relation: Relation, sourceName: String, sourceValue: Any, tuples: Seq[Map[String, Any]]) = atomic {
-    val relationSuccessors = successors(relation)
-    val sourceSuccessors = relationSuccessors.getOrElse((sourceName, sourceValue), TransactionalVector())
-    val (matchingSuccessors, notMatchingSuccessors) = sourceSuccessors.partition(tuples.contains(_))
-
-    notMatchingSuccessors.foreach(tuple => removeLinkByNode(relation, tuple, Some(sourceValue)))
-    tuples.filter(!matchingSuccessors.contains(_)).foreach(addLink(relation, _))
+  def setLinks(relation: Relation, sourceNames: List[String], sources: List[List[Any]],
+               destinationNames: List[String], destinations: List[List[Any]]) = atomic {
+    if (sourceNames.isEmpty)
+      replaceLinks(relation, destinationNames, destinations)
+    else
+      replaceLinksBySource(relation, sources, sourceNames, destinationNames, destinations)
   }
 
+  def replaceLinks(relation: Relation, destinationNames: List[String], destinations: List[List[Any]]) {
+    successors(relation).clear()
+
+    for (destination <- destinations)
+      addLink(relation, destinationNames.zip(destination).toMap)
+  }
+
+  def replaceLinksBySource(relation: Relation, sources: List[List[Any]], sourceNames: List[String],
+                           destinationNames: List[String], destinations: List[List[Any]]) {
+    val relationSuccessors = successors(relation)
+
+    for (source <- sources; i <- 0 until sourceNames.size) {
+      val sourceName = sourceNames(i)
+      val sourceValues = sources(i)
+
+      for (sourceValue <- sourceValues) {
+        val sourceSuccessors = relationSuccessors.getOrElse((sourceName, sourceValue), TransactionalVector())
+        val (matchingSuccessors, _) = sourceSuccessors.partition({
+          successor =>
+            sourceNames.zip(source).forall {
+              case (name, value) => successor(name) == value
+            }
+        })
+
+        matchingSuccessors.foreach(tuple => removeLinkByNode(relation, tuple, Some(sourceValue)))
+
+        for (destination <- destinations) {
+          val tuple = (sourceNames.zip(source) ++ destinationNames.zip(destination)).toMap
+          addLink(relation, tuple)
+        }
+      }
+    }
+  }
 
   private def demandSynset(sense: Sense) = {
     follow(WordNet.SenseToSynset, Relation.Source, sense, Relation.Destination).head.asInstanceOf[Synset]
   }
 
-  def merge(synsets: List[Synset], senses: List[Sense], assignments: List[PropertyAssignment]) = atomic {
+  def merge(synsets: List[Synset], senses: List[Sense]) = atomic {
     if (!synsets.isEmpty || !senses.isEmpty) {
       val (destination, sources) = if (synsets.isEmpty) (Synset("synset#" + senses.head.toString), Nil) else (synsets.head, synsets.tail)
-      val (addAssignments, setAssignments, removeAssignments) = partitionAssignments(assignments)
-      val notSetRelations = relations.filter(relation => relation.name != Relation.AnyName && !setAssignments.exists(_.pattern.relation.get == relation))
-      val skippedTuples = removeAssignments.map(assignment => (assignment.pattern.relation.get, assignment.tuplesFor(destination))).toMap
+      val notAnyRelations = relations.filter(relation => relation.name != Relation.AnyName)
       val destinationType = DataType.fromValue(destination)
 
-      for (assignment <- removeAssignments; tuple <- assignment.tuplesFor(destination))
-        removeMatchingLinksByNode(assignment.pattern.relation.get, tuple, None, true, true)
+      for (synset <- sources; relation <- notAnyRelations)
+        copyLinks(relation, destinationType, synset, destination)
 
-      for (synset <- sources; relation <- notSetRelations)
-        copyLinks(relation, destinationType, synset, destination, skippedTuples.get(relation).orZero)
-
-      for (sense <- senses; relation <- notSetRelations.filterNot(List(WordNet.SynsetToSenses, WordNet.SenseToSynset,WordNet.SynsetToWordForms, WordNet.WordFormToSynsets).contains(_))) {
-        copyLinks(relation, destinationType, demandSynset(sense), destination, skippedTuples.get(relation).orZero)
+      for (sense <- senses; relation <- notAnyRelations
+            .filterNot(List(WordNet.SynsetToSenses, WordNet.SenseToSynset,WordNet.SynsetToWordForms, WordNet.WordFormToSynsets).contains(_))) {
+        copyLinks(relation, destinationType, demandSynset(sense), destination)
       }
-
-      for (assignment <- setAssignments) {
-        removeMatchingLinksByNode(assignment.pattern.relation.get, Map((assignment.pattern.source.name, destination)), Some(destination), false, false)
-        assignment.tuplesFor(destination).foreach(addLink(assignment.pattern.relation.get, _))
-      }
-
-      for (assignment <- addAssignments)
-        assignment.tuplesFor(destination).foreach(addLink(assignment.pattern.relation.get, _))
 
       sources.foreach(removeNode(SynsetType, _, false, false))
       senses.foreach(sense => moveSense(sense, demandSynset(sense), destination))
@@ -598,27 +665,21 @@ class InMemoryWordNetStore extends WordNetStore {
     addSuccessor(sense.wordForm, WordNet.WordFormToSynsets, destination)
   }
 
-  private def copyLinks(relation: Relation, requiredType: DataType, source: Any, destination: Any, skippedLinks: List[Map[String, Any]]) {
+  private def copyLinks(relation: Relation, requiredType: DataType, source: Any, destination: Any) {
     val relationSuccessors = successors(relation)
 
     for (argument <- relation.arguments if argument.nodeType == requiredType) {
       for (succs <- relationSuccessors.get((argument.name, source)); successor <- succs) {
         val tuple = ((argument.name, destination)::((successor - argument.name).toList)).toMap
 
-        if (!skippedLinks.contains(tuple) && !containsLink(relation, tuple))
+        if (!containsLink(relation, tuple))
           addLink(relation, tuple)
       }
     }
   }
 
-  private def partitionAssignments(assignments: List[PropertyAssignment]) = {
-    val (addAssignments, rest) = assignments.partition(_.op == "+=")
-    val (setAssignments, removeAssignments) = rest.partition(_.op == ":=")
-    (addAssignments, setAssignments, removeAssignments)
-  }
-
-  def split(synsets: List[Synset], assignments: List[PropertyAssignment]) {
+  def split(synsets: List[Synset]) {
     for (synset <- synsets; sense <- getSenses(synset))
-      merge(Nil, List(sense), assignments)
+      merge(Nil, List(sense))
   }
 }

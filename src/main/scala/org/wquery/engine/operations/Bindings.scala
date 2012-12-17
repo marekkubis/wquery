@@ -4,6 +4,7 @@ import scala.collection.mutable.Map
 import scalaz._
 import Scalaz._
 import org.wquery.model.DataSet
+import org.wquery.{WQueryEvaluationException, WQueryStaticCheckException}
 
 class Bindings(parent: Option[Bindings], updatesParent: Boolean) {
   val setVariables = Map[String, DataSet]()
@@ -39,6 +40,16 @@ class Bindings(parent: Option[Bindings], updatesParent: Boolean) {
   def lookupPathVariable(name: String): Option[List[Any]] = pathVariables.get(name).orElse(parent.flatMap(_.lookupPathVariable(name)))
 
   def lookupStepVariable(name: String): Option[Any] = stepVariables.get(name).orElse(parent.flatMap(_.lookupStepVariable(name)))
+
+  def demandSetVariable(name: String): DataSet = lookupSetVariable(name)
+    .getOrElse(throw new WQueryEvaluationException("A reference to unknown variable " + name + " found"))
+
+  def demandPathVariable(name: String): List[Any] = lookupPathVariable(name)
+    .getOrElse(throw new WQueryEvaluationException("A reference to unknown variable " + name + " found"))
+
+  def demandStepVariable(name: String): Any = lookupStepVariable(name)
+    .getOrElse(throw new WQueryEvaluationException("A reference to unknown variable " + name + " found"))
+
 }
 
 object Bindings {

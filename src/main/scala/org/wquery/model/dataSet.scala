@@ -12,7 +12,7 @@ class DataSet(val paths: List[List[Any]], val pathVars: Map[String, List[(Int, I
     val sizes = paths.map(_.size)
     (if (sizes.isEmpty) 0 else sizes.min, some(if (sizes.isEmpty) 0 else sizes.max))
   }
-        
+
   val pathCount = paths.size
   val containsSingleTuple = pathCount == 1
   lazy val containsValues = minTupleSize == 1 && maxTupleSize.get == 1
@@ -24,10 +24,10 @@ class DataSet(val paths: List[List[Any]], val pathVars: Map[String, List[(Int, I
       false
     } else {
       if (maxTupleSize.get == 1) {
-        val booleans = paths.map { x => 
-          if (x.head.isInstanceOf[Boolean]) 
-            x.head.asInstanceOf[Boolean] 
-          else 
+        val booleans = paths.map { x =>
+          if (x.head.isInstanceOf[Boolean])
+            x.head.asInstanceOf[Boolean]
+          else
             true
         }
 
@@ -50,7 +50,7 @@ class DataSet(val paths: List[List[Any]], val pathVars: Map[String, List[(Int, I
   def rightType(pos: Int): Set[DataType] = paths.filter(pos < _.size).map(tuple => DataType.fromValue(tuple(tuple.size - 1 - pos))).toSet
 
   def types = (for (i <- maxTupleSize.get - 1 to 0 by -1) yield rightType(i)).toList
-  
+
   def toBoundPaths: List[(List[Any], Map[String, (Int, Int)], Map[String, Int])] = {
     val buffer = new ListBuffer[(List[Any], Map[String, (Int, Int)], Map[String, Int])]
     val pathVarNames = pathVars.keys
@@ -133,11 +133,11 @@ class DataSet(val paths: List[List[Any]], val pathVars: Map[String, List[(Int, I
 
 object DataSet {
   val empty = new DataSet(Nil, Map(), Map())
-  
+
   implicit def DataSetZero = zero(empty)
 
   def apply(paths: List[List[Any]]) = new DataSet(paths, Map(), Map())
-  
+
   def apply(paths: List[List[Any]], pathVars: Map[String, List[(Int, Int)]], stepVars: Map[String, List[Int]]) = new DataSet(paths, pathVars, stepVars)
 
   def fromBoundPaths(boundPaths: List[(List[Any], Map[String, (Int, Int)], Map[String, Int])]) = {
@@ -145,25 +145,25 @@ object DataSet {
     val stepVarNames = if (boundPaths.isEmpty) Set.empty[String] else boundPaths.head._3.keySet
     val pathBuffer = DataSetBuffers.createPathBuffer
     val pathVarBuffers = DataSetBuffers.createPathVarBuffers(pathVarNames)
-    val stepVarBuffers = DataSetBuffers.createStepVarBuffers(stepVarNames)    
-    
+    val stepVarBuffers = DataSetBuffers.createStepVarBuffers(stepVarNames)
+
     for ((path, pathVars, stepVars) <- boundPaths) {
       pathBuffer.append(path)
-      
+
       for ((v, pos) <- pathVars)
         pathVarBuffers(v).append(pos)
 
       for ((v, pos) <- stepVars)
         stepVarBuffers(v).append(pos)
     }
-    
+
     fromBuffers(pathBuffer, pathVarBuffers, stepVarBuffers)
   }
-  
+
   def fromBuffers(pathBuffer: ListBuffer[List[Any]], pathVarBuffers: Map[String, ListBuffer[(Int, Int)]], stepVarBuffers: Map[String, ListBuffer[Int]]) = {
-      new DataSet(pathBuffer.toList, pathVarBuffers.mapValues(_.toList), stepVarBuffers.mapValues(_.toList)) 
+      new DataSet(pathBuffer.toList, pathVarBuffers.mapValues(_.toList), stepVarBuffers.mapValues(_.toList))
   }
-  
+
   def fromList(vlist: List[Any]) = new DataSet(vlist.map(List(_)), Map(), Map())
 
   def fromTuple(tuple: List[Any]) = new DataSet(List(tuple), Map(), Map())
@@ -174,12 +174,12 @@ object DataSet {
 }
 
 object DataSetBuffers {
-  def createPathBuffer = new ListBuffer[List[Any]]  
-    
+  def createPathBuffer = new ListBuffer[List[Any]]
+
   def createPathVarBuffers(pathVarNames: Set[String]) = {
     Map[String, ListBuffer[(Int, Int)]](pathVarNames.toSeq.map(x => (x, new ListBuffer[(Int, Int)])): _*)
   }
-  
+
   def createStepVarBuffers(stepVarNames: Set[String]) = {
     Map[String, ListBuffer[Int]](stepVarNames.toSeq.map(x => (x, new ListBuffer[Int])): _*)
   }
@@ -189,7 +189,7 @@ class DataSetBuffer {
   val pathBuffer = DataSetBuffers.createPathBuffer
   var pathVarBuffers = Map[String, ListBuffer[(Int, Int)]]()
   var stepVarBuffers = Map[String, ListBuffer[Int]]()
-  
+
   def append(result: DataSet) {
     if (pathBuffer.isEmpty) {
       pathVarBuffers = DataSetBuffers.createPathVarBuffers(result.pathVars.keySet)
@@ -206,7 +206,7 @@ class DataSetBuffer {
     pathVarBuffers.keys.foreach(key => pathVarBuffers(key).appendAll(result.pathVars(key)))
     stepVarBuffers.keys.foreach(key => stepVarBuffers(key).appendAll(result.stepVars(key)))
   }
-  
+
   def toDataSet = DataSet.fromBuffers(pathBuffer, pathVarBuffers, stepVarBuffers)
 }
 

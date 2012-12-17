@@ -7,10 +7,11 @@ case class Relation(name: String, arguments: Set[Argument]) {
   private val argumentsByName = arguments.map(arg => (arg.name, arg)).toMap
 
   val sourceType = argumentsByName(Relation.Source).nodeType
-  
+
   val destinationType = argumentsByName.get(Relation.Destination).map(_.nodeType)
 
-  val argumentNames = Relation.Source :: (arguments.map(_.name) - Relation.Source - Relation.Destination).toList.sortWith((x, y) => x < y) ++ argumentsByName.get(Relation.Destination).toList.map(_.name)
+  val argumentNames = Relation.Source :: (arguments.map(_.name) - Relation.Source - Relation.Destination)
+    .toList.sortWith((x, y) => x < y) ++ argumentsByName.get(Relation.Destination).toList.map(_.name)
 
   def isTraversable = arguments.size > 1
 

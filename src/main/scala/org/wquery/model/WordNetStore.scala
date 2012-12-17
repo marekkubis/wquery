@@ -26,13 +26,7 @@ trait WordNetStore {
   def stats: WordNetStats
 
   // updating nodes
-  def addSense(sense: Sense, assignments: List[PropertyAssignment])
-
-  def addSynset(synsetId: Option[String], senses: List[Sense], assignments: List[PropertyAssignment], moveSenses: Boolean = true): Synset
-
-  def addWord(word: String, patterns: List[PropertyAssignment])
-
-  def addPartOfSpeechSymbol(pos: String, patterns: List[PropertyAssignment])
+  def addSynset(synsetId: Option[String], senses: List[Sense], moveSenses: Boolean = true): Synset
 
   def removeSense(sense: Sense)
 
@@ -42,13 +36,13 @@ trait WordNetStore {
 
   def removePartOfSpeechSymbol(pos: String)
 
-  def setSynsets(synsets: List[Synset], assignments: List[PropertyAssignment])
+  def setSynsets(synsets: List[Synset])
 
-  def setSenses(newSenses: List[Sense], assignments: List[PropertyAssignment])
+  def setSenses(newSenses: List[Sense])
 
-  def setPartOfSpeechSymbols(newPartOfSpeechSymbols: List[String], assignments: List[PropertyAssignment])
+  def setPartOfSpeechSymbols(newPartOfSpeechSymbols: List[String])
 
-  def setWords(newWords: List[String], assignments: List[PropertyAssignment])
+  def setWords(newWords: List[String])
 
   // updating relations
   def addRelation(relation: Relation)
@@ -57,21 +51,20 @@ trait WordNetStore {
 
   def removeRelation(relation: Relation)
 
-  def setRelations(newRelations: List[Relation], assignments: List[PropertyAssignment])
+  def setRelations(newRelations: List[Relation])
 
-  // updating links
-  def addLink(relation: Relation, tuple: Map[String, Any])
+  // updating tuples
+  def addTuple(relation: Relation, tuple: Map[String, Any])
 
-  def removeLink(relation: Relation, tuple: Map[String, Any], withDependentNodes: Boolean = true, withCollectionDependentNodes: Boolean = true)
+  def removeTuple(relation: Relation, tuple: Map[String, Any], withDependentNodes: Boolean = true, withCollectionDependentNodes: Boolean = true)
 
-  def removeMatchingLinks(relation: Relation, tuple: Map[String, Any])
-
-  def setLinks(relation: Relation, sourceName: String, sourceValue: Any, tuples: Seq[Map[String, Any]])
+  def setTuples(relation: Relation, sourceNames: List[String], sourceValues: List[List[Any]],
+                destinationNames: List[String], destinationValues: List[List[Any]])
 
   // merge & split
-  def merge(synsets: List[Synset], senses: List[Sense], assignments: List[PropertyAssignment])
+  def merge(synsets: List[Synset], senses: List[Sense])
 
-  def split(synsets: List[Synset], assignments: List[PropertyAssignment])
+  def split(synsets: List[Synset])
 
   // relation properties
   val dependent = MMap[Relation, Set[String]]()
@@ -87,11 +80,11 @@ trait WordNetStore {
 
   // helper methods
   def addSuccessor(predecessor: Any, relation: Relation, successor: Any) {
-    addLink(relation, Map((Relation.Source, predecessor), (Relation.Destination, successor)))
+    addTuple(relation, Map((Relation.Source, predecessor), (Relation.Destination, successor)))
   }
 
   def removeSuccessor(predecessor: Any, relation: Relation, successor: Any, withDependentNodes: Boolean = false, withCollectionDependentNodes:Boolean = false) {
-    removeLink(relation, Map((Relation.Source, predecessor), (Relation.Destination, successor)), withDependentNodes, withCollectionDependentNodes)
+    removeTuple(relation, Map((Relation.Source, predecessor), (Relation.Destination, successor)), withDependentNodes, withCollectionDependentNodes)
   }
 }
 

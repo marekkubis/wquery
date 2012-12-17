@@ -75,8 +75,8 @@ case class VariableTemplate(pattern: List[Variable]) {
 
 object VariableTemplate {
   val empty = new VariableTemplate(Nil)
-  
+
   implicit val VariableTemplateZero = zero(empty)
-  
+
   implicit val VariableTemplateEqual = equalA[VariableTemplate]
 }

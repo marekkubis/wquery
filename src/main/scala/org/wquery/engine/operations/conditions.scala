@@ -1,19 +1,19 @@
 package org.wquery.engine.operations
 
 import org.wquery.WQueryEvaluationException
-import org.wquery.engine.{ReferencesVariables, Variable}
+import org.wquery.engine.{Context, ReferencesVariables, Variable}
 import org.wquery.model._
 import scalaz._
 import Scalaz._
 import org.wquery.utils.BigIntOptionW._
 
 sealed abstract class Condition extends ReferencesVariables with HasCost {
-  def satisfied(wordNet: WordNet, bindings: Bindings): Boolean
+  def satisfied(wordNet: WordNet, bindings: Bindings, context: Context): Boolean
   def selectivity(wordNet: WordNetSchema): Double
 }
 
 case class OrCondition(exprs: List[Condition]) extends Condition {
-  def satisfied(wordNet: WordNet, bindings: Bindings) = exprs.exists(_.satisfied(wordNet, bindings))
+  def satisfied(wordNet: WordNet, bindings: Bindings, context: Context) = exprs.exists(_.satisfied(wordNet, bindings, context))
 
   val referencedVariables = exprs.foldLeft(Set.empty[Variable])((vars, expr) => vars union expr.referencedVariables)
 
@@ -23,7 +23,7 @@ case class OrCondition(exprs: List[Condition]) extends Condition {
 }
 
 case class AndCondition(exprs: List[Condition]) extends Condition {
-  def satisfied(wordNet: WordNet, bindings: Bindings) = exprs.forall(_.satisfied(wordNet, bindings))
+  def satisfied(wordNet: WordNet, bindings: Bindings, context: Context) = exprs.forall(_.satisfied(wordNet, bindings, context))
 
   val referencedVariables = exprs.foldLeft(Set.empty[Variable])((vars, expr) => vars union expr.referencedVariables)
 
@@ -33,7 +33,7 @@ case class AndCondition(exprs: List[Condition]) extends Condition {
 }
 
 case class NotCondition(expr: Condition) extends Condition {
-  def satisfied(wordNet: WordNet, bindings: Bindings) = !expr.satisfied(wordNet, bindings)
+  def satisfied(wordNet: WordNet, bindings: Bindings, context: Context) = !expr.satisfied(wordNet, bindings, context)
 
   val referencedVariables = expr.referencedVariables
 
@@ -43,31 +43,27 @@ case class NotCondition(expr: Condition) extends Condition {
 }
 
 case class BinaryCondition(op: String, leftOp: AlgebraOp, rightOp: AlgebraOp) extends Condition {
-  var leftCache: (List[Any], Map[Any, List[Any]]) = null
-  var rightCache: (List[Any], Map[Any, List[Any]]) = null
+  var leftCache = none[(List[Any], Map[Any, List[Any]])]
+  var rightCache = none[(List[Any], Map[Any, List[Any]])]
 
-  def satisfied(wordNet: WordNet, bindings: Bindings) = {
-    val (leftResult, leftGroup) = if (leftCache != null) {
-      leftCache
-    } else {
-      val result = leftOp.evaluate(wordNet, bindings).paths.map(_.last)
+  def satisfied(wordNet: WordNet, bindings: Bindings, context: Context) = {
+    val (leftResult, leftGroup) = leftCache.getOrElse {
+      val result = leftOp.evaluate(wordNet, bindings, context).paths.map(_.last)
       val group = result.groupBy(x => x)
 
       if (leftOp.referencedVariables.isEmpty)
-        leftCache = (result, group)
+        leftCache = some((result, group))
 
       (result, group)
     }
 
-    val (rightResult, rightGroup) = if (rightCache != null) {
-      rightCache
-    } else {
-      val result = rightOp.evaluate(wordNet, bindings).paths.map(_.last)
+    val (rightResult, rightGroup) = rightCache.getOrElse {
+      val result = rightOp.evaluate(wordNet, bindings, context).paths.map(_.last)
       val group = result.groupBy(x => x)
 
       if (rightOp.referencedVariables.isEmpty)
-        rightCache = (result, group)
-      
+        rightCache = some((result, group))
+
       (result, group)
     }
 
@@ -81,7 +77,9 @@ case class BinaryCondition(op: String, leftOp: AlgebraOp, rightOp: AlgebraOp) ex
       case "in" =>
         leftGroup.forall{ case (left, leftValues) => rightGroup.get(left).map(rightValues => leftValues.size <= rightValues.size).getOrElse(false) }
       case "pin" =>
-        leftGroup.forall{ case (left, leftValues) => rightGroup.get(left).map(rightValues => leftValues.size <= rightValues.size).getOrElse(false) } && leftResult.size < rightResult.size
+        leftGroup.forall{
+          case (left, leftValues) => rightGroup.get(left).map(rightValues => leftValues.size <= rightValues.size).getOrElse(false)
+        } && leftResult.size < rightResult.size
       case "=~" =>
         val regexps = rightResult.collect{ case pattern: String => pattern.r }
 
@@ -127,8 +125,8 @@ case class BinaryCondition(op: String, leftOp: AlgebraOp, rightOp: AlgebraOp) ex
 }
 
 case class RightFringeCondition(op: AlgebraOp) extends Condition {
-  def satisfied(wordNet: WordNet, bindings: Bindings) = {
-    val lastSteps = op.evaluate(wordNet, bindings).paths.map(_.last)
+  def satisfied(wordNet: WordNet, bindings: Bindings, context: Context) = {
+    val lastSteps = op.evaluate(wordNet, bindings, context).paths.map(_.last)
 
     !lastSteps.isEmpty && lastSteps.forall(x => x.isInstanceOf[Boolean] && x.asInstanceOf[Boolean])
   }

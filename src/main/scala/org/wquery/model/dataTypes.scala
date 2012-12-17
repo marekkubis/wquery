@@ -1,3 +1,5 @@
+// scalastyle:off magic.number
+
 package org.wquery.model
 
 import org.wquery.WQueryModelException
@@ -70,7 +72,7 @@ object DataType {
   val numeric = Set[DataType](IntegerType, FloatType)
 
   implicit val DataTypeEqual = equalA[DataType]
-  
+
   def fromValue(value: Any) = value match {
     case _:Synset =>
       SynsetType

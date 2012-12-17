@@ -45,7 +45,9 @@ case class RelationUnionPattern(patterns: List[RelationalPattern]) extends Relat
 
   def rightType(pos: Int) = patterns.flatMap(_.rightType(pos)).toSet
 
-  def maxCount(pathCount: Option[BigInt], wordNet: WordNetSchema, direction: Direction) = patterns.map(_.maxCount(pathCount, wordNet, direction)).sequence.map(_.sum)
+  def maxCount(pathCount: Option[BigInt], wordNet: WordNetSchema, direction: Direction) = {
+    patterns.map(_.maxCount(pathCount, wordNet, direction)).sequence.map(_.sum)
+  }
 
   def fringeMaxCount(side: Side, wordNet: WordNetSchema) = patterns.map(_.fringeMaxCount(side, wordNet)).sum
 }
@@ -112,9 +114,11 @@ case class RelationCompositionPattern(patterns: List[RelationalPattern]) extends
   def maxCount(pathCount: Option[BigInt], wordNet: WordNetSchema, direction: Direction) = {
     direction match {
       case Forward =>
-        patterns.tail.foldLeft(patterns.head.maxCount(pathCount, wordNet, direction))((pathCount, pattern) => pattern.maxCount(pathCount, wordNet, direction))
+        patterns.tail.
+          foldLeft(patterns.head.maxCount(pathCount, wordNet, direction))((pathCount, pattern) => pattern.maxCount(pathCount, wordNet, direction))
       case Backward =>
-        patterns.dropRight(1).foldRight(patterns.last.maxCount(pathCount, wordNet, direction))((pattern, pathCount) => pattern.maxCount(pathCount, wordNet, direction))
+        patterns.dropRight(1).
+          foldRight(patterns.last.maxCount(pathCount, wordNet, direction))((pattern, pathCount) => pattern.maxCount(pathCount, wordNet, direction))
     }
   }
 
@@ -274,9 +278,9 @@ case class QuantifiedRelationPattern(pattern: RelationalPattern, quantifier: Qua
       val domainRelationsMaxCount = (for ((relation, argument) <- getFringeDomainRelations(fringeTypes))
         yield wordNet.stats.fetchMaxCount(relation, List((argument, Nil)), List(argument))).sum
 
-      if (fringeTypes.subsetOf(DataType.domain)) 
-        domainRelationsMaxCount 
-      else 
+      if (fringeTypes.subsetOf(DataType.domain))
+        domainRelationsMaxCount
+      else
         pattern.fringeMaxCount(side, wordNet) + domainRelationsMaxCount
     }
   }
