@@ -37,7 +37,7 @@ sealed abstract class UpdateOp extends AlgebraOp {
 case class AddTuplesOp(leftOp: Option[AlgebraOp], spec: RelationSpecification, rightOp: AlgebraOp) extends UpdateOp {
   def update(wordNet: WordNet, bindings: Bindings, context: Context) {
     val (relation, leftArgs, rightArgs) = spec.resolve(wordNet.store.schema, bindings, leftOp.map(_.minTupleSize).orZero)
-    val opContext = if (WordNet.dataTypesRelations.values.exists(_ == relation)) context.copy(creation = true) else context
+    val opContext = if (WordNet.domainRelations.contains(relation)) context.copy(creation = true) else context
     val op = leftOp.some[AlgebraOp](JoinOp(_, rightOp)).none(rightOp)
     val dataSet = op.evaluate(wordNet, bindings, opContext)
 
@@ -67,7 +67,7 @@ case class SetTuplesOp(leftOp: Option[AlgebraOp], spec: RelationSpecification, r
   def update(wordNet: WordNet, bindings: Bindings, context: Context) {
     val (relation, leftArgs, rightArgs) = spec.resolve(wordNet.store.schema, bindings, leftOp.map(_.minTupleSize).orZero)
     val leftPaths = leftOp.map(_.evaluate(wordNet, bindings, context).paths).orZero
-    val rightContext = if (WordNet.dataTypesRelations.values.exists(_ == relation)) context.copy(creation = true) else context
+    val rightContext = if (WordNet.domainRelations.contains(relation)) context.copy(creation = true) else context
     val rightPaths = rightOp.evaluate(wordNet, bindings, rightContext).paths
 
     // TODO check sizes

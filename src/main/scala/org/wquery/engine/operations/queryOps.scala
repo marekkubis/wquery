@@ -878,8 +878,7 @@ class NewSynset(val senses: List[Sense]) extends Synset("synset#" + senses.head.
 
 case class FetchOp(relation: Relation, from: List[(String, List[Any])], to: List[String]) extends QueryOp {
   def evaluate(wordNet: WordNet, bindings: Bindings, context: Context) = {
-    if (context.creation && WordNet.dataTypesRelations.values.exists(_ == relation) &&
-      from.forall { case (source, values) => values.nonEmpty }) {
+    if (context.creation && WordNet.domainRelations.contains(relation) && from.forall { case (source, values) => values.nonEmpty }) {
       DataSet(from.flatMap{ case (_, value) => List(value) })
     } else {
       wordNet.store.fetch(relation, from, to)
