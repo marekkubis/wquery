@@ -11,6 +11,7 @@ import scala.collection.mutable.{Set, Map, ListBuffer}
 import scala.collection.immutable.{Map => IMap, Set => ISet}
 import org.wquery.model._
 import org.wquery.WQueryUpdateBreaksRelationPropertyException
+import collection.mutable
 
 class GridLoader extends WordNetLoader with Logging {
   override def canLoad(url: String): Boolean = url.endsWith(".xml") // TODO provide a better check
@@ -76,27 +77,7 @@ class GridHandler(wordnet: WordNet) extends DefaultHandler with Logging {
       case "SYNSET" =>
         endSynsetTag
       case tagName =>
-        val content = text.toString.trim
-
-        tagName match {
-          case "ID" =>
-            synsetId = content
-          case "POS" =>
-            synsetPos = content
-            endGenericTag("POS", content)
-          case "LITERAL" =>
-            synsetSenses += ((content, literalSense))
-            literalSense = null
-          case "SENSE" =>
-            literalSense = content
-          case "ILR" =>
-            synsetIlrRelationsTuples += ((ilrType.replace(' ','_').replace('-','_'), content))
-            ilrType = null
-          case "TYPE" =>
-            ilrType = content
-          case tagName =>
-            endGenericTag(tagName, content)
-        }
+        endSynsetSubTag(tagName, text.toString().trim)
     }
 
     tagName match {
@@ -106,6 +87,28 @@ class GridHandler(wordnet: WordNet) extends DefaultHandler with Logging {
         popText
       case _ =>
         pushText
+    }
+  }
+
+  private def endSynsetSubTag(tagName: String, content: String) {
+    tagName match {
+      case "ID" =>
+        synsetId = content
+      case "POS" =>
+        synsetPos = content
+        endGenericTag("POS", content)
+      case "LITERAL" =>
+        synsetSenses += ((content, literalSense))
+        literalSense = null
+      case "SENSE" =>
+        literalSense = content
+      case "ILR" =>
+        synsetIlrRelationsTuples += ((ilrType.replace(' ','_').replace('-','_'), content))
+        ilrType = null
+      case "TYPE" =>
+        ilrType = content
+      case tagName =>
+        endGenericTag(tagName, content)
     }
   }
 
@@ -222,25 +225,30 @@ class GridHandler(wordnet: WordNet) extends DefaultHandler with Logging {
   }
 
   private def createGenericRelations {
-    // create relations datatypes
+    createGenericRelationsDefinitions
+    createGenericRelationsSuccessors
+    info("non-ILR relations loaded")
+  }
+
+  private def createGenericRelationsDefinitions {
     val genericRelationsDestTypes = Map[String, NodeType]()
 
     for ((synset, relname, reldest) <- genericRelationsTuples) {
       val dtype = getType(reldest)
 
       if (!genericRelationsDestTypes.contains(relname) ||
-            rankType(genericRelationsDestTypes(relname)) < rankType(dtype)) {
+        rankType(genericRelationsDestTypes(relname)) < rankType(dtype)) {
         genericRelationsDestTypes(relname) = dtype
       }
     }
 
-    // create relations
     for ((relname, dtype) <- genericRelationsDestTypes) {
       val relation = Relation.binary(relname, SynsetType, dtype)
       wordnet.store.addRelation(relation)
     }
+  }
 
-    // create successors
+  private def createGenericRelationsSuccessors {
     for ((synset, relname, reldest) <- genericRelationsTuples) {
       val relation = wordnet.store.schema.demandRelation(relname, IMap((Relation.Source, ISet[DataType](SynsetType))))
 
@@ -261,9 +269,8 @@ class GridHandler(wordnet: WordNet) extends DefaultHandler with Logging {
         }
       }.getOrElse(throw new RuntimeException("Relation '" + relname + "' has no destination type"))
     }
-
-    info("non-ILR relations loaded")
   }
+
 
   private def getType(destination: String): NodeType = {
     synsetsById.get(destination).map(_ => SynsetType).getOrElse(

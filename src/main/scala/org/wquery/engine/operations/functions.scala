@@ -178,7 +178,7 @@ object SortFunction extends DataSetFunction("sort") with AcceptsAll with Returns
  with PreservesTypes with PreservesTupleSizes with PreservesBindingsPattern {
 
   def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
-    DataSet.fromBoundPaths(dataSet.toBoundPaths.sortBy(x => x._1)(WQueryListOrdering))
+    DataSet.fromBoundPaths(dataSet.toBoundPaths.sortBy(x => x._1)(AnyListOrdering))
   }
 
   def cost(args: AlgebraOp, wordNet: WordNetSchema) = args.maxCount(wordNet).map(cost => cost*cost)
@@ -189,7 +189,7 @@ with PreservesTypes with PreservesTupleSizes with PreservesBindingsPattern {
 
   def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
     if (!dataSet.isEmpty) {
-      val sorted = dataSet.toBoundPaths.sortBy(x => x._1)(WQueryListOrdering)
+      val sorted = dataSet.toBoundPaths.sortBy(x => x._1)(AnyListOrdering)
       val minValue = sorted.head._1
 
       var count = 0
@@ -212,7 +212,7 @@ with PreservesTypes with PreservesTupleSizes with PreservesBindingsPattern {
 
   def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
     if (!dataSet.isEmpty) {
-      val sorted = dataSet.toBoundPaths.sortBy(x => x._1)(WQueryListOrdering)
+      val sorted = dataSet.toBoundPaths.sortBy(x => x._1)(AnyListOrdering)
       val maxValue = sorted.last._1
 
       var count = sorted.size - 2
@@ -258,7 +258,7 @@ object SortByFunction extends ByFunction("sortby") with ReturnsDataSetOfSimilarS
   def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
     if (!dataSet.isEmpty) {
       val argNum = dataSet.paths.head.last.asInstanceOf[Int] - 1
-      val sorted = dataSet.toBoundPaths.sortBy(x => x._1(argNum))(WQueryOrdering)
+      val sorted = dataSet.toBoundPaths.sortBy(x => x._1(argNum))(AnyOrdering)
 
       DataSet.fromBoundPaths(sorted.map{ case (x, y, z) => (x.dropRight(1), y, z) })
     } else {
@@ -273,7 +273,7 @@ object MinByFunction extends ByFunction("minby") with ReturnsDataSetOfSimilarSiz
   def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
     if (!dataSet.isEmpty) {
       val argNum = dataSet.paths.head.last.asInstanceOf[Int] - 1
-      val sorted = dataSet.toBoundPaths.sortBy(x => x._1(argNum))(WQueryOrdering)
+      val sorted = dataSet.toBoundPaths.sortBy(x => x._1(argNum))(AnyOrdering)
       val minValue = sorted.head._1(argNum)
 
       var count = 0
@@ -295,7 +295,7 @@ object MaxByFunction extends ByFunction("maxby") with ReturnsDataSetOfSimilarSiz
   def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
     if (!dataSet.isEmpty) {
       val argNum = dataSet.paths.head.last.asInstanceOf[Int] - 1
-      val sorted = dataSet.toBoundPaths.sortBy(x => x._1(argNum))(WQueryOrdering)
+      val sorted = dataSet.toBoundPaths.sortBy(x => x._1(argNum))(AnyOrdering)
       val maxValue = sorted.last._1(argNum)
 
       var count = sorted.size - 2
@@ -639,6 +639,8 @@ abstract class JavaMethod(override val name: String, method: Method) extends Fun
     DataSet(buffer.toList)
   }
 }
+
+// scalastyle:off multiple.string.literals
 
 object Functions {
   private val functions = scala.collection.mutable.Map[String, List[Function]]()

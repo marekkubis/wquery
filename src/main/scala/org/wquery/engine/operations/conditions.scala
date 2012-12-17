@@ -88,31 +88,35 @@ case class BinaryCondition(op: String, leftOp: AlgebraOp, rightOp: AlgebraOp) ex
             regexps.forall(_.findFirstIn(elem).isDefined)
         }
       case _ =>
-        if (leftResult.size == 1 && rightResult.size == 1) {
-          // element context
-          op match {
-            case "<=" =>
-              WQueryListOrdering.lteq(leftResult, rightResult)
-            case "<" =>
-              WQueryListOrdering.lt(leftResult, rightResult)
-            case ">=" =>
-              WQueryListOrdering.gteq(leftResult, rightResult)
-            case ">" =>
-              WQueryListOrdering.gt(leftResult, rightResult)
-          }
-        } else {
-          if (leftResult.isEmpty)
-            throw new WQueryEvaluationException("The leftSet side of '" + op + "' returns no values")
-          if (leftResult.size > 1)
-            throw new WQueryEvaluationException("The leftSet side of '" + op + "' returns more than one value")
-          if (rightResult.isEmpty)
-            throw new WQueryEvaluationException("The rightSet side of '" + op + "' returns no values")
-          if (rightResult.size > 1)
-            throw new WQueryEvaluationException("The rightSet side of '" + op + "' returns more than one values")
+        tryComparingAsSingletons(leftResult, rightResult)
+    }
+  }
 
-          // the following shall not happen
-          throw new WQueryEvaluationException("Both sides of '" + op + "' should return exactly one value")
-        }
+  private def tryComparingAsSingletons(leftResult: List[Any], rightResult: List[Any]) = {
+    if (leftResult.size == 1 && rightResult.size == 1) {
+      // element context
+      op match {
+        case "<=" =>
+          AnyListOrdering.lteq(leftResult, rightResult)
+        case "<" =>
+          AnyListOrdering.lt(leftResult, rightResult)
+        case ">=" =>
+          AnyListOrdering.gteq(leftResult, rightResult)
+        case ">" =>
+          AnyListOrdering.gt(leftResult, rightResult)
+      }
+    } else {
+      if (leftResult.isEmpty)
+        throw new WQueryEvaluationException("The leftSet side of '" + op + "' returns no values")
+      if (leftResult.size > 1)
+        throw new WQueryEvaluationException("The leftSet side of '" + op + "' returns more than one value")
+      if (rightResult.isEmpty)
+        throw new WQueryEvaluationException("The rightSet side of '" + op + "' returns no values")
+      if (rightResult.size > 1)
+        throw new WQueryEvaluationException("The rightSet side of '" + op + "' returns more than one values")
+
+      // the following shall not happen
+      throw new WQueryEvaluationException("Both sides of '" + op + "' should return exactly one value")
     }
   }
 

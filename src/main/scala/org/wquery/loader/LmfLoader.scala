@@ -3,6 +3,8 @@
 
 package org.wquery.loader
 
+import scalaz._
+import Scalaz._
 import org.wquery.utils.Logging
 import javax.xml.parsers.SAXParserFactory
 import java.io.{File, FileReader, BufferedReader}
@@ -41,11 +43,11 @@ class LmfHandler(wordNet: WordNet) extends DefaultHandler with Logging {
   private val stringRelationsTuples = new ListBuffer[(String, String, String)]()
 
   // per lemma attributes
-  private var writtenForm: String = null
-  private var partOfSpeech: String = null
+  private var writtenForm = none[String]
+  private var partOfSpeech = none[String]
 
   // per synset attributes
-  private var synsetId: String = null
+  private var synsetIdOption = none[String]
 
   override def setDocumentLocator(loc: Locator) { locator = loc }
 
@@ -55,38 +57,43 @@ class LmfHandler(wordNet: WordNet) extends DefaultHandler with Logging {
         writtenForm = getAttributeOrWarn(tagName, attributes, "writtenForm", "skipping all related senses")
         partOfSpeech = getAttributeOrWarn(tagName, attributes, "partOfSpeech", "skipping all related senses")
       case "Sense" =>
-        val senseSynsetId = getAttributeOrWarn(tagName, attributes, "synset", "skipping the related sense")
-
-        if (writtenForm != null && partOfSpeech != null) {
-          val senseNumber = senseNumbers.get((writtenForm, partOfSpeech)).getOrElse(0) + 1
-
-          senseNumbers.put((writtenForm, partOfSpeech), senseNumber)
-
-          if (senseSynsetId != null) {
-            if (!sensesBySynsetId.contains(senseSynsetId))
-              sensesBySynsetId(senseSynsetId) = new ListBuffer[Sense]()
-
-            sensesBySynsetId(senseSynsetId).append(new Sense(writtenForm, senseNumber, partOfSpeech))
-          }
-        }
+        startSenseElement(attributes)
       case "Synset" =>
-        synsetId = getAttributeOrWarn(tagName, attributes, "id", "(skipping the synset)")
-        val bcs = attributes.getValue("baseConcept")
-
-        if (synsetId != null && bcs != null)
-          stringRelationsTuples.append((synsetId, "bcs", bcs))
+        startSynsetElement(attributes)
       case "Definition" =>
-        if (synsetId != null)
-          stringRelationsTuples.append((synsetId, "gloss", attributes.getValue("gloss")))
+        synsetIdOption.map(id => stringRelationsTuples.append((id, "gloss", attributes.getValue("gloss"))))
       case "Statement" =>
-        if (synsetId != null)
-          stringRelationsTuples.append((synsetId, "example", attributes.getValue("example")))
+        synsetIdOption.map(id => stringRelationsTuples.append((id, "example", attributes.getValue("example"))))
       case "SynsetRelation" =>
-        if (synsetId != null)
-          synsetRelationsTuples.append((synsetId, attributes.getValue("relType"), attributes.getValue("target")))
+        synsetIdOption.map(id => synsetRelationsTuples.append((id, attributes.getValue("relType"), attributes.getValue("target"))))
       case _ =>
         // skip
     }
+  }
+
+  private def startSenseElement(attributes: Attributes) {
+    val senseSynsetId = getAttributeOrWarn("Sense", attributes, "synset", "skipping the related sense")
+
+    (writtenForm <|*|> partOfSpeech).map{ case (form, pos) =>
+      val senseNumber = senseNumbers.get((form, pos)).getOrElse(0) + 1
+
+      senseNumbers.put((form, pos), senseNumber)
+
+      senseSynsetId.map { id =>
+        if (!sensesBySynsetId.contains(id))
+          sensesBySynsetId(id) = new ListBuffer[Sense]()
+
+        sensesBySynsetId(id).append(new Sense(form, senseNumber, pos))
+      }
+    }
+  }
+
+  private def startSynsetElement(attributes: Attributes) {
+    synsetIdOption = getAttributeOrWarn("Synset", attributes, "id", "(skipping the synset)")
+    val bcs = attributes.getValue("baseConcept")
+
+    if (synsetIdOption.isDefined && bcs != null)
+      stringRelationsTuples.append((synsetIdOption.get, "bcs", bcs))
   }
 
   override def endDocument {
@@ -158,10 +165,12 @@ class LmfHandler(wordNet: WordNet) extends DefaultHandler with Logging {
   private def getAttributeOrWarn(tag: String, attributes: Attributes, name: String, note: String) = {
     val value = attributes.getValue(name)
 
-    if (value == null)
+    if (value == null) {
       locatedWarn(tag + " has no '" + name + "' attribute (" + note + ")")
-
-    value
+      none[String]
+    } else {
+      some(value)
+    }
   }
 
   private def locatedWarn(message: String)

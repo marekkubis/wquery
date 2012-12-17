@@ -7,7 +7,7 @@ import scalaz._
 import Scalaz._
 import org.wquery.model._
 import org.wquery.engine.operations._
-import org.wquery.{WQueryStaticCheckException, WQueryEvaluationException}
+import org.wquery.{FoundReferenceToUnknownVariableWhileCheckingException, WQueryStaticCheckException, WQueryEvaluationException}
 import collection.mutable.ListBuffer
 
 sealed abstract class Expr
@@ -83,53 +83,6 @@ case class RelationAssignmentExpr(name: String, expr: RelationalExpr) extends Ev
     else
       throw new WQueryEvaluationException("Expression " + expr + " does not determine single " + typeName + " type")
   }
-}
-
-case class WordNetUpdateExpr(property: String, op: String, valuesExpr: EvaluableExpr) extends EvaluableExpr {
-  val Senses = "senses"
-  val Synsets = "synsets"
-  val Words = "words"
-  val PosSymbols = "possyms"
-  val Relations = "relations"
-
-  def evaluationPlan(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context) = {
-    val valuesContext = if (op === "-=") context else context.copy(creation = true)
-    val valuesOp = valuesExpr.evaluationPlan(wordNet, bindings, valuesContext)
-
-    val contextType = property match {
-      case Senses =>
-        if (op === "+=") SynsetType else SenseType
-      case Synsets =>
-        SynsetType
-      case Words =>
-        StringType
-      case PosSymbols =>
-        StringType
-      case Relations =>
-        ArcType
-      case _ =>
-        throw new WQueryStaticCheckException("wordnet has no property '" + property + "'")
-    }
-
-    op match {
-      case "+=" =>
-        property match {
-          case Relations =>
-            AddRelationsOp(valuesOp)
-        }
-      case ":=" =>
-        property match {
-          case Relations =>
-            SetRelationsOp(valuesOp)
-        }
-      case "-=" =>
-        property match {
-          case Relations =>
-            RemoveRelationsOp(valuesOp)
-        }
-    }
-  }
-
 }
 
 case class UpdateExpr(left: Option[EvaluableExpr], spec: RelationSpecification, op: String, right: EvaluableExpr) extends EvaluableExpr {
@@ -582,13 +535,13 @@ case class ContextByVariableReq(variable: Variable) extends EvaluableExpr {
   def evaluationPlan(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context) = variable match {
     case variable @ SetVariable(name) =>
       bindings.lookupSetVariableType(name).map(SetVariableRefOp(variable, _))
-        .getOrElse(throw new WQueryStaticCheckException("A reference to unknown variable " + variable + " found"))
+        .getOrElse(throw new FoundReferenceToUnknownVariableWhileCheckingException(variable))
     case variable @ TupleVariable(name) =>
       bindings.lookupPathVariableType(name).map(PathVariableRefOp(variable, _))
-        .getOrElse(throw new WQueryStaticCheckException("A reference to unknown variable " + variable + " found"))
+        .getOrElse(throw new FoundReferenceToUnknownVariableWhileCheckingException(variable))
     case variable @ StepVariable(name) =>
       bindings.lookupStepVariableType(name).map(StepVariableRefOp(variable, _))
-        .getOrElse(throw new WQueryStaticCheckException("A reference to unknown variable " + variable + " found"))
+        .getOrElse(throw new FoundReferenceToUnknownVariableWhileCheckingException(variable))
 
   }
 }

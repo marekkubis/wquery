@@ -4,7 +4,8 @@ import scala.collection.mutable.Map
 import scalaz._
 import Scalaz._
 import org.wquery.model.DataSet
-import org.wquery.{WQueryEvaluationException, WQueryStaticCheckException}
+import org.wquery.{FoundReferenceToUnknownVariableWhileEvaluatingException, WQueryEvaluationException, WQueryStaticCheckException}
+import org.wquery.engine.{TupleVariable, StepVariable, SetVariable}
 
 class Bindings(parent: Option[Bindings], updatesParent: Boolean) {
   val setVariables = Map[String, DataSet]()
@@ -42,13 +43,13 @@ class Bindings(parent: Option[Bindings], updatesParent: Boolean) {
   def lookupStepVariable(name: String): Option[Any] = stepVariables.get(name).orElse(parent.flatMap(_.lookupStepVariable(name)))
 
   def demandSetVariable(name: String): DataSet = lookupSetVariable(name)
-    .getOrElse(throw new WQueryEvaluationException("A reference to unknown variable " + name + " found"))
+    .getOrElse(throw new FoundReferenceToUnknownVariableWhileEvaluatingException(SetVariable(name)))
 
   def demandPathVariable(name: String): List[Any] = lookupPathVariable(name)
-    .getOrElse(throw new WQueryEvaluationException("A reference to unknown variable " + name + " found"))
+    .getOrElse(throw new FoundReferenceToUnknownVariableWhileEvaluatingException(TupleVariable(name)))
 
   def demandStepVariable(name: String): Any = lookupStepVariable(name)
-    .getOrElse(throw new WQueryEvaluationException("A reference to unknown variable " + name + " found"))
+    .getOrElse(throw new FoundReferenceToUnknownVariableWhileEvaluatingException(StepVariable(name)))
 
 }
 

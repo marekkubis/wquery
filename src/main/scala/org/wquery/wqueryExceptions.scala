@@ -1,6 +1,9 @@
+// scalastyle:off multiple.string.literals
+
 package org.wquery
 
 import model.Relation
+import engine.Variable
 
 sealed abstract class WQueryException(message: String) extends RuntimeException(message)
 
@@ -15,10 +18,16 @@ class WQueryStaticCheckException(message: String) extends WQueryException(messag
 class WQueryStepVariableCannotBeBoundException(variableName: String)
   extends WQueryStaticCheckException("Variable $" + variableName + " cannot be bound")
 
+class FoundReferenceToUnknownVariableWhileCheckingException(variable: Variable)
+  extends WQueryStaticCheckException("A reference to unknown variable " + variable + " found")
+
 class WQueryEvaluationException(message: String) extends WQueryException(message)
 
 class WQueryInvalidValueSpecifiedForRelationPropertyException(property: String)
   extends WQueryEvaluationException("Invalid value specified for relation property '" + property + "'")
+
+class FoundReferenceToUnknownVariableWhileEvaluatingException(variable: Variable)
+  extends WQueryEvaluationException("A reference to unknown variable " + variable + " found")
 
 class WQueryModelException(message: String) extends WQueryException(message)
 

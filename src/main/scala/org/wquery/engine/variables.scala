@@ -3,7 +3,7 @@ import scalaz._
 import Scalaz._
 
 sealed abstract class Variable(val name: String) {
-  val isUnnamed = name == "_"
+  val isUnnamed = name == Variable.EmptyName
 }
 
 sealed abstract class PathVariable(override val name: String) extends Variable(name)
@@ -21,14 +21,16 @@ case class SetVariable(override val name: String) extends Variable(name) {
 }
 
 object Variable {
+  val EmptyName = "_"
+
   implicit val VariableEqual = equalA[Variable]
 }
 
 object StepVariable {
   val ContextVariable = StepVariable("__#")
-  val Unnamed = StepVariable("_")
+  val Unnamed = StepVariable(Variable.EmptyName)
 }
 
 object TupleVariable {
-  val Unnamed = TupleVariable("_")
+  val Unnamed = TupleVariable(Variable.EmptyName)
 }
