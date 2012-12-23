@@ -36,13 +36,13 @@ sealed abstract class UpdateOp extends AlgebraOp {
 
 case class AddTuplesOp(leftOp: Option[AlgebraOp], spec: RelationSpecification, rightOp: AlgebraOp) extends UpdateOp {
   def update(wordNet: WordNet, bindings: Bindings, context: Context) {
-    val (relation, leftArgs, rightArgs) = spec.resolve(wordNet.store.schema, bindings, leftOp.map(_.minTupleSize).orZero)
+    val (relation, leftArgs, rightArgs) = spec.resolve(wordNet.schema, bindings, leftOp.map(_.minTupleSize).orZero)
     val opContext = if (WordNet.domainRelations.contains(relation)) context.copy(creation = true) else context
     val op = leftOp.some[AlgebraOp](JoinOp(_, rightOp)).none(rightOp)
     val dataSet = op.evaluate(wordNet, bindings, opContext)
 
     for (path <- dataSet.paths) {
-      wordNet.store.addTuple(relation, (leftArgs ++ rightArgs).zip(path).toMap)
+      wordNet.addTuple(relation, (leftArgs ++ rightArgs).zip(path).toMap)
     }
   }
 
@@ -51,12 +51,12 @@ case class AddTuplesOp(leftOp: Option[AlgebraOp], spec: RelationSpecification, r
 
 case class RemoveTuplesOp(leftOp: Option[AlgebraOp], spec: RelationSpecification, rightOp: AlgebraOp) extends UpdateOp {
   def update(wordNet: WordNet, bindings: Bindings, context: Context) {
-    val (relation, leftArgs, rightArgs) = spec.resolve(wordNet.store.schema, bindings, leftOp.map(_.minTupleSize).orZero)
+    val (relation, leftArgs, rightArgs) = spec.resolve(wordNet.schema, bindings, leftOp.map(_.minTupleSize).orZero)
     val op = leftOp.some[AlgebraOp](JoinOp(_, rightOp)).none(rightOp)
     val dataSet = op.evaluate(wordNet, bindings, context)
 
     for (path <- dataSet.paths) {
-      wordNet.store.removeTuple(relation, (leftArgs ++ rightArgs).zip(path).toMap)
+      wordNet.removeTuple(relation, (leftArgs ++ rightArgs).zip(path).toMap)
     }
   }
 
@@ -65,14 +65,14 @@ case class RemoveTuplesOp(leftOp: Option[AlgebraOp], spec: RelationSpecification
 
 case class SetTuplesOp(leftOp: Option[AlgebraOp], spec: RelationSpecification, rightOp:AlgebraOp) extends UpdateOp {
   def update(wordNet: WordNet, bindings: Bindings, context: Context) {
-    val (relation, leftArgs, rightArgs) = spec.resolve(wordNet.store.schema, bindings, leftOp.map(_.minTupleSize).orZero)
+    val (relation, leftArgs, rightArgs) = spec.resolve(wordNet.schema, bindings, leftOp.map(_.minTupleSize).orZero)
     val leftPaths = leftOp.map(_.evaluate(wordNet, bindings, context).paths).orZero
     val rightContext = if (WordNet.domainRelations.contains(relation)) context.copy(creation = true) else context
     val rightPaths = rightOp.evaluate(wordNet, bindings, rightContext).paths
 
     // TODO check sizes
 
-    wordNet.store.setTuples(relation, leftArgs, leftPaths, rightArgs, rightPaths)
+    wordNet.setTuples(relation, leftArgs, leftPaths, rightArgs, rightPaths)
   }
 
   val referencedVariables = rightOp.referencedVariables ++ leftOp.map(_.referencedVariables).orZero
@@ -99,14 +99,14 @@ sealed abstract class WordNetUpdateWithValuesOp[A](override val valuesOp: Algebr
 case class AddRelationsOp(override val valuesOp: AlgebraOp) extends WordNetUpdateWithAssignmentsOp(valuesOp) {
   def updateWithAssignments(wordNet: WordNet, bindings: Bindings, context: Context) = {
     val valueSet = valuesOp.evaluate(wordNet, bindings, context)
-    valueSet.paths.map(_.last.asInstanceOf[Arc].relation).distinct.foreach(wordNet.store.addRelation(_))
+    valueSet.paths.map(_.last.asInstanceOf[Arc].relation).distinct.foreach(wordNet.addRelation(_))
   }
 }
 
 case class RemoveRelationsOp(override val valuesOp: AlgebraOp) extends WordNetUpdateWithAssignmentsOp(valuesOp) {
   def updateWithAssignments(wordNet: WordNet, bindings: Bindings, context: Context) = {
     val valueSet = valuesOp.evaluate(wordNet, bindings, context)
-    valueSet.paths.map(_.last.asInstanceOf[Arc].relation).distinct.foreach(wordNet.store.removeRelation(_))
+    valueSet.paths.map(_.last.asInstanceOf[Arc].relation).distinct.foreach(wordNet.removeRelation(_))
   }
 }
 
@@ -115,21 +115,8 @@ case class SetRelationsOp(override val valuesOp: AlgebraOp) extends WordNetUpdat
     val valueSet = valuesOp.evaluate(wordNet, bindings, context)
     val newRelations = valueSet.paths.map(_.last.asInstanceOf[Arc].relation).distinct
 
-    wordNet.store.setRelations(newRelations)
+    wordNet.setRelations(newRelations)
   }
-}
-
-case class CreateRelationFromPatternOp(name: String, pattern: RelationalPattern, sourceType: NodeType, destinationType: NodeType) extends UpdateOp {
-  def update(wordNet: WordNet, bindings: Bindings, context: Context) {
-    wordNet.store.schema.getRelation(name, Map((Relation.Source, pattern.sourceType))).map(wordNet.store.removeRelation(_))
-
-    val relation = Relation.binary(name, sourceType, destinationType)
-
-    wordNet.store.addRelation(relation)
-    wordNet.store.addRelationPattern(relation, pattern)
-  }
-
-  val referencedVariables = ∅[Set[Variable]]
 }
 
 case class RelationUpdateOp(arcsOp: AlgebraOp, op: String, property: String, action: Boolean, valuesOp: AlgebraOp) extends UpdateOp {
@@ -143,11 +130,11 @@ case class RelationUpdateOp(arcsOp: AlgebraOp, op: String, property: String, act
       if (Relation.PropertyActions.contains(value)) {
         property match {
           case Relation.Transitivity =>
-            updateRelationPropertyAction(wordNet.store.transitivesActions, arcs, value)
+            updateRelationPropertyAction(wordNet.transitivesActions, arcs, value)
           case Relation.Symmetry =>
-            updateRelationPropertyAction(wordNet.store.symmetryActions, arcs, value)
+            updateRelationPropertyAction(wordNet.symmetryActions, arcs, value)
           case Relation.Functional =>
-            updateRelationArgumentPropertyAction(wordNet.store.functionalForActions, arcs, value)
+            updateRelationArgumentPropertyAction(wordNet.functionalForActions, arcs, value)
         }
       } else {
         throw new WQueryInvalidValueSpecifiedForRelationPropertyException(property)
@@ -155,32 +142,32 @@ case class RelationUpdateOp(arcsOp: AlgebraOp, op: String, property: String, act
     } else {
       property match {
         case Relation.Transitivity =>
-          updateTransitivityProperty(wordNet.store, arcs, value)
+          updateTransitivityProperty(wordNet, arcs, value)
         case Relation.Symmetry =>
-          updateSymmetryProperty(wordNet.store, arcs, value)
+          updateSymmetryProperty(wordNet, arcs, value)
         case Relation.RequiredBy =>
-          updateRelationArgumentProperty(wordNet.store.requiredBys, arcs, value)
+          updateRelationArgumentProperty(wordNet.requiredBys, arcs, value)
         case Relation.Functional =>
-          updateRelationArgumentProperty(wordNet.store.functionalFor, arcs, value)
+          updateRelationArgumentProperty(wordNet.functionalFor, arcs, value)
       }
     }
   }
 
-  private def updateTransitivityProperty(store: WordNetStore, arcs: List[Arc], value: Any) {
+  private def updateTransitivityProperty(wordNet: WordNet, arcs: List[Arc], value: Any) {
     val logicValue = value.asInstanceOf[Boolean]
 
     if (op == "+=" || op == ":=") {
       for (arc <- arcs)
-        store.transitives(arc.relation) = logicValue
+        wordNet.transitives(arc.relation) = logicValue
     } else {
       for (arc <- arcs) {
-        if (store.transitives(arc.relation) == value)
-          store.transitives(arc.relation) = !logicValue
+        if (wordNet.transitives(arc.relation) == value)
+          wordNet.transitives(arc.relation) = !logicValue
       }
     }
   }
 
-  private def updateSymmetryProperty(store: WordNetStore, arcs: List[Arc], value: Any) {
+  private def updateSymmetryProperty(wordNet: WordNet, arcs: List[Arc], value: Any) {
     val symmetry = value.asInstanceOf[String] match {
       case "antisymmetric" =>
         Antisymmetric
@@ -194,11 +181,11 @@ case class RelationUpdateOp(arcsOp: AlgebraOp, op: String, property: String, act
 
     if (op == "+=" || op == ":=") {
       for (arc <- arcs)
-        store.symmetry(arc.relation) = symmetry
+        wordNet.symmetry(arc.relation) = symmetry
     } else {
       for (arc <- arcs) {
-        if (store.symmetry(arc.relation) == symmetry)
-          store.symmetry(arc.relation) = NonSymmetric
+        if (wordNet.symmetry(arc.relation) == symmetry)
+          wordNet.symmetry(arc.relation) = NonSymmetric
       }
     }
   }
@@ -262,6 +249,6 @@ case class MergeOp(override val valuesOp: AlgebraOp) extends WordNetUpdateWithAs
   def updateWithAssignments(wordNet: WordNet, bindings: Bindings, context: Context) = {
     val (synsets, senses) = valuesOp.evaluate(wordNet, bindings, context).paths.map(_.last)
       .partition(_.isInstanceOf[Synset]).asInstanceOf[(List[Synset], List[Sense])]
-    wordNet.store.merge(synsets, senses)
+    wordNet.merge(synsets, senses)
   }
 }

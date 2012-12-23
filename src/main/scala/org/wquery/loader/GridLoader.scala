@@ -146,7 +146,7 @@ class GridHandler(wordnet: WordNet) extends DefaultHandler with Logging {
         }
       }
 
-      val synset = wordnet.store.addSynset(Some(synsetId), senses.toList, moveSenses = false)
+      val synset = wordnet.addSynset(Some(synsetId), senses.toList, moveSenses = false)
       synsetsById(synset.id) = synset
 
       for ((ilrType, content) <- synsetIlrRelationsTuples) {
@@ -196,19 +196,19 @@ class GridHandler(wordnet: WordNet) extends DefaultHandler with Logging {
     // create semantic relations
     for (name <- ilrRelationsNames) {
       val relation = Relation.binary(name, SynsetType, SynsetType)
-      wordnet.store.addRelation(relation)
+      wordnet.addRelation(relation)
     }
 
     // create semantic relations successors
     for ((synset, relname, reldest) <- ilrRelationsTuples) {
-      val relation = wordnet.store.schema.demandRelation(relname, IMap((Relation.Source, ISet[DataType](SynsetType))))
+      val relation = wordnet.schema.demandRelation(relname, IMap((Relation.Source, ISet[DataType](SynsetType))))
 
       relation.destinationType.some { dt =>
         dt match {
           case SynsetType =>
             synsetsById.get(reldest).some { destination =>
               try {
-                wordnet.store.addSuccessor(synset, relation, destination)
+                wordnet.addSuccessor(synset, relation, destination)
               } catch {
                 case e: WQueryUpdateBreaksRelationPropertyException =>
                   warn("ILR tag with type '" + relname + "' found in synset '" + synset.id + "' that points to synset '" + reldest +
@@ -245,26 +245,26 @@ class GridHandler(wordnet: WordNet) extends DefaultHandler with Logging {
 
     for ((relname, dtype) <- genericRelationsDestTypes) {
       val relation = Relation.binary(relname, SynsetType, dtype)
-      wordnet.store.addRelation(relation)
+      wordnet.addRelation(relation)
     }
   }
 
   private def createGenericRelationsSuccessors {
     for ((synset, relname, reldest) <- genericRelationsTuples) {
-      val relation = wordnet.store.schema.demandRelation(relname, IMap((Relation.Source, ISet[DataType](SynsetType))))
+      val relation = wordnet.schema.demandRelation(relname, IMap((Relation.Source, ISet[DataType](SynsetType))))
 
       relation.destinationType.some { dt =>
         dt match {
           case SynsetType =>
-            wordnet.store.addSuccessor(synset, relation, synsetsById(reldest))
+            wordnet.addSuccessor(synset, relation, synsetsById(reldest))
           case BooleanType =>
-            wordnet.store.addSuccessor(synset, relation, reldest.toBoolean)
+            wordnet.addSuccessor(synset, relation, reldest.toBoolean)
           case IntegerType =>
-            wordnet.store.addSuccessor(synset, relation, reldest.toInt)
+            wordnet.addSuccessor(synset, relation, reldest.toInt)
           case FloatType =>
-            wordnet.store.addSuccessor(synset, relation, reldest.toFloat)
+            wordnet.addSuccessor(synset, relation, reldest.toFloat)
           case StringType =>
-            wordnet.store.addSuccessor(synset, relation, reldest)
+            wordnet.addSuccessor(synset, relation, reldest)
           case dtype =>
             throw new RuntimeException("Incorrect destination type " + dtype + " as a successor of relation '" + relation + "'")
         }

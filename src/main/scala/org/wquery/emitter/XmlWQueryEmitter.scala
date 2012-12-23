@@ -67,7 +67,7 @@ class XmlWQueryEmitter extends WQueryEmitter {
     element match {
       case element: Synset =>
         builder append "<SYNSET>\n"
-        wordNet.store.getSenses(element).foreach(emitSense(_, builder))
+        wordNet.getSenses(element).foreach(emitSense(_, builder))
         builder append "</SYNSET>\n"
       case element: Sense =>
         emitSense(element, builder)

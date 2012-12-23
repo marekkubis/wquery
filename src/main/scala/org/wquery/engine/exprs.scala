@@ -68,23 +68,6 @@ case class VariableAssignmentExpr(variable: SetVariable, expr: EvaluableExpr) ex
   }
 }
 
-case class RelationAssignmentExpr(name: String, expr: RelationalExpr) extends EvaluableExpr {
-  def evaluationPlan(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context) = {
-    val pattern = expr.evaluationPattern(wordNet, DataType.all)
-    val sourceType = demandSingleNodeType(pattern.sourceType, "source")
-    val destinationType = demandSingleNodeType(pattern.rightType(0), "destination")
-
-    CreateRelationFromPatternOp(name, pattern, sourceType, destinationType)
-  }
-
-  private def demandSingleNodeType(types: Set[_ <: DataType], typeName: String) = {
-    if (types.size === 1 && types.head.isInstanceOf[NodeType])
-      types.head.asInstanceOf[NodeType]
-    else
-      throw new WQueryEvaluationException("Expression " + expr + " does not determine single " + typeName + " type")
-  }
-}
-
 case class UpdateExpr(left: Option[EvaluableExpr], spec: RelationSpecification, op: String, right: EvaluableExpr) extends EvaluableExpr {
   def evaluationPlan(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context) = {
     val leftOp = left.map(_.evaluationPlan(wordNet, bindings, context))

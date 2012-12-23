@@ -13,11 +13,11 @@ class PlannerTests extends WQueryTestSuite {
   def pathFor(query: String) = {
     (wquery.parser.parse(query): @unchecked) match {
       case FunctionExpr(sort,FunctionExpr(distinct, ConjunctiveExpr(pathExpr @ PathExpr(steps, _)))) =>
-        pathExpr.createPath(steps, wquery.wordNet.store.schema, BindingsSchema(), Context())
+        pathExpr.createPath(steps, wquery.wordNet.schema, BindingsSchema(), Context())
     }
   }
 
-  def plansFor(query: String) = new PathPlanGenerator(pathFor(query)).plan(wquery.wordNet.store.schema, BindingsSchema())
+  def plansFor(query: String) = new PathPlanGenerator(pathFor(query)).plan(wquery.wordNet.schema, BindingsSchema())
 
   private def emitted(dataSet: DataSet) = emitter.emit(Answer(wquery.wordNet, dataSet))
 
@@ -45,7 +45,7 @@ class PlannerTests extends WQueryTestSuite {
 
   @Test def planMultipleTransformations() {
     val plans = plansFor("{}.hypernym.partial_holonym.hypernym")
-    val plan = PlanEvaluator.chooseBest(wquery.wordNet.store.schema, plans)
+    val plan = PlanEvaluator.chooseBest(wquery.wordNet.schema, plans)
     val result = plan.evaluate(wquery.wordNet, Bindings(), Context())
 
     plan.toString should equal ("ExtendOp(ExtendOp(ExtendOp(FetchOp(synsets,List((source,List())),List(source)),source&synset^hypernym^destination&synset,Forward,novars),source&synset^partial_holonym^destination&synset,Forward,novars),source&synset^hypernym^destination&synset,Forward,novars)")
@@ -66,7 +66,7 @@ class PlannerTests extends WQueryTestSuite {
 
   @Test def planTransformationsComposition() {
     val plans = plansFor("{}.(hypernym.partial_holonym.hypernym)")
-    val plan = PlanEvaluator.chooseBest(wquery.wordNet.store.schema, plans)
+    val plan = PlanEvaluator.chooseBest(wquery.wordNet.schema, plans)
     val result = plan.evaluate(wquery.wordNet, Bindings(), Context())
 
     plan.toString should equal ("ExtendOp(FetchOp(synsets,List((source,List())),List(source)),RelationCompositionPattern(List(source&synset^hypernym^destination&synset, source&synset^partial_holonym^destination&synset, source&synset^hypernym^destination&synset)),Forward,novars)")
@@ -129,7 +129,7 @@ class PlannerTests extends WQueryTestSuite {
   }
 
   @Test def verifyStats() {
-    val stats = wquery.wordNet.store.schema.stats
+    val stats = wquery.wordNet.schema.stats
 
     stats.fetchMaxCount(WordNet.SynsetSet, List((Relation.Source, Nil)), List(Relation.Source)) should equal (tuples.of("count({})").asValueOf[Int])
     stats.fetchMaxCount(WordNet.SenseSet, List((Relation.Source, Nil)), List(Relation.Source)) should equal (tuples.of("count(::)").asValueOf[Int])
@@ -138,19 +138,19 @@ class PlannerTests extends WQueryTestSuite {
     stats.fetchMaxCount(WordNet.SenseToWordFormSenseNumberAndPos, List((Relation.Source, List("cab")),("num", List(3)), ("pos", List("n"))), List(Relation.Source)) should equal (tuples.of("count(cab.senses)").asValueOf[Int])
 
     stats.extendMaxCount(some(1), ArcPattern(
-      wquery.wordNet.store.schema.relations.find(_.name == "hypernym"),
+      wquery.wordNet.schema.relations.find(_.name == "hypernym"),
       ArcPatternArgument("source", None), List(ArcPatternArgument("destination", None))
     ), Forward).get should equal (tuples.of("max(from {}$a emit count($a.hypernym))").asValueOf[Int])
 
     stats.extendMaxCount(some(1), ArcPattern(
-      wquery.wordNet.store.schema.relations.find(_.name == "hypernym"),
+      wquery.wordNet.schema.relations.find(_.name == "hypernym"),
       ArcPatternArgument("source", None), List(ArcPatternArgument("destination", None))
     ), Backward).get should equal (tuples.of("max(from {}$a emit count($a.^hypernym))").asValueOf[Int])
   }
 
   @Test def choosePlanForPathWithHighlySelectiveNodeFilter() {
     val plans = plansFor("{}.hypernym.{cab:3}")
-    val plan = PlanEvaluator.chooseBest(wquery.wordNet.store.schema, plans)
+    val plan = PlanEvaluator.chooseBest(wquery.wordNet.schema, plans)
     val result = plan.evaluate(wquery.wordNet, Bindings(), Context())
 
     plan.toString should equal ("BindOp(ExtendOp(ProjectOp(ExtendOp(FetchOp(literal,List((destination,List(cab)), (num,List(3))),List(source)),RelationUnionPattern(List(source&sense^synset^destination&synset)),Forward,$__p),StepVariableRefOp($__p,Set(synset))),source&synset^hypernym^destination&synset,Backward,novars),$__f@_)")
@@ -159,7 +159,7 @@ class PlannerTests extends WQueryTestSuite {
 
   @Test def choosePlanForPathWithHighlySelectiveGenerator() {
     val plans = plansFor("{cab:3}.hypernym")
-    val plan = PlanEvaluator.chooseBest(wquery.wordNet.store.schema, plans)
+    val plan = PlanEvaluator.chooseBest(wquery.wordNet.schema, plans)
     val result = plan.evaluate(wquery.wordNet, Bindings(), Context())
 
     plan.toString should equal ("ExtendOp(ProjectOp(ExtendOp(FetchOp(literal,List((destination,List(cab)), (num,List(3))),List(source)),RelationUnionPattern(List(source&sense^synset^destination&synset)),Forward,$__p),StepVariableRefOp($__p,Set(synset))),source&synset^hypernym^destination&synset,Forward,novars)")
@@ -168,7 +168,7 @@ class PlannerTests extends WQueryTestSuite {
 
   @Test def choosePlanForPathWithHighlySelectiveFilterAndGenerator() {
     val plans = plansFor("{cab:3}.hypernym.{car:1}")
-    val plan = PlanEvaluator.chooseBest(wquery.wordNet.store.schema, plans)
+    val plan = PlanEvaluator.chooseBest(wquery.wordNet.schema, plans)
     val result = plan.evaluate(wquery.wordNet, Bindings(), Context())
 
     plan.toString should equal ("SelectOp(BindOp(ExtendOp(ProjectOp(ExtendOp(FetchOp(literal,List((destination,List(cab)), (num,List(3))),List(source)),RelationUnionPattern(List(source&sense^synset^destination&synset)),Forward,$__p),StepVariableRefOp($__p,Set(synset))),source&synset^hypernym^destination&synset,Forward,novars),$__#),BinaryCondition(in,StepVariableRefOp($__#,Set(synset)),ProjectOp(ExtendOp(FetchOp(literal,List((destination,List(car)), (num,List(1))),List(source)),RelationUnionPattern(List(source&sense^synset^destination&synset)),Forward,$__p),StepVariableRefOp($__p,Set(synset)))))")
@@ -177,7 +177,7 @@ class PlannerTests extends WQueryTestSuite {
 
   @Test def choosePlanByHighlySelectiveInnerFilter() {
     val plans = plansFor("{}.hypernym.{cab:3}.hypernym")
-    val plan = PlanEvaluator.chooseBest(wquery.wordNet.store.schema, plans)
+    val plan = PlanEvaluator.chooseBest(wquery.wordNet.schema, plans)
     val result = plan.evaluate(wquery.wordNet, Bindings(), Context())
 
     plan.toString should equal ("BindOp(ExtendOp(ExtendOp(ProjectOp(ExtendOp(FetchOp(literal,List((destination,List(cab)), (num,List(3))),List(source)),RelationUnionPattern(List(source&sense^synset^destination&synset)),Forward,$__p),StepVariableRefOp($__p,Set(synset))),source&synset^hypernym^destination&synset,Forward,novars),source&synset^hypernym^destination&synset,Backward,novars),$__f@_)")
@@ -186,7 +186,7 @@ class PlannerTests extends WQueryTestSuite {
 
   @Test def choosePlanByHighlySelectiveOuterNodes() {
     val plans = plansFor("{bus:4}.hypernym$a.^hypernym.{ambulance:1}")
-    val plan = PlanEvaluator.chooseBest(wquery.wordNet.store.schema, plans)
+    val plan = PlanEvaluator.chooseBest(wquery.wordNet.schema, plans)
     val result = plan.evaluate(wquery.wordNet, Bindings(), Context())
 
     plan.toString should equal ("NaturalJoinOp(ExtendOp(ProjectOp(ExtendOp(FetchOp(literal,List((destination,List(bus)), (num,List(4))),List(source)),RelationUnionPattern(List(source&sense^synset^destination&synset)),Forward,$__p),StepVariableRefOp($__p,Set(synset))),source&synset^hypernym^destination&synset,Forward,$a),ExtendOp(ProjectOp(ExtendOp(FetchOp(literal,List((destination,List(ambulance)), (num,List(1))),List(source)),RelationUnionPattern(List(source&sense^synset^destination&synset)),Forward,$__p),StepVariableRefOp($__p,Set(synset))),destination&synset^hypernym^source&synset,Backward,novars))")
@@ -195,7 +195,7 @@ class PlannerTests extends WQueryTestSuite {
 
   @Test def backwardPlanWithTraverseThroughFilter() {
     val plans = plansFor("{}.hypernym[distinct(max(last(senses.sensenum))) > 2].hypernym.{car}")
-    val plan = PlanEvaluator.chooseBest(wquery.wordNet.store.schema, plans)
+    val plan = PlanEvaluator.chooseBest(wquery.wordNet.schema, plans)
     val result = plan.evaluate(wquery.wordNet, Bindings(), Context())
 
     plan.toString should equal ("SelectOp(BindOp(ExtendOp(SelectOp(BindOp(ExtendOp(FetchOp(synsets,List((source,List())),List(source)),source&synset^hypernym^destination&synset,Forward,novars),$__#),BinaryCondition(>,FunctionOp(distinct,FunctionOp(max,FunctionOp(last,ExtendOp(ExtendOp(StepVariableRefOp($__#,Set(synset)),source&synset^senses^destination&sense,Forward,novars),source&sense^sensenum^destination&integer,Forward,novars)))),ConstantOp(List(List(2))))),source&synset^hypernym^destination&synset,Forward,novars),$__#),BinaryCondition(in,StepVariableRefOp($__#,Set(synset)),ProjectOp(ExtendOp(FetchOp(words,List((source,List(car))),List(source)),RelationUnionPattern(List(source&string^synsets^destination&synset)),Forward,$__p),StepVariableRefOp($__p,Set(synset)))))")

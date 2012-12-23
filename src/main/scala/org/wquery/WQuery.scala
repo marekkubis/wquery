@@ -2,7 +2,7 @@ package org.wquery
 
 import engine._
 import loader.{LmfLoader, GridLoader, WordNetLoader}
-import model.impl.InMemoryWordNetStore
+import model.impl.InMemoryWordNet
 import operations.{Bindings, BindingsSchema}
 import org.wquery.model.WordNet
 import org.wquery.parser.WQueryParsers
@@ -21,7 +21,7 @@ class WQuery(val wordNet: WordNet) extends Logging {
       val expr = parser parse input
       debug("Expr: " + expr)
 
-      val plan = expr.evaluationPlan(wordNet.store.schema, bindingsSchema, Context())
+      val plan = expr.evaluationPlan(wordNet.schema, bindingsSchema, Context())
       debug("Plan: " + plan)
 
       val dataSet = plan.evaluate(wordNet, bindings, Context())
@@ -49,12 +49,11 @@ object WQuery {
   }
 
   def createInstance(from: String, where: String = "memory"): WQuery = {
-    val store = where match {
+    val wordNet = where match {
       case _ =>
-        new InMemoryWordNetStore
+        new InMemoryWordNet
     }
 
-    val wordNet = new WordNet(store)
     val validLoaders = loaders.filter(_.canLoad(from))
 
     if (validLoaders.isEmpty)

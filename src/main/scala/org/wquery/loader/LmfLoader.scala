@@ -104,16 +104,16 @@ class LmfHandler(wordNet: WordNet) extends DefaultHandler with Logging {
 
   private def createSynsets {
     for ((synsetId, senses) <- sensesBySynsetId) {
-      synsetsById(synsetId) = wordNet.store.addSynset(Some(synsetId), senses.toList, moveSenses = false)
+      synsetsById(synsetId) = wordNet.addSynset(Some(synsetId), senses.toList, moveSenses = false)
     }
     info("Synsets loaded")
   }
 
   private def createSynsetRelations {
     for ((sourceSynsetId, relationName, destinationSynsetId) <- synsetRelationsTuples) {
-      val relation = wordNet.store.schema.getRelation(relationName, IMap((Relation.Source, Set[DataType](SynsetType))))|{
-        wordNet.store.addRelation(Relation.binary(relationName, SynsetType, SynsetType))
-        wordNet.store.schema.demandRelation(relationName, IMap((Relation.Source, Set[DataType](SynsetType))))
+      val relation = wordNet.schema.getRelation(relationName, IMap((Relation.Source, Set[DataType](SynsetType))))|{
+        wordNet.addRelation(Relation.binary(relationName, SynsetType, SynsetType))
+        wordNet.schema.demandRelation(relationName, IMap((Relation.Source, Set[DataType](SynsetType))))
       }
 
       relation.destinationType.some { dt =>
@@ -127,7 +127,7 @@ class LmfHandler(wordNet: WordNet) extends DefaultHandler with Logging {
             else if (destinationSynset == None)
               warn("Semantic relation '" + relation.name + "' points to an unknown destination synset '" + destinationSynsetId + "'")
             else
-              wordNet.store.addSuccessor(sourceSynset.get, relation, destinationSynset.get)
+              wordNet.addSuccessor(sourceSynset.get, relation, destinationSynset.get)
           case destinationType =>
             throw new RuntimeException("Semantic relation '" + relation.name + "' has incorrect destination type " + destinationType)
         }
@@ -139,9 +139,9 @@ class LmfHandler(wordNet: WordNet) extends DefaultHandler with Logging {
 
   private def createStringRelations {
     for ((sourceSynsetId, relationName, destination) <- stringRelationsTuples) {
-      val relation = wordNet.store.schema.getRelation(relationName, IMap((Relation.Source, Set[DataType](SynsetType))))| {
-        wordNet.store.addRelation(Relation.binary(relationName, SynsetType, StringType))
-        wordNet.store.schema.demandRelation(relationName, IMap((Relation.Source, Set[DataType](SynsetType))))
+      val relation = wordNet.schema.getRelation(relationName, IMap((Relation.Source, Set[DataType](SynsetType))))| {
+        wordNet.addRelation(Relation.binary(relationName, SynsetType, StringType))
+        wordNet.schema.demandRelation(relationName, IMap((Relation.Source, Set[DataType](SynsetType))))
       }
 
       relation.destinationType.some { dt =>
@@ -152,7 +152,7 @@ class LmfHandler(wordNet: WordNet) extends DefaultHandler with Logging {
             if (sourceSynset == None)
               warn("Relation '" + relation.name + "' points to an empty or unknown source synset '" + sourceSynsetId + "'")
             else
-              wordNet.store.addSuccessor(sourceSynset.get, relation, destination)
+              wordNet.addSuccessor(sourceSynset.get, relation, destination)
           case destinationType =>
             throw new RuntimeException("Relation '" + relation.name + "' has incorrect destination type " + destinationType)
         }

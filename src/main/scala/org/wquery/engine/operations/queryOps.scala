@@ -687,7 +687,7 @@ case class ProjectOp(op: AlgebraOp, projectOp: AlgebraOp) extends QueryOp {
 case class ExtendOp(op: AlgebraOp, pattern: RelationalPattern, direction: Direction, variables: VariableTemplate) extends QueryOp {
   def evaluate(wordNet: WordNet, bindings: Bindings, context: Context) = {
     val dataSet = op.evaluate(wordNet, bindings, context)
-    val extensionSet = pattern.extend(wordNet.store, bindings, new DataExtensionSet(dataSet), direction)
+    val extensionSet = pattern.extend(wordNet, bindings, new DataExtensionSet(dataSet), direction)
     val dataSetPathVarNames = dataSet.pathVars.keySet
     val dataSetStepVarNames = dataSet.stepVars.keySet
     val pathBuffer = DataSetBuffers.createPathBuffer
@@ -800,7 +800,7 @@ case class BindOp(op: AlgebraOp, variables: VariableTemplate) extends QueryOp {
 }
 
 case class FringeOp(pattern: RelationalPattern, side: Side) extends QueryOp {
-  def evaluate(wordNet: WordNet, bindings: Bindings, context: Context) = pattern.fringe(wordNet.store, bindings, side)
+  def evaluate(wordNet: WordNet, bindings: Bindings, context: Context) = pattern.fringe(wordNet, bindings, side)
 
   def leftType(pos: Int) = (pos == 0).??(pattern.leftType(0))
 
@@ -828,8 +828,8 @@ case class SynsetFetchOp(op: AlgebraOp) extends AlgebraOp {
      val senses = op.evaluate(wordNet, bindings, context).paths.map(_.last.asInstanceOf[Sense])
 
      if (!senses.isEmpty) {
-       val synset = wordNet.store.getSynset(senses.head).some { synset =>
-         if (wordNet.store.getSenses(synset) == senses)
+       val synset = wordNet.getSynset(senses.head).some { synset =>
+         if (wordNet.getSenses(synset) == senses)
            synset
          else
            new NewSynset(senses)
@@ -881,7 +881,7 @@ case class FetchOp(relation: Relation, from: List[(String, List[Any])], to: List
     if (context.creation && WordNet.domainRelations.contains(relation) && from.forall { case (source, values) => values.nonEmpty }) {
       DataSet(from.flatMap{ case (_, value) => List(value) })
     } else {
-      wordNet.store.fetch(relation, from, to)
+      wordNet.fetch(relation, from, to)
     }
   }
 

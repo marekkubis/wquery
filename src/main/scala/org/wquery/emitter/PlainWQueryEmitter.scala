@@ -74,7 +74,7 @@ class PlainWQueryEmitter extends WQueryEmitter {
       case element: Synset =>
         builder append "{ "
 
-        wordNet.store.getSenses(element).foreach{ sense =>
+        wordNet.getSenses(element).foreach{ sense =>
           emitSense(sense, builder)
           builder append " "
         }

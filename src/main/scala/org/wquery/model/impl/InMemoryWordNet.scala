@@ -10,7 +10,7 @@ import Scalaz._
 import org.wquery.engine.operations.{RelationalPattern, NewSynset, Bindings}
 import org.wquery.utils.Cache
 
-class InMemoryWordNetStore extends WordNetStore {
+class InMemoryWordNet extends WordNet {
   private val successors = TransactionalMap[Relation, TransactionalMap[(String, Any), IndexedSeq[Map[String, Any]]]]()
   private val patterns = scala.collection.mutable.Map[Relation, List[RelationalPattern]]()
   private var relationsList = List[Relation]()
@@ -19,6 +19,12 @@ class InMemoryWordNetStore extends WordNetStore {
   val schema = new WordNetSchema(this)
 
   def relations = relationsList
+
+  for (relation <- WordNet.relations)
+    addRelation(relation)
+
+  dependent ++= WordNet.dependent
+  collectionDependent ++= WordNet.collectionDependent
 
   def addRelation(relation: Relation) {
     if (!relations.contains(relation)) {
@@ -243,15 +249,6 @@ class InMemoryWordNetStore extends WordNetStore {
     }
 
     new WordNetStats(relations, fetchAllMaxCounts.toMap, extendValueMaxCounts.toMap)
-  }
-
-  def addRelationPattern(relation: Relation, pattern: RelationalPattern) {
-    if (!(patterns.contains(relation))) {
-      patterns(relation) = Nil
-    }
-
-    patterns(relation) = patterns(relation) :+ pattern
-    statsCache.invalidate
   }
 
   private def addSense(sense: Sense) {
