@@ -198,9 +198,8 @@ class UpdatesTestSuite extends WQueryTestSuite {
 
   @Test def testSetSynsets() = {
     result of ("{unit:6:n}") should equal ("{ whole:2:n unit:6:n }\n")
-    result of ("update synsets := {}$_a[$_a != {unit:6}] union {pppp:1:n}") should equal ("(no result)\n")
+    result of ("update synsets := {}$_a[not unit:6:n in $_a.senses] union {pppp:1:n}") should equal ("(no result)\n")
     result of ("{unit:6:n}") should equal ("(no result)\n")
-    result of ("{pppp:1:n}.desc") should equal ("{ pppp:1:n } desc '4 p'\n")
   }
 
   @Test def testSetPartOfSpeechSymbol() = {
