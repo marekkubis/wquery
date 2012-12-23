@@ -1,10 +1,12 @@
 package org.wquery.engine.operations
 
 import org.wquery.model._
+import scalaz._
+import Scalaz._
 
 class BindingsSchema(val parent: Option[BindingsSchema], updatesParent: Boolean) extends BindingsPattern {
   override def bindStepVariableType(name: String, types: Set[DataType]) {
-    if (updatesParent && parent.map(_.lookupStepVariableType(name).isDefined).getOrElse(false)) {
+    if (updatesParent && parent.some(_.lookupStepVariableType(name).isDefined).none(false)) {
       parent.get.bindStepVariableType(name, types)
     } else {
       super.bindStepVariableType(name, types)
@@ -12,7 +14,7 @@ class BindingsSchema(val parent: Option[BindingsSchema], updatesParent: Boolean)
   }
 
   override def bindPathVariableType(name: String, op: AlgebraOp, leftShift: Int, rightShift: Int) {
-    if (updatesParent && parent.map(_.lookupPathVariableType(name).isDefined).getOrElse(false)) {
+    if (updatesParent && parent.some(_.lookupPathVariableType(name).isDefined).none(false)) {
       parent.get.bindPathVariableType(name, op, leftShift, rightShift)
     } else {
       super.bindPathVariableType(name, op, leftShift, rightShift)
@@ -20,7 +22,7 @@ class BindingsSchema(val parent: Option[BindingsSchema], updatesParent: Boolean)
   }
 
   override def bindSetVariableType(name: String, op: AlgebraOp) {
-    if (updatesParent && parent.map(_.lookupPathVariableType(name).isDefined).getOrElse(false)) {
+    if (updatesParent && parent.some(_.lookupPathVariableType(name).isDefined).none(false)) {
       parent.get.bindSetVariableType(name, op)
     } else {
       super.bindSetVariableType(name, op)

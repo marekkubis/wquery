@@ -4,7 +4,6 @@ import scalaz._
 import Scalaz._
 import org.wquery.model._
 import collection.mutable.ListBuffer
-import org.wquery.WQueryEvaluationException
 import org.wquery.engine._
 import org.wquery.utils.IntOptionW._
 
@@ -89,7 +88,7 @@ case class RelationCompositionPattern(patterns: List[RelationalPattern]) extends
     patterns.headOption.map { headPattern =>
       if (pos < headPattern.minTupleSize)
         headPattern.leftType(pos)
-      else if (headPattern.maxTupleSize.map(pos < _).getOrElse(true)) { // pos < maxSize or maxSize undefined
+      else if (headPattern.maxTupleSize.some(pos < _).none(true)) { // pos < maxSize or maxSize undefined
         headPattern.leftType(pos) union leftType(patterns.tail, pos - headPattern.minTupleSize)
       } else { // else pos < maxSize and defined
         leftType(patterns.tail, pos - headPattern.maxTupleSize.get)
@@ -103,7 +102,7 @@ case class RelationCompositionPattern(patterns: List[RelationalPattern]) extends
     patterns.headOption.map { headPattern =>
       if (pos < headPattern.minTupleSize)
         headPattern.rightType(pos)
-      else if (headPattern.maxTupleSize.map(pos < _).getOrElse(true)) { // pos < maxSize or maxSize undefined
+      else if (headPattern.maxTupleSize.some(pos < _).none(true)) { // pos < maxSize or maxSize undefined
         headPattern.rightType(pos) union rightType(patterns.tail, pos - headPattern.minTupleSize)
       } else { // else pos < maxSize and defined
         rightType(patterns.tail, pos - headPattern.maxTupleSize.get)
@@ -173,8 +172,8 @@ case class QuantifiedRelationPattern(pattern: RelationalPattern, quantifier: Qua
       val source = extensionSet.right(i)
       builder.extend(i, Nil)
 
-      for (cnode <- closeTupleForward(wordNet, bindings, List(source), Set(source), limit))
-        builder.extend(i, cnode)
+      for (closureNode <- closeTupleForward(wordNet, bindings, List(source), Set(source), limit))
+        builder.extend(i, closureNode)
     }
 
     builder.build
@@ -187,15 +186,15 @@ case class QuantifiedRelationPattern(pattern: RelationalPattern, quantifier: Qua
       val source = extensionSet.left(i, 0)
       builder.extend(i, Nil)
 
-      for (cnode <- closeTupleBackward(wordNet, bindings, List(source), Set(source), limit))
-        builder.extend(i, cnode)
+      for (closureNode <- closeTupleBackward(wordNet, bindings, List(source), Set(source), limit))
+        builder.extend(i, closureNode)
     }
 
     builder.build
   }
 
   private def closeTupleForward(wordNet: WordNetStore, bindings: Bindings, source: List[Any], forbidden: Set[Any], limit: Option[Int]): Seq[List[Any]] = {
-    if (limit.getOrElse(1) > 0) {
+    if ((limit|1) > 0) {
       val transformed = pattern.extend(wordNet, bindings, new DataExtensionSet(DataSet.fromList(source)), Forward)
       val filtered = transformed.extensions.filter{ case (_, extension) => !forbidden.contains(extension.last)}.map(_._2)
 
@@ -221,7 +220,7 @@ case class QuantifiedRelationPattern(pattern: RelationalPattern, quantifier: Qua
   }
 
   private def closeTupleBackward(wordNet: WordNetStore, bindings: Bindings, source: List[Any], forbidden: Set[Any], limit: Option[Int]): Seq[List[Any]] = {
-    if (limit.getOrElse(1) > 0) {
+    if ((limit|1) > 0) {
       val transformed = pattern.extend(wordNet, bindings, new DataExtensionSet(DataSet.fromList(source)), Backward)
       val filtered = transformed.extensions.filter{ case (_, extension) => !forbidden.contains(extension.head)}.map(_._2)
 
@@ -252,15 +251,15 @@ case class QuantifiedRelationPattern(pattern: RelationalPattern, quantifier: Qua
 
   def sourceType = pattern.sourceType
 
-  def leftType(pos: Int) = if (maxTupleSize.map(pos < _).getOrElse(true)) {
-    (for (i <- pattern.minTupleSize to pattern.maxTupleSize.getOrElse(pos + 1))
+  def leftType(pos: Int) = if (maxTupleSize.some(pos < _).none(true)) {
+    (for (i <- pattern.minTupleSize to pattern.maxTupleSize|(pos + 1))
     yield pattern.leftType(if (i > 0) pos % i else 0)).flatten.toSet
   } else {
     Set[DataType]()
   }
 
-  def rightType(pos: Int) = if (maxTupleSize.map(pos < _).getOrElse(true)) {
-    (for (i <- pattern.minTupleSize to pattern.maxTupleSize.getOrElse(pos + 1))
+  def rightType(pos: Int) = if (maxTupleSize.some(pos < _).none(true)) {
+    (for (i <- pattern.minTupleSize to pattern.maxTupleSize|(pos + 1))
     yield pattern.rightType(if (i > 0) pos % i else 0)).flatten.toSet
   } else {
     Set[DataType]()
@@ -299,8 +298,8 @@ case class QuantifiedRelationPattern(pattern: RelationalPattern, quantifier: Qua
 
 case class ArcRelationalPattern(pattern: ArcPattern) extends RelationalPattern {
   def extend(wordNet: WordNetStore, bindings: Bindings, extensionSet: ExtensionSet, direction: Direction) = {
-    pattern.relation.map(wordNet.extend(extensionSet, _, direction, pattern.source.name, pattern.destinations.map(_.name)))
-      .getOrElse(wordNet.extend(extensionSet, direction, (pattern.source.name, pattern.source.nodeType),
+    pattern.relation.some(wordNet.extend(extensionSet, _, direction, pattern.source.name, pattern.destinations.map(_.name)))
+      .none(wordNet.extend(extensionSet, direction, (pattern.source.name, pattern.source.nodeType),
         if (pattern.destinations == List(ArcPatternArgument.Any)) Nil else pattern.destinations.map(dest => (dest.name, dest.nodeType))))
   }
 
@@ -339,8 +338,8 @@ case class ArcRelationalPattern(pattern: ArcPattern) extends RelationalPattern {
   override def toString = pattern.toString
 
   private def demandArgumentType(argument: ArcPatternArgument) = {
-    pattern.relation.map(rel => Set(rel.demandArgument(argument.name).nodeType))
-      .getOrElse(argument.nodeType.map(Set(_)).getOrElse(NodeType.all)).asInstanceOf[Set[DataType]]
+    pattern.relation.some(rel => Set(rel.demandArgument(argument.name).nodeType))
+      .none(argument.nodeType.some(Set(_)).none(NodeType.all)).asInstanceOf[Set[DataType]]
   }
 
   def maxCount(pathCount: Option[BigInt], wordNet: WordNetSchema, direction: Direction) = wordNet.stats.extendMaxCount(pathCount, pattern, direction)

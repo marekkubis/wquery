@@ -132,12 +132,12 @@ with ClearsBindingsPattern {
   }
 
   def leftType(args: AlgebraOp, pos: Int) = {
-    (for (i <- args.minTupleSize to args.maxTupleSize.getOrElse(pos + 1))
+    (for (i <- args.minTupleSize to args.maxTupleSize|(pos + 1))
     yield args.leftType(if (i > 0) pos % i else 0)).flatten.toSet
   }
 
   def rightType(args: AlgebraOp, pos: Int) = {
-    (for (i <- args.minTupleSize to args.maxTupleSize.getOrElse(pos + 1))
+    (for (i <- args.minTupleSize to args.maxTupleSize|(pos + 1))
     yield args.rightType(if (i > 0) pos % i else 0)).flatten.toSet
   }
 
@@ -410,7 +410,7 @@ object LongestFunction extends DataSetFunction("longest") with AcceptsAll with R
     DataSet.fromBoundPaths(dataSet.toBoundPaths.filter(p => p._1.size == dataSet.maxTupleSize.get))
   }
 
-  def minTupleSize(args: AlgebraOp) = args.maxTupleSize.getOrElse(args.minTupleSize)
+  def minTupleSize(args: AlgebraOp) = args.maxTupleSize|args.minTupleSize
 
   def maxTupleSize(args: AlgebraOp) = args.maxTupleSize
 
@@ -646,8 +646,8 @@ object Functions {
   private val functions = scala.collection.mutable.Map[String, List[Function]]()
 
   def registerFunction(function: Function) {
-    functions.get(function.name).map(l => functions(function.name) = (l :+ function))
-      .getOrElse(functions(function.name) = List(function))
+    functions.get(function.name).some(l => functions(function.name) = (l :+ function))
+      .none(functions(function.name) = List(function))
   }
 
   def findFunctionsByName(name: String) = functions.get(name)

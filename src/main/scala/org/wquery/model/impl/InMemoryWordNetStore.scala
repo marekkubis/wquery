@@ -120,10 +120,10 @@ class InMemoryWordNetStore extends WordNetStore {
 
     for (relation <- relations if relation.isTraversable;
          source <- relation.argumentNames if (through._1 == ArcPatternArgument.AnyName || through._1 == source) &&
-            through._2.map(_ == relation.demandArgument(source).nodeType).getOrElse(true);
+            through._2.some(_ == relation.demandArgument(source).nodeType).none(true);
          destination <- relation.argumentNames if toMap.isEmpty ||
             toMap.get(destination)
-              .map(nodeTypeOption => nodeTypeOption.map(_ == relation.demandArgument(destination).nodeType).getOrElse(true)).getOrElse(false)
+              .some(nodeTypeOption => nodeTypeOption.some(_ == relation.demandArgument(destination).nodeType).none(true)).none(false)
          if source != destination)
       buffer.append(extendWithRelationTuples(extensionSet, relation, direction, source, List(destination)))
 
@@ -259,7 +259,7 @@ class InMemoryWordNetStore extends WordNetStore {
   }
 
   def addSynset(synsetId: Option[String], senses: List[Sense], moveSenses: Boolean = true) = {
-    val synset = new Synset(synsetId.getOrElse("synset#" + senses.head))
+    val synset = new Synset(synsetId|("synset#" + senses.head))
 
     addNode(SynsetType, synset)
     addSuccessor(synset.id, WordNet.IdToSynset, synset)
@@ -268,8 +268,8 @@ class InMemoryWordNetStore extends WordNetStore {
     for (sense <- senses) {
       if (moveSenses) {
         getSynset(sense)
-          .map(synsetSense => moveSense(sense, synsetSense, synset))
-          .getOrElse(createSense(sense, synset))
+          .some(synsetSense => moveSense(sense, synsetSense, synset))
+          .none(createSense(sense, synset))
       } else {
         createSense(sense, synset)
       }
@@ -303,11 +303,11 @@ class InMemoryWordNetStore extends WordNetStore {
   def addPartOfSpeechSymbol(pos: String) { if (!isPartOfSpeechSymbol(pos)) addNode(POSType, pos) }
 
   private def isWord(word: String) = {
-    successors(WordNet.WordSet).get(Relation.Source, word).map(!_.isEmpty).getOrElse(false)
+    successors(WordNet.WordSet).get(Relation.Source, word).some(!_.isEmpty).none(false)
   }
 
   private def isPartOfSpeechSymbol(pos: String) = {
-    successors(WordNet.PosSet).get(Relation.Source, pos).map(!_.isEmpty).getOrElse(false)
+    successors(WordNet.PosSet).get(Relation.Source, pos).some(!_.isEmpty).none(false)
   }
 
   private def addNode(nodeType: NodeType, node: Any) = atomic {
@@ -391,7 +391,7 @@ class InMemoryWordNetStore extends WordNetStore {
   }
 
   private def containsLink(relation: Relation, tuple: Map[String, Any]) = {
-    successors(relation).get(Relation.Source, tuple(Relation.Source)).map(_.contains(tuple)).getOrElse(false)
+    successors(relation).get(Relation.Source, tuple(Relation.Source)).some(_.contains(tuple)).none(false)
   }
 
   private def handleFunctionalForPropertyForAddLink(relation: Relation, tuple: Map[String, Any]) {

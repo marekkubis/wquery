@@ -9,6 +9,8 @@ import org.wquery.emitter.{WQueryEmitter, PlainWQueryEmitter}
 import org.slf4j.LoggerFactory
 import ch.qos.logback.classic.{Logger, Level}
 import java.io.{StringReader, FileReader, Reader}
+import scalaz._
+import Scalaz._
 
 object WQueryConsole extends Logging {
   val WQueryBanner = "WQuery " + WQueryProperties.version + "\n" + WQueryProperties.copyright
@@ -35,13 +37,13 @@ object WQueryConsole extends Logging {
   def main(args: Array[String]) {
     try {
       argsParser.parse(args)
-      val quiet = quietOption.value.getOrElse(false)
+      val quiet = quietOption.value|false
 
       if (quiet)
         tryDisableLoggers
 
       val wquery = WQuery.createInstance(wordnetParameter.value.get)
-      val emitter = emitterOption.value.getOrElse(new PlainWQueryEmitter)
+      val emitter = emitterOption.value|new PlainWQueryEmitter
 
       for (queryFile <- queryParameter.value)
         readQueriesFromReader(new FileReader(queryFile), wquery, emitter, !quiet)

@@ -41,7 +41,7 @@ case class VariableTemplate(pattern: List[Variable]) {
 
   val leftVariablesNames = leftVariablesIndexes.keySet
   val rightVariablesNames = rightVariablesIndexes.keySet
-  val leftPatternSize = pathVariablePosition.getOrElse(0)
+  val leftPatternSize = pathVariablePosition|0
   val rightPatternSize = pathVariablePosition.some(pos => pattern.size - (pos + 1)).none(pattern.size)
 
   def leftIndex(variable: String, tupleSize: Int, shift: Int) = {

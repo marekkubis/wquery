@@ -5,6 +5,8 @@ import org.wquery.model.DataType
 import org.wquery.WQueryStepVariableCannotBeBoundException
 import org.wquery.engine._
 import scala.Some
+import scalaz._
+import Scalaz._
 
 class BindingsPattern {
   val stepVariablesTypes = Map[String, Set[DataType]]()
@@ -71,7 +73,7 @@ class BindingsPattern {
 
   private def bindTypesFromLeft(op: AlgebraOp, variables: VariableTemplate) {
     for ((name, pos) <- variables.leftVariablesIndexes) {
-      if (op.maxTupleSize.map(pos < _).getOrElse(true))
+      if (op.maxTupleSize.some(pos < _).none(true))
         bindStepVariableType(name, op.leftType(pos))
       else
         throw new WQueryStepVariableCannotBeBoundException(name)
@@ -80,7 +82,7 @@ class BindingsPattern {
 
   private def bindTypesFromRight(op: AlgebraOp, variables: VariableTemplate) {
     for ((name, pos) <- variables.rightVariablesIndexes) {
-      if (op.maxTupleSize.map(pos < _).getOrElse(true))
+      if (op.maxTupleSize.some(pos < _).none(true))
         bindStepVariableType(name, op.rightType(pos))
       else
         throw new WQueryStepVariableCannotBeBoundException(name)

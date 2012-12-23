@@ -11,7 +11,8 @@ import scala.collection.mutable.{Set, Map, ListBuffer}
 import scala.collection.immutable.{Map => IMap, Set => ISet}
 import org.wquery.model._
 import org.wquery.WQueryUpdateBreaksRelationPropertyException
-import collection.mutable
+import scalaz._
+import Scalaz._
 
 class GridLoader extends WordNetLoader with Logging {
   override def canLoad(url: String): Boolean = url.endsWith(".xml") // TODO provide a better check
@@ -202,10 +203,10 @@ class GridHandler(wordnet: WordNet) extends DefaultHandler with Logging {
     for ((synset, relname, reldest) <- ilrRelationsTuples) {
       val relation = wordnet.store.schema.demandRelation(relname, IMap((Relation.Source, ISet[DataType](SynsetType))))
 
-      relation.destinationType.map { dt =>
+      relation.destinationType.some { dt =>
         dt match {
           case SynsetType =>
-            synsetsById.get(reldest).map { destination =>
+            synsetsById.get(reldest).some { destination =>
               try {
                 wordnet.store.addSuccessor(synset, relation, destination)
               } catch {
@@ -213,11 +214,11 @@ class GridHandler(wordnet: WordNet) extends DefaultHandler with Logging {
                   warn("ILR tag with type '" + relname + "' found in synset '" + synset.id + "' that points to synset '" + reldest +
                     "' breaks property '" + e.property + "' of relation '" + e.relation.name + "'")
               }
-            }.getOrElse(warn("ILR tag with type '" + relname + "' found in synset '" + synset.id + "' points to unknown synset '" + reldest + "'"))
+            }.none(warn("ILR tag with type '" + relname + "' found in synset '" + synset.id + "' points to unknown synset '" + reldest + "'"))
           case dtype =>
             throw new RuntimeException("ILR tag points to relation " + relation + " that has incorrect destination type " + dtype)
         }
-      }.getOrElse(throw new RuntimeException("Relation '" + relname + "' has no destination type"))
+      }.none(throw new RuntimeException("Relation '" + relname + "' has no destination type"))
 
     }
 
@@ -252,7 +253,7 @@ class GridHandler(wordnet: WordNet) extends DefaultHandler with Logging {
     for ((synset, relname, reldest) <- genericRelationsTuples) {
       val relation = wordnet.store.schema.demandRelation(relname, IMap((Relation.Source, ISet[DataType](SynsetType))))
 
-      relation.destinationType.map { dt =>
+      relation.destinationType.some { dt =>
         dt match {
           case SynsetType =>
             wordnet.store.addSuccessor(synset, relation, synsetsById(reldest))
@@ -267,7 +268,7 @@ class GridHandler(wordnet: WordNet) extends DefaultHandler with Logging {
           case dtype =>
             throw new RuntimeException("Incorrect destination type " + dtype + " as a successor of relation '" + relation + "'")
         }
-      }.getOrElse(throw new RuntimeException("Relation '" + relname + "' has no destination type"))
+      }.none(throw new RuntimeException("Relation '" + relname + "' has no destination type"))
     }
   }
 

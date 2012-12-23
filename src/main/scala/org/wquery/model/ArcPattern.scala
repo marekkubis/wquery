@@ -4,7 +4,7 @@ import scalaz._
 import Scalaz._
 
 case class ArcPattern(relation: Option[Relation], source: ArcPatternArgument, destinations: List[ArcPatternArgument]) {
-  override def toString = (source::relation.map(_.name).getOrElse(Relation.AnyName)::destinations).mkString("^")
+  override def toString = (source::relation.some(_.name).none(Relation.AnyName)::destinations).mkString("^")
 }
 
 case class ArcPatternArgument(name: String, nodeType: Option[NodeType]) {

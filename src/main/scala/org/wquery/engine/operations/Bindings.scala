@@ -42,14 +42,17 @@ class Bindings(parent: Option[Bindings], updatesParent: Boolean) {
 
   def lookupStepVariable(name: String): Option[Any] = stepVariables.get(name).orElse(parent.flatMap(_.lookupStepVariable(name)))
 
-  def demandSetVariable(name: String): DataSet = lookupSetVariable(name)
-    .getOrElse(throw new FoundReferenceToUnknownVariableWhileEvaluatingException(SetVariable(name)))
+  def demandSetVariable(name: String): DataSet = {
+    lookupSetVariable(name)|(throw new FoundReferenceToUnknownVariableWhileEvaluatingException(SetVariable(name)))
+  }
 
-  def demandPathVariable(name: String): List[Any] = lookupPathVariable(name)
-    .getOrElse(throw new FoundReferenceToUnknownVariableWhileEvaluatingException(TupleVariable(name)))
+  def demandPathVariable(name: String): List[Any] = {
+    lookupPathVariable(name)|(throw new FoundReferenceToUnknownVariableWhileEvaluatingException(TupleVariable(name)))
+  }
 
-  def demandStepVariable(name: String): Any = lookupStepVariable(name)
-    .getOrElse(throw new FoundReferenceToUnknownVariableWhileEvaluatingException(StepVariable(name)))
+  def demandStepVariable(name: String): Any = {
+    lookupStepVariable(name)|(throw new FoundReferenceToUnknownVariableWhileEvaluatingException(StepVariable(name)))
+  }
 
 }
 

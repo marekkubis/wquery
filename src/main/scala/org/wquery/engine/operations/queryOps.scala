@@ -121,7 +121,7 @@ case class BlockOp(ops: List[AlgebraOp]) extends QueryOp {
 
   def bindingsPattern = {
     // It is assumed that all statements in a block provide same binding schemas
-    ops.headOption.map(_.bindingsPattern).getOrElse(BindingsPattern())
+    ops.headOption.some(_.bindingsPattern).none(BindingsPattern())
   }
 
   val referencedVariables = ops.map(_.referencedVariables).asMA.sum
@@ -293,7 +293,7 @@ case class JoinOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends QueryOp {
 
     if (pos < leftMinSize) {
       leftOp.leftType(pos)
-    } else if (leftMaxSize.map(pos < _).getOrElse(true)) { // pos < leftMaxSize or leftMaxSize undefined
+    } else if (leftMaxSize.some(pos < _).none(true)) { // pos < leftMaxSize or leftMaxSize undefined
       val rightOpTypes = for (i <- 0 to pos - leftMinSize) yield rightOp.leftType(i)
 
       (rightOpTypes :+ leftOp.leftType(pos)).flatten.toSet
@@ -308,7 +308,7 @@ case class JoinOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends QueryOp {
 
     if (pos < rightMinSize) {
       rightOp.rightType(pos)
-    } else if (rightMaxSize.map(pos < _).getOrElse(true)) { // pos < rightMaxSize or rightMaxSize undefined
+    } else if (rightMaxSize.some(pos < _).none(true)) { // pos < rightMaxSize or rightMaxSize undefined
       val leftOpTypes = for (i <- 0 to pos - rightMinSize) yield leftOp.rightType(i)
 
       (leftOpTypes :+ rightOp.rightType(pos)).flatten.toSet
@@ -376,7 +376,7 @@ case class NaturalJoinOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends QueryOp 
 
     if (pos < leftMinSize) {
       leftOp.leftType(pos)
-    } else if (leftMaxSize.map(pos < _).getOrElse(true)) { // pos < leftMaxSize or leftMaxSize undefined
+    } else if (leftMaxSize.some(pos < _).none(true)) { // pos < leftMaxSize or leftMaxSize undefined
       val rightOpTypes = for (i <- 0 to pos - leftMinSize) yield rightOp.leftType(i + 1)
 
       (rightOpTypes :+ leftOp.leftType(pos)).flatten.toSet
@@ -391,7 +391,7 @@ case class NaturalJoinOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends QueryOp 
 
     if (pos < rightMinSize) {
       rightOp.rightType(pos)
-    } else if (rightMaxSize.map(pos < _).getOrElse(true)) { // pos < rightMaxSize or rightMaxSize undefined
+    } else if (rightMaxSize.some(pos < _).none(true)) { // pos < rightMaxSize or rightMaxSize undefined
       val leftOpTypes = for (i <- 0 to pos - rightMinSize) yield leftOp.rightType(i + 1)
 
       (leftOpTypes :+ rightOp.rightType(pos)).flatten.toSet
@@ -691,7 +691,7 @@ case class ExtendOp(op: AlgebraOp, pattern: RelationalPattern, direction: Direct
     val dataSetPathVarNames = dataSet.pathVars.keySet
     val dataSetStepVarNames = dataSet.stepVars.keySet
     val pathBuffer = DataSetBuffers.createPathBuffer
-    val pathVarBuffers = DataSetBuffers.createPathVarBuffers(variables.pathVariableName.map(dataSetPathVarNames + _).getOrElse(dataSetPathVarNames))
+    val pathVarBuffers = DataSetBuffers.createPathVarBuffers(variables.pathVariableName.some(dataSetPathVarNames + _).none(dataSetPathVarNames))
     val stepVarBuffers = DataSetBuffers.createStepVarBuffers(dataSetStepVarNames union variables.stepVariableNames)
 
     for ((pathPos, extension) <- extensionSet.extensions) {
@@ -731,7 +731,7 @@ case class ExtendOp(op: AlgebraOp, pattern: RelationalPattern, direction: Direct
   def leftType(pos: Int) = {
     if (pos < op.minTupleSize) {
       op.leftType(pos)
-    } else if (op.maxTupleSize.map(pos < _).getOrElse(true)) { // pos < maxTupleSize or maxTupleSize undefined
+    } else if (op.maxTupleSize.some(pos < _).none(true)) { // pos < maxTupleSize or maxTupleSize undefined
       val extendOpTypes = for (i <- 0 to pos - op.minTupleSize) yield pattern.leftType(i)
 
       (extendOpTypes :+ op.leftType(pos)).flatten.toSet
@@ -743,7 +743,7 @@ case class ExtendOp(op: AlgebraOp, pattern: RelationalPattern, direction: Direct
   def rightType(pos: Int) = {
     if (pos < pattern.minTupleSize) {
       pattern.rightType(pos)
-    } else if (pattern.maxTupleSize.map(pos < _).getOrElse(true)) { // pos < maxSize or maxSize undefined
+    } else if (pattern.maxTupleSize.some(pos < _).none(true)) { // pos < maxSize or maxSize undefined
       val extendOpTypes = for (i <- 0 to pos - pattern.minTupleSize) yield op.rightType(i)
 
       (extendOpTypes :+ pattern.rightType(pos)).flatten.toSet
@@ -828,12 +828,12 @@ case class SynsetFetchOp(op: AlgebraOp) extends AlgebraOp {
      val senses = op.evaluate(wordNet, bindings, context).paths.map(_.last.asInstanceOf[Sense])
 
      if (!senses.isEmpty) {
-       val synset = wordNet.store.getSynset(senses.head).map { synset =>
+       val synset = wordNet.store.getSynset(senses.head).some { synset =>
          if (wordNet.store.getSenses(synset) == senses)
            synset
          else
            new NewSynset(senses)
-       }.getOrElse(new NewSynset(senses))
+       }.none(new NewSynset(senses))
 
        DataSet.fromValue(synset)
      } else {

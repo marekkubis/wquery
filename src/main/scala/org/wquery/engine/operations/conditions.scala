@@ -47,7 +47,7 @@ case class BinaryCondition(op: String, leftOp: AlgebraOp, rightOp: AlgebraOp) ex
   var rightCache = none[(List[Any], Map[Any, List[Any]])]
 
   def satisfied(wordNet: WordNet, bindings: Bindings, context: Context) = {
-    val (leftResult, leftGroup) = leftCache.getOrElse {
+    val (leftResult, leftGroup) = leftCache|{
       val result = leftOp.evaluate(wordNet, bindings, context).paths.map(_.last)
       val group = result.groupBy(x => x)
 
@@ -57,7 +57,7 @@ case class BinaryCondition(op: String, leftOp: AlgebraOp, rightOp: AlgebraOp) ex
       (result, group)
     }
 
-    val (rightResult, rightGroup) = rightCache.getOrElse {
+    val (rightResult, rightGroup) = rightCache|{
       val result = rightOp.evaluate(wordNet, bindings, context).paths.map(_.last)
       val group = result.groupBy(x => x)
 
@@ -69,16 +69,16 @@ case class BinaryCondition(op: String, leftOp: AlgebraOp, rightOp: AlgebraOp) ex
 
     op match {
       case "=" =>
-        leftGroup.forall{ case (left, leftValues) => rightGroup.get(left).map(rightValues => rightValues.size == leftValues.size).getOrElse(false) } &&
-          rightGroup.forall{ case (right, rightValues) => leftGroup.get(right).map(leftValues => leftValues.size == rightValues.size).getOrElse(false) }
+        leftGroup.forall{ case (left, leftValues) => rightGroup.get(left).some(rightValues => rightValues.size == leftValues.size).none(false) } &&
+          rightGroup.forall{ case (right, rightValues) => leftGroup.get(right).some(leftValues => leftValues.size == rightValues.size).none(false) }
       case "!=" =>
-        !(leftGroup.forall{ case (left, leftValues) => rightGroup.get(left).map(rightValues => rightValues.size == leftValues.size).getOrElse(false) } &&
-            rightGroup.forall{ case (right, rightValues) => leftGroup.get(right).map(leftValues => leftValues.size == rightValues.size).getOrElse(false) })
+        !(leftGroup.forall{ case (left, leftValues) => rightGroup.get(left).some(rightValues => rightValues.size == leftValues.size).none(false) } &&
+            rightGroup.forall{ case (right, rightValues) => leftGroup.get(right).some(leftValues => leftValues.size == rightValues.size).none(false) })
       case "in" =>
-        leftGroup.forall{ case (left, leftValues) => rightGroup.get(left).map(rightValues => leftValues.size <= rightValues.size).getOrElse(false) }
+        leftGroup.forall{ case (left, leftValues) => rightGroup.get(left).some(rightValues => leftValues.size <= rightValues.size).none(false) }
       case "pin" =>
         leftGroup.forall{
-          case (left, leftValues) => rightGroup.get(left).map(rightValues => leftValues.size <= rightValues.size).getOrElse(false)
+          case (left, leftValues) => rightGroup.get(left).some(rightValues => leftValues.size <= rightValues.size).none(false)
         } && leftResult.size < rightResult.size
       case "=~" =>
         val regexps = rightResult.collect{ case pattern: String => pattern.r }

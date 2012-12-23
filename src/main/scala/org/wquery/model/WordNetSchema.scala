@@ -1,6 +1,8 @@
 package org.wquery.model
 
 import org.wquery.WQueryModelException
+import scalaz._
+import Scalaz._
 
 class WordNetSchema(store: WordNetStore) {
   def relations = store.relations
@@ -10,11 +12,11 @@ class WordNetSchema(store: WordNetStore) {
   def getRelation(name: String, arguments: Map[String, Set[DataType]]) = {
     val extendedArguments = arguments.map{ case (name, types) => if (types.contains(StringType)) (name, types + POSType) else (name, types) }
     store.relations.find(r => r.name == name &&
-      extendedArguments.forall{ case (name, types) => r.getArgument(name).map(arg => types.contains(arg.nodeType)).getOrElse(false) })
+      extendedArguments.forall{ case (name, types) => r.getArgument(name).some(arg => types.contains(arg.nodeType)).none(false) })
   }
 
   def demandRelation(name: String, arguments: Map[String, Set[DataType]]) = {
-    getRelation(name, arguments).getOrElse(throw new WQueryModelException("Relation '" + name + "' not found"))
+    getRelation(name, arguments)|(throw new WQueryModelException("Relation '" + name + "' not found"))
   }
 
   def containsRelation(name: String, arguments: Map[String, Set[DataType]]) = getRelation(name, arguments).isDefined

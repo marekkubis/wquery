@@ -82,7 +82,7 @@ class DataSet(val paths: List[List[Any]], val pathVars: Map[String, List[(Int, I
   }
 
   private def isSubgroupOf(leftGroups: Map[scala.List[Any], List[scala.List[Any]]], rightGroups: Map[scala.List[Any], List[scala.List[Any]]]) = {
-    leftGroups.forall{ case (left, leftValues) => rightGroups.get(left).map(_.size == leftValues.size).getOrElse(false) }
+    leftGroups.forall{ case (left, leftValues) => rightGroups.get(left).some(_.size == leftValues.size).none(false) }
   }
 
   def bindVariables(variables: VariableTemplate) = {

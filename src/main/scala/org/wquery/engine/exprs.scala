@@ -175,10 +175,10 @@ case class FunctionExpr(name: String, args: EvaluableExpr) extends EvaluableExpr
   def evaluationPlan(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context) = {
     val argsOp = args.evaluationPlan(wordNet, bindings, context)
 
-    Functions.findFunctionsByName(name).map { functions =>
-      functions.find(_.accepts(argsOp)).map(FunctionOp(_, argsOp))
-        .getOrElse(throw new WQueryEvaluationException("Function '" + name + "' cannot accept provided arguments"))
-    }.getOrElse(throw new WQueryEvaluationException("Function '" + name + "' not found"))
+    Functions.findFunctionsByName(name).some { functions =>
+      functions.find(_.accepts(argsOp)).some(FunctionOp(_, argsOp))
+        .none(throw new WQueryEvaluationException("Function '" + name + "' cannot accept provided arguments"))
+    }.none(throw new WQueryEvaluationException("Function '" + name + "' not found"))
   }
 }
 
@@ -274,8 +274,8 @@ case class RelationCompositionExpr(exprs: List[RelationalExpr]) extends Relation
 case class QuantifiedRelationExpr(expr: RelationalExpr, quantifier: Quantifier) extends RelationalExpr {
   def evaluationPattern(wordNet: WordNetSchema, sourceTypes: Set[DataType]) = {
     if (quantifier.lowerBound >= 0 && quantifier.upperBound
-      .map(upperBound => quantifier.lowerBound < upperBound || quantifier.lowerBound === upperBound && (upperBound /== 0))
-      .getOrElse(true))
+      .some(upperBound => quantifier.lowerBound < upperBound || quantifier.lowerBound === upperBound && (upperBound /== 0))
+      .none(true))
       QuantifiedRelationPattern(expr.evaluationPattern(wordNet, sourceTypes), quantifier)
     else
       throw new WQueryStaticCheckException("Invalid bound in quantifier " + quantifier)
@@ -320,23 +320,23 @@ case class ArcExpr(ids: List[ArcExprArgument]) extends RelationalExpr {
           evaluateAsDestinationTypePattern(wordNet, contextTypes, left, right, rest)
             .orElse(evaluateAsSourceTypePattern(wordNet, contextTypes, left, right, rest))
         }
-    }).getOrElse(throw new WQueryStaticCheckException("Arc expression " + toString + " references an unknown relation or argument"))
+    })|(throw new WQueryStaticCheckException("Arc expression " + toString + " references an unknown relation or argument"))
   }
 
   private def evaluateAsSourceTypePattern(wordNet: WordNetSchema, contextTypes: Set[DataType], left: ArcExprArgument, right: ArcExprArgument,
                                           rest: List[ArcExprArgument]) = {
-    val sourceTypes = left.nodeType.map(Set[DataType](_)).getOrElse(contextTypes)
+    val sourceTypes = left.nodeType.some(Set[DataType](_)).none(contextTypes)
     val sourceName = left.name
     val relationName = right.name
     val emptyDestination = rest.isEmpty??(List(ArcPatternArgument(Relation.Destination, None)).some)
 
     if (relationName === Relation.AnyName) {
       Some(ArcRelationalPattern(ArcPattern(None, ArcPatternArgument(sourceName, left.nodeType),
-        emptyDestination.getOrElse(rest.map(arg => ArcPatternArgument(arg.name, arg.nodeType))))))
+        emptyDestination|(rest.map(arg => ArcPatternArgument(arg.name, arg.nodeType))))))
     } else {
       wordNet.getRelation(right.name, ((sourceName, sourceTypes) +: (rest.map(_.nodeDescription))).toMap)
         .map(relation => ArcRelationalPattern(ArcPattern(Some(relation), ArcPatternArgument(sourceName, Some(relation.sourceType)),
-        emptyDestination.getOrElse(rest.map(arg => ArcPatternArgument(arg.name, relation.demandArgument(arg.name).nodeType.some))))))
+        emptyDestination|(rest.map(arg => ArcPatternArgument(arg.name, relation.demandArgument(arg.name).nodeType.some))))))
     }
   }
 
@@ -359,9 +359,9 @@ case class ArcExpr(ids: List[ArcExprArgument]) extends RelationalExpr {
 
 case class ArcExprArgument(name: String, nodeTypeName: Option[String]) extends Expr {
   val nodeType: Option[NodeType] = nodeTypeName.map(n => NodeType.fromName(n))
-  val nodeDescription = (name, nodeType.map(Set[DataType](_)).getOrElse(NodeType.all.toSet[DataType]))
+  val nodeDescription = (name, nodeType.some(Set[DataType](_)).none(NodeType.all.toSet[DataType]))
 
-  override def toString = name + nodeTypeName.map("&" + _).getOrElse("")
+  override def toString = name + ~nodeTypeName.map("&" + _)
 }
 
 case class ProjectionExpr(expr: EvaluableExpr) extends Expr {
@@ -479,7 +479,7 @@ case class ContextByRelationalExprReq(expr: RelationalExpr) extends EvaluableExp
   def evaluationPlan(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context) = {
     expr match {
       case ArcExpr(List(ArcExprArgument(id, None))) =>
-        val sourceTypes = bindings.lookupStepVariableType(StepVariable.ContextVariable.name).getOrElse(DataType.all)
+        val sourceTypes = bindings.lookupStepVariableType(StepVariable.ContextVariable.name)|DataType.all
 
         if (wordNet.containsRelation(id, Map((Relation.Source, sourceTypes))) || id === Relation.AnyName) {
           extendBasedEvaluationPlan(wordNet, bindings)
@@ -534,14 +534,14 @@ case class BooleanByFilterReq(conditionalExpr: ConditionalExpr) extends Evaluabl
 case class ContextByVariableReq(variable: Variable) extends EvaluableExpr {
   def evaluationPlan(wordNet: WordNetSchema, bindings: BindingsSchema, context: Context) = variable match {
     case variable @ SetVariable(name) =>
-      bindings.lookupSetVariableType(name).map(SetVariableRefOp(variable, _))
-        .getOrElse(throw new FoundReferenceToUnknownVariableWhileCheckingException(variable))
+      bindings.lookupSetVariableType(name).some(SetVariableRefOp(variable, _))
+        .none(throw new FoundReferenceToUnknownVariableWhileCheckingException(variable))
     case variable @ TupleVariable(name) =>
-      bindings.lookupPathVariableType(name).map(PathVariableRefOp(variable, _))
-        .getOrElse(throw new FoundReferenceToUnknownVariableWhileCheckingException(variable))
+      bindings.lookupPathVariableType(name).some(PathVariableRefOp(variable, _))
+        .none(throw new FoundReferenceToUnknownVariableWhileCheckingException(variable))
     case variable @ StepVariable(name) =>
-      bindings.lookupStepVariableType(name).map(StepVariableRefOp(variable, _))
-        .getOrElse(throw new FoundReferenceToUnknownVariableWhileCheckingException(variable))
+      bindings.lookupStepVariableType(name).some(StepVariableRefOp(variable, _))
+        .none(throw new FoundReferenceToUnknownVariableWhileCheckingException(variable))
 
   }
 }
@@ -551,10 +551,10 @@ case class ArcByArcExprReq(expr: ArcExpr) extends EvaluableExpr {
     val relationalPattern = if (context.creation) expr.creationPattern(wordNet) else expr.evaluationPattern(wordNet, DataType.all)
     val pattern = relationalPattern.pattern
 
-    pattern.relation.map { relation =>
+    pattern.relation.some { relation =>
       val arcs = pattern.destinations.map(destination => List(Arc(pattern.relation.get, pattern.source.name, destination.name)))
       ConstantOp(DataSet(if (arcs.isEmpty) List(List(Arc(pattern.relation.get, pattern.source.name, pattern.source.name))) else arcs))
-    }.getOrElse {
+    }.none {
       val toMap = pattern.destinations match {
         case List(ArcPatternArgument.Any) =>
           ∅[Map[String, Option[NodeType]]]
@@ -564,9 +564,9 @@ case class ArcByArcExprReq(expr: ArcExpr) extends EvaluableExpr {
 
       val arcs = (for (relation <- wordNet.relations;
            source <- relation.argumentNames if (pattern.source.name === ArcPatternArgument.AnyName ||
-             pattern.source.name === source)  && pattern.source.nodeType.map(_ === relation.demandArgument(source).nodeType).getOrElse(true);
-           destination <- relation.argumentNames if toMap.isEmpty || toMap.get(destination).map(nodeTypeOption =>
-             nodeTypeOption.map(_ === relation.demandArgument(destination).nodeType).getOrElse(true)).getOrElse(false)
+             pattern.source.name === source)  && pattern.source.nodeType.some(_ === relation.demandArgument(source).nodeType).none(true);
+           destination <- relation.argumentNames if toMap.isEmpty || toMap.get(destination).some(nodeTypeOption =>
+             nodeTypeOption.some(_ === relation.demandArgument(destination).nodeType).none(true)).none(false)
            if relation.arguments.size === 1 || (source /== destination))
         yield List(Arc(relation, source, destination)))
 

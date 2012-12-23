@@ -1,5 +1,8 @@
 package org.wquery.model
 
+import scalaz._
+import Scalaz._
+
 class WordNetStats(relations: List[Relation], val fetchAllMaxCounts: Map[(Relation, String), BigInt],
                    val extendValueMaxCounts: Map[(Relation, String), BigInt]) {
   val maxPathSize = 20 // TODO estimate using WordNet content
@@ -23,7 +26,7 @@ class WordNetStats(relations: List[Relation], val fetchAllMaxCounts: Map[(Relati
         pattern.destinations.map(_.name)
     }
 
-    val extendMaxCount = (for (relation <- pattern.relation.map(List(_)).getOrElse(relations.filter(_.isTraversable));
+    val extendMaxCount = (for (relation <- pattern.relation.some(List(_)).none(relations.filter(_.isTraversable));
          source <- if (pattern.source.isUnnamed) relation.argumentNames else sources)
     yield extendValueMaxCounts(relation, source)).sum
 
