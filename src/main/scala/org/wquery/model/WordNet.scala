@@ -58,10 +58,8 @@ trait WordNet {
   def setTuples(relation: Relation, sourceNames: List[String], sourceValues: List[List[Any]],
                 destinationNames: List[String], destinationValues: List[List[Any]])
 
-  // merge & split
+  // merge
   def merge(synsets: List[Synset], senses: List[Sense])
-
-  def split(synsets: List[Synset])
 
   // relation properties
   val dependent = MMap[Relation, Set[String]]()

@@ -671,9 +671,4 @@ class InMemoryWordNet extends WordNet {
       }
     }
   }
-
-  def split(synsets: List[Synset]) {
-    for (synset <- synsets; sense <- getSenses(synset))
-      merge(Nil, List(sense))
-  }
 }
