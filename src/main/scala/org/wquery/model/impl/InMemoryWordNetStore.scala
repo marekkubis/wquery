@@ -610,23 +610,20 @@ class InMemoryWordNetStore extends WordNetStore {
 
     for (source <- sources; i <- 0 until sourceNames.size) {
       val sourceName = sourceNames(i)
-      val sourceValues = sources(i)
+      val sourceValue = source(i)
+      val sourceSuccessors = relationSuccessors.getOrElse((sourceName, sourceValue), TransactionalVector())
+      val (matchingSuccessors, _) = sourceSuccessors.partition({
+        successor =>
+          sourceNames.zip(source).forall {
+            case (name, value) => successor(name) == value
+          }
+      })
 
-      for (sourceValue <- sourceValues) {
-        val sourceSuccessors = relationSuccessors.getOrElse((sourceName, sourceValue), TransactionalVector())
-        val (matchingSuccessors, _) = sourceSuccessors.partition({
-          successor =>
-            sourceNames.zip(source).forall {
-              case (name, value) => successor(name) == value
-            }
-        })
+      matchingSuccessors.foreach(tuple => removeLinkByNode(relation, tuple, Some(sourceValue)))
 
-        matchingSuccessors.foreach(tuple => removeLinkByNode(relation, tuple, Some(sourceValue)))
-
-        for (destination <- destinations) {
-          val tuple = (sourceNames.zip(source) ++ destinationNames.zip(destination)).toMap
-          addLink(relation, tuple)
-        }
+      for (destination <- destinations) {
+        val tuple = (sourceNames.zip(source) ++ destinationNames.zip(destination)).toMap
+        addLink(relation, tuple)
       }
     }
   }
