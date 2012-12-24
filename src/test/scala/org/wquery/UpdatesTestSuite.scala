@@ -50,8 +50,8 @@ class UpdatesTestSuite extends WQueryTestSuite {
   @Test def testAddRelations() = {
     result of ("do " +
         "update relations += `newrelation` " +
-        "update `newrelation` arguments += `source`, `synset`, 1 " +
-        "update `newrelation` arguments += `destination`, `synset`, 2 " +
+        "update `newrelation` arguments += `src`, `synset`, 1 " +
+        "update `newrelation` arguments += `dst`, `synset`, 2 " +
       "end") should equal ("(no result)\n")
     result of ("{car}.newrelation") should equal ("(no result)\n")
   }
@@ -62,30 +62,30 @@ class UpdatesTestSuite extends WQueryTestSuite {
   }
 
   @Test def testAddLinksByNameAndArguments() = {
-    result of ("update {person:2} destination^hypernym^source += {car:1}") should equal ("(no result)\n")
+    result of ("update {person:2} dst^hypernym^src += {car:1}") should equal ("(no result)\n")
     result of ("{car:1}.hypernym") should equal ("{ car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n } hypernym { person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n }\n{ car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n } hypernym { motor vehicle:1:n automotive vehicle:1:n }\n{ car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n } hypernym { person:2:n }\n")
   }
 
   @Test def testAddLinksMultiArgumentRelationMultipleArgumentSet() = {
     result of ("update words += yyy") should equal ("(no result)\n")
-    result of ("update cab:3:n source^literal^num^pos += 7,`n`") should equal ("(no result)\n")
+    result of ("update cab:3:n src^literal^num^pos += 7,`n`") should equal ("(no result)\n")
     result of ("(cab:3:n).literal") should equal ("cab:3:n literal cab\n")
-    result of ("(cab:3:n).literal^num") should equal ("cab:3:n source^literal^num 3\ncab:3:n source^literal^num 7\n")
-    result of ("(cab:3:n).literal^num^pos") should equal ("cab:3:n source^literal^num 3 source^literal^pos n\ncab:3:n source^literal^num 7 source^literal^pos n\n")
+    result of ("(cab:3:n).literal^num") should equal ("cab:3:n src^literal^num 3\ncab:3:n src^literal^num 7\n")
+    result of ("(cab:3:n).literal^num^pos") should equal ("cab:3:n src^literal^num 3 src^literal^pos n\ncab:3:n src^literal^num 7 src^literal^pos n\n")
   }
 
   @Test def testAddLinksFunctionalForPropertySupport() = {
-    result of ("update {person:1} desc += `hhhhhhhhhhhhh`") should startWith ("ERROR: Update breaks property 'functional' of relation 'desc' on argument 'source'")
-    result of ("\\desc^source functional_action := restore") should equal ("(no result)\n")
+    result of ("update {person:1} desc += `hhhhhhhhhhhhh`") should startWith ("ERROR: Update breaks property 'functional' of relation 'desc' on argument 'src'")
+    result of ("\\desc^src functional_action := restore") should equal ("(no result)\n")
     result of ("update {person:1} desc += `hhhhhhhhhhhhh`") should startWith ("(no result)\n")
     result of ("{person:1}.desc") should startWith ("{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n } desc hhhhhhhhhhhhh\n")
-    result of ("\\desc^source functional_action := preserve") should equal ("(no result)\n")
+    result of ("\\desc^src functional_action := preserve") should equal ("(no result)\n")
   }
 
   @Test def testAddLinksSymmetricPropertyPreserved() = {
-    result of ("update pair_properties += `similar`, `source`, `destination`, `symmetry`, `preserve`") should equal ("(no result)\n")
+    result of ("update pair_properties += `similar`, `src`, `dst`, `symmetry`, `preserve`") should equal ("(no result)\n")
     result of ("update {apple:1:n} similar := {apple:2:n}") should startWith ("ERROR: Update breaks property 'symmetric' of relation 'similar'")
-    result of ("update pair_properties += `similar`, `source`, `destination`, `symmetry`, `restore`") should equal ("(no result)\n")
+    result of ("update pair_properties += `similar`, `src`, `dst`, `symmetry`, `restore`") should equal ("(no result)\n")
     result of ("update {apple:1:n} similar := {apple:2:n}") should equal ("(no result)\n")
     result of ("{apple}.similar") should equal ("{ apple:1:n } similar { apple:2:n orchard apple tree:1:n Malus pumila:1:n }\n{ apple:2:n orchard apple tree:1:n Malus pumila:1:n } similar { apple:1:n }\n")
   }
@@ -151,7 +151,7 @@ class UpdatesTestSuite extends WQueryTestSuite {
   }
 
   @Test def testRemoveLinksRequiredPropertyBreak() = {
-    result of ("{apple:1:n} desc -= last({apple:1:n}.desc)") should startWith ("ERROR: Update breaks property 'required_by' of relation 'desc' on argument 'source'")
+    result of ("{apple:1:n} desc -= last({apple:1:n}.desc)") should startWith ("ERROR: Update breaks property 'required_by' of relation 'desc' on argument 'src'")
   }
 
   @Test def testRemoveLinksSymmetricPropertyPreserved() = {
@@ -162,12 +162,12 @@ class UpdatesTestSuite extends WQueryTestSuite {
   }
 
   @Test def testRemoveLinksByNameAndArguments() = {
-    result of ("update {racer:2} destination^hypernym^source -= {finisher:5}") should equal ("(no result)\n")
+    result of ("update {racer:2} dst^hypernym^src -= {finisher:5}") should equal ("(no result)\n")
     result of ("{finisher:5}.hypernym") should equal ("(no result)\n")
   }
 
   @Test def testRemoveLinksMultiArgumentRelationOneArgumentSet() = {
-    result of ("update minicab:1:n source^literal^num^pos -= 1,`n`") should equal ("(no result)\n")
+    result of ("update minicab:1:n src^literal^num^pos -= 1,`n`") should equal ("(no result)\n")
     result of ("(minicab:1:n).literal") should equal ("(no result)\n")
   }
 
@@ -182,12 +182,12 @@ class UpdatesTestSuite extends WQueryTestSuite {
   @Test def testSetLinksFunctionalPropertyBreak() = {
     result of ("update {apple:1} desc := `aaa`") should equal ("(no result)\n")
     result of ("{apple:1}.desc") should equal ("{ apple:1:n } desc aaa\n")
-    result of ("update {apple:1} desc := `bbb` union `ddd`") should startWith ("ERROR: Update breaks property 'functional' of relation 'desc' on argument 'source'")
+    result of ("update {apple:1} desc := `bbb` union `ddd`") should startWith ("ERROR: Update breaks property 'functional' of relation 'desc' on argument 'src'")
     result of ("{apple:1}.desc") should equal ("{ apple:1:n } desc aaa\n")
   }
 
   @Test def testSetLinksRequiredByPropertyBreak() = {
-    result of ("update last({person}.desc) ^desc := {car:1}") should startWith ("ERROR: Update breaks property 'required_by' of relation 'desc' on argument 'source'")
+    result of ("update last({person}.desc) ^desc := {car:1}") should startWith ("ERROR: Update breaks property 'required_by' of relation 'desc' on argument 'src'")
   }
 
   @Test def testSetLinksRemoveLinks() = {
@@ -220,7 +220,7 @@ class UpdatesTestSuite extends WQueryTestSuite {
   }
 
   @Test def testMergeSynsets() = {
-    result of ("merge {coupe:1:n} union {compact:3}") should startWith ("ERROR: Update breaks property 'functional' of relation 'desc' on argument 'source'")
+    result of ("merge {coupe:1:n} union {compact:3}") should startWith ("ERROR: Update breaks property 'functional' of relation 'desc' on argument 'src'")
     result of ("merge {coupe:1:n} union {compact:3} with desc:={coupe:1}.desc") should equal ("(no result)\n")
     result of ("{coupe:1:n}.desc") should equal ("{ coupe:1:n compact:3:n compact car:1:n } desc 'a car with two doors and front seats and a luggage compartment'\n")
     result of ("{compact:3:n}.hypernym") should equal ("{ coupe:1:n compact:3:n compact car:1:n } hypernym { car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n }\n")

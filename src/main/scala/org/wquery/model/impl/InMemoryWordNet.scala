@@ -20,6 +20,9 @@ class InMemoryWordNet extends WordNet {
 
   def relations = relationsList
 
+  for (relation <- WordNet.Meta.relations)
+    createRelation(relation)
+
   for (relation <- WordNet.relations)
     addRelation(relation)
 
@@ -31,7 +34,7 @@ class InMemoryWordNet extends WordNet {
       relationsList = (relationsList :+ relation)
         .sortWith((l, r) => l.name < r.name || l.name == r.name && l.arguments.size < r.arguments.size ||
           l.name == r.name && l.arguments.size == r.arguments.size && l.sourceType < r.sourceType)
-      successors(relation) = TransactionalMap[(String, Any), IndexedSeq[Map[String, Any]]]()
+      createRelation(relation)
       dependent(relation) = ∅[Set[String]]
       collectionDependent(relation) = ∅[Set[String]]
       functionalFor(relation) = ∅[Set[String]]
@@ -40,6 +43,10 @@ class InMemoryWordNet extends WordNet {
       symmetry(relation) = NonSymmetric
       statsCache.invalidate
     }
+  }
+
+  private def createRelation(relation: Relation) {
+    successors(relation) = TransactionalMap[(String, Any), IndexedSeq[Map[String, Any]]]()
   }
 
   def removeRelation(relation: Relation) {
@@ -324,8 +331,8 @@ class InMemoryWordNet extends WordNet {
         addWord(tuple(Relation.Source).asInstanceOf[String])
       case WordNet.PosSet =>
         addPartOfSpeechSymbol(tuple(Relation.Source).asInstanceOf[String])
-      case WordNet.Meta.Relations =>
-
+      case WordNet.Meta.Aliases =>
+        addEdge(relation, tuple)
       case _ =>
         addLink(relation, tuple)
     }

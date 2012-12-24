@@ -7,6 +7,7 @@ import scala.util.parsing.combinator.RegexParsers
 import org.wquery.engine._
 import org.wquery.engine.operations._
 import org.wquery.model.DataSet
+import org.wquery.model.Relation
 import scalaz._
 import Scalaz._
 
@@ -145,7 +146,7 @@ trait WQueryParsers extends RegexParsers {
   )
 
   def arc_expr = (
-    ("^" ~> notQuotedString) ^^ { id => ArcExpr(List("destination", id, "source").map(ArcExprArgument(_, None))) } // syntactic sugar
+    ("^" ~> notQuotedString) ^^ { id => ArcExpr(List(Relation.Destination, id, Relation.Source).map(ArcExprArgument(_, None))) } // syntactic sugar
     | rep1sep(arc_expr_arg, "^") ^^ { ArcExpr(_) }
   )
 

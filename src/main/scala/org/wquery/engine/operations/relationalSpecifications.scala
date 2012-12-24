@@ -9,7 +9,7 @@ case class RelationSpecification(arguments: List[RelationSpecificationArgument])
     val identifiers = arguments.map(_.resolveIdentifier(bindings))
 
     if (identifiers.size == 1) {
-      val relation = wordNet.demandRelation(identifiers.head, Map())
+      val relation = wordNet.demandRelation(identifiers.head, Map(), true)
       val (leftArgs, rightArgs) = relation.argumentNames.splitAt(leftSize)
 
       (relation, leftArgs, rightArgs)

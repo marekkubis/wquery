@@ -90,8 +90,8 @@ class FunctionsTestSuite extends WQueryTestSuite {
 
   @Test def testArcName() = result of ("arc_name(\\hypernym)") should equal ("hypernym\n")
 
-  @Test def testSourceName() = result of ("arc_src(\\hypernym)") should equal ("source\n")
+  @Test def testSourceName() = result of ("arc_src(\\hypernym)") should equal ("src\n")
 
-  @Test def testDestinationName() = result of ("arc_dst(\\hypernym)") should equal ("destination\n")
+  @Test def testDestinationName() = result of ("arc_dst(\\hypernym)") should equal ("dst\n")
 
 }

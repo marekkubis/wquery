@@ -33,8 +33,8 @@ object Relation {
   val AnyName = "_"
 
   // default argument names
-  val Source = "source"
-  val Destination = "destination"
+  val Source = "src"
+  val Destination = "dst"
 
   // property names
   val Transitivity = "transitivity"

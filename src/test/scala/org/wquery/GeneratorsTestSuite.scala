@@ -76,7 +76,7 @@ class GeneratorsTestSuite extends WQueryTestSuite {
   
   @Test def testRelationGeneratorUnion() = result of ("member_holonym|partial_holonym") should equal ("{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n } member_holonym { people:1:n }\n{ cab:3:n hack:5:n taxi:1:n taxicab:1:n } member_holonym { fleet:2:n }\n{ room:1:n } partial_holonym { building:1:n edifice:1:n }\n{ human body:1:n physical body:1:n material body:1:n soma:3:n build:2:n figure:2:n physique:2:n anatomy:2:n shape:3:n bod:1:n chassis:1:n frame:3:n form:5:n flesh:2:n } partial_holonym { person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n }\n{ human body:1:n physical body:1:n material body:1:n soma:3:n build:2:n figure:2:n physique:2:n anatomy:2:n shape:3:n bod:1:n chassis:1:n frame:3:n form:5:n flesh:2:n } partial_holonym { homo:2:n man:4:n human being:1:n human:1:n }\n{ apple:1:n } partial_holonym { apple:2:n orchard apple tree:1:n Malus pumila:1:n }\n{ orange:1:n } partial_holonym { orange:3:n orange tree:1:n }\n")  
   
-  @Test def testRelationGeneratorProjections() = result of ("literal^pos^num[# = 6]") should equal ("machine:6:n source^literal^pos n source^literal^num 6\nunit:6:n source^literal^pos n source^literal^num 6\n")
+  @Test def testRelationGeneratorProjections() = result of ("literal^pos^num[# = 6]") should equal ("machine:6:n src^literal^pos n src^literal^num 6\nunit:6:n src^literal^pos n src^literal^num 6\n")
   
   @Test def testSimpleArcGenerator() = result of ("\\hypernym") should equal ("hypernym\n")
 
@@ -84,23 +84,23 @@ class GeneratorsTestSuite extends WQueryTestSuite {
   
   @Test def testInvertedArcGenerator() = result of ("\\^hypernym") should equal ("^hypernym\n")
   
-  @Test def testInvertedArcByFullDescriptionGenerator() = result of ("\\destination^hypernym^source") should equal ("^hypernym\n")
+  @Test def testInvertedArcByFullDescriptionGenerator() = result of ("\\dst^hypernym^src") should equal ("^hypernym\n")
   
-  @Test def testDestinationArcGenerator() = result of ("\\hypernym^source") should equal ("source^hypernym^source\n")
+  @Test def testDestinationArcGenerator() = result of ("\\hypernym^src") should equal ("src^hypernym^src\n")
 
-  @Test def testSourceArcGenerator() = result of ("\\destination^hypernym") should equal ("destination^hypernym^destination\n")
+  @Test def testSourceArcGenerator() = result of ("\\dst^hypernym") should equal ("dst^hypernym^dst\n")
 
-  @Test def testMultipleArcGenerator() = result of ("\\source^literal^num^pos") should equal ("source^literal^num\nsource^literal^pos\n")
+  @Test def testMultipleArcGenerator() = result of ("\\src^literal^num^pos") should equal ("src^literal^num\nsrc^literal^pos\n")
 
   @Test def testAnyRelationArcGenerator() = result of ("count(\\_)") should equal ("64\n")
 
-  @Test def testAnyBinaryRelationArcGenerator() = result of ("count(\\source^_^destination)") should equal ("25\n")
+  @Test def testAnyBinaryRelationArcGenerator() = result of ("count(\\src^_^dst)") should equal ("25\n")
 
-  @Test def testAnyBinaryRelationWithDestinationTypeArcGenerator() = result of ("count(\\source^_^destination&synset)") should equal ("12\n")
+  @Test def testAnyBinaryRelationWithDestinationTypeArcGenerator() = result of ("count(\\src^_^dst&synset)") should equal ("12\n")
 
-  @Test def testAnyBinaryRelationWithSourceTypeArcGenerator() = result of ("count(\\source&synset^_^destination)") should equal ("15\n")
+  @Test def testAnyBinaryRelationWithSourceTypeArcGenerator() = result of ("count(\\src&synset^_^dst)") should equal ("15\n")
 
-  @Test def testAnyBinaryRelationWithSourceAndDestinationTypesArcGenerator() = result of ("count(\\source&synset^_^destination&synset)") should equal ("9\n")
+  @Test def testAnyBinaryRelationWithSourceAndDestinationTypesArcGenerator() = result of ("count(\\src&synset^_^dst&synset)") should equal ("9\n")
 
   @Test def testFunctionGenerator() = result of ("max('').senses") should equal ("zymurgy senses zymurgy:1:n\n")
 
