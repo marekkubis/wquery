@@ -348,22 +348,6 @@ class InMemoryWordNet extends WordNet {
     }
   }
 
-  private def addAlias(tuple: Map[String, Any]) {
-    // TODO implement validations
-    val relationName = tuple(WordNet.Meta.Aliases.Relation).asInstanceOf[String]
-    val sourceName = tuple(WordNet.Meta.Aliases.Source).asInstanceOf[String]
-    val destinationName = tuple(WordNet.Meta.Aliases.Destination).asInstanceOf[String]
-    val aliasName = tuple(WordNet.Meta.Aliases.Name).asInstanceOf[String]
-    val relation = schema.demandRelation(relationName, Map((sourceName, DataType.all), (destinationName, DataType.all)))
-    val sourceType = relation.demandArgument(sourceName).nodeType
-    val destinationType = relation.demandArgument(destinationName).nodeType
-    val alias = Relation.binary(aliasName, sourceType, destinationType)
-
-    aliasMap.put(alias, Arc(relation, sourceName, destinationName))
-    addEdge(WordNet.Meta.Aliases, tuple)
-    statsCache.invalidate
-  }
-
   def removeTuple(relation: Relation, tuple: Map[String, Any], withDependentNodes: Boolean = true,
                   withCollectionDependentNodes: Boolean = true) = atomic {
     relation match {
@@ -375,11 +359,40 @@ class InMemoryWordNet extends WordNet {
         removeWord(tuple(Relation.Src).asInstanceOf[String])
       case WordNet.PosSet =>
         removePartOfSpeechSymbol(tuple(Relation.Src).asInstanceOf[String])
-      case WordNet.Meta.Relations =>
-
+      case WordNet.Meta.Aliases =>
+        removeAlias(tuple)
       case _ =>
         removeLink(relation, tuple, withDependentNodes, withCollectionDependentNodes)
     }
+  }
+
+  private def addAlias(tuple: Map[String, Any]) {
+    val (alias, arc) = createAliasFromTuple(tuple)
+    aliasMap.put(alias, arc)
+    addEdge(WordNet.Meta.Aliases, tuple)
+    statsCache.invalidate
+  }
+
+  private def removeAlias(tuple: Map[String, Any]) {
+    val (alias, _) = createAliasFromTuple(tuple)
+    aliasMap.remove(alias)
+    removeEdge(WordNet.Meta.Aliases, tuple)
+    statsCache.invalidate
+  }
+
+  private def createAliasFromTuple(tuple: Map[String, Any]) = {
+    // TODO implement validations
+    val relationName = tuple(WordNet.Meta.Aliases.Relation).asInstanceOf[String]
+    val sourceName = tuple(WordNet.Meta.Aliases.Source).asInstanceOf[String]
+    val destinationName = tuple(WordNet.Meta.Aliases.Destination).asInstanceOf[String]
+    val aliasName = tuple(WordNet.Meta.Aliases.Name).asInstanceOf[String]
+    val relation = schema.demandRelation(relationName, Map((sourceName, DataType.all), (destinationName, DataType.all)))
+    val sourceType = relation.demandArgument(sourceName).nodeType
+    val destinationType = relation.demandArgument(destinationName).nodeType
+    val alias = Relation.binary(aliasName, sourceType, destinationType)
+    val arc = Arc(relation, sourceName, destinationName)
+
+    (alias, arc)
   }
 
   def setTuples(relation: Relation, sourceNames: List[String], sources: List[List[Any]],
@@ -415,6 +428,16 @@ class InMemoryWordNet extends WordNet {
       }
 
       relationSuccessors((sourceName, sourceValue)) = relationSuccessors((sourceName, sourceValue)) :+ tuple
+    }
+
+    statsCache.age
+  }
+
+  private def removeEdge(relation: Relation, tuple: Map[String, Any]) = atomic {
+    val relationSuccessors = successors(relation)
+
+    for ((sourceName, sourceValue) <- tuple if relationSuccessors.contains((sourceName, sourceValue))) {
+      relationSuccessors((sourceName, sourceValue)) = relationSuccessors((sourceName, sourceValue)).filterNot(_ == tuple)
     }
 
     statsCache.age
