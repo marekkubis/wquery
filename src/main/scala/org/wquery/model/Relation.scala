@@ -30,7 +30,7 @@ case class Relation(name: String, arguments: List[Argument]) {
   override def toString = name
 }
 
-case class Argument(name: String, nodeType: NodeType)
+case class Argument(val name: String, val nodeType: NodeType)
 
 object Relation {
   val AnyName = "_"

@@ -50,8 +50,8 @@ class UpdatesTestSuite extends WQueryTestSuite {
   @Test def testAddRelations() = {
     result of ("do " +
         "update relations += `newrelation` " +
-        "update `newrelation` arguments += `src`, `synset`, 1 " +
-        "update `newrelation` arguments += `dst`, `synset`, 2 " +
+        "update `newrelation` arguments += `src`, `synset`, 0 " +
+        "update `newrelation` arguments += `dst`, `synset`, 1 " +
       "end") should equal ("(no result)\n")
     result of ("{car}.newrelation") should equal ("(no result)\n")
   }

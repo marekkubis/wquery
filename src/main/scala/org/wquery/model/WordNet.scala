@@ -117,23 +117,43 @@ trait WordNet {
 
 object WordNet {
   object Meta {
-    // src = name
-    val Relations = Relation.unary("relations", StringType)
-    // src = relation, dst = argument
-    val Arguments = Relation("arguments",
-      List(Argument(Relation.Src, StringType), Argument(Relation.Dst, StringType), Argument("type", StringType), Argument("position", IntegerType)))
-    // src = relation, dst = argument
-    val Properties = Relation("properties",
-      List(Argument(Relation.Src, StringType), Argument(Relation.Dst, StringType), Argument("property", StringType)))
-    // src = relation, dst = source
-    val PairProperties = Relation("pair_properties",
-      List(Argument(Relation.Src, StringType),
-        Argument(Relation.Dst, StringType), Argument("destination", StringType),
-        Argument("property", StringType), Argument("action", StringType)))
-    // src = relation, dst = source
+    val Relations = new Relation("relations", List(Argument("name", StringType))) {
+      val Name = "name"
+    }
+
+    val Arguments = new Relation("arguments", List(Argument("relation", StringType), Argument("argument", StringType),
+      Argument("type", StringType), Argument("position", IntegerType))) {
+      val Relation = "relation"
+      val Argument = "argument"
+      val Type = "type"
+      val Position = "position"
+    }
+
+    val Properties = new Relation("properties", List(Argument("relation", StringType), Argument("argument", StringType),
+      Argument("property", StringType))) {
+      val Relation = "relation"
+      val Argument = "argument"
+      val Property = "property"
+    }
+
+    val PairProperties = new Relation("pair_properties", List(Argument("relation", StringType), Argument("source", StringType),
+      Argument("destination", StringType), Argument("property", StringType), Argument("action", StringType))) {
+      val Relation = "relation"
+      val Source = "source"
+      val Destination = "destination"
+      val Property = "property"
+      val Action = "action"
+    }
+
+    val Dependencies = new Relation("dependencies", List(Argument("relation", StringType), Argument("argument", StringType),
+      Argument("type", StringType))) {
+      val Relation = "relation"
+      val Argument = "argument"
+      val Property = "type"
+    }
+
     val Aliases = new Relation("aliases", List(Argument("relation", StringType), Argument("source", StringType),
       Argument("destination", StringType), Argument("name", StringType))) {
-
       val Relation = "relation"
       val Source = "source"
       val Destination = "destination"
