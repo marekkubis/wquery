@@ -16,6 +16,17 @@ class InMemoryWordNet extends WordNet {
   private var relationsList = List[Relation]()
   private val statsCache = new Cache[WordNetStats](calculateStats, 1000)
 
+  // relation properties
+  private val dependent = MMap[Relation, Set[String]]()
+  private val collectionDependent = MMap[Relation, Set[String]]()
+  private val functionalFor = MMap[Relation, Set[String]]()
+  private val requiredBys = MMap[Relation, Set[String]]()
+  private val transitives = MMap[Relation, List[(String, String)]]()
+  private val symmetry = MMap[Relation, Map[(String, String), Symmetry]]()
+
+  private val transitivesActions = MMap[(Relation, String, String), String]()
+  private val symmetryActions = MMap[(Relation, String, String), String]()
+
   def relations = relationsList
 
   def aliases = aliasMap.keys.toList
@@ -339,6 +350,8 @@ class InMemoryWordNet extends WordNet {
         addMetaRelation(tuple)
       case WordNet.Meta.Arguments =>
         addMetaArgument(tuple)
+      case WordNet.Meta.Properties =>
+        addMetaProperty(tuple)
       case WordNet.Meta.Aliases =>
         addMetaAlias(tuple)
       case _ =>
@@ -361,6 +374,8 @@ class InMemoryWordNet extends WordNet {
         removeMetaRelation(tuple)
       case WordNet.Meta.Arguments =>
         removeMetaArgument(tuple)
+      case WordNet.Meta.Properties =>
+        removeMetaProperty(tuple)
       case WordNet.Meta.Aliases =>
         removeMetaAlias(tuple)
       case _ =>
@@ -415,6 +430,49 @@ class InMemoryWordNet extends WordNet {
     removeRelation(oldRelation)
     addRelation(Relation(relationName, oldRelation.arguments.filterNot(_ == argument)))
     removeEdge(WordNet.Meta.Arguments, tuple)
+  }
+
+
+  private def addMetaProperty(tuple: Map[String, Any]) {
+    // TODO implement validations
+    val relationName = tuple(WordNet.Meta.Properties.Relation).asInstanceOf[String]
+    val argumentName = tuple(WordNet.Meta.Properties.Argument).asInstanceOf[String]
+    val property = tuple(WordNet.Meta.Properties.Property).asInstanceOf[String]
+    val relation = schema.demandRelation(relationName, Map())
+
+    property match {
+      case WordNet.Meta.Properties.PropertyValueFunctional =>
+        if (!functionalFor.contains(relation))
+          functionalFor(relation) = Set(argumentName)
+        else
+          functionalFor(relation) = functionalFor(relation) + argumentName
+      case WordNet.Meta.Properties.PropertyValueRequired =>
+        if (!requiredBys.contains(relation))
+          requiredBys(relation) = Set(argumentName)
+        else
+          requiredBys(relation) = requiredBys(relation) + argumentName
+      case _ =>
+        throw new WQueryModelException("Unknown relation argument property " + property)
+    }
+  }
+
+  private def removeMetaProperty(tuple: Map[String, Any]) {
+    // TODO implement validations
+    val relationName = tuple(WordNet.Meta.Properties.Relation).asInstanceOf[String]
+    val argumentName = tuple(WordNet.Meta.Properties.Argument).asInstanceOf[String]
+    val property = tuple(WordNet.Meta.Properties.Property).asInstanceOf[String]
+    val relation = schema.demandRelation(relationName, Map())
+
+    property match {
+      case WordNet.Meta.Properties.PropertyValueFunctional =>
+        if (functionalFor.contains(relation))
+          functionalFor(relation) = functionalFor(relation) - argumentName
+      case WordNet.Meta.Properties.PropertyValueRequired =>
+        if (requiredBys.contains(relation))
+          requiredBys(relation) = requiredBys(relation) - argumentName
+      case _ =>
+        throw new WQueryModelException("Unknown relation argument property " + property)
+    }
   }
 
   private def addMetaAlias(tuple: Map[String, Any]) {
@@ -506,37 +564,37 @@ class InMemoryWordNet extends WordNet {
 
       relationSuccessors.get((param, node)).map( successors =>
         if (!successors.isEmpty) {
-          if (functionalForActions((relation, param)) == Relation.Preserve)
-            throw new WQueryUpdateBreaksRelationPropertyException(Relation.Functional, relation, param)
-          else if (functionalForActions((relation, param)) == Relation.Restore)
-            successors.foreach(removeLinkByNode(relation, _, Some(node)))
+          throw new WQueryUpdateBreaksRelationPropertyException(Relation.Functional, relation, param)
         }
       )
     }
   }
 
   private def handleSymmetryForAddLink(relation: Relation, tuple: Map[String, Any]) {
-    if (relation.arguments.size == 2 && relation.sourceType == relation.destinationType.get)
-    symmetry.get(relation) match {
-      case Some(Symmetric) =>
-        if (symmetryActions(relation) == Relation.Restore)
-          addEdge(relation, Map((Relation.Src, tuple(Relation.Dst)),(Relation.Dst, tuple(Relation.Src))))
-        else if (symmetryActions(relation) == Relation.Preserve)
-          throw new WQueryUpdateBreaksRelationPropertyException("symmetric", relation)
-      case Some(Antisymmetric) =>
-        if (transitives.getOrElse(relation, false)) {
-          if (reaches(relation, tuple(Relation.Dst), tuple(Relation.Src), Nil))
-            throw new WQueryUpdateBreaksRelationPropertyException("transitive antisymmetry", relation)
-        } else {
-          if (follow(relation, Relation.Src, tuple(Relation.Dst), Relation.Dst).contains(tuple(Relation.Src))) {
-            if (symmetryActions(relation) == Relation.Restore)
-              removeMatchingLinks(relation, Map((Relation.Src, tuple(Relation.Dst)), (Relation.Dst, tuple(Relation.Src))))
-            else if (symmetryActions(relation) == Relation.Preserve)
-              throw new WQueryUpdateBreaksRelationPropertyException("antisymmetry", relation)
-          }
+    symmetry.get(relation).map { symmetries =>
+      for (((src, dst), sym) <- symmetries) {
+        sym match {
+          case Symmetric =>
+            if (symmetryActions((relation, src, dst)) == Relation.Restore)
+              addEdge(relation, Map((src, tuple(dst)),(dst, tuple(src))))
+            else if (symmetryActions((relation, src, dst)) == Relation.Preserve)
+              throw new WQueryUpdateBreaksRelationPropertyException("symmetric", relation)
+          case Antisymmetric =>
+            if (transitives.get(relation).some(_.contains((src, dst))).none(false)) {
+              if (reaches(relation, tuple(dst), tuple(src), Nil))
+                throw new WQueryUpdateBreaksRelationPropertyException("transitive antisymmetry", relation)
+            } else {
+              if (follow(relation, src, tuple(dst), dst).contains(tuple(src))) {
+                if (symmetryActions((relation, src, dst)) == Relation.Restore)
+                  removeMatchingLinks(relation, Map((src, tuple(dst)), (dst, tuple(src))))
+                else if (symmetryActions((relation, src, dst)) == Relation.Preserve)
+                  throw new WQueryUpdateBreaksRelationPropertyException("antisymmetry", relation)
+              }
+            }
+          case _ =>
+          // do nothing
         }
-      case _ =>
-        // do nothing
+      }
     }
   }
 
@@ -575,15 +633,15 @@ class InMemoryWordNet extends WordNet {
 
   private def removeDependentLinks(nodeType: NodeType, obj: Any, withDependentNodes: Boolean, withCollectionDependentNodes: Boolean) {
     for (relation <- relations) {
-      if (transitives.getOrElse(relation, false)) {
-        if (transitivesActions(relation) == Relation.Restore) {
-          for (source <- follow(relation, Relation.Dst, obj, Relation.Src);
-               destination <- follow(relation, Relation.Src, obj, Relation.Dst)) {
-            addEdge(relation, Map((Relation.Src, source), (Relation.Dst, destination)))
+      for (trans <- transitives.get(relation); (src, dst) <- trans) {
+        if (transitivesActions((relation, src, dst)) == Relation.Restore) {
+          for (source <- follow(relation, dst, obj, src);
+               destination <- follow(relation, src, obj, dst)) {
+            addEdge(relation, Map((src, source), (dst, destination)))
           }
-        } else if (transitivesActions(relation) == Relation.Preserve &&
-            !follow(relation, Relation.Dst, obj, Relation.Src).isEmpty &&
-            !follow(relation, Relation.Src, obj, Relation.Dst).isEmpty) {
+        } else if (transitivesActions((relation, src, dst)) == Relation.Preserve &&
+          !follow(relation, dst, obj, src).isEmpty &&
+          !follow(relation, src, obj, dst).isEmpty) {
           throw new WQueryUpdateBreaksRelationPropertyException(Relation.Transitivity, relation)
         }
       }
@@ -670,13 +728,11 @@ class InMemoryWordNet extends WordNet {
   }
 
   private def handleSymmetryForRemoveLink(relation: Relation, tuple: Map[String, Any], node: Option[Any], symmetricEdge: Boolean) {
-    if (relation.arguments.size == 2 && relation.sourceType == relation.destinationType.get && !symmetricEdge)
-    symmetry.get(relation) match {
-      case Some(Symmetric) =>
+    if (!symmetricEdge) {
+      for (syms <- symmetry.get(relation); ((src, dst), sym) <- syms if sym == Symmetric) {
         removeLinkByNode(relation,
-          Map((Relation.Src, tuple(Relation.Dst)),(Relation.Dst, tuple(Relation.Src))), node, symmetricEdge = true)
-      case _ =>
-        // do nothing
+          Map((src, tuple(dst)),(dst, tuple(src))), node, symmetricEdge = true)
+      }
     }
   }
 

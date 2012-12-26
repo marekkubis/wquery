@@ -89,20 +89,7 @@ trait WordNet {
   def setTuples(relation: Relation, sourceNames: List[String], sourceValues: List[List[Any]],
                 destinationNames: List[String], destinationValues: List[List[Any]])
 
-  // merge
   def merge(synsets: List[Synset], senses: List[Sense])
-
-  // relation properties
-  val dependent = MMap[Relation, Set[String]]()
-  val collectionDependent = MMap[Relation, Set[String]]()
-  val functionalFor = MMap[Relation, Set[String]]()
-  val requiredBys = MMap[Relation, Set[String]]()
-  val transitives = MMap[Relation, Boolean]()
-  val symmetry = MMap[Relation, Symmetry]()
-
-  val transitivesActions = MMap[Relation, String]()
-  val symmetryActions = MMap[Relation, String]()
-  val functionalForActions = MMap[(Relation, String), String]()
 
   // helper methods
   def addSuccessor(predecessor: Any, relation: Relation, successor: Any) {
@@ -134,6 +121,8 @@ object WordNet {
       val Relation = "relation"
       val Argument = "argument"
       val Property = "property"
+      val PropertyValueRequired = "required"
+      val PropertyValueFunctional = "functional"
     }
 
     val PairProperties = new Relation("pair_properties", List(Argument("relation", StringType), Argument("source", StringType),
