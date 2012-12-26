@@ -1,11 +1,11 @@
 package org.wquery.engine.operations
 
 import org.wquery.engine.{SetVariable, TupleVariable, StepVariable, Variable}
-import org.wquery.model.{WordNetSchema, Relation, DataType, WordNet}
+import org.wquery.model.{WordNet, Relation, DataType}
 import org.wquery.WQueryEvaluationException
 
 case class RelationSpecification(arguments: List[RelationSpecificationArgument]) {
-  def resolve(wordNet: WordNetSchema, bindings: Bindings, leftSize: Int): (Relation, List[String], List[String]) = {
+  def resolve(wordNet: WordNet#Schema, bindings: Bindings, leftSize: Int): (Relation, List[String], List[String]) = {
     val identifiers = arguments.map(_.resolveIdentifier(bindings))
 
     if (identifiers.size == 1) {

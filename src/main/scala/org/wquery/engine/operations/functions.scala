@@ -18,8 +18,8 @@ abstract class Function(val name: String) {
   def minTupleSize(args: AlgebraOp): Int
   def maxTupleSize(args: AlgebraOp): Option[Int]
   def bindingsPattern(args: AlgebraOp): BindingsPattern
-  def maxCount(args: AlgebraOp, wordNet: WordNetSchema): Option[BigInt]
-  def cost(args: AlgebraOp, wordNet: WordNetSchema): Option[BigInt]
+  def maxCount(args: AlgebraOp, wordNet: WordNet#Schema): Option[BigInt]
+  def cost(args: AlgebraOp, wordNet: WordNet#Schema): Option[BigInt]
   override def toString = name
 }
 
@@ -69,11 +69,11 @@ trait ReturnsValueSet {
 }
 
 trait ReturnsSingleTuple {
-  def maxCount(args: AlgebraOp, wordNet: WordNetSchema) = some(BigInt(1))
+  def maxCount(args: AlgebraOp, wordNet: WordNet#Schema) = some(BigInt(1))
 }
 
 trait ReturnsDataSetOfSimilarSize {
-  def maxCount(args: AlgebraOp, wordNet: WordNetSchema) = args.maxCount(wordNet)
+  def maxCount(args: AlgebraOp, wordNet: WordNet#Schema) = args.maxCount(wordNet)
 }
 
 trait ReturnsSingleValue extends ReturnsValueSet with ReturnsSingleTuple
@@ -87,7 +87,7 @@ trait PreservesTypes {
 }
 
 trait CountProportionalCost { this: Function =>
-  def cost(args: AlgebraOp, wordNet: WordNetSchema) = maxCount(args, wordNet)
+  def cost(args: AlgebraOp, wordNet: WordNet#Schema) = maxCount(args, wordNet)
 }
 
 trait PreservesTupleSizes {
@@ -145,7 +145,7 @@ with ClearsBindingsPattern {
 
   def maxTupleSize(args: AlgebraOp) = None
 
-  def cost(args: AlgebraOp, wordNet: WordNetSchema) = args.maxCount(wordNet).map(cost => cost*cost)
+  def cost(args: AlgebraOp, wordNet: WordNet#Schema) = args.maxCount(wordNet).map(cost => cost*cost)
 }
 
 object DistinctFunction extends DataSetFunction("distinct") with AcceptsAll
@@ -155,7 +155,7 @@ with PreservesTypes with PreservesTupleSizes with PreservesBindingsPattern with 
     dataSet.distinct
   }
 
-  def cost(args: AlgebraOp, wordNet: WordNetSchema) = args.maxCount(wordNet).map(cost => cost*cost)
+  def cost(args: AlgebraOp, wordNet: WordNet#Schema) = args.maxCount(wordNet).map(cost => cost*cost)
 }
 
 object FlattenFunction extends DataSetFunction("flatten") with AcceptsAll with ReturnsValueSet with ClearsBindingsPattern {
@@ -169,9 +169,9 @@ object FlattenFunction extends DataSetFunction("flatten") with AcceptsAll with R
     DataSet(dataSet.paths.flatten.map(x => List(x)))
   }
 
-  def maxCount(args: AlgebraOp, wordNet: WordNetSchema) = (args.maxTupleSize <|*|> args.maxCount(wordNet)).map{ case (l, r) => l * r }
+  def maxCount(args: AlgebraOp, wordNet: WordNet#Schema) = (args.maxTupleSize <|*|> args.maxCount(wordNet)).map{ case (l, r) => l * r }
 
-  def cost(args: AlgebraOp, wordNet: WordNetSchema) = args.cost(wordNet)
+  def cost(args: AlgebraOp, wordNet: WordNet#Schema) = args.cost(wordNet)
 }
 
 object SortFunction extends DataSetFunction("sort") with AcceptsAll with ReturnsDataSetOfSimilarSize
@@ -181,7 +181,7 @@ object SortFunction extends DataSetFunction("sort") with AcceptsAll with Returns
     DataSet.fromBoundPaths(dataSet.toBoundPaths.sortBy(x => x._1)(AnyListOrdering))
   }
 
-  def cost(args: AlgebraOp, wordNet: WordNetSchema) = args.maxCount(wordNet).map(cost => cost*cost)
+  def cost(args: AlgebraOp, wordNet: WordNet#Schema) = args.maxCount(wordNet).map(cost => cost*cost)
 }
 
 object MinFunction extends DataSetFunction("min") with AcceptsAll with ReturnsSingleTuple
@@ -204,7 +204,7 @@ with PreservesTypes with PreservesTupleSizes with PreservesBindingsPattern {
     }
   }
 
-  def cost(args: AlgebraOp, wordNet: WordNetSchema) = args.maxCount(wordNet).map(cost => cost*cost)
+  def cost(args: AlgebraOp, wordNet: WordNet#Schema) = args.maxCount(wordNet).map(cost => cost*cost)
 }
 
 object MaxFunction extends DataSetFunction("max") with AcceptsAll with ReturnsSingleTuple
@@ -227,7 +227,7 @@ with PreservesTypes with PreservesTupleSizes with PreservesBindingsPattern {
     }
   }
 
-  def cost(args: AlgebraOp, wordNet: WordNetSchema) = args.maxCount(wordNet).map(cost => cost*cost)
+  def cost(args: AlgebraOp, wordNet: WordNet#Schema) = args.maxCount(wordNet).map(cost => cost*cost)
 }
 
 abstract class ByFunction(name: String) extends DataSetFunction(name) with ReturnsDataSetOfSimilarSize {
@@ -266,7 +266,7 @@ object SortByFunction extends ByFunction("sortby") with ReturnsDataSetOfSimilarS
     }
   }
 
-  def cost(args: AlgebraOp, wordNet: WordNetSchema) = args.maxCount(wordNet).map(cost => cost*cost)
+  def cost(args: AlgebraOp, wordNet: WordNet#Schema) = args.maxCount(wordNet).map(cost => cost*cost)
 }
 
 object MinByFunction extends ByFunction("minby") with ReturnsDataSetOfSimilarSize {
@@ -288,7 +288,7 @@ object MinByFunction extends ByFunction("minby") with ReturnsDataSetOfSimilarSiz
     }
   }
 
-  def cost(args: AlgebraOp, wordNet: WordNetSchema) = args.maxCount(wordNet).map(cost => cost*cost)
+  def cost(args: AlgebraOp, wordNet: WordNet#Schema) = args.maxCount(wordNet).map(cost => cost*cost)
 }
 
 object MaxByFunction extends ByFunction("maxby") with ReturnsDataSetOfSimilarSize {
@@ -310,7 +310,7 @@ object MaxByFunction extends ByFunction("maxby") with ReturnsDataSetOfSimilarSiz
     }
   }
 
-  def cost(args: AlgebraOp, wordNet: WordNetSchema) = args.maxCount(wordNet).map(cost => cost*cost)
+  def cost(args: AlgebraOp, wordNet: WordNet#Schema) = args.maxCount(wordNet).map(cost => cost*cost)
 }
 
 object CountFunction extends DataSetFunction("count") with AcceptsAll with ReturnsSingleValue
@@ -400,7 +400,7 @@ object ShortestFunction extends DataSetFunction("shortest") with AcceptsAll with
 
   def maxTupleSize(args: AlgebraOp) = Some(args.minTupleSize)
 
-  def cost(args: AlgebraOp, wordNet: WordNetSchema) = args.cost(wordNet) * some(2)
+  def cost(args: AlgebraOp, wordNet: WordNet#Schema) = args.cost(wordNet) * some(2)
 }
 
 object LongestFunction extends DataSetFunction("longest") with AcceptsAll with ReturnsSingleTuple
@@ -414,7 +414,7 @@ object LongestFunction extends DataSetFunction("longest") with AcceptsAll with R
 
   def maxTupleSize(args: AlgebraOp) = args.maxTupleSize
 
-  def cost(args: AlgebraOp, wordNet: WordNetSchema) = args.cost(wordNet) * some(2)
+  def cost(args: AlgebraOp, wordNet: WordNet#Schema) = args.cost(wordNet) * some(2)
 }
 
 object SizeFunction extends DataSetFunction("size") with AcceptsAll with ReturnsValueSetOfSimilarSize
@@ -549,7 +549,7 @@ object RangeFunction extends DataSetFunction("range") with AcceptsTypes with Ret
 
   def returnType(args: AlgebraOp) = Set(IntegerType)
 
-  def maxCount(args: AlgebraOp, wordNet: WordNetSchema) = args match {
+  def maxCount(args: AlgebraOp, wordNet: WordNet#Schema) = args match {
     // infer the range suze from the arguments structure or assume that it can be from MIN_INT to MAX_INT
     case JoinOp(ConstantOp(leftSet), ConstantOp(rightSet)) =>
       if (leftSet.containsSingleValue && rightSet.containsSingleValue)

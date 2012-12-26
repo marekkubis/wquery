@@ -146,7 +146,7 @@ trait WQueryParsers extends RegexParsers {
   )
 
   def arc_expr = (
-    ("^" ~> notQuotedString) ^^ { id => ArcExpr(List(Relation.Destination, id, Relation.Source).map(ArcExprArgument(_, None))) } // syntactic sugar
+    ("^" ~> notQuotedString) ^^ { id => ArcExpr(List(Relation.Dst, id, Relation.Src).map(ArcExprArgument(_, None))) } // syntactic sugar
     | rep1sep(arc_expr_arg, "^") ^^ { ArcExpr(_) }
   )
 

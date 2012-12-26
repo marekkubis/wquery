@@ -25,9 +25,9 @@ sealed abstract class UpdateOp extends AlgebraOp {
 
   def bindingsPattern = BindingsSchema()
 
-  def maxCount(wordNet: WordNetSchema) = some(0)
+  def maxCount(wordNet: WordNet#Schema) = some(0)
 
-  def cost(wordNet: WordNetSchema) = some(1) // TODO implement cost model for update operations
+  def cost(wordNet: WordNet#Schema) = some(1) // TODO implement cost model for update operations
 }
 
 //

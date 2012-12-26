@@ -131,11 +131,11 @@ class PlannerTests extends WQueryTestSuite {
   @Test def verifyStats() {
     val stats = wquery.wordNet.schema.stats
 
-    stats.fetchMaxCount(WordNet.SynsetSet, List((Relation.Source, Nil)), List(Relation.Source)) should equal (tuples.of("count({})").asValueOf[Int])
-    stats.fetchMaxCount(WordNet.SenseSet, List((Relation.Source, Nil)), List(Relation.Source)) should equal (tuples.of("count(::)").asValueOf[Int])
-    stats.fetchMaxCount(WordNet.WordSet, List((Relation.Source, Nil)), List(Relation.Source)) should equal (tuples.of("count('')").asValueOf[Int])
-    stats.fetchMaxCount(WordNet.PosSet, List((Relation.Source, Nil)), List(Relation.Source)) should equal (tuples.of("count(possyms)").asValueOf[Int])
-    stats.fetchMaxCount(WordNet.SenseToWordFormSenseNumberAndPos, List((Relation.Source, List("cab")),("num", List(3)), ("pos", List("n"))), List(Relation.Source)) should equal (tuples.of("count(cab.senses)").asValueOf[Int])
+    stats.fetchMaxCount(WordNet.SynsetSet, List((Relation.Src, Nil)), List(Relation.Src)) should equal (tuples.of("count({})").asValueOf[Int])
+    stats.fetchMaxCount(WordNet.SenseSet, List((Relation.Src, Nil)), List(Relation.Src)) should equal (tuples.of("count(::)").asValueOf[Int])
+    stats.fetchMaxCount(WordNet.WordSet, List((Relation.Src, Nil)), List(Relation.Src)) should equal (tuples.of("count('')").asValueOf[Int])
+    stats.fetchMaxCount(WordNet.PosSet, List((Relation.Src, Nil)), List(Relation.Src)) should equal (tuples.of("count(possyms)").asValueOf[Int])
+    stats.fetchMaxCount(WordNet.SenseToWordFormSenseNumberAndPos, List((Relation.Src, List("cab")),("num", List(3)), ("pos", List("n"))), List(Relation.Src)) should equal (tuples.of("count(cab.senses)").asValueOf[Int])
 
     stats.extendMaxCount(some(1), ArcPattern(
       wquery.wordNet.schema.relations.find(_.name == "hypernym"),

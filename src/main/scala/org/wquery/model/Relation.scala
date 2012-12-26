@@ -3,15 +3,14 @@ import org.wquery.WQueryModelException
 import scalaz._
 import Scalaz._
 
-case class Relation(name: String, arguments: Set[Argument]) {
+case class Relation(name: String, arguments: List[Argument]) {
   private val argumentsByName = arguments.map(arg => (arg.name, arg)).toMap
 
-  val sourceType = argumentsByName(Relation.Source).nodeType
+  val sourceType = arguments.head.nodeType
 
-  val destinationType = argumentsByName.get(Relation.Destination).map(_.nodeType)
+  val destinationType = argumentsByName.get(Relation.Dst).map(_.nodeType)
 
-  val argumentNames = Relation.Source :: (arguments.map(_.name) - Relation.Source - Relation.Destination)
-    .toList.sortWith((x, y) => x < y) ++ argumentsByName.get(Relation.Destination).toList.map(_.name)
+  val argumentNames = arguments.map(_.name)
 
   def isTraversable = arguments.size > 1
 
@@ -19,12 +18,16 @@ case class Relation(name: String, arguments: Set[Argument]) {
     argumentsByName.getOrElse(argument, throw new WQueryModelException("Relation '" + name + "' does not have argument '" + argument + "'"))
   }
 
-  def getArgument(argument: String) = argumentsByName.get(argument)
+  def getArgument(argument: String) = argument match {
+    case Relation.Src =>
+      arguments.headOption
+    case Relation.Dst =>
+      arguments.tail.headOption
+    case _ =>
+      argumentsByName.get(argument)
+  }
 
   override def toString = name
-
-  if (!argumentsByName.contains(Relation.Source))
-    throw new IllegalArgumentException("An attempt to create Relation '" + name + "' without source argument")
 }
 
 case class Argument(name: String, nodeType: NodeType)
@@ -33,8 +36,8 @@ object Relation {
   val AnyName = "_"
 
   // default argument names
-  val Source = "src"
-  val Destination = "dst"
+  val Src = "src"
+  val Dst = "dst"
 
   // property names
   val Transitivity = "transitivity"
@@ -49,11 +52,11 @@ object Relation {
   val PropertyActions = List(Restore, Preserve)
 
   def unary(name: String, sourceType: NodeType) = {
-    Relation(name, Set(Argument(Relation.Source, sourceType)))
+    Relation(name, List(Argument(Relation.Src, sourceType)))
   }
 
   def binary(name: String, sourceType: NodeType, destinationType: NodeType) = {
-    Relation(name, Set(Argument(Relation.Source, sourceType), Argument(Relation.Destination, destinationType)))
+    Relation(name, List(Argument(Relation.Src, sourceType), Argument(Relation.Dst, destinationType)))
   }
 }
 

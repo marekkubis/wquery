@@ -1,9 +1,9 @@
 package org.wquery.engine
 
-import org.wquery.model.WordNetSchema
+import org.wquery.model.WordNet
 import org.wquery.utils.BigIntOptionW._
 
 trait ProvidesSize { this: ProvidesTupleSizes =>
-  def maxCount(wordNet: WordNetSchema): Option[BigInt]
-  def maxSize(wordNet: WordNetSchema) = maxCount(wordNet) * maxTupleSize.map(BigInt(_))
+  def maxCount(wordNet: WordNet#Schema): Option[BigInt]
+  def maxSize(wordNet: WordNet#Schema) = maxCount(wordNet) * maxTupleSize.map(BigInt(_))
 }

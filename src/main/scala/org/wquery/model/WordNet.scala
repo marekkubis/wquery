@@ -1,10 +1,41 @@
 package org.wquery.model
 
 import scala.collection.mutable.{Map => MMap}
+import org.wquery.WQueryModelException
+import scalaz._
+import Scalaz._
 
 trait WordNet {
+  class Schema {
+    def relations = WordNet.this.relations
+
+    def stats = WordNet.this.stats
+
+    def getRelation(name: String, arguments: Map[String, Set[DataType]], includingMeta: Boolean = false) = {
+      val relations = WordNet.this.relations ++ (includingMeta ?? WordNet.Meta.relations) ++ WordNet.this.aliases
+      relations.find(r => relationMatchesNameAndArguments(r, name, arguments))
+    }
+
+    private def relationMatchesNameAndArguments(relation: Relation, name: String, arguments: Map[String, Set[DataType]]) = {
+      val extendedArguments = arguments.map{ case (name, types) => types.contains(StringType) ? (name, types + POSType) | (name, types)}
+      relation.name == name &&
+        extendedArguments.forall{ case (name, types) => relation.getArgument(name).some(arg => types.contains(arg.nodeType)).none(false) }
+    }
+
+    def demandRelation(name: String, arguments: Map[String, Set[DataType]], includingMeta: Boolean = false) = {
+      getRelation(name, arguments, includingMeta)|(throw new WQueryModelException("Relation '" + name + "' not found"))
+    }
+
+    def containsRelation(name: String, arguments: Map[String, Set[DataType]], includingMeta: Boolean = false) = {
+      getRelation(name, arguments, includingMeta).isDefined
+    }
+  }
+
+
   // querying
   def relations: List[Relation]
+
+  def aliases: List[Relation]
 
   def fetch(relation: Relation, from: List[(String, List[Any])], to: List[String]): DataSet
 
@@ -19,7 +50,7 @@ trait WordNet {
   def getSynset(sense: Sense): Option[Synset]
 
   // schema
-  def schema: WordNetSchema
+  val schema: WordNet#Schema = new Schema
 
   // stats
   def stats: WordNetStats
@@ -75,11 +106,11 @@ trait WordNet {
 
   // helper methods
   def addSuccessor(predecessor: Any, relation: Relation, successor: Any) {
-    addTuple(relation, Map((Relation.Source, predecessor), (Relation.Destination, successor)))
+    addTuple(relation, Map((Relation.Src, predecessor), (Relation.Dst, successor)))
   }
 
   def removeSuccessor(predecessor: Any, relation: Relation, successor: Any, withDependentNodes: Boolean = false, withCollectionDependentNodes:Boolean = false) {
-    removeTuple(relation, Map((Relation.Source, predecessor), (Relation.Destination, successor)), withDependentNodes, withCollectionDependentNodes)
+    removeTuple(relation, Map((Relation.Src, predecessor), (Relation.Dst, successor)), withDependentNodes, withCollectionDependentNodes)
   }
 }
 
@@ -90,18 +121,24 @@ object WordNet {
     val Relations = Relation.unary("relations", StringType)
     // src = relation, dst = argument
     val Arguments = Relation("arguments",
-      Set(Argument(Relation.Source, StringType), Argument(Relation.Destination, StringType), Argument("type", StringType), Argument("position", IntegerType)))
+      List(Argument(Relation.Src, StringType), Argument(Relation.Dst, StringType), Argument("type", StringType), Argument("position", IntegerType)))
     // src = relation, dst = argument
     val Properties = Relation("properties",
-      Set(Argument(Relation.Source, StringType), Argument(Relation.Destination, StringType), Argument("property", StringType)))
+      List(Argument(Relation.Src, StringType), Argument(Relation.Dst, StringType), Argument("property", StringType)))
     // src = relation, dst = source
     val PairProperties = Relation("pair_properties",
-      Set(Argument(Relation.Source, StringType),
-        Argument(Relation.Destination, StringType), Argument("destination", StringType),
+      List(Argument(Relation.Src, StringType),
+        Argument(Relation.Dst, StringType), Argument("destination", StringType),
         Argument("property", StringType), Argument("action", StringType)))
     // src = relation, dst = source
-    val Aliases = Relation("aliases",
-      Set(Argument(Relation.Source, StringType), Argument(Relation.Destination, StringType), Argument("destination", StringType), Argument("name", StringType)))
+    val Aliases = new Relation("aliases", List(Argument("relation", StringType), Argument("source", StringType),
+      Argument("destination", StringType), Argument("name", StringType))) {
+
+      val Relation = "relation"
+      val Source = "source"
+      val Destination = "destination"
+      val Name = "name"
+    }
 
     val relations = List(Relations, Arguments, Properties, PairProperties, Aliases)
   }
@@ -118,7 +155,7 @@ object WordNet {
   val IdToSense = Relation.binary("id_sense", StringType, SenseType)
   val SenseToId = Relation.binary("id", SenseType, StringType)
   val SenseToWordFormSenseNumberAndPos = Relation("literal",
-    Set(Argument(Relation.Source, SenseType), Argument(Relation.Destination, StringType), Argument("num", IntegerType), Argument("pos", POSType)))
+    List(Argument(Relation.Src, SenseType), Argument(Relation.Dst, StringType), Argument("num", IntegerType), Argument("pos", POSType)))
   val SenseToSenseNumber = Relation.binary("sensenum", SenseType, IntegerType)
   val SenseToPos = Relation.binary("pos", SenseType, POSType)
   val SenseToWordForm = Relation.binary("word", SenseType, StringType)
@@ -132,9 +169,9 @@ object WordNet {
     SenseToPos, SynsetToWordForms, SynsetToSenses, WordFormToSenses, SenseToSynset, WordFormToSynsets,
     SenseToWordFormSenseNumberAndPos, SynsetSet, SenseSet, WordSet, PosSet)
 
-  val dependent = List((SenseToWordFormSenseNumberAndPos, Set(Relation.Source)), (SenseToPos, Set(Relation.Source)),
-    (SenseToWordForm, Set(Relation.Source)), (WordFormToSenses, Set(Relation.Destination)),
-    (SenseToSynset, Set(Relation.Source)), (SynsetToSenses, Set(Relation.Destination)))
+  val dependent = List((SenseToWordFormSenseNumberAndPos, Set(Relation.Src)), (SenseToPos, Set(Relation.Src)),
+    (SenseToWordForm, Set(Relation.Src)), (WordFormToSenses, Set(Relation.Dst)),
+    (SenseToSynset, Set(Relation.Src)), (SynsetToSenses, Set(Relation.Dst)))
 
-  val collectionDependent = List((SenseToSynset, Set(Relation.Destination)))
+  val collectionDependent = List((SenseToSynset, Set(Relation.Dst)))
 }

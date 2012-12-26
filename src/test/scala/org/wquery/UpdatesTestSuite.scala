@@ -241,4 +241,13 @@ class UpdatesTestSuite extends WQueryTestSuite {
     result of ("merge {minicab:1:n} union 'gypsy cab':1:n") should equal ("(no result)\n")
     result of ("{minicab:1:n}.hypernym") should equal ("{ minicab:1:n gypsy cab:1:n } hypernym { cab:3:n hack:5:n taxi:1:n taxicab:1:n }\n{ minicab:1:n gypsy cab:1:n } hypernym { minicar:1:n }\n")
   }
+
+  @Test def testAddRemoveAlias() = {
+    result of ("update aliases += `hypernym`, `dst`, `src`, `hypo`") should equal ("(no result)\n")
+    result of ("{taxi:1:n}.hypo") should equal ("{ cab:3:n hack:5:n taxi:1:n taxicab:1:n } ^hypernym { gypsy cab:1:n }\n{ cab:3:n hack:5:n taxi:1:n taxicab:1:n } ^hypernym { minicab:1:n }\n")
+    result of ("{taxi:1:n}.^hypo") should equal ("{ cab:3:n hack:5:n taxi:1:n taxicab:1:n } hypernym { car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n }\n")
+    result of ("update aliases -= `hypernym`, `dst`, `src`, `hypo`") should equal ("(no result)\n")
+    result of ("{minicab:1:n}.hypo") should equal ("")
+  }
+
 }

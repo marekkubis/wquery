@@ -3,22 +3,22 @@ package org.wquery.model.impl
 import collection.mutable.ListBuffer
 import collection.mutable.{Map => MMap}
 import org.wquery.model._
+import org.wquery.utils.Cache
 import org.wquery.{WQueryUpdateBreaksRelationPropertyException, WQueryModelException, WQueryEvaluationException}
 import akka.stm._
 import scalaz._
 import Scalaz._
-import org.wquery.engine.operations.{RelationalPattern, NewSynset, Bindings}
-import org.wquery.utils.Cache
+import org.wquery.engine.operations.NewSynset
 
 class InMemoryWordNet extends WordNet {
   private val successors = TransactionalMap[Relation, TransactionalMap[(String, Any), IndexedSeq[Map[String, Any]]]]()
-  private val patterns = scala.collection.mutable.Map[Relation, List[RelationalPattern]]()
+  private val aliasMap = scala.collection.mutable.Map[Relation, Arc]()
   private var relationsList = List[Relation]()
   private val statsCache = new Cache[WordNetStats](calculateStats, 1000)
 
-  val schema = new WordNetSchema(this)
-
   def relations = relationsList
+
+  def aliases = aliasMap.keys.toList
 
   for (relation <- WordNet.Meta.relations)
     createRelation(relation)
@@ -28,6 +28,8 @@ class InMemoryWordNet extends WordNet {
 
   dependent ++= WordNet.dependent
   collectionDependent ++= WordNet.collectionDependent
+
+  statsCache.invalidate
 
   def addRelation(relation: Relation) {
     if (!relations.contains(relation)) {
@@ -54,7 +56,6 @@ class InMemoryWordNet extends WordNet {
       throw new WQueryModelException("Cannot remove the mandatory relation '" + relation + "'")
 
     relationsList = relationsList.filterNot(_ == relation)
-    patterns.remove(relation)
     successors.remove(relation)
     statsCache.invalidate
   }
@@ -74,10 +75,10 @@ class InMemoryWordNet extends WordNet {
     successors(relation).get((from, through)).map(_.map(succ => succ(to))).orZero
   }
 
-  def getSenses(synset: Synset) = follow(WordNet.SynsetToSenses, Relation.Source, synset, Relation.Destination).toList.asInstanceOf[List[Sense]]
+  def getSenses(synset: Synset) = follow(WordNet.SynsetToSenses, Relation.Src, synset, Relation.Dst).toList.asInstanceOf[List[Sense]]
 
   def getSynset(sense: Sense) = {
-    val synsets = follow(WordNet.SenseToSynset, Relation.Source, sense, Relation.Destination).toList
+    val synsets = follow(WordNet.SenseToSynset, Relation.Src, sense, Relation.Dst).toList
 
     if (synsets.isEmpty) None else Some(synsets.head.asInstanceOf[Synset])
   }
@@ -146,8 +147,11 @@ class InMemoryWordNet extends WordNet {
   def extend(extensionSet: ExtensionSet, relation: Relation, direction: Direction, through: String, to: List[String]) = {
     val buffer = new ExtensionSetBuffer(extensionSet, direction)
 
-    buffer.append(extendWithRelationTuples(extensionSet, relation, direction, through, to))
-    extendWithPatterns(extensionSet, relation, direction, through, to, buffer)
+    if (aliasMap.contains(relation))
+      extendWithAlias(extensionSet, relation, direction, through, to, buffer)
+    else
+      buffer.append(extendWithRelationTuples(extensionSet, relation, direction, through, to))
+
     buffer.toExtensionSet
   }
 
@@ -213,27 +217,33 @@ class InMemoryWordNet extends WordNet {
     builder.build
   }
 
-  private def extendWithPatterns(extensionSet: ExtensionSet, relation: Relation, direction: Direction,
+  private def extendWithAlias(extensionSet: ExtensionSet, relation: Relation, direction: Direction,
                                  through: String, to: List[String], buffer: ExtensionSetBuffer) {
-    if (patterns.contains(relation)) {
-      if (through == Relation.Source && to.size == 1 && to.head == Relation.Destination) {
-        patterns(relation).foreach( pattern =>
-          buffer.append(pattern.extend(this, Bindings(), extensionSet, direction))
-        )
-      } else {
-        throw new WQueryEvaluationException("One cannot traverse the inferred relation "
-          + relation + " using custom source or destination arguments")
+    if (to.size == 1) {
+      val arc = aliasMap(relation)
+
+      (through, to.head) match {
+        case (Relation.Src, Relation.Dst) =>
+          buffer.append(extendWithRelationTuples(extensionSet, arc.relation, direction, arc.from, List(arc.to)))
+        case (Relation.Dst, Relation.Src) =>
+          buffer.append(extendWithRelationTuples(extensionSet, arc.relation, direction, arc.to, List(arc.from)))
+        case _ =>
+          throw new WQueryEvaluationException("One cannot traverse the alias " + relation + " using custom source or destination arguments")
       }
+    } else {
+      throw new WQueryEvaluationException("One cannot traverse the alias " + relation + " to multiple destinations")
     }
   }
 
   def stats = statsCache.get // stats are calculated below in calculateStats()
 
   private def calculateStats() = {
+    val allRelations = relations ++ aliases ++ WordNet.Meta.relations
+
     val fetchAllMaxCounts = MMap[(Relation, String), BigInt](
-      (for (relation <- relations; argument <- ArcPatternArgument.AnyName::relation.argumentNames) yield ((relation, argument), BigInt(0))): _*)
+      (for (relation <- allRelations; argument <- ArcPatternArgument.AnyName::relation.argumentNames) yield ((relation, argument), BigInt(0))): _*)
     val extendValueMaxCounts = MMap[(Relation, String), BigInt](
-      (for (relation <- relations; argument <- ArcPatternArgument.AnyName::relation.argumentNames) yield ((relation, argument), BigInt(0))): _*)
+      (for (relation <- allRelations; argument <- ArcPatternArgument.AnyName::relation.argumentNames) yield ((relation, argument), BigInt(0))): _*)
 
     for ((relation, relationSuccessors) <- successors; ((argument, _), argumentSuccessors) <- relationSuccessors) {
       fetchAllMaxCounts((relation, argument)) += argumentSuccessors.size
@@ -250,7 +260,7 @@ class InMemoryWordNet extends WordNet {
     val fetchAnyRelationMaxCount = (for (((_, argument), count) <- fetchAllMaxCounts if argument == ArcPatternArgument.AnyName) yield count).sum
     val extendAnyRelationMaxCount = (for (((_, argument), count) <- extendValueMaxCounts if argument == ArcPatternArgument.AnyName) yield count).sum
 
-    for ((relation, _) <- patterns; argument <- relation.argumentNames) {
+    for ((relation, _) <- aliasMap; argument <- relation.argumentNames) {
       fetchAllMaxCounts((relation, argument)) = fetchAnyRelationMaxCount
       extendValueMaxCounts((relation, argument)) = extendAnyRelationMaxCount
     }
@@ -299,7 +309,7 @@ class InMemoryWordNet extends WordNet {
     addSuccessor(sense, WordNet.SenseToSynset, synset)
     addSuccessor(sense.wordForm, WordNet.WordFormToSynsets, synset)
     addLink(WordNet.SenseToWordFormSenseNumberAndPos,
-      Map((Relation.Source, sense), (Relation.Destination, sense.wordForm), ("num", sense.senseNumber), ("pos", sense.pos)))
+      Map((Relation.Src, sense), (Relation.Dst, sense.wordForm), ("num", sense.senseNumber), ("pos", sense.pos)))
   }
 
   def addWord(word: String) { addNode(StringType, word) }
@@ -307,48 +317,64 @@ class InMemoryWordNet extends WordNet {
   def addPartOfSpeechSymbol(pos: String) { if (!isPartOfSpeechSymbol(pos)) addNode(POSType, pos) }
 
   private def isWord(word: String) = {
-    successors(WordNet.WordSet).get(Relation.Source, word).some(!_.isEmpty).none(false)
+    successors(WordNet.WordSet).get(Relation.Src, word).some(!_.isEmpty).none(false)
   }
 
   private def isPartOfSpeechSymbol(pos: String) = {
-    successors(WordNet.PosSet).get(Relation.Source, pos).some(!_.isEmpty).none(false)
+    successors(WordNet.PosSet).get(Relation.Src, pos).some(!_.isEmpty).none(false)
   }
 
   private def addNode(nodeType: NodeType, node: Any) = atomic {
     val relation = WordNet.dataTypesRelations(nodeType)
 
-    addLink(relation, Map((Relation.Source, node)))
+    addLink(relation, Map((Relation.Src, node)))
   }
 
   def addTuple(relation: Relation, tuple: Map[String, Any]) = atomic {
     relation match {
       case WordNet.SynsetSet =>
-        val synset = tuple(Relation.Source).asInstanceOf[NewSynset]
+        val synset = tuple(Relation.Src).asInstanceOf[NewSynset]
         addSynset(Some(synset.id), synset.senses)
       case WordNet.SenseSet =>
-        addSense(tuple(Relation.Source).asInstanceOf[Sense])
+        addSense(tuple(Relation.Src).asInstanceOf[Sense])
       case WordNet.WordSet =>
-        addWord(tuple(Relation.Source).asInstanceOf[String])
+        addWord(tuple(Relation.Src).asInstanceOf[String])
       case WordNet.PosSet =>
-        addPartOfSpeechSymbol(tuple(Relation.Source).asInstanceOf[String])
+        addPartOfSpeechSymbol(tuple(Relation.Src).asInstanceOf[String])
       case WordNet.Meta.Aliases =>
-        addEdge(relation, tuple)
+        addAlias(tuple)
       case _ =>
         addLink(relation, tuple)
     }
+  }
+
+  private def addAlias(tuple: Map[String, Any]) {
+    // TODO implement validations
+    val relationName = tuple(WordNet.Meta.Aliases.Relation).asInstanceOf[String]
+    val sourceName = tuple(WordNet.Meta.Aliases.Source).asInstanceOf[String]
+    val destinationName = tuple(WordNet.Meta.Aliases.Destination).asInstanceOf[String]
+    val aliasName = tuple(WordNet.Meta.Aliases.Name).asInstanceOf[String]
+    val relation = schema.demandRelation(relationName, Map((sourceName, DataType.all), (destinationName, DataType.all)))
+    val sourceType = relation.demandArgument(sourceName).nodeType
+    val destinationType = relation.demandArgument(destinationName).nodeType
+    val alias = Relation.binary(aliasName, sourceType, destinationType)
+
+    aliasMap.put(alias, Arc(relation, sourceName, destinationName))
+    addEdge(WordNet.Meta.Aliases, tuple)
+    statsCache.invalidate
   }
 
   def removeTuple(relation: Relation, tuple: Map[String, Any], withDependentNodes: Boolean = true,
                   withCollectionDependentNodes: Boolean = true) = atomic {
     relation match {
       case WordNet.SynsetSet =>
-        removeSynset(tuple(Relation.Source).asInstanceOf[Synset])
+        removeSynset(tuple(Relation.Src).asInstanceOf[Synset])
       case WordNet.SenseSet =>
-        removeSense(tuple(Relation.Source).asInstanceOf[Sense])
+        removeSense(tuple(Relation.Src).asInstanceOf[Sense])
       case WordNet.WordSet =>
-        removeWord(tuple(Relation.Source).asInstanceOf[String])
+        removeWord(tuple(Relation.Src).asInstanceOf[String])
       case WordNet.PosSet =>
-        removePartOfSpeechSymbol(tuple(Relation.Source).asInstanceOf[String])
+        removePartOfSpeechSymbol(tuple(Relation.Src).asInstanceOf[String])
       case WordNet.Meta.Relations =>
 
       case _ =>
@@ -395,7 +421,7 @@ class InMemoryWordNet extends WordNet {
   }
 
   private def containsLink(relation: Relation, tuple: Map[String, Any]) = {
-    successors(relation).get(Relation.Source, tuple(Relation.Source)).some(_.contains(tuple)).none(false)
+    successors(relation).get(Relation.Src, tuple(Relation.Src)).some(_.contains(tuple)).none(false)
   }
 
   private def handleFunctionalForPropertyForAddLink(relation: Relation, tuple: Map[String, Any]) {
@@ -420,17 +446,17 @@ class InMemoryWordNet extends WordNet {
     symmetry(relation) match {
       case Symmetric =>
         if (symmetryActions(relation) == Relation.Restore)
-          addEdge(relation, Map((Relation.Source, tuple(Relation.Destination)),(Relation.Destination, tuple(Relation.Source))))
+          addEdge(relation, Map((Relation.Src, tuple(Relation.Dst)),(Relation.Dst, tuple(Relation.Src))))
         else if (symmetryActions(relation) == Relation.Preserve)
           throw new WQueryUpdateBreaksRelationPropertyException("symmetric", relation)
       case Antisymmetric =>
         if (transitives(relation)) {
-          if (reaches(relation, tuple(Relation.Destination), tuple(Relation.Source), Nil))
+          if (reaches(relation, tuple(Relation.Dst), tuple(Relation.Src), Nil))
             throw new WQueryUpdateBreaksRelationPropertyException("transitive antisymmetry", relation)
         } else {
-          if (follow(relation, Relation.Source, tuple(Relation.Destination), Relation.Destination).contains(tuple(Relation.Source))) {
+          if (follow(relation, Relation.Src, tuple(Relation.Dst), Relation.Dst).contains(tuple(Relation.Src))) {
             if (symmetryActions(relation) == Relation.Restore)
-              removeMatchingLinks(relation, Map((Relation.Source, tuple(Relation.Destination)), (Relation.Destination, tuple(Relation.Source))))
+              removeMatchingLinks(relation, Map((Relation.Src, tuple(Relation.Dst)), (Relation.Dst, tuple(Relation.Src))))
             else if (symmetryActions(relation) == Relation.Preserve)
               throw new WQueryUpdateBreaksRelationPropertyException("antisymmetry", relation)
           }
@@ -441,7 +467,7 @@ class InMemoryWordNet extends WordNet {
   }
 
   private def reaches(relation: Relation, source: Any, destination: Any, reached: List[Any]): Boolean = {
-    val fringe = follow(relation, Relation.Source, source, Relation.Destination).filterNot(reached.contains(_))
+    val fringe = follow(relation, Relation.Src, source, Relation.Dst).filterNot(reached.contains(_))
 
     if (fringe.isEmpty) {
       false
@@ -470,20 +496,20 @@ class InMemoryWordNet extends WordNet {
 
   private def removeNode(domainType: DomainType, value: Any, withDependentNodes: Boolean, withCollectionDependentNodes: Boolean) = atomic {
     removeDependentLinks(domainType, value, withDependentNodes, withCollectionDependentNodes)
-    removeLink(WordNet.dataTypesRelations(domainType), Map((Relation.Source, value)))
+    removeLink(WordNet.dataTypesRelations(domainType), Map((Relation.Src, value)))
   }
 
   private def removeDependentLinks(nodeType: NodeType, obj: Any, withDependentNodes: Boolean, withCollectionDependentNodes: Boolean) {
     for (relation <- relations) {
       if (transitives(relation)) {
         if (transitivesActions(relation) == Relation.Restore) {
-          for (source <- follow(relation, Relation.Destination, obj, Relation.Source);
-               destination <- follow(relation, Relation.Source, obj, Relation.Destination)) {
-            addEdge(relation, Map((Relation.Source, source), (Relation.Destination, destination)))
+          for (source <- follow(relation, Relation.Dst, obj, Relation.Src);
+               destination <- follow(relation, Relation.Src, obj, Relation.Dst)) {
+            addEdge(relation, Map((Relation.Src, source), (Relation.Dst, destination)))
           }
         } else if (transitivesActions(relation) == Relation.Preserve &&
-            !follow(relation, Relation.Destination, obj, Relation.Source).isEmpty &&
-            !follow(relation, Relation.Source, obj, Relation.Destination).isEmpty) {
+            !follow(relation, Relation.Dst, obj, Relation.Src).isEmpty &&
+            !follow(relation, Relation.Src, obj, Relation.Dst).isEmpty) {
           throw new WQueryUpdateBreaksRelationPropertyException(Relation.Transitivity, relation)
         }
       }
@@ -496,8 +522,8 @@ class InMemoryWordNet extends WordNet {
   def setSynsets(synsets: List[Synset]) {
     val (newSynsets, preservedSynsets) = synsets.partition(_.isInstanceOf[NewSynset])
     val preservedSynsetsSet = preservedSynsets.toSet
-    val removedSynsets = fetch(WordNet.SynsetSet, List((Relation.Source, Nil)),
-      List(Relation.Source)).paths.map(_.last.asInstanceOf[Synset]).filterNot(preservedSynsetsSet.contains(_))
+    val removedSynsets = fetch(WordNet.SynsetSet, List((Relation.Src, Nil)),
+      List(Relation.Src)).paths.map(_.last.asInstanceOf[Synset]).filterNot(preservedSynsetsSet.contains(_))
 
     newSynsets.foreach(synset => addSynset(None, synset.asInstanceOf[NewSynset].senses))
     removedSynsets.foreach(removeSynset(_))
@@ -518,7 +544,7 @@ class InMemoryWordNet extends WordNet {
   private def setNodes[A](newNodes: List[A], nodesRelation: Relation,
                   addFunction: (A => Unit),
                   removeFunction: (A => Unit)) {
-    val nodesSet = fetch(nodesRelation, List((Relation.Source, Nil)), List(Relation.Source)).paths.map(_.last.asInstanceOf[A]).toSet
+    val nodesSet = fetch(nodesRelation, List((Relation.Src, Nil)), List(Relation.Src)).paths.map(_.last.asInstanceOf[A]).toSet
     val newNodesSet = newNodes.toSet
 
     for (node <- nodesSet if (!newNodesSet.contains(node)))
@@ -574,7 +600,7 @@ class InMemoryWordNet extends WordNet {
     symmetry(relation) match {
       case Symmetric =>
         removeLinkByNode(relation,
-          Map((Relation.Source, tuple(Relation.Destination)),(Relation.Destination, tuple(Relation.Source))), node, symmetricEdge = true)
+          Map((Relation.Src, tuple(Relation.Dst)),(Relation.Dst, tuple(Relation.Src))), node, symmetricEdge = true)
       case _ =>
         // do nothing
     }
@@ -633,7 +659,7 @@ class InMemoryWordNet extends WordNet {
   }
 
   private def demandSynset(sense: Sense) = {
-    follow(WordNet.SenseToSynset, Relation.Source, sense, Relation.Destination).head.asInstanceOf[Synset]
+    follow(WordNet.SenseToSynset, Relation.Src, sense, Relation.Dst).head.asInstanceOf[Synset]
   }
 
   def merge(synsets: List[Synset], senses: List[Sense]) = atomic {

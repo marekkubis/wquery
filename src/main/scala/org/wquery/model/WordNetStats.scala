@@ -7,7 +7,7 @@ class WordNetStats(relations: List[Relation], val fetchAllMaxCounts: Map[(Relati
                    val extendValueMaxCounts: Map[(Relation, String), BigInt]) {
   val maxPathSize = 20 // TODO estimate using WordNet content
 
-  def domainSize = WordNet.domainRelations.map(r => fetchAllMaxCounts((r, Relation.Source))).sum
+  def domainSize = WordNet.domainRelations.map(r => fetchAllMaxCounts((r, Relation.Src))).sum
 
   def fetchMaxCount(relation: Relation, from: List[(String, List[Any])], to: List[String]) = {
     (for ((argument, values) <- from) yield {
