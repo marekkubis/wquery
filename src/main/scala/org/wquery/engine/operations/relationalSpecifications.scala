@@ -31,7 +31,7 @@ case class VariableRelationSpecificationArgument(variable: Variable) extends Rel
       case StepVariable(name) =>
         bindings.demandStepVariable(name)
       case TupleVariable(name) =>
-        val tuple = bindings.demandPathVariable(name)
+        val tuple = bindings.demandTupleVariable(name)
 
         if (tuple.size == 1)
           tuple.head

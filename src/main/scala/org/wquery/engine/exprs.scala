@@ -520,7 +520,7 @@ case class ContextByVariableReq(variable: Variable) extends EvaluableExpr {
       bindings.lookupSetVariableType(name).some(SetVariableRefOp(variable, _))
         .none(throw new FoundReferenceToUnknownVariableWhileCheckingException(variable))
     case variable @ TupleVariable(name) =>
-      bindings.lookupPathVariableType(name).some(PathVariableRefOp(variable, _))
+      bindings.lookupTupleVariableType(name).some(PathVariableRefOp(variable, _))
         .none(throw new FoundReferenceToUnknownVariableWhileCheckingException(variable))
     case variable @ StepVariable(name) =>
       bindings.lookupStepVariableType(name).some(StepVariableRefOp(variable, _))

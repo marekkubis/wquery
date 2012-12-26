@@ -13,16 +13,16 @@ class BindingsSchema(val parent: Option[BindingsSchema], updatesParent: Boolean)
     }
   }
 
-  override def bindPathVariableType(name: String, op: AlgebraOp, leftShift: Int, rightShift: Int) {
-    if (updatesParent && parent.some(_.lookupPathVariableType(name).isDefined).none(false)) {
-      parent.get.bindPathVariableType(name, op, leftShift, rightShift)
+  override def bindTupleVariableType(name: String, op: AlgebraOp, leftShift: Int, rightShift: Int) {
+    if (updatesParent && parent.some(_.lookupTupleVariableType(name).isDefined).none(false)) {
+      parent.get.bindTupleVariableType(name, op, leftShift, rightShift)
     } else {
-      super.bindPathVariableType(name, op, leftShift, rightShift)
+      super.bindTupleVariableType(name, op, leftShift, rightShift)
     }
   }
 
   override def bindSetVariableType(name: String, op: AlgebraOp) {
-    if (updatesParent && parent.some(_.lookupPathVariableType(name).isDefined).none(false)) {
+    if (updatesParent && parent.some(_.lookupTupleVariableType(name).isDefined).none(false)) {
       parent.get.bindSetVariableType(name, op)
     } else {
       super.bindSetVariableType(name, op)
@@ -34,9 +34,9 @@ class BindingsSchema(val parent: Option[BindingsSchema], updatesParent: Boolean)
       .orElse(parent.flatMap(_.lookupStepVariableType(name)))
   }
 
-  override def lookupPathVariableType(name: String): Option[(AlgebraOp, Int, Int)] = {
-    super.lookupPathVariableType(name)
-      .orElse(parent.flatMap(_.lookupPathVariableType(name)))
+  override def lookupTupleVariableType(name: String): Option[(AlgebraOp, Int, Int)] = {
+    super.lookupTupleVariableType(name)
+      .orElse(parent.flatMap(_.lookupTupleVariableType(name)))
   }
 
   override def lookupSetVariableType(name: String): Option[AlgebraOp] = {
@@ -53,11 +53,11 @@ class BindingsSchema(val parent: Option[BindingsSchema], updatesParent: Boolean)
     for ((name, types) <- pattern.stepVariablesTypes)
       sum.bindStepVariableType(name, types)
 
-    for ((name, (op, left, right)) <- pathVariablesTypes)
-      sum.bindPathVariableType(name, op, left, right)
+    for ((name, (op, left, right)) <- tupleVariablesTypes)
+      sum.bindTupleVariableType(name, op, left, right)
 
-    for ((name, (op, left, right)) <- pattern.pathVariablesTypes)
-      sum.bindPathVariableType(name, op, left, right)
+    for ((name, (op, left, right)) <- pattern.tupleVariablesTypes)
+      sum.bindTupleVariableType(name, op, left, right)
 
     sum
   }

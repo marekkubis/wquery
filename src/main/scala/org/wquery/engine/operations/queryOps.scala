@@ -47,7 +47,7 @@ case class IterateOp(bindingOp: AlgebraOp, iteratedOp: AlgebraOp) extends QueryO
 
       pathVarNames.foreach { pathVar =>
         val varPos = bindingSet.pathVars(pathVar)(i)
-        bindings.bindPathVariable(pathVar, tuple.slice(varPos._1, varPos._2))
+        bindings.bindTupleVariable(pathVar, tuple.slice(varPos._1, varPos._2))
       }
 
       stepVarNames.foreach(stepVar => bindings.bindStepVariable(stepVar, tuple(bindingSet.stepVars(stepVar)(i))))
@@ -599,7 +599,7 @@ case class SelectOp(op: AlgebraOp, condition: Condition) extends QueryOp {
 
       for (pathVar <- filterPathVarNames) {
         val varPos = dataSet.pathVars(pathVar)(i)
-        binds.bindPathVariable(pathVar, tuple.slice(varPos._1, varPos._2))
+        binds.bindTupleVariable(pathVar, tuple.slice(varPos._1, varPos._2))
       }
 
       for (stepVar <- filterStepVarNames) {
@@ -652,7 +652,7 @@ case class ProjectOp(op: AlgebraOp, projectOp: AlgebraOp) extends QueryOp {
 
       for (pathVar <- filterPathVarNames) {
         val varPos = dataSet.pathVars(pathVar)(i)
-        binds.bindPathVariable(pathVar, tuple.slice(varPos._1, varPos._2))
+        binds.bindTupleVariable(pathVar, tuple.slice(varPos._1, varPos._2))
       }
 
       for (stepVar <- filterStepVarNames) {
@@ -983,7 +983,7 @@ case class SetVariableRefOp(variable: SetVariable, op: AlgebraOp) extends QueryO
 }
 
 case class PathVariableRefOp(variable: TupleVariable, types: (AlgebraOp, Int, Int)) extends QueryOp {
-  def evaluate(wordNet: WordNet, bindings: Bindings, context: Context) = DataSet.fromTuple(bindings.demandPathVariable(variable.name))
+  def evaluate(wordNet: WordNet, bindings: Bindings, context: Context) = DataSet.fromTuple(bindings.demandTupleVariable(variable.name))
 
   def leftType(pos: Int) = types._1.leftType(pos + types._2)
 

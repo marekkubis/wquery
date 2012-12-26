@@ -10,12 +10,12 @@ import Scalaz._
 
 class BindingsPattern {
   val stepVariablesTypes = Map[String, Set[DataType]]()
-  val pathVariablesTypes = Map[String, (AlgebraOp, Int, Int)]()
+  val tupleVariablesTypes = Map[String, (AlgebraOp, Int, Int)]()
   val setVariablesTypes = Map[String, AlgebraOp]()
 
   def variables = {
     val stepVariables = stepVariablesTypes.keySet.map(StepVariable(_)).asInstanceOf[Set[Variable]]
-    val pathVariables = pathVariablesTypes.keySet.map(TupleVariable(_)).asInstanceOf[Set[Variable]]
+    val pathVariables = tupleVariablesTypes.keySet.map(TupleVariable(_)).asInstanceOf[Set[Variable]]
 
     stepVariables union pathVariables
   }
@@ -24,8 +24,8 @@ class BindingsPattern {
     stepVariablesTypes(name) = types
   }
 
-  def bindPathVariableType(name: String, op: AlgebraOp, leftShift: Int, rightShift: Int) {
-    pathVariablesTypes(name) = (op, leftShift, rightShift)
+  def bindTupleVariableType(name: String, op: AlgebraOp, leftShift: Int, rightShift: Int) {
+    tupleVariablesTypes(name) = (op, leftShift, rightShift)
   }
 
   def bindSetVariableType(name: String, op: AlgebraOp) {
@@ -34,7 +34,7 @@ class BindingsPattern {
 
   def lookupStepVariableType(name: String): Option[Set[DataType]] = stepVariablesTypes.get(name)
 
-  def lookupPathVariableType(name: String): Option[(AlgebraOp, Int, Int)] = pathVariablesTypes.get(name)
+  def lookupTupleVariableType(name: String): Option[(AlgebraOp, Int, Int)] = tupleVariablesTypes.get(name)
 
   def lookupSetVariableType(name: String): Option[AlgebraOp] = setVariablesTypes.get(name)
 
@@ -42,7 +42,7 @@ class BindingsPattern {
     case SetVariable(name) =>
       lookupSetVariableType(name).isDefined
     case TupleVariable(name) =>
-      lookupPathVariableType(name).isDefined
+      lookupTupleVariableType(name).isDefined
     case StepVariable(name) =>
       lookupStepVariableType(name).isDefined
   }
@@ -52,8 +52,8 @@ class BindingsPattern {
 
     sum.stepVariablesTypes ++= stepVariablesTypes
     sum.stepVariablesTypes ++= that.stepVariablesTypes
-    sum.pathVariablesTypes ++= pathVariablesTypes
-    sum.pathVariablesTypes ++= that.pathVariablesTypes
+    sum.tupleVariablesTypes ++= tupleVariablesTypes
+    sum.tupleVariablesTypes ++= that.tupleVariablesTypes
     sum.setVariablesTypes ++= setVariablesTypes
     sum.setVariablesTypes ++= that.setVariablesTypes
 
@@ -64,7 +64,7 @@ class BindingsPattern {
     variables.pathVariablePosition match {
       case Some(pathVarPos) =>
         bindTypesFromRight(op, variables)
-        variables.pathVariableName.map(bindPathVariableType(_, op, variables.leftPatternSize, variables.rightPatternSize))
+        variables.pathVariableName.map(bindTupleVariableType(_, op, variables.leftPatternSize, variables.rightPatternSize))
         bindTypesFromLeft(op, variables)
       case None =>
         bindTypesFromRight(op, variables)

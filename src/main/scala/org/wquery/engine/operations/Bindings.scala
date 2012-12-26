@@ -9,7 +9,7 @@ import org.wquery.engine.{TupleVariable, StepVariable, SetVariable}
 
 class Bindings(parent: Option[Bindings], updatesParent: Boolean) {
   val setVariables = Map[String, DataSet]()
-  val pathVariables = Map[String, List[Any]]()
+  val tupleVariables = Map[String, List[Any]]()
   val stepVariables = Map[String, Any]()
 
   def bindStepVariable(name: String, value: Any) {
@@ -20,11 +20,11 @@ class Bindings(parent: Option[Bindings], updatesParent: Boolean) {
     }
   }
 
-  def bindPathVariable(name: String, value: List[Any]) {
-    if (updatesParent && parent.some(_.lookupPathVariable(name).isDefined).none(false)) {
-      parent.get.bindPathVariable(name, value)
+  def bindTupleVariable(name: String, value: List[Any]) {
+    if (updatesParent && parent.some(_.lookupTupleVariable(name).isDefined).none(false)) {
+      parent.get.bindTupleVariable(name, value)
     } else {
-      pathVariables(name) = value
+      tupleVariables(name) = value
     }
   }
 
@@ -38,7 +38,7 @@ class Bindings(parent: Option[Bindings], updatesParent: Boolean) {
 
   def lookupSetVariable(name: String): Option[DataSet] = setVariables.get(name).orElse(parent.flatMap(_.lookupSetVariable(name)))
 
-  def lookupPathVariable(name: String): Option[List[Any]] = pathVariables.get(name).orElse(parent.flatMap(_.lookupPathVariable(name)))
+  def lookupTupleVariable(name: String): Option[List[Any]] = tupleVariables.get(name).orElse(parent.flatMap(_.lookupTupleVariable(name)))
 
   def lookupStepVariable(name: String): Option[Any] = stepVariables.get(name).orElse(parent.flatMap(_.lookupStepVariable(name)))
 
@@ -46,8 +46,8 @@ class Bindings(parent: Option[Bindings], updatesParent: Boolean) {
     lookupSetVariable(name)|(throw new FoundReferenceToUnknownVariableWhileEvaluatingException(SetVariable(name)))
   }
 
-  def demandPathVariable(name: String): List[Any] = {
-    lookupPathVariable(name)|(throw new FoundReferenceToUnknownVariableWhileEvaluatingException(TupleVariable(name)))
+  def demandTupleVariable(name: String): List[Any] = {
+    lookupTupleVariable(name)|(throw new FoundReferenceToUnknownVariableWhileEvaluatingException(TupleVariable(name)))
   }
 
   def demandStepVariable(name: String): Any = {
