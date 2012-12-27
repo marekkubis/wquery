@@ -132,6 +132,10 @@ object WordNet {
       val Destination = "destination"
       val Property = "property"
       val Action = "action"
+      val PropertyValueSymmetric = "symmetric"
+      val PropertyValueAntisymmetric = "antisymmetric"
+      val PropertyValueNonSymmetric = "nonsymmetric"
+      val PropertyValueTransitive = "transitive"
     }
 
     val Dependencies = new Relation("dependencies", List(Argument("relation", StringType), Argument("argument", StringType),

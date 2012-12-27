@@ -22,7 +22,7 @@ class InMemoryWordNet extends WordNet {
   private val functionalFor = MMap[Relation, Set[String]]()
   private val requiredBys = MMap[Relation, Set[String]]()
   private val transitives = MMap[Relation, List[(String, String)]]()
-  private val symmetry = MMap[Relation, Map[(String, String), Symmetry]]()
+  private val symmetry = MMap[Relation, MMap[(String, String), Symmetry]]()
 
   private val transitivesActions = MMap[(Relation, String, String), String]()
   private val symmetryActions = MMap[(Relation, String, String), String]()
@@ -352,6 +352,8 @@ class InMemoryWordNet extends WordNet {
         addMetaArgument(tuple)
       case WordNet.Meta.Properties =>
         addMetaProperty(tuple)
+      case WordNet.Meta.PairProperties =>
+        addMetaPairProperty(tuple)
       case WordNet.Meta.Aliases =>
         addMetaAlias(tuple)
       case _ =>
@@ -376,6 +378,8 @@ class InMemoryWordNet extends WordNet {
         removeMetaArgument(tuple)
       case WordNet.Meta.Properties =>
         removeMetaProperty(tuple)
+      case WordNet.Meta.PairProperties =>
+        removeMetaPairProperty(tuple)
       case WordNet.Meta.Aliases =>
         removeMetaAlias(tuple)
       case _ =>
@@ -453,6 +457,81 @@ class InMemoryWordNet extends WordNet {
           requiredBys(relation) = requiredBys(relation) + argumentName
       case _ =>
         throw new WQueryModelException("Unknown relation argument property " + property)
+    }
+  }
+
+  private def addMetaPairProperty(tuple: Map[String, Any]) {
+    // TODO implement validations
+    val relationName = tuple(WordNet.Meta.PairProperties.Relation).asInstanceOf[String]
+    val source = tuple(WordNet.Meta.PairProperties.Source).asInstanceOf[String]
+    val destination = tuple(WordNet.Meta.PairProperties.Destination).asInstanceOf[String]
+    val property = tuple(WordNet.Meta.PairProperties.Property).asInstanceOf[String]
+    val action = tuple(WordNet.Meta.PairProperties.Action).asInstanceOf[String]
+    val relation = schema.demandRelation(relationName, Map())
+
+    property match {
+      case WordNet.Meta.PairProperties.PropertyValueSymmetric =>
+        if (!symmetry.contains(relation))
+          symmetry.put(relation, MMap())
+
+        symmetry(relation).put((source, destination), Symmetric)
+        symmetryActions.put((relation, source, destination), action)
+      case WordNet.Meta.PairProperties.PropertyValueAntisymmetric =>
+        if (!symmetry.contains(relation))
+          symmetry.put(relation, MMap())
+
+        symmetry(relation).put((source, destination), Antisymmetric)
+        symmetryActions.put((relation, source, destination), action)
+      case WordNet.Meta.PairProperties.PropertyValueNonSymmetric =>
+        if (!symmetry.contains(relation))
+          symmetry.put(relation, MMap())
+
+        symmetry(relation).put((source, destination), NonSymmetric)
+        symmetryActions.put((relation, source, destination), action)
+      case WordNet.Meta.PairProperties.PropertyValueTransitive =>
+        if (!transitives.contains(relation))
+          transitives.put(relation, Nil)
+
+        transitives(relation) = (source, destination)::transitives(relation)
+        transitivesActions.put((relation, source, destination), action)
+      case _ =>
+        throw new WQueryModelException("Unknown relation argument pair property " + property)
+    }
+  }
+
+  private def removeMetaPairProperty(tuple: Map[String, Any]) {
+    // TODO implement validations
+    val relationName = tuple(WordNet.Meta.PairProperties.Relation).asInstanceOf[String]
+    val source = tuple(WordNet.Meta.PairProperties.Source).asInstanceOf[String]
+    val destination = tuple(WordNet.Meta.PairProperties.Destination).asInstanceOf[String]
+    val property = tuple(WordNet.Meta.PairProperties.Property).asInstanceOf[String]
+    val relation = schema.demandRelation(relationName, Map())
+
+    property match {
+      case WordNet.Meta.PairProperties.PropertyValueSymmetric =>
+        removeSymmetryIfEqual(relation, source, destination, Symmetric)
+      case WordNet.Meta.PairProperties.PropertyValueAntisymmetric =>
+        removeSymmetryIfEqual(relation, source, destination, Antisymmetric)
+      case WordNet.Meta.PairProperties.PropertyValueNonSymmetric =>
+        removeSymmetryIfEqual(relation, source, destination, NonSymmetric)
+      case WordNet.Meta.PairProperties.PropertyValueTransitive =>
+        if (transitives.contains(relation)) {
+          transitives(relation) = transitives(relation).filterNot(_ == (source, destination))
+          transitivesActions.remove((relation, source, destination))
+        }
+      case _ =>
+        throw new WQueryModelException("Unknown relation argument pair property " + property)
+    }
+  }
+
+  private def removeSymmetryIfEqual(relation: Relation, source: String, destination: String, symmetryValue: Symmetry) = {
+    symmetry.get(relation).map { symmetries =>
+      symmetries.get((source, destination)).map{ sym =>
+        if (sym == symmetryValue) {
+          symmetries.remove((source, destination))
+          symmetryActions.remove((relation, source, destination))
+        }
+      }
     }
   }
 

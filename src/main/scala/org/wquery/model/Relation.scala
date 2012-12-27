@@ -44,12 +44,10 @@ object Relation {
   val Symmetry = "symmetry"
   val RequiredBy = "required_by"
   val Functional = "functional"
-  val Properties = List(Transitivity, Symmetry, RequiredBy, Functional)
 
   // property actions
   val Restore = "restore"
   val Preserve = "preserve"
-  val PropertyActions = List(Restore, Preserve)
 
   def unary(name: String, sourceType: NodeType) = {
     Relation(name, List(Argument(Relation.Src, sourceType)))
