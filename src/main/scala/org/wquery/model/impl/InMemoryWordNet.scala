@@ -462,6 +462,8 @@ class InMemoryWordNet extends WordNet {
       case _ =>
         throw new WQueryModelException("Unknown relation argument property " + property)
     }
+
+    addEdge(WordNet.Meta.Properties, tuple)
   }
 
   private def removeMetaProperty(tuple: Map[String, Any]) {
@@ -481,6 +483,8 @@ class InMemoryWordNet extends WordNet {
       case _ =>
         throw new WQueryModelException("Unknown relation argument property " + property)
     }
+
+    removeEdge(WordNet.Meta.Properties, tuple)
   }
 
   private def addMetaPairProperty(tuple: Map[String, Any]) {
@@ -520,6 +524,8 @@ class InMemoryWordNet extends WordNet {
       case _ =>
         throw new WQueryModelException("Unknown relation argument pair property " + property)
     }
+
+    addEdge(WordNet.Meta.PairProperties, tuple)
   }
 
   private def removeMetaPairProperty(tuple: Map[String, Any]) {
@@ -545,6 +551,8 @@ class InMemoryWordNet extends WordNet {
       case _ =>
         throw new WQueryModelException("Unknown relation argument pair property " + property)
     }
+
+    removeEdge(WordNet.Meta.PairProperties, tuple)
   }
 
   private def removeSymmetryIfEqual(relation: Relation, source: String, destination: String, symmetryValue: Symmetry) = {
@@ -579,6 +587,8 @@ class InMemoryWordNet extends WordNet {
       case _ =>
         throw new WQueryModelException("Unknown relation dependency type " + typeName)
     }
+
+    addEdge(WordNet.Meta.Dependencies, tuple)
   }
 
   private def removeMetaDependency(tuple: Map[String, Any]) {
@@ -598,6 +608,8 @@ class InMemoryWordNet extends WordNet {
       case _ =>
         throw new WQueryModelException("Unknown relation dependency type " + typeName)
     }
+
+    removeEdge(WordNet.Meta.Dependencies, tuple)
   }
 
   private def addMetaAlias(tuple: Map[String, Any]) {
