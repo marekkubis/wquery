@@ -354,6 +354,8 @@ class InMemoryWordNet extends WordNet {
         addMetaProperty(tuple)
       case WordNet.Meta.PairProperties =>
         addMetaPairProperty(tuple)
+      case WordNet.Meta.Dependencies =>
+        addMetaDependency(tuple)
       case WordNet.Meta.Aliases =>
         addMetaAlias(tuple)
       case _ =>
@@ -380,6 +382,8 @@ class InMemoryWordNet extends WordNet {
         removeMetaProperty(tuple)
       case WordNet.Meta.PairProperties =>
         removeMetaPairProperty(tuple)
+      case WordNet.Meta.Dependencies =>
+        removeMetaDependency(tuple)
       case WordNet.Meta.Aliases =>
         removeMetaAlias(tuple)
       case _ =>
@@ -460,6 +464,25 @@ class InMemoryWordNet extends WordNet {
     }
   }
 
+  private def removeMetaProperty(tuple: Map[String, Any]) {
+    // TODO implement validations
+    val relationName = tuple(WordNet.Meta.Properties.Relation).asInstanceOf[String]
+    val argumentName = tuple(WordNet.Meta.Properties.Argument).asInstanceOf[String]
+    val property = tuple(WordNet.Meta.Properties.Property).asInstanceOf[String]
+    val relation = schema.demandRelation(relationName, Map())
+
+    property match {
+      case WordNet.Meta.Properties.PropertyValueFunctional =>
+        if (functionalFor.contains(relation))
+          functionalFor(relation) = functionalFor(relation) - argumentName
+      case WordNet.Meta.Properties.PropertyValueRequired =>
+        if (requiredBys.contains(relation))
+          requiredBys(relation) = requiredBys(relation) - argumentName
+      case _ =>
+        throw new WQueryModelException("Unknown relation argument property " + property)
+    }
+  }
+
   private def addMetaPairProperty(tuple: Map[String, Any]) {
     // TODO implement validations
     val relationName = tuple(WordNet.Meta.PairProperties.Relation).asInstanceOf[String]
@@ -535,22 +558,45 @@ class InMemoryWordNet extends WordNet {
     }
   }
 
-  private def removeMetaProperty(tuple: Map[String, Any]) {
+  private def addMetaDependency(tuple: Map[String, Any]) {
     // TODO implement validations
-    val relationName = tuple(WordNet.Meta.Properties.Relation).asInstanceOf[String]
-    val argumentName = tuple(WordNet.Meta.Properties.Argument).asInstanceOf[String]
-    val property = tuple(WordNet.Meta.Properties.Property).asInstanceOf[String]
+    val relationName = tuple(WordNet.Meta.Dependencies.Relation).asInstanceOf[String]
+    val argumentName = tuple(WordNet.Meta.Dependencies.Argument).asInstanceOf[String]
+    val typeName = tuple(WordNet.Meta.Dependencies.Type).asInstanceOf[String]
     val relation = schema.demandRelation(relationName, Map())
 
-    property match {
-      case WordNet.Meta.Properties.PropertyValueFunctional =>
-        if (functionalFor.contains(relation))
-          functionalFor(relation) = functionalFor(relation) - argumentName
-      case WordNet.Meta.Properties.PropertyValueRequired =>
-        if (requiredBys.contains(relation))
-          requiredBys(relation) = requiredBys(relation) - argumentName
+    typeName match {
+      case WordNet.Meta.Dependencies.TypeValueMember =>
+        if (!dependent.contains(relation))
+          dependent(relation) = Set(argumentName)
+        else
+          dependent(relation) = dependent(relation) + argumentName
+      case WordNet.Meta.Dependencies.TypeValueSet =>
+        if (!collectionDependent.contains(relation))
+          collectionDependent(relation) = Set(argumentName)
+        else
+          collectionDependent(relation) = collectionDependent(relation) + argumentName
       case _ =>
-        throw new WQueryModelException("Unknown relation argument property " + property)
+        throw new WQueryModelException("Unknown relation dependency type " + typeName)
+    }
+  }
+
+  private def removeMetaDependency(tuple: Map[String, Any]) {
+    // TODO implement validations
+    val relationName = tuple(WordNet.Meta.Dependencies.Relation).asInstanceOf[String]
+    val argumentName = tuple(WordNet.Meta.Dependencies.Argument).asInstanceOf[String]
+    val typeName = tuple(WordNet.Meta.Dependencies.Type).asInstanceOf[String]
+    val relation = schema.demandRelation(relationName, Map())
+
+    typeName match {
+      case WordNet.Meta.Dependencies.TypeValueMember =>
+        if (dependent.contains(relation))
+          dependent(relation) = dependent(relation) - argumentName
+      case WordNet.Meta.Dependencies.TypeValueSet =>
+        if (collectionDependent.contains(relation))
+          collectionDependent(relation) = collectionDependent(relation) - argumentName
+      case _ =>
+        throw new WQueryModelException("Unknown relation dependency type " + typeName)
     }
   }
 

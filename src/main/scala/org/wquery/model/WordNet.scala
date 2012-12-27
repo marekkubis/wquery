@@ -142,7 +142,9 @@ object WordNet {
       Argument("type", StringType))) {
       val Relation = "relation"
       val Argument = "argument"
-      val Property = "type"
+      val Type = "type"
+      val TypeValueMember = "member"
+      val TypeValueSet = "set"
     }
 
     val Aliases = new Relation("aliases", List(Argument("relation", StringType), Argument("source", StringType),
