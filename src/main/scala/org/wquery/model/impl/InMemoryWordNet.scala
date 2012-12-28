@@ -14,7 +14,7 @@ class InMemoryWordNet extends WordNet {
   private val StatsCacheThreshold = 1000
 
   private val successors = TransactionalMap[Relation, TransactionalMap[(String, Any), IndexedSeq[Map[String, Any]]]]()
-  private val aliasMap = scala.collection.mutable.Map[Relation, Arc]()
+  private val aliasMap = scala.collection.mutable.Map[Relation, List[Arc]]()
   private var relationsList = List[Relation]()
   private val statsCache = new Cache[WordNetStats](calculateStats, StatsCacheThreshold)
 
@@ -229,13 +229,15 @@ class InMemoryWordNet extends WordNet {
   private def extendWithAlias(extensionSet: ExtensionSet, relation: Relation, direction: Direction,
                                  through: String, to: List[String], buffer: ExtensionSetBuffer) {
     if (to.size == 1) {
-      val arc = aliasMap(relation)
+      val arcs = aliasMap(relation)
 
       (through, to.head) match {
         case (Relation.Src, Relation.Dst) =>
-          buffer.append(extendWithRelationTuples(extensionSet, arc.relation, direction, arc.from, List(arc.to)))
+          for (arc <- arcs)
+            buffer.append(extendWithRelationTuples(extensionSet, arc.relation, direction, arc.from, List(arc.to)))
         case (Relation.Dst, Relation.Src) =>
-          buffer.append(extendWithRelationTuples(extensionSet, arc.relation, direction, arc.to, List(arc.from)))
+          for (arc <- arcs)
+            buffer.append(extendWithRelationTuples(extensionSet, arc.relation, direction, arc.to, List(arc.from)))
         case _ =>
           throw new WQueryEvaluationException("One cannot traverse the alias " + relation + " using custom source or destination arguments")
       }
@@ -617,7 +619,7 @@ class InMemoryWordNet extends WordNet {
 
   private def addMetaAlias(tuple: Map[String, Any]) {
     val (alias, arc) = createAliasFromTuple(tuple)
-    aliasMap.put(alias, arc)
+    aliasMap.put(alias, arc::(~aliasMap.get(alias)))
     addEdge(WordNet.Meta.Aliases, tuple)
     statsCache.invalidate
   }

@@ -257,4 +257,9 @@ class UpdatesTestSuite extends WQueryTestSuite {
     result of ("{minicab:1:n}.hypo") should equal ("ERROR: Arc expression hypo references an unknown relation or argument")
   }
 
+  @Test def testAddMultipleAliases() = {
+    result of ("update aliases += `member_holonym`, `dst`, `src`, `holonym`") should equal ("(no result)\n")
+    result of ("update aliases += `partial_holonym`, `dst`, `src`, `holonym`") should equal ("(no result)\n")
+    result of ("{}.holonym") should equal ("{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n } ^partial_holonym { human body:1:n physical body:1:n material body:1:n soma:3:n build:2:n figure:2:n physique:2:n anatomy:2:n shape:3:n bod:1:n chassis:1:n frame:3:n form:5:n flesh:2:n }\n{ homo:2:n man:4:n human being:1:n human:1:n } ^partial_holonym { human body:1:n physical body:1:n material body:1:n soma:3:n build:2:n figure:2:n physique:2:n anatomy:2:n shape:3:n bod:1:n chassis:1:n frame:3:n form:5:n flesh:2:n }\n{ building:1:n edifice:1:n } ^partial_holonym { room:1:n }\n{ people:1:n } ^member_holonym { person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n }\n{ fleet:2:n } ^member_holonym { cab:3:n hack:5:n taxi:1:n taxicab:1:n }\n{ apple:2:n orchard apple tree:1:n Malus pumila:1:n } ^partial_holonym { apple:1:n }\n{ orange:3:n orange tree:1:n } ^partial_holonym { orange:1:n }\n")
+  }
 }
