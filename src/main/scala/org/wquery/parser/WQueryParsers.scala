@@ -201,6 +201,7 @@ trait WQueryParsers extends RegexParsers {
   def non_rel_expr_generator = (
     boolean_generator
     | synset_generator
+    | domain_generator
     | sense_generator
     | function_call_generator
     | float_generator
@@ -223,9 +224,11 @@ trait WQueryParsers extends RegexParsers {
   )
 
   def synset_generator = (
-    "{}" ^^ { _ => AlgebraExpr(FetchOp.synsets) }
+    "{}" ^^^ { AlgebraExpr(FetchOp.synsets) }
     | "{" ~> expr <~ "}" ^^ { SynsetByExprReq(_) }
   )
+
+  def domain_generator = "__" ^^^ { DomainReq() }
 
   def sense_generator = (
     "::" ^^ { _ => AlgebraExpr(FetchOp.senses) }

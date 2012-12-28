@@ -110,4 +110,5 @@ class GeneratorsTestSuite extends WQueryTestSuite {
 
   @Test def testSynsetsBySensesAndWords() = result of ("{car:1:n union person}") should equal ("{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n }\n{ car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n }\n{ person:2:n }\n{ person:3:n }\n")
 
+  @Test def testDomainGenerator() = result of ("__[# = 6]") should equal ("6\n")
 }

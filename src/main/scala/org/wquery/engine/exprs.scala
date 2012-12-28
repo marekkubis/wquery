@@ -558,6 +558,18 @@ case class ArcByArcExprReq(expr: ArcExpr) extends EvaluableExpr {
   }
 }
 
+case class DomainReq() extends EvaluableExpr {
+  def evaluationPlan(wordNet: WordNet#Schema, bindings: BindingsSchema, context: Context) = {
+    val domainSetFetches =  List(FetchOp.synsets, FetchOp.senses, FetchOp.words, FetchOp.possyms)
+    val relationArgumentFetches = (for (relation <- wordNet.relations; argument <- relation.arguments
+         if argument.nodeType != SynsetType &&  argument.nodeType != SenseType)
+      yield FetchOp(relation, List((argument.name, Nil)), List(argument.name)))
+
+    (domainSetFetches ++ relationArgumentFetches).foldLeft[AlgebraOp](ConstantOp.empty)((l, r) => UnionOp(l, r))
+  }
+
+}
+
 case class AlgebraExpr(op: AlgebraOp) extends EvaluableExpr {
   def evaluationPlan(wordNet: WordNet#Schema, bindings: BindingsSchema, context: Context) = op
 }
