@@ -15,7 +15,7 @@ sealed abstract class DataType extends Ordered[DataType] {
 }
 
 case object ArcType extends DataType {
-  def rank = 0
+  def rank = 1
   def associatedClass = classOf[Arc]
   override def toString = "arc"
 }
@@ -25,43 +25,43 @@ sealed abstract class NodeType extends DataType
 sealed abstract class DomainType extends NodeType
 
 case object SynsetType extends DomainType {
-  def rank = 1
+  def rank = 2
   def associatedClass = classOf[Synset]
   override def toString = "synset"
 }
 
 case object SenseType extends DomainType {
-  def rank = 2
+  def rank = 3
   def associatedClass = classOf[Sense]
   override def toString = "sense"
 }
 
 case object StringType extends DomainType {
-  def rank = 3
+  def rank = 4
   def associatedClass = classOf[String]
   override def toString = "string"
 }
 
 case object POSType extends DomainType {
-  def rank = 4
+  def rank = 5
   def associatedClass = classOf[String]
   override def toString = "pos"
 }
 
 case object IntegerType extends NodeType {
-  def rank = 5
+  def rank = 6
   def associatedClass = classOf[Int]
   override def toString = "integer"
 }
 
 case object FloatType extends NodeType {
-  def rank = 6
+  def rank = 7
   def associatedClass = classOf[Double]
   override def toString = "float"
 }
 
 case object BooleanType extends NodeType {
-  def rank = 7
+  def rank = 0
   def associatedClass = classOf[Boolean]
   override def toString = "boolean"
 }
