@@ -150,7 +150,7 @@ class UpdatesTestSuite extends WQueryTestSuite {
   }
 
   @Test def testRemoveLinksRequiredPropertyBreak() = {
-    result of ("update `desc`, `src` properties += `required`") should equal ("(no result)\n")
+    result of ("update `desc`, `src` properties := `required`") should equal ("(no result)\n")
     result of ("update {apple:1:n} desc -= last({apple:1:n}.desc)") should startWith ("ERROR: Update breaks property 'required_by' of relation 'desc' on argument 'src'")
     result of ("update `desc`, `src` properties -= `required`") should equal ("(no result)\n")
   }
@@ -181,7 +181,7 @@ class UpdatesTestSuite extends WQueryTestSuite {
  }
 
   @Test def testSetLinksFunctionalPropertyBreak() = {
-    result of ("update `desc`, `src` properties += `functional`") should equal ("(no result)\n")
+    result of ("update `desc`, `src` properties := `functional`") should equal ("(no result)\n")
     result of ("update {apple:1} desc := `aaa`") should equal ("(no result)\n")
     result of ("{apple:1}.desc") should equal ("{ apple:1:n } desc aaa\n")
     result of ("update {apple:1} desc := `bbb` union `ddd`") should startWith ("ERROR: Update breaks property 'functional' of relation 'desc' on argument 'src'")

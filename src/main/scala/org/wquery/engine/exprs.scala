@@ -567,7 +567,13 @@ case class DomainReq() extends EvaluableExpr {
 
     (domainSetFetches ++ relationArgumentFetches).foldLeft[AlgebraOp](ConstantOp.empty)((l, r) => UnionOp(l, r))
   }
+}
 
+case class RelationByNameReq(name: String) extends EvaluableExpr {
+  def evaluationPlan(wordNet: WordNet#Schema, bindings: BindingsSchema, context: Context) = {
+    val relation = wordNet.demandRelation(name, Map())
+    FetchOp(relation, relation.argumentNames.map(arg => (arg, Nil)), relation.argumentNames)
+  }
 }
 
 case class AlgebraExpr(op: AlgebraOp) extends EvaluableExpr {

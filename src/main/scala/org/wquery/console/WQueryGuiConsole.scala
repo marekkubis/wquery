@@ -3,7 +3,6 @@
 // scalastyle:off illegal.imports
 // scalastyle:off multiple.string.literals
 // scalastyle:off method.length
-// scalastyle:off cyclomatic.complexity
 
 package org.wquery.console
 import javax.swing.UIManager

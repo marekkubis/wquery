@@ -42,7 +42,6 @@ object ArcOrdering extends Ordering[Arc] {
 }
 
 object AnyOrdering extends Ordering[Any] {
-  // scalastyle:off cyclomatic.complexity
   def compare(left: Any, right: Any): Int = {
     (left, right) match {
       case (left: Synset, right: Synset) =>
@@ -67,7 +66,6 @@ object AnyOrdering extends Ordering[Any] {
         DataType.fromValue(left).rank compare DataType.fromValue(right).rank
     }
   }
-  // scalastyle:on cyclomatic.complexity
 }
 
 object AnyListOrdering extends Ordering[List[Any]] {

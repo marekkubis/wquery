@@ -1,5 +1,4 @@
 // scalastyle:off return
-// scalastyle:off cyclomatic.complexity
 
 package org.wquery.console
 import java.io.{BufferedReader, Reader}

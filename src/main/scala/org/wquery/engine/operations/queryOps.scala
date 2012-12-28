@@ -875,12 +875,12 @@ case class SynsetFetchOp(op: AlgebraOp) extends AlgebraOp {
 
 class NewSynset(val senses: List[Sense]) extends Synset("synset#" + senses.head.toString)
 
-case class FetchOp(relation: Relation, from: List[(String, List[Any])], to: List[String]) extends QueryOp {
+case class FetchOp(relation: Relation, from: List[(String, List[Any])], to: List[String], withArcs: Boolean = true) extends QueryOp {
   def evaluate(wordNet: WordNet, bindings: Bindings, context: Context) = {
     if (context.creation && WordNet.domainRelations.contains(relation) && from.forall { case (source, values) => values.nonEmpty }) {
       DataSet(from.flatMap{ case (_, value) => List(value) })
     } else {
-      wordNet.fetch(relation, from, to)
+      wordNet.fetch(relation, from, to, withArcs)
     }
   }
 

@@ -202,6 +202,7 @@ trait WQueryParsers extends RegexParsers {
     boolean_generator
     | synset_generator
     | domain_generator
+    | relation_generator
     | sense_generator
     | function_call_generator
     | float_generator
@@ -229,6 +230,8 @@ trait WQueryParsers extends RegexParsers {
   )
 
   def domain_generator = "__" ^^^ { DomainReq() }
+
+  def relation_generator = "!" ~> notQuotedString ^^ { RelationByNameReq(_) }
 
   def sense_generator = (
     "::" ^^ { _ => AlgebraExpr(FetchOp.senses) }

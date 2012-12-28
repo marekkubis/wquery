@@ -1,7 +1,5 @@
 package org.wquery.model
 import org.wquery.WQueryModelException
-import scalaz._
-import Scalaz._
 
 case class Relation(name: String, arguments: List[Argument]) {
   private val argumentsByName = arguments.map(arg => (arg.name, arg)).toMap

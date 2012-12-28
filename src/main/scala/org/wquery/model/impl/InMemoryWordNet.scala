@@ -11,10 +11,12 @@ import Scalaz._
 import org.wquery.engine.operations.NewSynset
 
 class InMemoryWordNet extends WordNet {
+  private val StatsCacheThreshold = 1000
+
   private val successors = TransactionalMap[Relation, TransactionalMap[(String, Any), IndexedSeq[Map[String, Any]]]]()
   private val aliasMap = scala.collection.mutable.Map[Relation, Arc]()
   private var relationsList = List[Relation]()
-  private val statsCache = new Cache[WordNetStats](calculateStats, 1000)
+  private val statsCache = new Cache[WordNetStats](calculateStats, StatsCacheThreshold)
 
   // relation properties
   private val dependent = MMap[Relation, Set[String]]()
@@ -88,25 +90,25 @@ class InMemoryWordNet extends WordNet {
     if (synsets.isEmpty) None else Some(synsets.head.asInstanceOf[Synset])
   }
 
-  def fetch(relation: Relation, from: List[(String, List[Any])], to: List[String]) = {
+  def fetch(relation: Relation, from: List[(String, List[Any])], to: List[String], withArcs: Boolean) = {
     val buffer = DataSetBuffers.createPathBuffer
     val (sourceName, sourceValues) = from.head
     val destinations = from.tail
 
     if (sourceValues.isEmpty) {
       for (((src, obj), destinationMaps) <- successors(relation) if (src == sourceName))
-        appendDestinationTuples(destinationMaps, destinations, to, relation, buffer)
+        appendDestinationTuples(destinationMaps, destinations, to, relation, buffer, withArcs)
     } else {
       for (sourceValue <- sourceValues)
         successors(relation).get((sourceName, sourceValue))
-          .map(appendDestinationTuples(_, destinations, to, relation, buffer))
+          .map(appendDestinationTuples(_, destinations, to, relation, buffer, withArcs))
     }
 
     DataSet(buffer.toList)
   }
 
   private def appendDestinationTuples(destinationMaps: Seq[Map[String, Any]], destinations: List[(String, List[Any])],
-                                      to: List[String], relation: Relation, buffer: ListBuffer[List[Any]]) {
+                                      to: List[String], relation: Relation, buffer: ListBuffer[List[Any]], withArcs: Boolean) {
     for (destinationMap <- destinationMaps) {
       if (destinations.forall(dest => destinationMap.contains(dest._1) && (dest._2.isEmpty || dest._2.contains(destinationMap(dest._1))))) {
         val tupleBuffer = new ListBuffer[Any]
@@ -114,7 +116,9 @@ class InMemoryWordNet extends WordNet {
         tupleBuffer.append(destinationMap(to.head))
 
         for (destinationName <- to.tail) {
-          tupleBuffer.append(Arc(relation, to.head, destinationName))
+          if (withArcs)
+            tupleBuffer.append(Arc(relation, to.head, destinationName))
+
           tupleBuffer.append(destinationMap(destinationName))
         }
 
@@ -440,7 +444,6 @@ class InMemoryWordNet extends WordNet {
     removeEdge(WordNet.Meta.Arguments, tuple)
   }
 
-
   private def addMetaProperty(tuple: Map[String, Any]) {
     // TODO implement validations
     val relationName = tuple(WordNet.Meta.Properties.Relation).asInstanceOf[String]
@@ -643,6 +646,23 @@ class InMemoryWordNet extends WordNet {
 
   def setTuples(relation: Relation, sourceNames: List[String], sources: List[List[Any]],
                 destinationNames: List[String], destinations: List[List[Any]]) = atomic {
+    val (addFunction, removeFunction) : (Map[String, Any] => Unit, Map[String, Any] => Unit) = relation match {
+      case WordNet.Meta.Relations =>
+        (addMetaRelation _, removeMetaRelation _)
+      case WordNet.Meta.Arguments =>
+        (addMetaArgument _, removeMetaArgument _)
+      case WordNet.Meta.Properties =>
+        (addMetaProperty _, removeMetaProperty _)
+      case WordNet.Meta.PairProperties =>
+        (addMetaPairProperty _, removeMetaPairProperty _)
+      case WordNet.Meta.Dependencies =>
+        (addMetaDependency _, removeMetaDependency _)
+      case WordNet.Meta.Aliases =>
+        (addMetaAlias _, removeMetaAlias _)
+      case _ =>
+        (∅[Map[String, Any] => Unit], ∅[Map[String, Any] => Unit])
+    }
+
     relation match {
       case WordNet.SynsetSet =>
         setSynsets(destinations.map(_.head.asInstanceOf[Synset]))
@@ -652,17 +672,16 @@ class InMemoryWordNet extends WordNet {
         setWords(destinations.map(_.head.asInstanceOf[String]))
       case WordNet.PosSet =>
         setPartOfSpeechSymbols(destinations.map(_.head.asInstanceOf[String]))
-      case WordNet.Meta.Relations =>
-
       case _ =>
-        setLinks(relation, sourceNames, sources, destinationNames, destinations)
+        setLinks(relation, sourceNames, sources, destinationNames, destinations, addFunction, removeFunction)
     }
   }
 
-  def addLink(relation: Relation, tuple: Map[String, Any]) = atomic {
+  def addLink(relation: Relation, tuple: Map[String, Any], addFunction: Map[String, Any] => Unit = ∅[Map[String, Any] => Unit]) = atomic {
     handleFunctionalForPropertyForAddLink(relation, tuple)
     addEdge(relation, tuple)
     handleSymmetryForAddLink(relation, tuple)
+    addFunction(tuple)
   }
 
   private def addEdge(relation: Relation, tuple: Map[String, Any]) = atomic {
@@ -824,11 +843,12 @@ class InMemoryWordNet extends WordNet {
   }
 
   def removeLink(relation: Relation, tuple: Map[String, Any], withDependentNodes: Boolean = true, withCollectionDependentNodes: Boolean = true) = atomic {
-    removeLinkByNode(relation, tuple, None, withDependentNodes = withDependentNodes, withCollectionDependentNodes = withCollectionDependentNodes)
+    removeLinkByNode(relation, tuple, None, ∅[Map[String, Any] => Unit],
+      withDependentNodes = withDependentNodes, withCollectionDependentNodes = withCollectionDependentNodes)
   }
 
-  def removeLinkByNode(relation: Relation, tuple: Map[String, Any], node: Option[Any], symmetricEdge: Boolean = false,
-                       withDependentNodes: Boolean = true, withCollectionDependentNodes: Boolean = true): Unit = atomic {
+  def removeLinkByNode(relation: Relation, tuple: Map[String, Any], node: Option[Any], removeFunction: Map[String, Any] => Unit,
+                       symmetricEdge: Boolean = false, withDependentNodes: Boolean = true, withCollectionDependentNodes: Boolean = true): Unit = atomic {
     val relationSuccessors = successors(relation)
 
     for ((sourceName, sourceValue) <- tuple if (relationSuccessors.contains(sourceName, sourceValue))) {
@@ -853,6 +873,7 @@ class InMemoryWordNet extends WordNet {
     }
 
     handleSymmetryForRemoveLink(relation, tuple, node, symmetricEdge)
+    removeFunction(tuple)
     statsCache.age
   }
 
@@ -868,7 +889,7 @@ class InMemoryWordNet extends WordNet {
     if (!symmetricEdge) {
       for (syms <- symmetry.get(relation); ((src, dst), sym) <- syms if sym == Symmetric) {
         removeLinkByNode(relation,
-          Map((src, tuple(dst)),(dst, tuple(src))), node, symmetricEdge = true)
+          Map((src, tuple(dst)),(dst, tuple(src))), node, ∅[Map[String, Any] => Unit], symmetricEdge = true)
       }
     }
   }
@@ -882,19 +903,21 @@ class InMemoryWordNet extends WordNet {
     for ((sourceName, sourceValue) <- tuple if (relationSuccessors.contains(sourceName, sourceValue))) {
       val matchingSuccessors = relationSuccessors((sourceName, sourceValue)).filter(succ => tuple.forall(elem => succ.exists(_ == elem)))
 
-      matchingSuccessors.foreach(removeLinkByNode(relation, _, node, false, withDependentNodes, withCollectionDependentNodes))
+      matchingSuccessors.foreach(removeLinkByNode(relation, _, node, ∅[Map[String, Any] => Unit], false, withDependentNodes, withCollectionDependentNodes))
     }
   }
 
   def setLinks(relation: Relation, sourceNames: List[String], sources: List[List[Any]],
-               destinationNames: List[String], destinations: List[List[Any]]) = atomic {
+               destinationNames: List[String], destinations: List[List[Any]],
+               addFunction: Map[String, Any] => Unit, removeFunction: Map[String, Any] => Unit) = atomic {
     if (sourceNames.isEmpty)
-      replaceLinks(relation, destinationNames, destinations)
+      replaceLinks(relation, destinationNames, destinations, addFunction, removeFunction)
     else
-      replaceLinksBySource(relation, sources, sourceNames, destinationNames, destinations)
+      replaceLinksBySource(relation, sources, sourceNames, destinationNames, destinations, addFunction, removeFunction)
   }
 
-  def replaceLinks(relation: Relation, destinationNames: List[String], destinations: List[List[Any]]) {
+  def replaceLinks(relation: Relation, destinationNames: List[String], destinations: List[List[Any]],
+                   addFunction: Map[String, Any] => Unit, removeFunction: Map[String, Any] => Unit) {
     successors(relation).clear()
 
     for (destination <- destinations)
@@ -902,7 +925,8 @@ class InMemoryWordNet extends WordNet {
   }
 
   def replaceLinksBySource(relation: Relation, sources: List[List[Any]], sourceNames: List[String],
-                           destinationNames: List[String], destinations: List[List[Any]]) {
+                           destinationNames: List[String], destinations: List[List[Any]],
+                           addFunction: Map[String, Any] => Unit, removeFunction: Map[String, Any] => Unit) {
     val relationSuccessors = successors(relation)
 
     for (source <- sources; i <- 0 until sourceNames.size) {
@@ -916,11 +940,11 @@ class InMemoryWordNet extends WordNet {
           }
       })
 
-      matchingSuccessors.foreach(tuple => removeLinkByNode(relation, tuple, Some(sourceValue)))
+      matchingSuccessors.foreach(tuple => removeLinkByNode(relation, tuple, Some(sourceValue), removeFunction))
 
       for (destination <- destinations) {
         val tuple = (sourceNames.zip(source) ++ destinationNames.zip(destination)).toMap
-        addLink(relation, tuple)
+        addLink(relation, tuple, addFunction)
       }
     }
   }

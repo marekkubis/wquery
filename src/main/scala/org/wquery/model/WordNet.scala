@@ -37,7 +37,7 @@ trait WordNet {
 
   def aliases: List[Relation]
 
-  def fetch(relation: Relation, from: List[(String, List[Any])], to: List[String]): DataSet
+  def fetch(relation: Relation, from: List[(String, List[Any])], to: List[String], withArcs: Boolean = false): DataSet
 
   def fringe(relation: List[(Relation, String)], distinct: Boolean = true): DataSet
 
@@ -101,7 +101,7 @@ trait WordNet {
   }
 }
 
-
+// scalastyle:off multiple.string.literals
 object WordNet {
   object Meta {
     val Relations = new Relation("relations", List(Argument("name", StringType))) {
