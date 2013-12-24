@@ -70,11 +70,6 @@
             <id>undercover</id>
             <url>http://zact.googlecode.com/svn/maven/repository</url>
         </repository>
-        <repository>
-            <id>typesafe</id>
-            <name>Typesafe Repository</name>
-            <url>http://repo.typesafe.com/typesafe/releases/</url>
-        </repository>
 	</repositories>
 	
 	<pluginRepositories>
@@ -154,7 +149,7 @@
 	    <dependency>
   	        <groupId>org.testng</groupId>
 	        <artifactId>testng</artifactId>
-	        <version>6.0.1</version>
+	        <version>6.1</version>
 	        <scope>test</scope>
 	    </dependency>
     </dependencies>

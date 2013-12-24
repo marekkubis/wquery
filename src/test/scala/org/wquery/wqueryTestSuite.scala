@@ -1,10 +1,10 @@
 package org.wquery
 
 import engine.{Error, Answer}
-import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.testng.TestNGSuite
 import org.testng.annotations.BeforeClass
 import org.wquery.emitter.{PlainWQueryEmitter, WQueryEmitter}
+import org.scalatest.Matchers
 
 object WQueryRuntime {
   val wquery = createWQuery
@@ -31,7 +31,7 @@ object WQueryRuntime {
   }
 }
 
-abstract class WQueryTestSuite extends TestNGSuite with ShouldMatchers {  
+abstract class WQueryTestSuite extends TestNGSuite with Matchers {
   var wquery: WQuery = null
   var emitter: WQueryEmitter = null
 
