@@ -186,7 +186,7 @@ object WQueryGuiConsole extends SimpleSwingApplication {
     try {
         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName)
     } catch {
-      case _ =>
+      case _ : Throwable =>
         // do nothing
     }
 

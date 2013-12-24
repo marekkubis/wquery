@@ -279,7 +279,7 @@ class GridHandler(wordnet: WordNet) extends DefaultHandler with Logging {
         destination.toBoolean
         BooleanType
       } catch {
-        case _:NumberFormatException =>
+        case _:IllegalArgumentException =>
           try {
             destination.toInt
             IntegerType
