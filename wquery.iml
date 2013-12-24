@@ -26,9 +26,9 @@
     <orderEntry type="library" name="Maven: org.scala-lang:scala-library:2.10.3" level="project" />
     <orderEntry type="library" name="Maven: org.scala-lang:scala-swing:2.10.3" level="project" />
     <orderEntry type="library" name="Maven: org.scalaz:scalaz-core_2.10:6.0.4" level="project" />
-    <orderEntry type="library" name="Maven: org.slf4j:slf4j-api:1.7.1" level="project" />
-    <orderEntry type="library" name="Maven: ch.qos.logback:logback-classic:1.0.7" level="project" />
-    <orderEntry type="library" name="Maven: ch.qos.logback:logback-core:1.0.7" level="project" />
+    <orderEntry type="library" name="Maven: org.slf4j:slf4j-api:1.7.5" level="project" />
+    <orderEntry type="library" name="Maven: ch.qos.logback:logback-classic:1.0.13" level="project" />
+    <orderEntry type="library" name="Maven: ch.qos.logback:logback-core:1.0.13" level="project" />
     <orderEntry type="library" name="Maven: org.scala-stm:scala-stm_2.10:0.7" level="project" />
     <orderEntry type="library" name="Maven: org.clapper:argot_2.10:1.0.1" level="project" />
     <orderEntry type="library" name="Maven: org.clapper:grizzled-scala_2.10:1.1.2" level="project" />
