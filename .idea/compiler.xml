@@ -32,7 +32,7 @@
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="wquery" target="1.6" />
+      <module name="wquery" target="1.7" />
     </bytecodeTargetLevel>
   </component>
 </project>
