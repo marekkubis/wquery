@@ -71,7 +71,7 @@ val assembly = TaskKey[File]("assembly", "Creates an assembly.")
 
 assembly <<= (packageBin in Compile, update, templateFilesMappings, assemblyName, assemblyFile) map {
   (jar, updateReport, templateMappings, dirName, zipFile) =>
-    val inputs = Seq((jar, dirName + "/wquery.jar"))
+    val inputs = Seq(jar) x Path.flatRebase(dirName + "/lib")
     val dependencies = 
         updateReport.select(Set("compile", "runtime")) x Path.flatRebase(dirName + "/lib")
     IO.zip(inputs ++ dependencies ++ templateMappings, zipFile)

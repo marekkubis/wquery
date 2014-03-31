@@ -11,7 +11,7 @@ object WQueryRuntime {
   val emitter = new PlainWQueryEmitter
 
   def createWQuery = {
-    val wquery = WQuery.createInstance("src/main/assembly/template/samplenet.xml")
+    val wquery = WQuery.createInstance("src/main/assembly/template/samples/samplenet.xml")
 
     wquery.execute("\\hypernym transitivity := true")
     wquery.execute("\\partial_meronym transitivity := true")
