@@ -1,8 +1,13 @@
+import FilterKeys._
+
+//
+// Project information
+//
 name := "WQuery"
 
 organization := "org.wquery"
 
-version := "0.9"
+version := "0.9-SNAPSHOT"
 
 scalaVersion := "2.10.3"
 
@@ -19,8 +24,9 @@ licenses += "WQuery License" -> url("file://LICENSE.txt")
 
 publishMavenStyle := true
 
-// dependiencies
-
+//
+// Dependiencies
+//
 libraryDependencies ++= Seq(
     "org.scala-lang" % "scala-swing" % scalaVersion.value,
     "org.scalaz" %% "scalaz-core" % "6.0.4",
@@ -32,8 +38,21 @@ libraryDependencies ++= Seq(
     "org.testng" % "testng" % "6.1" % "test"
 )
 
-// assembly
+//
+// Resource filters
+//
 
+seq(filterSettings: _*)
+
+includeFilter in (Compile, filterResources) ~= { f => f || ("wconsole" | "wguiconsole") }
+
+extraProps += "startYear" -> startYear.value.get.toString
+
+extraProps += "currentYear" -> new java.text.SimpleDateFormat("yyyy").format(new java.util.Date())
+
+//
+// Assembly
+//
 val assemblyName = TaskKey[String]("assembly-name", "Creates the assembly name.")
 
 assemblyName <<= (version) map { (v: String) => "wquery-" + v }
@@ -54,10 +73,14 @@ val assembly = TaskKey[File]("assembly", "Creates an assembly.")
 
 assembly <<= (packageBin in Compile, update, templateFilesMappings, assemblyName, assemblyFile) map {
   (jar, updateReport, templateMappings, dirName, zipFile) =>
-    val inputs = Seq(jar) x Path.flatRebase(dirName)
+    val inputs = Seq((jar, dirName + "/wquery.jar"))
     val dependencies = 
         updateReport.select(Set("compile", "runtime")) x Path.flatRebase(dirName + "/lib")
     IO.zip(inputs ++ dependencies ++ templateMappings, zipFile)
     zipFile
 }
 
+//
+// Scalastyle
+//
+org.scalastyle.sbt.ScalastylePlugin.Settings
