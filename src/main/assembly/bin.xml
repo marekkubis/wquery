@@ -1,9 +1,0 @@
-<assembly>
-	<id>bin</id>
-	<formats>
-		<format>zip</format>
-	</formats>	
-    <componentDescriptors>
-        <componentDescriptor>src/main/assembly/binaries.xml</componentDescriptor>
-    </componentDescriptors> 
-</assembly>
