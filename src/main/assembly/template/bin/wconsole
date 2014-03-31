@@ -4,6 +4,6 @@
 #       WQuery interactive console
 #
 DIR=`dirname $0`
-LIBS=`ls -1 $DIR/lib/* | tr "\\n" ":"`
+LIBS=`ls -1 $DIR/../lib/* | tr "\\n" ":"`
 
-java $JAVA_OPTS -cp $LIBS:$DIR/wquery.jar org.wquery.console.WQueryConsole "$@"
+java $JAVA_OPTS -cp $LIBS org.wquery.console.WQueryConsole "$@"
