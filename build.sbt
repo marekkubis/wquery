@@ -28,7 +28,6 @@ publishMavenStyle := true
 // Dependiencies
 //
 libraryDependencies ++= Seq(
-    "org.scala-lang" % "scala-swing" % scalaVersion.value,
     "org.scalaz" %% "scalaz-core" % "6.0.4",
     "org.slf4j" % "slf4j-api" % "1.7.5",
     "ch.qos.logback" % "logback-classic" % "1.0.13",
@@ -41,7 +40,6 @@ libraryDependencies ++= Seq(
 //
 // Resource filters
 //
-
 seq(filterSettings: _*)
 
 includeFilter in (Compile, filterResources) ~= { f => f || ("wconsole" | "wguiconsole") }
