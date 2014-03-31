@@ -83,10 +83,10 @@ case class BinaryCondition(op: String, leftOp: AlgebraOp, rightOp: AlgebraOp) ex
       case "=~" =>
         val regexps = rightResult.collect{ case pattern: String => pattern.r }
 
-        leftGroup.forall {
+        leftGroup.forall { leftElem => { (leftElem: @unchecked) match {
           case (elem: String, _) =>
             regexps.forall(_.findFirstIn(elem).isDefined)
-        }
+        }}}
       case _ =>
         tryComparingAsSingletons(leftResult, rightResult)
     }
