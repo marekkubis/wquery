@@ -62,7 +62,7 @@ val assemblyFile = TaskKey[File]("assembly-file", "Creates the assembly file nam
 
 assemblyFile <<= (target, assemblyName) map { (t: File, n: String) => t / (n + ".zip") }
 
-val templateFilesMappings = TaskKey[Seq[(File, String)]]("template-files-mappings", "Maps template file paths to the finals destinations.")
+val templateFilesMappings = TaskKey[Seq[(File, String)]]("template-files-mappings", "Maps template file paths to the final destinations.")
 
 templateFilesMappings <<= (baseDirectory, assemblyName) map { (base, dirName) => 
     val templateDir = base / "src/main/assembly/template/"
@@ -70,14 +70,21 @@ templateFilesMappings <<= (baseDirectory, assemblyName) map { (base, dirName) =>
     templatePaths x Path.rebase(templateDir, dirName)
 }
 
+val infoFilesMappings = TaskKey[Seq[(File, String)]]("info-files-mappings", "Maps README.md, ChangeLog, etc. file paths to the final destinations.")
+
+infoFilesMappings <<= (baseDirectory, assemblyName) map { (base, dirName) => 
+    val infoPaths = Seq(base / "README.md", base / "LICENSE", base / "ChangeLog")
+    infoPaths x Path.rebase(base, dirName)
+}
+
 val assembly = TaskKey[File]("assembly", "Creates an assembly.")
 
-assembly <<= (packageBin in Compile, update, templateFilesMappings, assemblyName, assemblyFile) map {
-  (jar, updateReport, templateMappings, dirName, zipFile) =>
+assembly <<= (packageBin in Compile, update, infoFilesMappings, templateFilesMappings, assemblyName, assemblyFile) map {
+  (jar, updateReport, infoMappings, templateMappings, dirName, zipFile) =>
     val inputs = Seq(jar) x Path.flatRebase(dirName + "/lib")
     val dependencies = 
         updateReport.select(Set("compile", "runtime")) x Path.flatRebase(dirName + "/lib")
-    IO.zip(inputs ++ dependencies ++ templateMappings, zipFile)
+    IO.zip(inputs ++ dependencies ++ infoMappings ++ templateMappings, zipFile)
     zipFile
 }
 
