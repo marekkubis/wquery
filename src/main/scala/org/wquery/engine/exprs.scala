@@ -2,7 +2,6 @@
 
 package org.wquery.engine
 
-import planner.{ConditionApplier, PlanEvaluator, PathPlanGenerator, PathBuilder}
 import scalaz._
 import Scalaz._
 import org.wquery.model._
@@ -169,19 +168,18 @@ case class FunctionExpr(name: String, args: EvaluableExpr) extends EvaluableExpr
  * Step related expressions
  */
 sealed abstract class TransformationExpr extends Expr {
-  def push(wordNet: WordNet#Schema, bindings: BindingsSchema, context: Context, op: AlgebraOp, plan: PathBuilder): AlgebraOp
+  def push(wordNet: WordNet#Schema, bindings: BindingsSchema, context: Context, op: AlgebraOp): AlgebraOp
 }
 
 case class RelationTransformationExpr(expr: RelationalExpr) extends TransformationExpr {
-  def push(wordNet: WordNet#Schema, bindings: BindingsSchema, context: Context, op: AlgebraOp, plan: PathBuilder) = {
+  def push(wordNet: WordNet#Schema, bindings: BindingsSchema, context: Context, op: AlgebraOp) = {
     val pattern = expr.evaluationPattern(wordNet, op.rightType(0))
-    plan.appendLink(pattern)
     ExtendOp(op, pattern, Forward, VariableTemplate.empty)
   }
 }
 
 case class FilterTransformationExpr(conditionalExpr: ConditionalExpr) extends TransformationExpr {
-  def push(wordNet: WordNet#Schema, bindings: BindingsSchema, context: Context, op: AlgebraOp, plan: PathBuilder) = {
+  def push(wordNet: WordNet#Schema, bindings: BindingsSchema, context: Context, op: AlgebraOp) = {
     val filterBindings = BindingsSchema(bindings union op.bindingsPattern, false)
 
     filterBindings.bindStepVariableType(StepVariable.ContextVariable.name, op.rightType(0))
@@ -190,29 +188,26 @@ case class FilterTransformationExpr(conditionalExpr: ConditionalExpr) extends Tr
     val filteredOp = if (condition.referencedVariables.contains(StepVariable.ContextVariable))
       BindOp(op, VariableTemplate(List(StepVariable.ContextVariable))) else op
 
-    plan.appendCondition(condition)
-    ConditionApplier.applyIfNotRedundant(filteredOp, condition)
+    SimplificationRules.applyConditionIfNotRedundant(filteredOp, condition)
   }
+
 }
 
 case class NodeTransformationExpr(generator: EvaluableExpr) extends TransformationExpr {
-  def push(wordNet: WordNet#Schema, bindings: BindingsSchema, context: Context, op: AlgebraOp, plan: PathBuilder) = {
+  def push(wordNet: WordNet#Schema, bindings: BindingsSchema, context: Context, op: AlgebraOp) = {
     if (op /== ConstantOp.empty) {
       FilterTransformationExpr(BinaryConditionalExpr("in", ContextByVariableReq(StepVariable.ContextVariable), generator))
-        .push(wordNet, bindings, context, op, plan)
+        .push(wordNet, bindings, context, op)
     } else {
       val generateOp = generator.evaluationPlan(wordNet, bindings, context)
-      plan.createRootLink(generateOp)
       generateOp
     }
   }
 }
 
 case class BindTransformationExpr(variables: VariableTemplate) extends TransformationExpr {
-  def push(wordNet: WordNet#Schema, bindings: BindingsSchema, context: Context, op: AlgebraOp, plan: PathBuilder) = {
+  def push(wordNet: WordNet#Schema, bindings: BindingsSchema, context: Context, op: AlgebraOp) = {
     if (variables /== ∅[VariableTemplate]) {
-      plan.appendVariables(variables)
-
       op match {
         case ExtendOp(extendedOp, pattern, direction, VariableTemplate.empty) =>
           ExtendOp(extendedOp, pattern, direction, variables)
@@ -363,23 +358,13 @@ case class ProjectionExpr(expr: EvaluableExpr) extends Expr {
 
 case class PathExpr(exprs: List[TransformationExpr], projections: List[ProjectionExpr]) extends EvaluableExpr {
   def evaluationPlan(wordNet: WordNet#Schema, bindings: BindingsSchema, context: Context) = {
-    val path = createPath(exprs, wordNet, bindings, context)
-    val plans = new PathPlanGenerator(path).plan(wordNet, bindings)
-    val plan = PlanEvaluator.chooseBest(wordNet, plans)
+    val exprsOp = exprs.foldLeft[AlgebraOp](ConstantOp.empty) { (contextOp, expr) =>
+      expr.push(wordNet, bindings, context, contextOp)
+    }
 
-    projections.foldLeft[AlgebraOp](plan) { (contextOp, expr) =>
+    projections.foldLeft[AlgebraOp](exprsOp) { (contextOp, expr) =>
       expr.project(wordNet, bindings, context, contextOp)
     }
-  }
-
-  def createPath(exprs: List[TransformationExpr], wordNet: WordNet#Schema, bindings: BindingsSchema, context: Context) = {
-    val builder = new PathBuilder
-
-    exprs.foldLeft[AlgebraOp](ConstantOp.empty) { (contextOp, expr) =>
-      expr.push(wordNet, bindings, context, contextOp, builder)
-    }
-
-    builder.build
   }
 }
 
@@ -501,7 +486,7 @@ case class WordFormByRegexReq(regex: String) extends EvaluableExpr {
   def evaluationPlan(wordNet: WordNet#Schema, bindings: BindingsSchema, context: Context) = {
     val filteredVariable = StepVariable("__r")
 
-    ConditionApplier.applyIfNotRedundant(BindOp(FetchOp.words, VariableTemplate(List(filteredVariable))),
+    SimplificationRules.applyConditionIfNotRedundant(BindOp(FetchOp.words, VariableTemplate(List(filteredVariable))),
       BinaryConditionalExpr("=~", AlgebraExpr(StepVariableRefOp(filteredVariable, Set(StringType))),
       AlgebraExpr(ConstantOp.fromValue(regex))).conditionPlan(wordNet, bindings, context))
   }
@@ -509,7 +494,7 @@ case class WordFormByRegexReq(regex: String) extends EvaluableExpr {
 
 case class BooleanByFilterReq(conditionalExpr: ConditionalExpr) extends EvaluableExpr {
   def evaluationPlan(wordNet: WordNet#Schema, bindings: BindingsSchema, context: Context) = {
-    IfElseOp(ConditionApplier.applyIfNotRedundant(ConstantOp.fromValue(true), conditionalExpr.conditionPlan(wordNet, bindings, context)),
+    IfElseOp(SimplificationRules.applyConditionIfNotRedundant(ConstantOp.fromValue(true), conditionalExpr.conditionPlan(wordNet, bindings, context)),
       ConstantOp.fromValue(true), Some(ConstantOp.fromValue(false)))
   }
 }
