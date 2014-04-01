@@ -3,6 +3,8 @@ WQuery
 
 A domain-specific query language for WordNet-like lexical databases.
 
+[![Build Status](https://travis-ci.org/marekkubis/wquery.svg?branch=master)](https://travis-ci.org/marekkubis/wquery)
+
 Getting started
 ---------------
 

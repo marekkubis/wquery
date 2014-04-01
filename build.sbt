@@ -15,7 +15,7 @@ version := "0.9-SNAPSHOT"
 scalaVersion := "2.10.3"
 
 description :=
-    """ WQuery is a domain-specific query language designed for WordNet-like lexical databases.
+    """WQuery is a domain-specific query language designed for WordNet-like lexical databases.
     The WQuery interpreter operates on platforms that provide Java Runtime Environment and works with wordnets stored in XML files.
     It may be used as a standalone application or as an API to a lexical database in Java-based systems."""
 
