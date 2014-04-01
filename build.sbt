@@ -1,5 +1,7 @@
 import FilterKeys._
 import SiteKeys._
+import de.johoop.jacoco4sbt._
+import JacocoPlugin._
 
 //
 // Project information
@@ -83,6 +85,11 @@ assembly <<= (packageBin in Compile, update, templateFilesMappings, assemblyName
 // Scalastyle
 //
 org.scalastyle.sbt.ScalastylePlugin.Settings
+
+//
+// Coverage
+//
+jacoco.settings
 
 //
 // Site
