@@ -90,3 +90,7 @@ org.scalastyle.sbt.ScalastylePlugin.Settings
 site.settings
 
 includeFilter in makeSite ~= { f => f || ("CNAME" | "*.pdf") }
+
+ghpages.settings
+
+git.remoteRepo := "git@github.com:marekkubis/wquery.git"

@@ -5,3 +5,7 @@ resolvers += "sonatype-releases" at "https://oss.sonatype.org/content/repositori
 addSbtPlugin("com.github.sdb" % "xsbt-filter" % "0.4")
 
 addSbtPlugin("com.typesafe.sbt" % "sbt-site" % "0.7.1")
+
+resolvers += "jgit-repo" at "http://download.eclipse.org/jgit/maven"
+
+addSbtPlugin("com.typesafe.sbt" % "sbt-ghpages" % "0.5.2")
