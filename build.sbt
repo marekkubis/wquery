@@ -1,4 +1,5 @@
 import FilterKeys._
+import SiteKeys._
 
 //
 // Project information
@@ -82,3 +83,10 @@ assembly <<= (packageBin in Compile, update, templateFilesMappings, assemblyName
 // Scalastyle
 //
 org.scalastyle.sbt.ScalastylePlugin.Settings
+
+//
+// Site
+//
+site.settings
+
+includeFilter in makeSite ~= { f => f || ("CNAME" | "*.pdf") }
