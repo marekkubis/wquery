@@ -5,14 +5,14 @@ import loader.{LmfLoader, GridLoader, WordNetLoader}
 import model.impl.InMemoryWordNet
 import operations.{Bindings, BindingsSchema}
 import org.wquery.model.WordNet
-import org.wquery.parser.WQueryParsers
+import org.wquery.parser.WParsers
 import org.wquery.utils.Logging
 import collection.mutable.ListBuffer
 
 class WQuery(val wordNet: WordNet) extends Logging {
   val bindingsSchema = BindingsSchema()
   val bindings = Bindings()
-  val parser = new Object with WQueryParsers
+  val parser = new Object with WParsers
 
   def execute(input: String): Result = {
     try {

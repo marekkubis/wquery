@@ -11,77 +11,9 @@ import org.wquery.model.Relation
 import scalaz._
 import Scalaz._
 
-trait WQueryParsers extends RegexParsers {
+trait WPathParsers extends RegexParsers {
 
-  def parse(input: String): EvaluableExpr = {
-    parseAll(query, input) match {
-      case this.Success(expr, _) =>
-        expr
-      case this.Failure(message, _) =>
-        throw new WQueryParsingFailureException(message)
-      case this.Error(message, _) =>
-        throw new WQueryParsingErrorException(message)
-    }
-  }
-
-  // parsers
-
-  def query = (
-    imp_expr
-    | multipath_expr ^^ { x => FunctionExpr(SortFunction.name, FunctionExpr(DistinctFunction.name, x)) }
-  )
-
-  def expr = (
-    imp_expr
-    | multipath_expr
-  )
-
-  // imperative exprs
-
-  def imp_expr: Parser[EvaluableExpr] = (
-    "do" ~> rep(statement) <~ "end" ^^ { BlockExpr(_) }
-    | statement
-  )
-
-  def statement = (
-    iterator
-    | emission
-    | merge
-    | update
-    | assignment
-    | ifelse
-    | whiledo
-  )
-
-  def iterator = "from" ~> multipath_expr ~ imp_expr ^^ { case mexpr~iexpr => IteratorExpr(mexpr, iexpr) }
-
-  def emission = "emit" ~> multipath_expr ^^ { EmissionExpr(_) }
-
-  def merge = "merge" ~> expr ^^ { expr => MergeExpr(expr) }
-
-  def update = "update" ~> (
-    rel_spec ~ update_op ~ multipath_expr ^^ { case spec~op~expr => UpdateExpr(None, spec, op, expr) }
-    | multipath_expr ~ rel_spec ~ update_op ~ multipath_expr ^^ { case lexpr~spec~op~rexpr => UpdateExpr(Some(lexpr), spec, op, rexpr) }
-  )
-
-  def rel_spec = rep1sep(rel_spec_arg, "^") ^^ { RelationSpecification(_) }
-
-  def rel_spec_arg = (
-    var_decl ^^ { VariableRelationSpecificationArgument(_) }
-    | notQuotedString ^^ { ConstantRelationSpecificationArgument(_) }
-  )
-
-  def update_op = ("+="|"-="|":=")
-
-  def assignment = set_var_decl ~ ":=" ~ multipath_expr ^^ { case vdecl~_~mexpr => VariableAssignmentExpr(vdecl, mexpr) }
-
-  def ifelse = "if" ~> multipath_expr ~ imp_expr ~ opt("else" ~> imp_expr) ^^ {
-    case cexpr ~ iexpr ~ eexpr => IfElseExpr(cexpr, iexpr, eexpr)
-  }
-
-  def whiledo = "while" ~> multipath_expr ~ imp_expr ^^ { case cexpr~iexpr => WhileDoExpr(cexpr, iexpr) }
-
-  // mutlipath exprs
+  def expr = multipath_expr
 
   def multipath_expr: Parser[EvaluableExpr]
     = chainl1(intersect_expr,
@@ -306,6 +238,86 @@ trait WQueryParsers extends RegexParsers {
       } else {
         Failure("a letter expected but `" + in.first + "' found", in.drop(start - offset))
       }
+    }
+  }
+
+}
+
+trait WQueryParsers extends WPathParsers {
+
+  override def expr = (
+    imp_expr
+    | multipath_expr
+  )
+
+  def imp_expr: Parser[EvaluableExpr] = (
+    "do" ~> rep(statement) <~ "end" ^^ { BlockExpr(_) }
+    | statement
+  )
+
+  def statement = (
+    iterator
+    | emission
+    | merge
+    | assignment
+    | ifelse
+    | whiledo
+  )
+
+  def iterator = "from" ~> multipath_expr ~ imp_expr ^^ { case mexpr~iexpr => IteratorExpr(mexpr, iexpr) }
+
+  def emission = "emit" ~> multipath_expr ^^ { EmissionExpr(_) }
+
+  def merge = "merge" ~> expr ^^ { expr => MergeExpr(expr) }
+
+  def assignment = set_var_decl ~ ":=" ~ multipath_expr ^^ { case vdecl~_~mexpr => VariableAssignmentExpr(vdecl, mexpr) }
+
+  def ifelse = "if" ~> multipath_expr ~ imp_expr ~ opt("else" ~> imp_expr) ^^ {
+    case cexpr ~ iexpr ~ eexpr => IfElseExpr(cexpr, iexpr, eexpr)
+  }
+
+  def whiledo = "while" ~> multipath_expr ~ imp_expr ^^ { case cexpr~iexpr => WhileDoExpr(cexpr, iexpr) }
+
+}
+
+trait WUpdateParsers extends WQueryParsers {
+
+  override def statement = (
+    update
+    | super.statement
+  )
+
+  def update = "update" ~> (
+    rel_spec ~ update_op ~ multipath_expr ^^ { case spec~op~expr => UpdateExpr(None, spec, op, expr) }
+    | multipath_expr ~ rel_spec ~ update_op ~ multipath_expr ^^ { case lexpr~spec~op~rexpr => UpdateExpr(Some(lexpr), spec, op, rexpr) }
+  )
+
+  def rel_spec = rep1sep(rel_spec_arg, "^") ^^ { RelationSpecification(_) }
+
+  def rel_spec_arg = (
+    var_decl ^^ { VariableRelationSpecificationArgument(_) }
+    | notQuotedString ^^ { ConstantRelationSpecificationArgument(_) }
+  )
+
+  def update_op = ("+="|"-="|":=")
+
+}
+
+trait WParsers extends WUpdateParsers {
+
+  def query = (
+    imp_expr
+    | multipath_expr ^^ { x => FunctionExpr(SortFunction.name, FunctionExpr(DistinctFunction.name, x)) }
+  )
+
+  def parse(input: String): EvaluableExpr = {
+    parseAll(query, input) match {
+      case this.Success(expr, _) =>
+        expr
+      case this.Failure(message, _) =>
+        throw new WQueryParsingFailureException(message)
+      case this.Error(message, _) =>
+        throw new WQueryParsingErrorException(message)
     }
   }
 }
