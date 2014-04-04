@@ -174,7 +174,7 @@ sealed abstract class TransformationExpr extends Expr {
 case class RelationTransformationExpr(expr: RelationalExpr) extends TransformationExpr {
   def push(wordNet: WordNet#Schema, bindings: BindingsSchema, context: Context, op: AlgebraOp) = {
     val pattern = expr.evaluationPattern(wordNet, op.rightType(0))
-    ExtendOp(op, pattern, Forward, VariableTemplate.empty)
+    ExtendOp(op, pattern, VariableTemplate.empty)
   }
 }
 
@@ -209,8 +209,8 @@ case class BindTransformationExpr(variables: VariableTemplate) extends Transform
   def push(wordNet: WordNet#Schema, bindings: BindingsSchema, context: Context, op: AlgebraOp) = {
     if (variables /== ∅[VariableTemplate]) {
       op match {
-        case ExtendOp(extendedOp, pattern, direction, VariableTemplate.empty) =>
-          ExtendOp(extendedOp, pattern, direction, variables)
+        case ExtendOp(extendedOp, pattern, VariableTemplate.empty) =>
+          ExtendOp(extendedOp, pattern, variables)
         case _ =>
           BindOp(op, variables)
       }
@@ -461,7 +461,7 @@ case class ContextByRelationalExprReq(expr: RelationalExpr) extends EvaluableExp
 
   private def extendBasedEvaluationPlan(wordNet: WordNet#Schema, bindings: BindingsSchema) = {
     bindings.lookupStepVariableType(StepVariable.ContextVariable.name).map{ contextType =>
-      ExtendOp(StepVariableRefOp(StepVariable.ContextVariable, contextType), expr.evaluationPattern(wordNet, contextType), Forward, VariableTemplate.empty)
+      ExtendOp(StepVariableRefOp(StepVariable.ContextVariable, contextType), expr.evaluationPattern(wordNet, contextType), VariableTemplate.empty)
     }.getOrElse {
       val pattern = expr.evaluationPattern(wordNet, DataType.all)
 
@@ -477,7 +477,7 @@ case class ContextByRelationalExprReq(expr: RelationalExpr) extends EvaluableExp
       if (pattern.minTupleSize === 0 && pattern.maxTupleSize === Some(0))
         fetchOp
       else
-        ExtendOp(fetchOp, pattern, Forward, VariableTemplate.empty)
+        ExtendOp(fetchOp, pattern, VariableTemplate.empty)
     }
   }
 }

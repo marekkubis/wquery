@@ -6,7 +6,7 @@ import org.wquery.model.{DataSet, WordNet}
 import org.wquery.engine._
 
 abstract class AlgebraOp extends ProvidesTypes with ProvidesTupleSizes with ProvidesSize
-with ReferencesVariables with HasCost {
+with ReferencesVariables {
   def evaluate(wordNet: WordNet, bindings: Bindings, context: Context): DataSet
 
   def bindingsPattern: BindingsPattern

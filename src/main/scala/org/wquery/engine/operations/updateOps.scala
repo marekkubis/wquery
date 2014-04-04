@@ -27,7 +27,6 @@ sealed abstract class UpdateOp extends AlgebraOp {
 
   def maxCount(wordNet: WordNet#Schema) = some(0)
 
-  def cost(wordNet: WordNet#Schema) = some(1) // TODO implement cost model for update operations
 }
 
 case class AddTuplesOp(leftOp: Option[AlgebraOp], spec: RelationSpecification, rightOp: AlgebraOp) extends UpdateOp {

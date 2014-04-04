@@ -9,8 +9,6 @@ trait WordNet {
   class Schema {
     def relations = WordNet.this.relations
 
-    def stats = WordNet.this.stats
-
     def getRelation(name: String, arguments: Map[String, Set[DataType]], includingMeta: Boolean = false) = {
       val relations = WordNet.this.relations ++ (includingMeta ?? WordNet.Meta.relations) ++ WordNet.this.aliases
       relations.find(r => relationMatchesNameAndArguments(r, name, arguments))
@@ -39,11 +37,9 @@ trait WordNet {
 
   def fetch(relation: Relation, from: List[(String, List[Any])], to: List[String], withArcs: Boolean = false): DataSet
 
-  def fringe(relation: List[(Relation, String)], distinct: Boolean = true): DataSet
+  def extend(extensionSet: ExtensionSet, relation: Relation, through: String, to: List[String]): ExtendedExtensionSet
 
-  def extend(extensionSet: ExtensionSet, relation: Relation, direction: Direction, through: String, to: List[String]): ExtendedExtensionSet
-
-  def extend(extensionSet: ExtensionSet, direction: Direction, through: (String, Option[NodeType]), to: List[(String, Option[NodeType])]): ExtendedExtensionSet
+  def extend(extensionSet: ExtensionSet, through: (String, Option[NodeType]), to: List[(String, Option[NodeType])]): ExtendedExtensionSet
 
   def getSenses(synset: Synset): List[Sense]
 
@@ -51,9 +47,6 @@ trait WordNet {
 
   // schema
   val schema: WordNet#Schema = new Schema
-
-  // stats
-  def stats: WordNetStats
 
   // updating nodes
   def addSynset(synsetId: Option[String], senses: List[Sense], moveSenses: Boolean = true): Synset

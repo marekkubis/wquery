@@ -8,30 +8,18 @@ import org.wquery.engine._
 import org.wquery.utils.IntOptionW._
 
 sealed abstract class RelationalPattern extends ProvidesTypes with ProvidesTupleSizes {
-  def extend(wordNet: WordNet, bindings: Bindings, extensionSet: ExtensionSet, direction: Direction): ExtendedExtensionSet
-
-  def fringe(wordNet: WordNet, bindings: Bindings, side: Side): DataSet
+  def extend(wordNet: WordNet, bindings: Bindings, extensionSet: ExtensionSet): ExtendedExtensionSet
 
   def sourceType: Set[DataType]
 
-  def maxCount(pathCount: Option[BigInt], wordNet: WordNet#Schema, direction: Direction): Option[BigInt]
-
-  def fringeMaxCount(side: Side, wordNet: WordNet#Schema): BigInt
 }
 
 case class RelationUnionPattern(patterns: List[RelationalPattern]) extends RelationalPattern {
-  def extend(wordNet: WordNet, bindings: Bindings, extensionSet: ExtensionSet, direction: Direction) = {
-    val buffer = new ExtensionSetBuffer(extensionSet, direction)
+  def extend(wordNet: WordNet, bindings: Bindings, extensionSet: ExtensionSet) = {
+    val buffer = new ExtensionSetBuffer(extensionSet)
 
-    patterns.foreach(expr => buffer.append(expr.extend(wordNet, bindings, extensionSet, direction)))
+    patterns.foreach(expr => buffer.append(expr.extend(wordNet, bindings, extensionSet)))
     buffer.toExtensionSet
-  }
-
-  def fringe(wordNet: WordNet, bindings: Bindings, side: Side) = {
-    val buffer = new DataSetBuffer
-
-    patterns.foreach(expr => buffer.append(expr.fringe(wordNet, bindings, side)))
-    buffer.toDataSet.distinct
   }
 
   val minTupleSize = patterns.map(_.minTupleSize).min
@@ -44,36 +32,13 @@ case class RelationUnionPattern(patterns: List[RelationalPattern]) extends Relat
 
   def rightType(pos: Int) = patterns.flatMap(_.rightType(pos)).toSet
 
-  def maxCount(pathCount: Option[BigInt], wordNet: WordNet#Schema, direction: Direction) = {
-    patterns.map(_.maxCount(pathCount, wordNet, direction)).sequence.map(_.sum)
-  }
-
-  def fringeMaxCount(side: Side, wordNet: WordNet#Schema) = patterns.map(_.fringeMaxCount(side, wordNet)).sum
 }
 
 case class RelationCompositionPattern(patterns: List[RelationalPattern]) extends RelationalPattern {
-  def extend(wordNet: WordNet, bindings: Bindings, extensionSet: ExtensionSet, direction: Direction) = {
-    direction match {
-      case Forward =>
-        val headSet = patterns.head.extend(wordNet, bindings, extensionSet, direction)
+  def extend(wordNet: WordNet, bindings: Bindings, extensionSet: ExtensionSet) = {
+    val headSet = patterns.head.extend(wordNet, bindings, extensionSet)
 
-        patterns.tail.foldLeft(headSet)((dataSet, expr) => expr.extend(wordNet, bindings, dataSet, direction))
-      case Backward =>
-        val tailSet = patterns.tail.foldRight(extensionSet){ case (expr, dataSet) =>
-          expr.extend(wordNet, bindings, dataSet, direction)
-        }
-
-        patterns.head.extend(wordNet, bindings, tailSet, direction)
-    }
-  }
-
-  def fringe(wordNet: WordNet, bindings: Bindings, side: Side) = {
-    side match {
-      case Left =>
-        patterns.head.fringe(wordNet, bindings, Left)
-      case Right =>
-        patterns.last.fringe(wordNet, bindings, Right)
-    }
+    patterns.tail.foldLeft(headSet)((dataSet, expr) => expr.extend(wordNet, bindings, dataSet))
   }
 
   val minTupleSize = patterns.map(_.minTupleSize).sum
@@ -110,63 +75,21 @@ case class RelationCompositionPattern(patterns: List[RelationalPattern]) extends
     }.orZero
   }
 
-  def maxCount(pathCount: Option[BigInt], wordNet: WordNet#Schema, direction: Direction) = {
-    direction match {
-      case Forward =>
-        patterns.tail.
-          foldLeft(patterns.head.maxCount(pathCount, wordNet, direction))((pathCount, pattern) => pattern.maxCount(pathCount, wordNet, direction))
-      case Backward =>
-        patterns.dropRight(1).
-          foldRight(patterns.last.maxCount(pathCount, wordNet, direction))((pattern, pathCount) => pattern.maxCount(pathCount, wordNet, direction))
-    }
-  }
-
-  def fringeMaxCount(side: Side, wordNet: WordNet#Schema) = {
-    side match {
-      case Left =>
-        patterns.head.fringeMaxCount(Left, wordNet)
-      case Right =>
-        patterns.last.fringeMaxCount(Right, wordNet)
-    }
-  }
 }
 
 case class QuantifiedRelationPattern(pattern: RelationalPattern, quantifier: Quantifier) extends RelationalPattern {
-  def extend(wordNet: WordNet, bindings: Bindings, extensionSet: ExtensionSet, direction: Direction) = {
-    val lowerExtensionSet = (1 to quantifier.lowerBound).foldLeft(extensionSet)((x, _) => pattern.extend(wordNet, bindings, x, direction))
+  def extend(wordNet: WordNet, bindings: Bindings, extensionSet: ExtensionSet) = {
+    val lowerExtensionSet = (1 to quantifier.lowerBound).foldLeft(extensionSet)((x, _) => pattern.extend(wordNet, bindings, x))
 
     if (some(quantifier.lowerBound) != quantifier.upperBound)
-      direction match {
-        case Forward =>
-          computeClosureForward(wordNet, bindings, lowerExtensionSet, direction, quantifier.upperBound.map(_ - quantifier.lowerBound))
-        case Backward =>
-          computeClosureBackward(wordNet, bindings, lowerExtensionSet, direction, quantifier.upperBound.map(_ - quantifier.lowerBound))
-      }
+      computeClosureForward(wordNet, bindings, lowerExtensionSet, quantifier.upperBound.map(_ - quantifier.lowerBound))
     else {
       lowerExtensionSet.asInstanceOf[ExtendedExtensionSet] // valid quantifiers invoke extend at least once
     }
   }
 
-  def fringe(wordNet: WordNet, bindings: Bindings, side: Side) = {
-    if (quantifier.lowerBound > 0)
-      pattern.fringe(wordNet, bindings, side)
-    else {
-      val dataTypes = getFringeTypes(side)
-
-      val buffer = new DataSetBuffer
-
-      if (DataType.domain.exists(dataTypes.contains(_)))
-        buffer.append(wordNet.fringe(getFringeDomainRelations(dataTypes), distinct = false))
-
-      if (!dataTypes.subsetOf(DataType.domain))
-        buffer.append(pattern.fringe(wordNet, bindings, side))
-
-      buffer.toDataSet.distinct
-    }
-  }
-
-  private def computeClosureForward(wordNet: WordNet, bindings: Bindings, extensionSet: ExtensionSet, direction: Direction, limit: Option[Int]) = {
-    val builder = new ExtensionSetBuilder(extensionSet, direction)
+  private def computeClosureForward(wordNet: WordNet, bindings: Bindings, extensionSet: ExtensionSet, limit: Option[Int]) = {
+    val builder = new ExtensionSetBuilder(extensionSet)
 
     for (i <- 0 until extensionSet.size) {
       val source = extensionSet.right(i)
@@ -179,23 +102,9 @@ case class QuantifiedRelationPattern(pattern: RelationalPattern, quantifier: Qua
     builder.build
   }
 
-  private def computeClosureBackward(wordNet: WordNet, bindings: Bindings, extensionSet: ExtensionSet, direction: Direction, limit: Option[Int]) = {
-    val builder = new ExtensionSetBuilder(extensionSet, direction)
-
-    for (i <- 0 until extensionSet.size) {
-      val source = extensionSet.left(i, 0)
-      builder.extend(i, Nil)
-
-      for (closureNode <- closeTupleBackward(wordNet, bindings, List(source), Set(source), limit))
-        builder.extend(i, closureNode)
-    }
-
-    builder.build
-  }
-
   private def closeTupleForward(wordNet: WordNet, bindings: Bindings, source: List[Any], forbidden: Set[Any], limit: Option[Int]): Seq[List[Any]] = {
     if ((limit|1) > 0) {
-      val transformed = pattern.extend(wordNet, bindings, new DataExtensionSet(DataSet.fromList(source)), Forward)
+      val transformed = pattern.extend(wordNet, bindings, new DataExtensionSet(DataSet.fromList(source)))
       val filtered = transformed.extensions.filter{ case (_, extension) => !forbidden.contains(extension.last)}.map(_._2)
 
       if (filtered.isEmpty) {
@@ -210,32 +119,6 @@ case class QuantifiedRelationPattern(pattern: RelationalPattern, quantifier: Qua
 
           result.append(newSource.tail)
           result.appendAll(closeTupleForward(wordNet, bindings, newSource, newForbidden, newLimit))
-        }
-
-        result
-      }
-    } else {
-      Nil
-    }
-  }
-
-  private def closeTupleBackward(wordNet: WordNet, bindings: Bindings, source: List[Any], forbidden: Set[Any], limit: Option[Int]): Seq[List[Any]] = {
-    if ((limit|1) > 0) {
-      val transformed = pattern.extend(wordNet, bindings, new DataExtensionSet(DataSet.fromList(source)), Backward)
-      val filtered = transformed.extensions.filter{ case (_, extension) => !forbidden.contains(extension.head)}.map(_._2)
-
-      if (filtered.isEmpty) {
-        filtered
-      } else {
-        val result = new ListBuffer[List[Any]]
-        val newForbidden = forbidden ++ filtered.map(_.head)
-        val newLimit = limit.map(_ - 1)
-
-        for (extension <- filtered) {
-          val newSource = extension ++ source
-
-          result.append(newSource.dropRight(1))
-          result.appendAll(closeTupleBackward(wordNet, bindings, newSource, newForbidden, newLimit))
         }
 
         result
@@ -265,46 +148,13 @@ case class QuantifiedRelationPattern(pattern: RelationalPattern, quantifier: Qua
     Set[DataType]()
   }
 
-  def maxCount(pathCount: Option[BigInt], wordNet: WordNet#Schema, direction: Direction) = {
-    (1 to wordNet.stats.maxPathSize).foldLeft(pathCount)((count, _) => pattern.maxCount(count, wordNet, direction))
-  }
-
-  def fringeMaxCount(side: Side, wordNet: WordNet#Schema) = {
-    if (quantifier.lowerBound > 0)
-      pattern.fringeMaxCount(side, wordNet)
-    else {
-      val fringeTypes = getFringeTypes(side)
-      val domainRelationsMaxCount = (for ((relation, argument) <- getFringeDomainRelations(fringeTypes))
-        yield wordNet.stats.fetchMaxCount(relation, List((argument, Nil)), List(argument))).sum
-
-      if (fringeTypes.subsetOf(DataType.domain))
-        domainRelationsMaxCount
-      else
-        pattern.fringeMaxCount(side, wordNet) + domainRelationsMaxCount
-    }
-  }
-
-  private def getFringeTypes(side: Side) = side match {
-    case Left =>
-      leftType(0)
-    case Right =>
-      rightType(0)
-  }
-
-  private def getFringeDomainRelations(dataTypes: Set[DataType]) = {
-    dataTypes.map(WordNet.dataTypesRelations.get(_)).flatten.map((_, Relation.Src)).toList
-  }
 }
 
 case class ArcRelationalPattern(pattern: ArcPattern) extends RelationalPattern {
-  def extend(wordNet: WordNet, bindings: Bindings, extensionSet: ExtensionSet, direction: Direction) = {
-    pattern.relation.some(wordNet.extend(extensionSet, _, direction, pattern.source.name, pattern.destinations.map(_.name)))
-      .none(wordNet.extend(extensionSet, direction, (pattern.source.name, pattern.source.nodeType),
+  def extend(wordNet: WordNet, bindings: Bindings, extensionSet: ExtensionSet) = {
+    pattern.relation.some(wordNet.extend(extensionSet, _, pattern.source.name, pattern.destinations.map(_.name)))
+      .none(wordNet.extend(extensionSet, (pattern.source.name, pattern.source.nodeType),
         if (pattern.destinations == List(ArcPatternArgument.Any)) Nil else pattern.destinations.map(dest => (dest.name, dest.nodeType))))
-  }
-
-  def fringe(wordNet: WordNet, bindings: Bindings, side: Side) = {
-    wordNet.fringe(createFringeDescription(wordNet.relations, side))
   }
 
   val minTupleSize = 2*pattern.destinations.size
@@ -342,25 +192,4 @@ case class ArcRelationalPattern(pattern: ArcPattern) extends RelationalPattern {
       .none(argument.nodeType.some(Set(_)).none(NodeType.all)).asInstanceOf[Set[DataType]]
   }
 
-  def maxCount(pathCount: Option[BigInt], wordNet: WordNet#Schema, direction: Direction) = wordNet.stats.extendMaxCount(pathCount, pattern, direction)
-
-  def fringeMaxCount(side: Side, wordNet: WordNet#Schema) = {
-    (for ((relation, argument) <- createFringeDescription(wordNet.relations, side))
-    yield wordNet.stats.fetchMaxCount(relation, List((argument, Nil)), List(argument))).sum
-  }
-
-  private def createFringeDescription(relations: List[Relation], side: Side) = {
-    val (fringeName, fringeType) = side match {
-      case Left =>
-        (pattern.source.name, pattern.source.nodeType)
-      case Right =>
-        (pattern.destinations.last.name, pattern.destinations.last.nodeType)
-    }
-
-    pattern.relation
-      .some(rel => List((rel, fringeName)))
-      .none(for (relation <- relations if relation.getArgument(fringeName)
-        .some(arg => fringeType.some(_ == arg.nodeType).none(true))
-        .none(fringeName == ArcPatternArgument.AnyName)) yield (relation, fringeName))
-  }
 }

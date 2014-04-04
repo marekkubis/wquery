@@ -3,7 +3,6 @@ package org.wquery.model.impl
 import collection.mutable.ListBuffer
 import collection.mutable.{Map => MMap}
 import org.wquery.model._
-import org.wquery.utils.Cache
 import org.wquery.{WQueryUpdateBreaksRelationPropertyException, WQueryModelException, WQueryEvaluationException}
 import scala.concurrent.stm._
 import scalaz._
@@ -16,7 +15,6 @@ class InMemoryWordNet extends WordNet {
   private val successors = TMap[Relation, MMap[(String, Any), Vector[Map[String, Any]]]]()
   private val aliasMap = scala.collection.mutable.Map[Relation, List[Arc]]()
   private var relationsList = List[Relation]()
-  private val statsCache = new Cache[WordNetStats](calculateStats, StatsCacheThreshold)
 
   // relation properties
   private val dependent = MMap[Relation, Set[String]]()
@@ -42,15 +40,12 @@ class InMemoryWordNet extends WordNet {
   dependent ++= WordNet.dependent
   collectionDependent ++= WordNet.collectionDependent
 
-  statsCache.invalidate
-
   def addRelation(relation: Relation) {
     if (!relations.contains(relation)) {
       relationsList = (relationsList :+ relation)
         .sortWith((l, r) => l.name < r.name || l.name == r.name && l.arguments.size < r.arguments.size ||
           l.name == r.name && l.arguments.size == r.arguments.size && l.sourceType < r.sourceType)
       createRelation(relation)
-      statsCache.invalidate
     }
   }
 
@@ -64,7 +59,6 @@ class InMemoryWordNet extends WordNet {
 
     relationsList = relationsList.filterNot(_ == relation)
     successors.remove(relation)
-    statsCache.invalidate
   }
 
   def setRelations(newRelations: List[Relation]) {
@@ -127,18 +121,9 @@ class InMemoryWordNet extends WordNet {
     }
   }
 
-  def fringe(fringeRelations: List[(Relation, String)], distinct: Boolean) = {
-    val buffer = new DataSetBuffer
-
-    for ((relation, argument) <- fringeRelations)
-      buffer.append(fetch(relation, List((argument, Nil)), List(argument)))
-
-    if (distinct) buffer.toDataSet.distinct else buffer.toDataSet
-  }
-
-  def extend(extensionSet: ExtensionSet, direction: Direction, through: (String, Option[NodeType]),
+  def extend(extensionSet: ExtensionSet, through: (String, Option[NodeType]),
              to: List[(String, Option[NodeType])]): ExtendedExtensionSet = {
-    val buffer = new ExtensionSetBuffer(extensionSet, direction)
+    val buffer = new ExtensionSetBuffer(extensionSet)
     val toMap = to.toMap
 
     for (relation <- relations if relation.isTraversable;
@@ -148,37 +133,32 @@ class InMemoryWordNet extends WordNet {
             toMap.get(destination)
               .some(nodeTypeOption => nodeTypeOption.some(_ == relation.demandArgument(destination).nodeType).none(true)).none(false)
          if source != destination)
-      buffer.append(extendWithRelationTuples(extensionSet, relation, direction, source, List(destination)))
+      buffer.append(extendWithRelationTuples(extensionSet, relation, source, List(destination)))
 
     buffer.toExtensionSet
   }
 
-  def extend(extensionSet: ExtensionSet, relation: Relation, direction: Direction, through: String, to: List[String]) = {
-    val buffer = new ExtensionSetBuffer(extensionSet, direction)
+  def extend(extensionSet: ExtensionSet, relation: Relation, through: String, to: List[String]) = {
+    val buffer = new ExtensionSetBuffer(extensionSet)
 
     if (aliasMap.contains(relation))
-      extendWithAlias(extensionSet, relation, direction, through, to, buffer)
+      extendWithAlias(extensionSet, relation, through, to, buffer)
     else
-      buffer.append(extendWithRelationTuples(extensionSet, relation, direction, through, to))
+      buffer.append(extendWithRelationTuples(extensionSet, relation, through, to))
 
     buffer.toExtensionSet
   }
 
-  private def extendWithRelationTuples(extensionSet: ExtensionSet, relation: Relation, direction: Direction, through: String, to: List[String]) = {
+  private def extendWithRelationTuples(extensionSet: ExtensionSet, relation: Relation, through: String, to: List[String]) = {
     relation.demandArgument(through)
     to.foreach(relation.demandArgument)
 
-    direction match {
-      case Forward =>
-        extendWithRelationTuplesForward(extensionSet, relation, through, to)
-      case Backward =>
-        extendWithRelationTuplesBackward(extensionSet, relation, through, to)
-    }
+    extendWithRelationTuplesForward(extensionSet, relation, through, to)
   }
 
   private def extendWithRelationTuplesForward(extensionSet: ExtensionSet, relation: Relation, through: String, to: List[String]) = atomic { implicit txn =>
     val relationSuccessors = successors(relation)
-    val builder = new ExtensionSetBuilder(extensionSet, Forward)
+    val builder = new ExtensionSetBuilder(extensionSet)
 
     for (pathPos <- 0 until extensionSet.size) {
       val source = extensionSet.right(pathPos)
@@ -201,32 +181,7 @@ class InMemoryWordNet extends WordNet {
     builder.build
   }
 
-  private def extendWithRelationTuplesBackward(extensionSet: ExtensionSet, relation: Relation, through: String, to: List[String]) = atomic { implicit txn =>
-    val relationSuccessors = successors(relation)
-    val builder = new ExtensionSetBuilder(extensionSet, Backward)
-
-    for (pathPos <- 0 until extensionSet.size) {
-      val sources = to.indices.map(index => extensionSet.left(pathPos, index*2))
-
-      for (relSuccs <- relationSuccessors.get((to.head, sources.head)); succs <- relSuccs.distinct) {
-        val extensionBuffer = new ListBuffer[Any]
-
-        if (succs.contains(through) && (to zip sources).forall{ case (name, value) => succs(name) == value}) {
-          extensionBuffer.append(succs(through))
-          extensionBuffer.append(Arc(relation, through, to.head))
-        }
-
-        val extension = extensionBuffer.toList
-
-        if (!extension.isEmpty)
-          builder.extend(pathPos, extension)
-      }
-    }
-
-    builder.build
-  }
-
-  private def extendWithAlias(extensionSet: ExtensionSet, relation: Relation, direction: Direction,
+  private def extendWithAlias(extensionSet: ExtensionSet, relation: Relation,
                                  through: String, to: List[String], buffer: ExtensionSetBuffer) {
     if (to.size == 1) {
       val arcs = aliasMap(relation)
@@ -234,49 +189,16 @@ class InMemoryWordNet extends WordNet {
       (through, to.head) match {
         case (Relation.Src, Relation.Dst) =>
           for (arc <- arcs)
-            buffer.append(extendWithRelationTuples(extensionSet, arc.relation, direction, arc.from, List(arc.to)))
+            buffer.append(extendWithRelationTuples(extensionSet, arc.relation, arc.from, List(arc.to)))
         case (Relation.Dst, Relation.Src) =>
           for (arc <- arcs)
-            buffer.append(extendWithRelationTuples(extensionSet, arc.relation, direction, arc.to, List(arc.from)))
+            buffer.append(extendWithRelationTuples(extensionSet, arc.relation, arc.to, List(arc.from)))
         case _ =>
           throw new WQueryEvaluationException("One cannot traverse the alias " + relation + " using custom source or destination arguments")
       }
     } else {
       throw new WQueryEvaluationException("One cannot traverse the alias " + relation + " to multiple destinations")
     }
-  }
-
-  def stats = statsCache.get // stats are calculated below in calculateStats()
-
-  private def calculateStats() = atomic { implicit txn =>
-    val allRelations = relations ++ aliases ++ WordNet.Meta.relations
-
-    val fetchAllMaxCounts = MMap[(Relation, String), BigInt](
-      (for (relation <- allRelations; argument <- ArcPatternArgument.AnyName::relation.argumentNames) yield ((relation, argument), BigInt(0))): _*)
-    val extendValueMaxCounts = MMap[(Relation, String), BigInt](
-      (for (relation <- allRelations; argument <- ArcPatternArgument.AnyName::relation.argumentNames) yield ((relation, argument), BigInt(0))): _*)
-
-    for ((relation, relationSuccessors) <- successors; ((argument, _), argumentSuccessors) <- relationSuccessors) {
-      fetchAllMaxCounts((relation, argument)) += argumentSuccessors.size
-      extendValueMaxCounts((relation, argument)) = extendValueMaxCounts((relation, argument)) max argumentSuccessors.size
-    }
-
-    for (((relation, argument), count) <- fetchAllMaxCounts if argument != ArcPatternArgument.AnyName)
-      fetchAllMaxCounts((relation, ArcPatternArgument.AnyName)) += count
-
-    for (((relation, argument), count) <- extendValueMaxCounts if argument != ArcPatternArgument.AnyName)
-      extendValueMaxCounts((relation, ArcPatternArgument.AnyName)) += count
-
-    // TODO provide precise statistics for patterns using RelationalPattern.fetchMaxCount etc.
-    val fetchAnyRelationMaxCount = (for (((_, argument), count) <- fetchAllMaxCounts if argument == ArcPatternArgument.AnyName) yield count).sum
-    val extendAnyRelationMaxCount = (for (((_, argument), count) <- extendValueMaxCounts if argument == ArcPatternArgument.AnyName) yield count).sum
-
-    for ((relation, _) <- aliasMap; argument <- relation.argumentNames) {
-      fetchAllMaxCounts((relation, argument)) = fetchAnyRelationMaxCount
-      extendValueMaxCounts((relation, argument)) = extendAnyRelationMaxCount
-    }
-
-    new WordNetStats(relations, fetchAllMaxCounts.toMap, extendValueMaxCounts.toMap)
   }
 
   private def addSense(sense: Sense) {
@@ -409,7 +331,6 @@ class InMemoryWordNet extends WordNet {
 
     removeEdge(WordNet.Meta.Relations, tuple)
     removeRelation(relation)
-    statsCache.invalidate
   }
 
   private def createRelationArgumentFromTuple(tuple: Map[String, Any]) = {
@@ -621,14 +542,12 @@ class InMemoryWordNet extends WordNet {
     val (alias, arc) = createAliasFromTuple(tuple)
     aliasMap.put(alias, arc::(~aliasMap.get(alias)))
     addEdge(WordNet.Meta.Aliases, tuple)
-    statsCache.invalidate
   }
 
   private def removeMetaAlias(tuple: Map[String, Any]) {
     val (alias, _) = createAliasFromTuple(tuple)
     aliasMap.remove(alias)
     removeEdge(WordNet.Meta.Aliases, tuple)
-    statsCache.invalidate
   }
 
   private def createAliasFromTuple(tuple: Map[String, Any]) = {
@@ -697,7 +616,6 @@ class InMemoryWordNet extends WordNet {
       relationSuccessors((sourceName, sourceValue)) = relationSuccessors((sourceName, sourceValue)) :+ tuple
     }
 
-    statsCache.age
   }
 
   private def removeEdge(relation: Relation, tuple: Map[String, Any]) = atomic { implicit txn =>
@@ -707,7 +625,6 @@ class InMemoryWordNet extends WordNet {
       relationSuccessors((sourceName, sourceValue)) = relationSuccessors((sourceName, sourceValue)).filterNot(_ == tuple)
     }
 
-    statsCache.age
   }
 
   private def containsLink(relation: Relation, tuple: Map[String, Any]) = atomic { implicit txn =>
@@ -876,7 +793,6 @@ class InMemoryWordNet extends WordNet {
 
     handleSymmetryForRemoveLink(relation, tuple, node, symmetricEdge)
     removeFunction(tuple)
-    statsCache.age
   }
 
   private def handleRequiredByPropertyForRemoveLink(relation: Relation, argumentName: String, argumentValue: Any,

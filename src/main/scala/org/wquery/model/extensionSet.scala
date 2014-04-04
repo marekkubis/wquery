@@ -46,36 +46,6 @@ sealed abstract class ExtendedExtensionSet(val parent: ExtensionSet, val extensi
   def size = extensionsList.size
 }
 
-class LeftExtendedExtensionSet(override val parent: ExtensionSet, override val extensionsList: List[(Int,  List[Any])])
-  extends ExtendedExtensionSet(parent, extensionsList) {
-  def leftOrShift(pathPos: Int, pos: Int) = {
-    val (parentPos, extension) = extensionsList(pathPos)
-
-    if (pos < extension.size)
-      Right(extension(pos))
-    else
-      parent.leftOrShift(parentPos, pos - extension.size)
-  }
-
-  def rightOrShift(pathPos: Int) = {
-    val (parentPos, extension) = extensionsList(pathPos)
-
-    parent.rightOrShift(parentPos) match {
-      case Left(shift) =>
-        Right(extension(extension.size - 1 + shift))
-      case right =>
-        right
-    }
-  }
-
-  def extension(pathPos: Int) = {
-    val (parentPos, extension) = extensionsList(pathPos)
-    val (parentParentPos, parentExtension) = parent.extension(parentPos)
-
-    (parentParentPos, extension ++ parentExtension)
-  }
-}
-
 class RightExtendedExtensionSet(override val parent: ExtensionSet, override val extensionsList: List[(Int,  List[Any])])
   extends ExtendedExtensionSet(parent, extensionsList) {
   def leftOrShift(pathPos: Int, pos: Int) = {
@@ -107,20 +77,15 @@ class RightExtendedExtensionSet(override val parent: ExtensionSet, override val 
   }
 }
 
-class ExtensionSetBuilder(parent: ExtensionSet, direction: Direction) {
+class ExtensionSetBuilder(parent: ExtensionSet) {
   private val extensions = new ListBuffer[(Int, List[Any])]
 
   def extend(pathPos: Int, values: List[Any]) = extensions.append((pathPos, values))
 
-  def build = direction match {
-    case Forward =>
-      new RightExtendedExtensionSet(parent, extensions.toList)
-    case Backward =>
-      new LeftExtendedExtensionSet(parent, extensions.toList)
-  }
+  def build = new RightExtendedExtensionSet(parent, extensions.toList)
 }
 
-class ExtensionSetBuffer(parent: ExtensionSet, direction: Direction) {
+class ExtensionSetBuffer(parent: ExtensionSet) {
   private val extensionSets = new ListBuffer[ExtendedExtensionSet]
 
   def append(extensionSet: ExtensionSet) = extensionSet match {
@@ -130,20 +95,12 @@ class ExtensionSetBuffer(parent: ExtensionSet, direction: Direction) {
       else
         throw new IllegalArgumentException("ExtensionSetBuffer: extensionSet.parent != parent")
 
-      extensionSet match {
-        case _: LeftExtendedExtensionSet =>
-          if (direction == Forward)
-            throw new IllegalArgumentException("ExtensionSetBuffer: LeftExtendedExtensionSet appended to Forward buffer")
-        case _: RightExtendedExtensionSet =>
-          if (direction == Backward)
-            throw new IllegalArgumentException("ExtensionSetBuffer: RightExtendedExtensionSet appended to Backward buffer")
-      }
     case _ =>
       throw new IllegalArgumentException("ExtensionSetBuffer: extensionSet has no parent")
   }
 
   def toExtensionSet = {
-    val builder = new ExtensionSetBuilder(parent, direction)
+    val builder = new ExtensionSetBuilder(parent)
 
     for (extensionSet <- extensionSets; (pathPos, extension) <- extensionSet.extensionsList)
       builder.extend(pathPos, extension)
