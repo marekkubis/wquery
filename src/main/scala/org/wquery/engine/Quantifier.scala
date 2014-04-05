@@ -1,4 +1,5 @@
 package org.wquery.engine
+
 import scalaz._
 import Scalaz._
 

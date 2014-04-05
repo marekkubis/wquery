@@ -7,7 +7,7 @@ import org.wquery.{WQueryUpdateBreaksRelationPropertyException, WQueryModelExcep
 import scala.concurrent.stm._
 import scalaz._
 import Scalaz._
-import org.wquery.engine.operations.NewSynset
+import org.wquery.path.operations.NewSynset
 
 class InMemoryWordNet extends WordNet {
   private val StatsCacheThreshold = 1000

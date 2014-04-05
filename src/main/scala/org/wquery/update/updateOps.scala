@@ -1,4 +1,4 @@
-package org.wquery.engine.operations
+package org.wquery.update.operations
 
 import scalaz._
 import Scalaz._
@@ -6,6 +6,9 @@ import org.wquery.model._
 import org.wquery.WQueryInvalidValueSpecifiedForRelationPropertyException
 import scala.collection.mutable.{Map => MMap}
 import org.wquery.engine.{Context, Variable}
+import org.wquery.engine.operations._
+import org.wquery.path.operations._
+import org.wquery.query.operations._
 
 sealed abstract class UpdateOp extends AlgebraOp {
   def update(wordNet: WordNet, bindings: Bindings, context: Context)

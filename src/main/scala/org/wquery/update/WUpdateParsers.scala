@@ -1,0 +1,37 @@
+package org.wquery.update.parsers
+
+import org.wquery.query.parsers.WQueryParsers
+import org.wquery.engine._
+import org.wquery.engine.operations._
+import org.wquery.update.exprs._
+import org.wquery.model.DataSet
+import org.wquery.model.Relation
+import scalaz._
+import Scalaz._
+
+trait WUpdateParsers extends WQueryParsers {
+
+  override def statement = (
+    update
+    | merge
+    | super.statement
+  )
+
+  def update = "update" ~> (
+    rel_spec ~ update_op ~ multipath_expr ^^ { case spec~op~expr => UpdateExpr(None, spec, op, expr) }
+    | multipath_expr ~ rel_spec ~ update_op ~ multipath_expr ^^ { case lexpr~spec~op~rexpr => UpdateExpr(Some(lexpr), spec, op, rexpr) }
+  )
+
+  def rel_spec = rep1sep(rel_spec_arg, "^") ^^ { RelationSpecification(_) }
+
+  def rel_spec_arg = (
+    var_decl ^^ { VariableRelationSpecificationArgument(_) }
+    | notQuotedString ^^ { ConstantRelationSpecificationArgument(_) }
+  )
+
+  def update_op = ("+="|"-="|":=")
+
+  def merge = "merge" ~> expr ^^ { expr => MergeExpr(expr) }
+
+}
+
