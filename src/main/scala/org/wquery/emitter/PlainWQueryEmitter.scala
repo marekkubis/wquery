@@ -2,9 +2,9 @@
 
 package org.wquery.emitter
 
-import org.wquery.engine.Answer
-import org.wquery.engine.Error
-import org.wquery.engine.Result
+import org.wquery.lang.Answer
+import org.wquery.lang.Error
+import org.wquery.lang.Result
 import org.wquery.model._
 
 class PlainWQueryEmitter extends WQueryEmitter {

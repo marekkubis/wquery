@@ -2,10 +2,9 @@ package org.wquery.query.parsers
 
 import org.wquery.path.parsers.WPathParsers
 import org.wquery.query.exprs._
-import org.wquery.engine._
-import org.wquery.engine.operations._
 import org.wquery.model.DataSet
 import org.wquery.model.Relation
+import org.wquery.lang.exprs._
 import scalaz._
 import Scalaz._
 

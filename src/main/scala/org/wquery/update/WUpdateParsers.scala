@@ -1,8 +1,7 @@
 package org.wquery.update.parsers
 
 import org.wquery.query.parsers.WQueryParsers
-import org.wquery.engine._
-import org.wquery.engine.operations._
+import org.wquery.update._
 import org.wquery.update.exprs._
 import org.wquery.model.DataSet
 import org.wquery.model.Relation

@@ -1,6 +1,6 @@
 package org.wquery.emitter
 
-import org.wquery.engine.{Result, Error, Answer}
+import org.wquery.lang.{Result, Error, Answer}
 import org.wquery.model._
 
 class XmlWQueryEmitter extends WQueryEmitter {

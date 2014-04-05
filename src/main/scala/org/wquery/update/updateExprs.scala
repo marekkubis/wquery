@@ -1,9 +1,11 @@
 package org.wquery.update.exprs
 
-import org.wquery.engine._
-import org.wquery.engine.operations._
 import org.wquery.model._
 import org.wquery._
+import org.wquery.lang._
+import org.wquery.lang.exprs._
+import org.wquery.lang.operations._
+import org.wquery.update._
 import org.wquery.update.operations._
 
 case class UpdateExpr(left: Option[EvaluableExpr], spec: RelationSpecification, op: String, right: EvaluableExpr) extends EvaluableExpr {

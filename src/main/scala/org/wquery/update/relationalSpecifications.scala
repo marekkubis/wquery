@@ -1,6 +1,9 @@
-package org.wquery.engine.operations
+package org.wquery.update
 
-import org.wquery.engine.{SetVariable, TupleVariable, StepVariable, Variable}
+import org.wquery.lang.Variable
+import org.wquery.lang.operations._
+import org.wquery.path.{TupleVariable, StepVariable}
+import org.wquery.query.SetVariable
 import org.wquery.model.{WordNet, Relation, DataType}
 import org.wquery.WQueryEvaluationException
 

@@ -1,10 +1,11 @@
 package org.wquery.path.parsers
 
 import scala.util.parsing.combinator.RegexParsers
-import org.wquery.engine._
-import org.wquery.engine.operations._
+import org.wquery.lang.exprs._
+import org.wquery.path._
 import org.wquery.path.exprs._
 import org.wquery.path.operations._
+import org.wquery.query.SetVariable
 import org.wquery.model.DataSet
 import org.wquery.model.Relation
 import scalaz._

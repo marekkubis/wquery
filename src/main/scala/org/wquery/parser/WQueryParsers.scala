@@ -1,15 +1,12 @@
-// scalastyle:off multiple.string.literals
-// scalastyle:off number.of.methods
-
 package org.wquery.parser
 
 import org.wquery.path.exprs.FunctionExpr
+import org.wquery.path.operations.{SortFunction, DistinctFunction}
 import org.wquery.update.parsers.WUpdateParsers
 import org.wquery.{WQueryParsingErrorException, WQueryParsingFailureException}
-import org.wquery.engine._
-import org.wquery.engine.operations._
 import org.wquery.model.DataSet
 import org.wquery.model.Relation
+import org.wquery.lang.exprs._
 import scalaz._
 import Scalaz._
 

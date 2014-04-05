@@ -1,9 +1,11 @@
 package org.wquery.query.exprs
 
-import org.wquery.engine._
-import org.wquery.engine.operations._
 import org.wquery.query.operations._
 import org.wquery.model._
+import org.wquery.lang._
+import org.wquery.lang.operations._
+import org.wquery.lang.exprs._
+import org.wquery.query._
 
 case class EmissionExpr(expr: EvaluableExpr) extends EvaluableExpr {
   def evaluationPlan(wordNet: WordNet#Schema, bindings: BindingsSchema, context: Context) = EmitOp(expr.evaluationPlan(wordNet, bindings, context))

@@ -1,10 +1,10 @@
 package org.wquery
 
-import engine._
 import loader.{LmfLoader, GridLoader, WordNetLoader}
 import model.impl.InMemoryWordNet
-import operations.{Bindings, BindingsSchema}
+import lang.operations.{Bindings, BindingsSchema}
 import org.wquery.model.WordNet
+import org.wquery.lang._
 import org.wquery.parser.WParsers
 import org.wquery.utils.Logging
 import collection.mutable.ListBuffer

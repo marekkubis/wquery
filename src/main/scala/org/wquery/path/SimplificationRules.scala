@@ -1,8 +1,8 @@
-package org.wquery.engine
+package org.wquery.path
 
 import scalaz._
 import Scalaz._
-import org.wquery.engine.operations._
+import org.wquery.lang.operations._
 import org.wquery.path.operations._
 import org.wquery.model.{SenseType, POSType, SynsetType, StringType}
 

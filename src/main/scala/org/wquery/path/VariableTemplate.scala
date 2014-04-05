@@ -1,8 +1,9 @@
-package org.wquery.engine
+package org.wquery.path
 
 import scalaz._
 import Scalaz._
 import org.wquery.{WQueryStepVariableCannotBeBoundException, WQueryEvaluationException}
+import org.wquery.lang.Variable
 import org.wquery.utils.IntOptionW._
 
 case class VariableTemplate(pattern: List[Variable]) {

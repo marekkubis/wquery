@@ -1,9 +1,13 @@
-package org.wquery.engine.operations
+package org.wquery.lang.operations
 
 import scala.collection.mutable.Map
 import org.wquery.model.DataType
 import org.wquery.WQueryStepVariableCannotBeBoundException
-import org.wquery.engine._
+import org.wquery.lang.Variable
+import org.wquery.path.StepVariable
+import org.wquery.path.TupleVariable
+import org.wquery.path.VariableTemplate
+import org.wquery.query.SetVariable
 import scala.Some
 import scalaz._
 import Scalaz._

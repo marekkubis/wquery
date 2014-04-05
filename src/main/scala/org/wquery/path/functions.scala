@@ -1,14 +1,15 @@
 // scalastyle:off number.of.types
 
-package org.wquery.engine.operations
+package org.wquery.path.operations
 
 import collection.mutable.ListBuffer
 import java.lang.reflect.Method
 import scalaz._
 import Scalaz._
 import org.wquery.model._
+import org.wquery.lang._
+import org.wquery.lang.operations._
 import org.wquery.utils.BigIntOptionW._
-import org.wquery.engine.Context
 
 abstract class Function(val name: String) {
   def accepts(args: AlgebraOp): Boolean

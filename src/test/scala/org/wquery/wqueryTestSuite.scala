@@ -1,6 +1,6 @@
 package org.wquery
 
-import engine.{Error, Answer}
+import lang.{Error, Answer}
 import org.scalatest.testng.TestNGSuite
 import org.testng.annotations.BeforeClass
 import org.wquery.emitter.{PlainWQueryEmitter, WQueryEmitter}

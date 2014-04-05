@@ -1,10 +1,11 @@
-package org.wquery.engine.operations
+package org.wquery.path.operations
 
 import scalaz._
 import Scalaz._
-import org.wquery.model._
 import collection.mutable.ListBuffer
-import org.wquery.engine._
+import org.wquery.model._
+import org.wquery.lang.operations.{Bindings, ProvidesTypes, ProvidesTupleSizes}
+import org.wquery.path._
 import org.wquery.utils.IntOptionW._
 
 sealed abstract class RelationalPattern extends ProvidesTypes with ProvidesTupleSizes {

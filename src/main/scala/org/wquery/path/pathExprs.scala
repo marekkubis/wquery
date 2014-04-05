@@ -5,10 +5,13 @@ import Scalaz._
 import collection.mutable.ListBuffer
 import org.wquery._
 import org.wquery.model._
-import org.wquery.engine._
-import org.wquery.engine.operations._
+import org.wquery.lang._
+import org.wquery.lang.exprs._
+import org.wquery.lang.operations._
+import org.wquery.path._
 import org.wquery.path.operations._
 import org.wquery.query.operations.IfElseOp
+import org.wquery.query.SetVariable
 
 /*
  * Path expressions

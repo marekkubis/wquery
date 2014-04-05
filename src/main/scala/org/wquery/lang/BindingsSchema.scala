@@ -1,4 +1,4 @@
-package org.wquery.engine.operations
+package org.wquery.lang.operations
 
 import org.wquery.model._
 import scalaz._

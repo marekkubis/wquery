@@ -3,7 +3,7 @@
 package org.wquery
 
 import model.Relation
-import engine.Variable
+import lang.Variable
 
 sealed abstract class WQueryException(message: String) extends RuntimeException(message)
 

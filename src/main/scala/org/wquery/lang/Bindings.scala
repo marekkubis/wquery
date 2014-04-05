@@ -1,11 +1,12 @@
-package org.wquery.engine.operations
+package org.wquery.lang.operations
 
 import scala.collection.mutable.Map
 import scalaz._
 import Scalaz._
 import org.wquery.model.DataSet
 import org.wquery.{FoundReferenceToUnknownVariableWhileEvaluatingException, WQueryEvaluationException, WQueryStaticCheckException}
-import org.wquery.engine.{TupleVariable, StepVariable, SetVariable}
+import org.wquery.path.{TupleVariable, StepVariable}
+import org.wquery.query.SetVariable
 
 class Bindings(parent: Option[Bindings], updatesParent: Boolean) {
   val setVariables = Map[String, DataSet]()

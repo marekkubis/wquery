@@ -1,4 +1,5 @@
-package org.wquery.engine
+package org.wquery.lang
+
 import org.wquery.WQueryException
 import org.wquery.model.{WordNet, DataSet}
 

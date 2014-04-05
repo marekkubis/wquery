@@ -1,8 +1,9 @@
-package org.wquery.engine.operations
+package org.wquery.path.operations
 
 import org.wquery.WQueryEvaluationException
-import org.wquery.engine.{Context, ReferencesVariables, Variable}
 import org.wquery.model._
+import org.wquery.lang._
+import org.wquery.lang.operations._
 import scalaz._
 import Scalaz._
 import org.wquery.utils.BigIntOptionW._

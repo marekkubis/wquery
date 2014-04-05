@@ -4,7 +4,8 @@ import java.lang.IllegalArgumentException
 import org.wquery.WQueryStepVariableCannotBeBoundException
 import scalaz._
 import Scalaz._
-import org.wquery.engine.{ProvidesTypes, VariableTemplate, ProvidesTupleSizes}
+import org.wquery.lang.operations.{ProvidesTypes,ProvidesTupleSizes}
+import org.wquery.path.VariableTemplate
 
 class DataSet(val paths: List[List[Any]], val pathVars: Map[String, List[(Int, Int)]], val stepVars: Map[String, List[Int]])
  extends ProvidesTypes with ProvidesTupleSizes {

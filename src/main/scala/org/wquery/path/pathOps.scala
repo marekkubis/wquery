@@ -1,10 +1,12 @@
 package org.wquery.path.operations
 
-import org.wquery.model._
 import scalaz._
 import Scalaz._
-import org.wquery.engine._
-import org.wquery.engine.operations._
+import org.wquery.model._
+import org.wquery.lang._
+import org.wquery.lang.operations._
+import org.wquery.path._
+import org.wquery.query.SetVariable
 import org.wquery.utils.BigIntOptionW._
 import org.wquery.utils.IntOptionW._
 
