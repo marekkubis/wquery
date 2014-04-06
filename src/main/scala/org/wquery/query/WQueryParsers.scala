@@ -12,7 +12,7 @@ trait WQueryParsers extends WPathParsers {
 
   override def expr = (
     imp_expr
-    | multipath_expr
+    | super.expr
   )
 
   def imp_expr: Parser[EvaluableExpr] = (

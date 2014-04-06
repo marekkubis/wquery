@@ -8,13 +8,13 @@ class FunctionsTestSuite extends WQueryTestSuite {
 
   @Test def testMin() = result of ("min(1..10)") should equal ("1\n")
 
-  @Test def testMinMultipleResults() = result of ("emit min(1..10 union 1..5)") should equal ("1\n1\n")
+  @Test def testMinMultipleResults() = result withoutDistinctAndSort ("emit min(1..10 union 1..5)") should equal ("1\n1\n")
 
   @Test def testMinEmpty() = result of ("min(zzzzzz)") should equal ("(no result)\n")  
   
   @Test def testMax() = result of ("max(1..10)") should equal ("10\n")
 
-  @Test def testMaxMultipleResults() = result of ("emit max(1..10 union 6..10)") should equal ("10\n10\n")
+  @Test def testMaxMultipleResults() = result withoutDistinctAndSort ("emit max(1..10 union 6..10)") should equal ("10\n10\n")
 
   @Test def testMaxEmpty() = result of ("max(zzzzzz)") should equal ("(no result)\n")  
 
@@ -76,7 +76,7 @@ class FunctionsTestSuite extends WQueryTestSuite {
 
   @Test def testSort() = result of ("emit sort(10..15 union 23..25 union 1..9)") should equal ("1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12\n13\n14\n15\n23\n24\n25\n")
 
-  @Test def testSortBy() = result of ("emit sortby((10..15,2 union 23..25,1 union 1..9,3),2)") should equal ("23 1\n24 1\n25 1\n10 2\n11 2\n12 2\n13 2\n14 2\n15 2\n1 3\n2 3\n3 3\n4 3\n5 3\n6 3\n7 3\n8 3\n9 3\n")
+  @Test def testSortBy() = result withoutDistinctAndSort ("emit sortby((10..15,2 union 23..25,1 union 1..9,3),2)") should equal ("23 1\n24 1\n25 1\n10 2\n11 2\n12 2\n13 2\n14 2\n15 2\n1 3\n2 3\n3 3\n4 3\n5 3\n6 3\n7 3\n8 3\n9 3\n")
 
   @Test def testMinBy() = result of ("minby((10..15,2 union 23..25,1 union 1..9,3),2)") should equal ("23 1\n24 1\n25 1\n")
 

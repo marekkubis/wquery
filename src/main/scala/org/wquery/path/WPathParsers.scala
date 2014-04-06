@@ -1,6 +1,6 @@
 package org.wquery.path.parsers
 
-import scala.util.parsing.combinator.RegexParsers
+import org.wquery.lang.parsers.WParsers
 import org.wquery.lang.exprs._
 import org.wquery.path._
 import org.wquery.path.exprs._
@@ -11,7 +11,7 @@ import org.wquery.model.Relation
 import scalaz._
 import Scalaz._
 
-trait WPathParsers extends RegexParsers {
+trait WPathParsers extends WParsers {
 
   def expr = multipath_expr
 

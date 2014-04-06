@@ -1,6 +1,6 @@
 // scalastyle:off number.of.types
 
-package org.wquery.path.operations
+package org.wquery.lang.operations
 
 import collection.mutable.ListBuffer
 import java.lang.reflect.Method

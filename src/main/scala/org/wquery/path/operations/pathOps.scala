@@ -289,23 +289,6 @@ case class MinusOp(op: AlgebraOp) extends PathOp {
 
 }
 
-case class FunctionOp(function: Function, args: AlgebraOp) extends PathOp {
-  def evaluate(wordNet: WordNet, bindings: Bindings, context: Context) = function.evaluate(args, wordNet, bindings, context)
-
-  def leftType(pos: Int) = function.leftType(args, pos)
-
-  def rightType(pos: Int) = function.rightType(args, pos)
-
-  val minTupleSize = function.minTupleSize(args)
-
-  val maxTupleSize = function.maxTupleSize(args)
-
-  def bindingsPattern = function.bindingsPattern(args)
-
-  val referencedVariables = args.referencedVariables
-
-}
-
 /*
  * Declarative operations
  */

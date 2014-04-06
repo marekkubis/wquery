@@ -3,9 +3,11 @@
 package org.wquery
 import java.util.Properties
 
+class WQueryProperties
+
 object WQueryProperties {
   private val properties = new Properties
-  private val resourceStream = classOf[WQuery].getResourceAsStream("/wquery.properties")
+  private val resourceStream = classOf[WQueryProperties].getResourceAsStream("/wquery.properties")
 
   if (resourceStream != null) {
     properties.load(resourceStream)

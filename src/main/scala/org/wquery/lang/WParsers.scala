@@ -1,8 +1,6 @@
-package org.wquery.parser
+package org.wquery.lang.parsers
 
-import org.wquery.path.exprs.FunctionExpr
-import org.wquery.path.operations.{SortFunction, DistinctFunction}
-import org.wquery.update.parsers.WUpdateParsers
+import scala.util.parsing.combinator.RegexParsers
 import org.wquery.{WQueryParsingErrorException, WQueryParsingFailureException}
 import org.wquery.model.DataSet
 import org.wquery.model.Relation
@@ -10,17 +8,14 @@ import org.wquery.lang.exprs._
 import scalaz._
 import Scalaz._
 
-trait WParsers extends WUpdateParsers {
+trait WParsers extends RegexParsers {
 
-  def query = (
-    imp_expr
-    | multipath_expr ^^ { x => FunctionExpr(SortFunction.name, FunctionExpr(DistinctFunction.name, x)) }
-  )
+  def expr: Parser[EvaluableExpr] 
 
   def parse(input: String): EvaluableExpr = {
-    parseAll(query, input) match {
-      case this.Success(expr, _) =>
-        expr
+    parseAll(expr, input) match {
+      case this.Success(result, _) =>
+        result
       case this.Failure(message, _) =>
         throw new WQueryParsingFailureException(message)
       case this.Error(message, _) =>

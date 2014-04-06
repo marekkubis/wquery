@@ -1,7 +1,10 @@
 // scalastyle:off regex
 
 package org.wquery.console
-import org.wquery.{WQueryProperties, WQuery}
+
+import org.wquery.update.WUpdate
+import org.wquery.WQueryProperties
+import org.wquery.loader.WordNetLoader
 import org.wquery.utils.Logging
 import org.clapper.argot.{ArgotUsageException, ArgotParser}
 import org.clapper.argot.ArgotConverters._
@@ -42,7 +45,8 @@ object WQueryConsole extends Logging {
       if (quiet)
         tryDisableLoggers
 
-      val wquery = WQuery.createInstance(wordnetParameter.value.get)
+      val wordNet = WordNetLoader.load(wordnetParameter.value.get)
+      val wquery = new WUpdate(wordNet)
       val emitter = emitterOption.value|new PlainWQueryEmitter
 
       for (queryFile <- queryParameter.value)
@@ -77,7 +81,7 @@ object WQueryConsole extends Logging {
     java.util.logging.Logger.getLogger("").setLevel(java.util.logging.Level.OFF);
   }
 
-  private def readQueriesFromReader(reader: Reader, wquery: WQuery, emitter: WQueryEmitter, prompt: Boolean) {
+  private def readQueriesFromReader(reader: Reader, wquery: WUpdate, emitter: WQueryEmitter, prompt: Boolean) {
     val qin = new QueryReader(reader)
 
     while (!qin.isEof) {

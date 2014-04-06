@@ -3,6 +3,8 @@ package org.wquery
 import lang.{Error, Answer}
 import org.scalatest.testng.TestNGSuite
 import org.testng.annotations.BeforeClass
+import org.wquery.loader.WordNetLoader
+import org.wquery.update.WUpdate
 import org.wquery.emitter.{PlainWQueryEmitter, WQueryEmitter}
 import org.scalatest.Matchers
 
@@ -11,7 +13,8 @@ object WQueryRuntime {
   val emitter = new PlainWQueryEmitter
 
   def createWQuery = {
-    val wquery = WQuery.createInstance("src/main/assembly/template/samples/samplenet.xml")
+    val wordNet = WordNetLoader.load("src/main/assembly/template/samples/samplenet.xml") 
+    val wquery = new WUpdate(wordNet)
 
     wquery.execute("\\hypernym transitivity := true")
     wquery.execute("\\partial_meronym transitivity := true")
@@ -32,7 +35,7 @@ object WQueryRuntime {
 }
 
 abstract class WQueryTestSuite extends TestNGSuite with Matchers {
-  var wquery: WQuery = null
+  var wquery: WUpdate = null
   var emitter: WQueryEmitter = null
 
   class TuplesOf {
@@ -47,7 +50,9 @@ abstract class WQueryTestSuite extends TestNGSuite with Matchers {
   val tuples = new TuplesOf
 
   class ResultOf {
-    def of(query: String) = emitter.emit(wquery.execute(query))
+    def of(query: String) = emitter.emit(wquery.execute(query, true, true))
+
+    def withoutDistinctAndSort(query: String) = emitter.emit(wquery.execute(query, false, false))
   }
 
   val result = new ResultOf
