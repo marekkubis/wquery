@@ -43,6 +43,8 @@
         <option value="java.util.TreeSet" />
         <option value="java.util.Vector" />
         <option value="java.util.WeakHashMap" />
+        <option value="org.scalatest.fixture._" />
+        <option value="org.scalatest.path._" />
         <option value="scala.collection.mutable._" />
       </array>
     </option>

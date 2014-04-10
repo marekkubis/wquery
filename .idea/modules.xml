@@ -2,7 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/wquery.iml" filepath="$PROJECT_DIR$/wquery.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/wquery.iml" filepath="$PROJECT_DIR$/.idea/modules/wquery.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/wquery-build.iml" filepath="$PROJECT_DIR$/.idea/modules/wquery-build.iml" />
     </modules>
   </component>
 </project>

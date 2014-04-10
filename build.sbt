@@ -1,4 +1,9 @@
+import com.typesafe.sbt.SbtGhPages.ghpages
+import com.typesafe.sbt.SbtGit.git
+import com.typesafe.sbt.SbtSite.{site, SiteKeys}
+import sbtfilter.Plugin.FilterKeys
 import FilterKeys._
+import scala.Some
 import SiteKeys._
 import de.johoop.jacoco4sbt._
 import JacocoPlugin._
@@ -37,13 +42,14 @@ libraryDependencies ++= Seq(
     "org.scala-stm" %% "scala-stm" % "0.7",
     "org.clapper" %% "argot" % "1.0.1" exclude("jline", "jline"),
     "org.scalatest" %% "scalatest" % "2.0" % "test",
-    "org.testng" % "testng" % "6.1" % "test"
+    "org.testng" % "testng" % "6.1" % "test",
+    "com.h2database" % "h2" % "1.3.175"
 )
 
 //
 // Resource filters
 //
-seq(filterSettings: _*)
+sbtfilter.Plugin.filterSettings: _*
 
 includeFilter in (Compile, filterResources) ~= { f => f || ("wconsole" | "wguiconsole") }
 
@@ -56,7 +62,7 @@ extraProps += "currentYear" -> new java.text.SimpleDateFormat("yyyy").format(new
 //
 val assemblyName = TaskKey[String]("assembly-name", "Creates the assembly name.")
 
-assemblyName <<= (version) map { (v: String) => "wquery-" + v }
+assemblyName <<= version map { (v: String) => "wquery-" + v }
 
 val assemblyFile = TaskKey[File]("assembly-file", "Creates the assembly file name.")
 

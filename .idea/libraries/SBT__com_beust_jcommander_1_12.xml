@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="SBT: com.beust:jcommander:1.12">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.ivy2/cache/com.beust/jcommander/jars/jcommander-1.12.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$USER_HOME$/.ivy2/cache/com.beust/jcommander/docs/jcommander-1.12-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.ivy2/cache/com.beust/jcommander/srcs/jcommander-1.12-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
