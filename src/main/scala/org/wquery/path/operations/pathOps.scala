@@ -7,7 +7,6 @@ import org.wquery.lang._
 import org.wquery.lang.operations._
 import org.wquery.path._
 import org.wquery.query.SetVariable
-import org.wquery.utils.BigIntOptionW._
 import org.wquery.utils.IntOptionW._
 
 sealed abstract class PathOp extends AlgebraOp

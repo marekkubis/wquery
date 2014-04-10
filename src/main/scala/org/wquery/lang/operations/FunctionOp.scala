@@ -1,6 +1,6 @@
 package org.wquery.lang.operations
 
-import org.wquery.model.{DataSet, WordNet}
+import org.wquery.model.WordNet
 import org.wquery.lang.Context
 
 case class FunctionOp(function: Function, args: AlgebraOp) extends AlgebraOp {

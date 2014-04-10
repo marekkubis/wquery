@@ -4,7 +4,7 @@ import scala.collection.mutable.Map
 import scalaz._
 import Scalaz._
 import org.wquery.model.DataSet
-import org.wquery.{FoundReferenceToUnknownVariableWhileEvaluatingException, WQueryEvaluationException, WQueryStaticCheckException}
+import org.wquery.FoundReferenceToUnknownVariableWhileEvaluatingException
 import org.wquery.path.{TupleVariable, StepVariable}
 import org.wquery.query.SetVariable
 

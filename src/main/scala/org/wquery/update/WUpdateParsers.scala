@@ -3,10 +3,6 @@ package org.wquery.update.parsers
 import org.wquery.query.parsers.WQueryParsers
 import org.wquery.update._
 import org.wquery.update.exprs._
-import org.wquery.model.DataSet
-import org.wquery.model.Relation
-import scalaz._
-import Scalaz._
 
 trait WUpdateParsers extends WQueryParsers {
 

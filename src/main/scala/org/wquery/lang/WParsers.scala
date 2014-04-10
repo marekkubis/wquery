@@ -2,11 +2,7 @@ package org.wquery.lang.parsers
 
 import scala.util.parsing.combinator.RegexParsers
 import org.wquery.{WQueryParsingErrorException, WQueryParsingFailureException}
-import org.wquery.model.DataSet
-import org.wquery.model.Relation
 import org.wquery.lang.exprs._
-import scalaz._
-import Scalaz._
 
 trait WParsers extends RegexParsers {
 

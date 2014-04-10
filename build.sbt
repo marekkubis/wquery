@@ -49,7 +49,7 @@ libraryDependencies ++= Seq(
 //
 // Resource filters
 //
-sbtfilter.Plugin.filterSettings: _*
+sbtfilter.Plugin.filterSettings
 
 includeFilter in (Compile, filterResources) ~= { f => f || ("wconsole" | "wguiconsole") }
 

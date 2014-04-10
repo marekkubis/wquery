@@ -1,7 +1,5 @@
 package org.wquery.path
 
-import scalaz._
-import Scalaz._
 import org.wquery.lang.Variable
 
 sealed abstract class PathVariable(override val name: String) extends Variable(name)

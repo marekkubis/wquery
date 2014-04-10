@@ -6,7 +6,6 @@ import org.wquery.lang._
 import org.wquery.lang.operations._
 import scalaz._
 import Scalaz._
-import org.wquery.utils.BigIntOptionW._
 
 sealed abstract class Condition extends ReferencesVariables {
   def satisfied(wordNet: WordNet, bindings: Bindings, context: Context): Boolean

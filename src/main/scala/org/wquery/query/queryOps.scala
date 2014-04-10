@@ -9,7 +9,6 @@ import org.wquery.model._
 import org.wquery.lang._
 import org.wquery.lang.operations._
 import org.wquery.query._
-import org.wquery.utils.BigIntOptionW._
 import org.wquery.utils.IntOptionW._
 
 sealed abstract class QueryOp extends AlgebraOp

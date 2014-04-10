@@ -3,12 +3,10 @@ package org.wquery.update.operations
 import scalaz._
 import Scalaz._
 import org.wquery.model._
-import org.wquery.WQueryInvalidValueSpecifiedForRelationPropertyException
 import scala.collection.mutable.{Map => MMap}
-import org.wquery.lang.{Context, Variable}
+import org.wquery.lang.Context
 import org.wquery.lang.operations._
 import org.wquery.path.operations._
-import org.wquery.query.operations._
 import org.wquery.update._
 
 sealed abstract class UpdateOp extends AlgebraOp {

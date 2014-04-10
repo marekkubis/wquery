@@ -2,7 +2,6 @@ package org.wquery.lang
 
 import org.wquery.model.WordNet
 import org.wquery._
-import org.wquery.lang._
 import org.wquery.lang.operations._
 import org.wquery.lang.parsers.WParsers
 import org.wquery.utils.Logging

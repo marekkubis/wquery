@@ -8,8 +8,6 @@ import scalaz._
 import Scalaz._
 import org.wquery.model._
 import org.wquery.lang._
-import org.wquery.lang.operations._
-import org.wquery.utils.BigIntOptionW._
 
 abstract class Function(val name: String) {
   def accepts(args: AlgebraOp): Boolean
