@@ -29,6 +29,9 @@ trait WordNet {
     }
   }
 
+  def open(url: String)
+
+  def close()
 
   // querying
   def relations: List[Relation]

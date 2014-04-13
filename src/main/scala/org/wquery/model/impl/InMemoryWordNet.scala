@@ -10,8 +10,6 @@ import Scalaz._
 import org.wquery.path.operations.NewSynset
 
 class InMemoryWordNet extends WordNet {
-  private val StatsCacheThreshold = 1000
-
   private val successors = TMap[Relation, MMap[(String, Any), Vector[Map[String, Any]]]]()
   private val aliasMap = scala.collection.mutable.Map[Relation, List[Arc]]()
   private var relationsList = List[Relation]()
@@ -915,4 +913,8 @@ class InMemoryWordNet extends WordNet {
       }
     }
   }
+
+  override def open(url: String) = { /* do notihhg */ }
+
+  override def close() = { /* do notihhg */ }
 }

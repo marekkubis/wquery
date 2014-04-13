@@ -28,7 +28,7 @@ homepage := Some(url("http://www.wquery.org"))
 
 startYear := Some(2007)
 
-licenses += "WQuery License" -> url("file://LICENSE.txt")
+licenses += "WQuery License" -> url("file://LICENSE.txt.txt")
 
 publishMavenStyle := true
 
@@ -41,9 +41,12 @@ libraryDependencies ++= Seq(
     "ch.qos.logback" % "logback-classic" % "1.0.13",
     "org.scala-stm" %% "scala-stm" % "0.7",
     "org.clapper" %% "argot" % "1.0.1" exclude("jline", "jline"),
+    "org.rogach" %% "scallop" % "0.9.5",
+    "org.scalikejdbc" %% "scalikejdbc"               % "1.7.5",
+    "org.scalikejdbc" %% "scalikejdbc-interpolation" % "1.7.5",
+    "com.h2database" % "h2" % "1.3.175",
     "org.scalatest" %% "scalatest" % "2.0" % "test",
-    "org.testng" % "testng" % "6.1" % "test",
-    "com.h2database" % "h2" % "1.3.175"
+    "org.testng" % "testng" % "6.1" % "test"
 )
 
 //
@@ -79,7 +82,7 @@ templateFilesMappings <<= (baseDirectory, assemblyName) map { (base, dirName) =>
 val infoFilesMappings = TaskKey[Seq[(File, String)]]("info-files-mappings", "Maps README.md, ChangeLog, etc. file paths to the final destinations.")
 
 infoFilesMappings <<= (baseDirectory, assemblyName) map { (base, dirName) => 
-    val infoPaths = Seq(base / "README.md", base / "LICENSE", base / "ChangeLog")
+    val infoPaths = Seq(base / "README.md", base / "LICENSE.txt", base / "ChangeLog")
     infoPaths x Path.rebase(base, dirName)
 }
 

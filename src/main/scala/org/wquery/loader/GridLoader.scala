@@ -202,7 +202,6 @@ class GridHandler(wordnet: WordNet) extends DefaultHandler with Logging {
     // create semantic relations successors
     for ((synset, relname, reldest) <- ilrRelationsTuples) {
       val relation = wordnet.schema.demandRelation(relname, IMap((Relation.Src, ISet[DataType](SynsetType))))
-
       relation.destinationType.some { dt =>
         dt match {
           case SynsetType =>
