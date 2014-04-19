@@ -66,14 +66,6 @@ class UpdatesTestSuite extends WQueryTestSuite {
     result of ("{car:1}.hypernym") should equal ("{ car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n } hypernym { person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n }\n{ car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n } hypernym { motor vehicle:1:n automotive vehicle:1:n }\n{ car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n } hypernym { person:2:n }\n")
   }
 
-  @Test def testAddLinksMultiArgumentRelationMultipleArgumentSet() = {
-    result of ("update words += yyy") should equal ("(no result)\n")
-    result of ("update cab:3:n src^literal^num^pos += 7,`n`") should equal ("(no result)\n")
-    result of ("(cab:3:n).literal") should equal ("cab:3:n literal cab\n")
-    result of ("(cab:3:n).literal^num") should equal ("cab:3:n src^literal^num 3\ncab:3:n src^literal^num 7\n")
-    result of ("(cab:3:n).literal^num^pos") should equal ("cab:3:n src^literal^num 3 src^literal^pos n\ncab:3:n src^literal^num 7 src^literal^pos n\n")
-  }
-
   @Test def testAddLinksFunctionalForPropertySupport() = {
     result of ("update `desc`, `src` properties += `functional`") should equal ("(no result)\n")
     result of ("update {person:1} desc += `hhhhhhhhhhhhh`") should startWith ("ERROR: Update breaks property 'functional' of relation 'desc' on argument 'src'")

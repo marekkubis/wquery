@@ -95,22 +95,20 @@ object DataType {
 
 object NodeType {
   val all = Set[NodeType](SynsetType, SenseType, StringType, POSType, IntegerType, FloatType, BooleanType)
+  val nameTypes = Map(
+    "synset" -> SynsetType,
+    "sense" -> SenseType,
+    "string" -> StringType,
+    "integer" -> IntegerType,
+    "float" -> FloatType,
+    "boolean" -> BooleanType
+  )
 
-  def fromName(name: String) = name match {
-    case "synset" =>
-      SynsetType
-    case "sense" =>
-      SenseType
-    case "string" =>
-      StringType
-    case "integer" =>
-      IntegerType
-    case "float" =>
-      FloatType
-    case "boolean" =>
-      BooleanType
-    case _ =>
-      throw new WQueryModelException("Datatype '" + name + "' not found")
+  def fromNameOption(name: String) = nameTypes.get(name)
+
+  def fromName(name: String) = fromNameOption(name).getOrElse {
+    throw new WQueryModelException("Datatype '" + name + "' not found")
   }
+
 }
 

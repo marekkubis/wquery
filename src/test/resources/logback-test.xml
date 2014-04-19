@@ -5,7 +5,7 @@
         </encoder>
     </appender>
 
-    <root level="error">
+    <root level="${org.wquery.log.level:-error}">
         <appender-ref ref="STDOUT"/>
     </root>
 </configuration>

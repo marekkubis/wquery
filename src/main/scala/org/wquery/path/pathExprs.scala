@@ -190,16 +190,14 @@ case class QuantifiedRelationExpr(expr: RelationalExpr, quantifier: Quantifier) 
   }
 }
 
-case class ArcExpr(ids: List[ArcExprArgument]) extends RelationalExpr {
+case class ArcExpr(ids: List[String], inverted: Boolean) extends RelationalExpr {
   def creationPattern(wordNet: WordNet#Schema) = {
-    if (ids.size > 1 && ids(0).nodeType.isDefined && ids.exists(_.name === Relation.Src) &&
-        ids(1).nodeType.isEmpty && (ids(1).name /== Relation.AnyName) && ids.tail.tail.forall(_.nodeType.isDefined)) {
-      val relation = Relation(ids(1).name,
-        (Argument(ids(0).name, ids(0).nodeType.get) :: ids.tail.tail.map(elem => Argument(elem.name, elem.nodeType.get))))
+    if (ids.size == 3 && (ids(1) /== Relation.AnyName) && !inverted) {
+      val relation = Relation.binary(ids(1), NodeType.fromName(ids(0)), NodeType.fromName(ids(2)))
 
       ArcRelationalPattern(ArcPattern(Some(relation),
-        ArcPatternArgument(ids(0).name, ids(0).nodeType),
-        ids.tail.tail.map(id => ArcPatternArgument(id.name, id.nodeType))))
+        ArcPatternArgument(Relation.Src, Some(relation.sourceType)),
+        List(ArcPatternArgument(Relation.Dst, relation.destinationType))))
     } else {
       throw new WQueryStaticCheckException("Arc expression " + toString + " does not determine a relation to create unambiguously")
     }
@@ -207,62 +205,60 @@ case class ArcExpr(ids: List[ArcExprArgument]) extends RelationalExpr {
 
   def evaluationPattern(wordNet: WordNet#Schema, contextTypes: Set[DataType]) = {
     ((ids: @unchecked) match {
-      case List(ArcExprArgument("_", nodeType)) =>
-        Some(ArcRelationalPattern(ArcPattern(None, ArcPatternArgument.anyFor(nodeType.map(NodeType.fromName(_))), List(ArcPatternArgument.Any))))
+      case List("_") =>
+        Some(ArcRelationalPattern(ArcPattern(None, ArcPatternArgument.Any, List(ArcPatternArgument.Any))))
       case List(arg) =>
-        if (arg.nodeType.isEmpty) {
-          wordNet.getRelation(arg.name, Map((Relation.Src, contextTypes)))
-            .map(relation => ArcRelationalPattern(ArcPattern(Some(relation), ArcPatternArgument(Relation.Src, Some(relation.sourceType)),
-              relation.destinationType.map(destinationType => ArcPatternArgument(Relation.Dst, Some(destinationType))).toList)))
-        } else {
-          throw new WQueryStaticCheckException("Relation name " + arg.name + " cannot be followed by type specifier &")
-        }
-      case left::right::rest =>
-        if (left.nodeType.isDefined && right.nodeType.isDefined) {
+        wordNet.getRelation(arg, Map((Relation.Src, contextTypes)))
+          .map{ relation =>
+            val relationSrcArgPattern = ArcPatternArgument(Relation.Src, Some(relation.sourceType))
+            val relationDstArgPattern = relation.destinationType.map(destinationType => ArcPatternArgument(Relation.Dst, Some(destinationType)))
+            val (srcArgPattern, dstArgPatterns) = if (inverted && relationDstArgPattern.isDefined)
+              (relationDstArgPattern.get, List(relationSrcArgPattern))
+            else
+              (relationSrcArgPattern, relationDstArgPattern.toList)
+
+            ArcRelationalPattern(ArcPattern(Some(relation), srcArgPattern, dstArgPatterns))
+          }
+      case List(left, right) =>
+        val leftType = NodeType.fromNameOption(left)
+        val rightType = NodeType.fromNameOption(right)
+
+        if (leftType.isDefined && rightType.isDefined) {
           throw new WQueryStaticCheckException("No relation name found in arc expression " + toString)
-        } else if (left.nodeType.isDefined) {
-          evaluateAsSourceTypePattern(wordNet, contextTypes, left, right, rest)
-        } else if (right.nodeType.isDefined) {
-          evaluateAsDestinationTypePattern(wordNet, contextTypes, left, right, rest)
+        } else if (leftType.isDefined) {
+          evaluationPatternBySorceAndDestination(wordNet, contextTypes, leftType, right, none, inverted)
+        } else if (rightType.isDefined) {
+          evaluationPatternBySorceAndDestination(wordNet, contextTypes, none, left, rightType, inverted)
         } else {
-          evaluateAsDestinationTypePattern(wordNet, contextTypes, left, right, rest)
-            .orElse(evaluateAsSourceTypePattern(wordNet, contextTypes, left, right, rest))
+          throw new WQueryStaticCheckException("No valid type name found in arc expression " + toString)
         }
+      case List(src, name, dst) =>
+        val srcType = NodeType.fromName(src)
+        val dstType = NodeType.fromName(dst)
+
+        evaluationPatternBySorceAndDestination(wordNet, contextTypes, some(srcType), name, some(dstType), inverted)
     })|(throw new WQueryStaticCheckException("Arc expression " + toString + " references an unknown relation or argument"))
   }
 
-  private def evaluateAsSourceTypePattern(wordNet: WordNet#Schema, contextTypes: Set[DataType], left: ArcExprArgument, right: ArcExprArgument,
-                                          rest: List[ArcExprArgument]) = {
-    val sourceTypes = left.nodeType.some(Set[DataType](_)).none(contextTypes)
-    val sourceName = left.name
-    val relationName = right.name
-    val emptyDestination = rest.isEmpty??(List(ArcPatternArgument(Relation.Dst, None)).some)
+  private def evaluationPatternBySorceAndDestination(wordNet: WordNet#Schema, contextTypes: Set[DataType],
+                                                     srcType: Option[NodeType], relationName: String,
+                                                     dstType: Option[NodeType], inverted: Boolean) = {
+    val srcTypes = srcType.some(Set[DataType](_)).none(contextTypes)
+    val dstTypes = dstType.some(Set[DataType](_)).none(NodeType.all.toSet[DataType])
+
+    val (srcName, dstName) = if (inverted) (Relation.Dst, Relation.Src) else (Relation.Src, Relation.Dst)
 
     if (relationName === Relation.AnyName) {
-      Some(ArcRelationalPattern(ArcPattern(None, ArcPatternArgument(sourceName, left.nodeType),
-        emptyDestination|(rest.map(arg => ArcPatternArgument(arg.name, arg.nodeType))))))
+      Some(ArcRelationalPattern(ArcPattern(None, ArcPatternArgument(srcName, srcType),
+        List(ArcPatternArgument(dstName, dstType)))))
     } else {
-      wordNet.getRelation(right.name, ((sourceName, sourceTypes) +: (rest.map(_.nodeDescription))).toMap)
-        .map(relation => ArcRelationalPattern(ArcPattern(Some(relation), ArcPatternArgument(sourceName, Some(relation.sourceType)),
-        emptyDestination|(rest.map(arg => ArcPatternArgument(arg.name, relation.demandArgument(arg.name).nodeType.some))))))
+      wordNet.getRelation(relationName, Map(srcName -> srcTypes, dstName -> dstTypes))
+        .map(relation => ArcRelationalPattern(ArcPattern(Some(relation), ArcPatternArgument(srcName, Some(relation.sourceType)),
+        List(ArcPatternArgument(dstName, dstType)))))
     }
   }
 
-  private def evaluateAsDestinationTypePattern(wordNet: WordNet#Schema, contextTypes: Set[DataType], left: ArcExprArgument, right: ArcExprArgument,
-                                               rest: List[ArcExprArgument]) = {
-    val relationName = left.name
-
-    if (relationName === Relation.AnyName) {
-      Some(ArcRelationalPattern(ArcPattern(None, ArcPatternArgument(Relation.Src, None),
-        (right::rest).map(arg => ArcPatternArgument(arg.name, arg.nodeType)))))
-    } else {
-      wordNet.getRelation(relationName, ((Relation.Src, contextTypes) +: right.nodeDescription +: (rest.map(_.nodeDescription))).toMap)
-        .map(relation => ArcRelationalPattern(ArcPattern(Some(relation), ArcPatternArgument(Relation.Src, Some(relation.sourceType)),
-          (right::rest).map(arg => ArcPatternArgument(arg.name, relation.demandArgument(arg.name).nodeType.some)))))
-    }
-  }
-
-  override def toString = ids.mkString("^")
+  override def toString = (if (inverted) "^" else "") + ids.mkString("&")
 }
 
 case class ArcExprArgument(name: String, nodeTypeName: Option[String]) extends Expr {
@@ -376,7 +372,7 @@ case class SenseByWordFormAndSenseNumberAndPosReq(wordForm: String, senseNumber:
 case class ContextByRelationalExprReq(expr: RelationalExpr) extends EvaluableExpr {
   def evaluationPlan(wordNet: WordNet#Schema, bindings: BindingsSchema, context: Context) = {
     expr match {
-      case ArcExpr(List(ArcExprArgument(id, None))) =>
+      case ArcExpr(List(id), _) =>
         val sourceTypes = bindings.lookupStepVariableType(StepVariable.ContextVariable.name)|DataType.all
 
         if (wordNet.containsRelation(id, Map((Relation.Src, sourceTypes))) || id === Relation.AnyName) {

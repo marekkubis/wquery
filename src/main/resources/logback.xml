@@ -12,7 +12,7 @@
         </encoder>
     </appender>
 
-    <root level="info">
+    <root level="${org.wquery.log.level:-info}">
         <appender-ref ref="STDOUT"/>
         <appender-ref ref="LOGFILE"/>
     </root>
