@@ -153,37 +153,37 @@ case class QuantifiedRelationPattern(pattern: RelationalPattern, quantifier: Qua
 
 case class ArcRelationalPattern(pattern: ArcPattern) extends RelationalPattern {
   def extend(wordNet: WordNet, bindings: Bindings, extensionSet: ExtensionSet) = {
-    pattern.relation.some(wordNet.extend(extensionSet, _, pattern.source.name, pattern.destinations.map(_.name)))
+    pattern.relation.some(wordNet.extend(extensionSet, _, pattern.source.name, pattern.destination.name))
       .none(wordNet.extend(extensionSet, (pattern.source.name, pattern.source.nodeType),
-        if (pattern.destinations == List(ArcPatternArgument.Any)) Nil else pattern.destinations.map(dest => (dest.name, dest.nodeType))))
+        (pattern.destination.name, pattern.destination.nodeType)))
   }
 
-  val minTupleSize = 2*pattern.destinations.size
+  val minTupleSize = if (pattern.source == pattern.destination) 0 else 2
 
-  val maxTupleSize = some(2*pattern.destinations.size)
+  val maxTupleSize = some(if (pattern.source == pattern.destination) 0 else 2)
 
   def sourceType = demandArgumentType(pattern.source)
 
   def leftType(pos: Int) = {
-    if (pos < minTupleSize)
-      if (pos % 2 == 0) {
+    pos match {
+      case 0 =>
         Set(ArcType)
-      } else {
-        demandArgumentType(pattern.destinations((pos - 1)/2))
-      }
-    else
-      Set.empty
+      case 1 =>
+        demandArgumentType(pattern.destination)
+      case _ =>
+        Set.empty
+    }
   }
 
   def rightType(pos: Int) = {
-    if (pos < pattern.destinations.size)
-      if (pos % 2 == 1) {
+    pos match {
+      case 0 =>
+        demandArgumentType(pattern.destination)
+      case 1 =>
         Set(ArcType)
-      } else {
-        demandArgumentType(pattern.destinations(pattern.destinations.size - 1 - pos/2))
-      }
-    else
-      Set.empty
+      case _ =>
+        Set.empty
+    }
   }
 
   override def toString = pattern.toString

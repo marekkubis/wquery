@@ -10,7 +10,7 @@ case class Relation(name: String, arguments: List[Argument]) {
 
   val argumentNames = arguments.map(_.name)
 
-  def isTraversable = arguments.size > 1
+  def isTraversable = destinationType.isDefined
 
   def demandArgument(argument: String) = {
     argumentsByName.getOrElse(argument, throw new WQueryModelException("Relation '" + name + "' does not have argument '" + argument + "'"))

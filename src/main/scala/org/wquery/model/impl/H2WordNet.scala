@@ -161,9 +161,9 @@ class H2WordNet extends WordNet with Logging {
 
   override def getSenses(synset: Synset) = ???
 
-  override def extend(extensionSet: ExtensionSet, through: (String, Option[NodeType]), to: List[(String, Option[NodeType])]) = ???
+  override def extend(extensionSet: ExtensionSet, through: (String, Option[NodeType]), to: (String, Option[NodeType])) = ???
 
-  override def extend(extensionSet: ExtensionSet, relation: Relation, through: String, to: List[String]) = ???
+  override def extend(extensionSet: ExtensionSet, relation: Relation, through: String, to: String) = ???
 
   override def fetch(relation: Relation, from: List[(String, List[Any])], to: List[String], withArcs: Boolean) = ???
 }

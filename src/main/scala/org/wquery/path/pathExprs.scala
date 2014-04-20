@@ -197,7 +197,7 @@ case class ArcExpr(ids: List[String], inverted: Boolean) extends RelationalExpr 
 
       ArcRelationalPattern(ArcPattern(Some(relation),
         ArcPatternArgument(Relation.Src, Some(relation.sourceType)),
-        List(ArcPatternArgument(Relation.Dst, relation.destinationType))))
+        ArcPatternArgument(Relation.Dst, relation.destinationType)))
     } else {
       throw new WQueryStaticCheckException("Arc expression " + toString + " does not determine a relation to create unambiguously")
     }
@@ -206,18 +206,21 @@ case class ArcExpr(ids: List[String], inverted: Boolean) extends RelationalExpr 
   def evaluationPattern(wordNet: WordNet#Schema, contextTypes: Set[DataType]) = {
     ((ids: @unchecked) match {
       case List("_") =>
-        Some(ArcRelationalPattern(ArcPattern(None, ArcPatternArgument.Any, List(ArcPatternArgument.Any))))
+        if (inverted)
+          Some(ArcRelationalPattern(ArcPattern(None, ArcPatternArgument(Relation.Dst, None), ArcPatternArgument(Relation.Src, None))))
+        else
+          Some(ArcRelationalPattern(ArcPattern(None, ArcPatternArgument(Relation.Src, None), ArcPatternArgument(Relation.Dst, None))))
       case List(arg) =>
         wordNet.getRelation(arg, Map((Relation.Src, contextTypes)))
           .map{ relation =>
             val relationSrcArgPattern = ArcPatternArgument(Relation.Src, Some(relation.sourceType))
             val relationDstArgPattern = relation.destinationType.map(destinationType => ArcPatternArgument(Relation.Dst, Some(destinationType)))
-            val (srcArgPattern, dstArgPatterns) = if (inverted && relationDstArgPattern.isDefined)
-              (relationDstArgPattern.get, List(relationSrcArgPattern))
+            val (srcArgPattern, dstArgPattern) = if (inverted)
+              (relationDstArgPattern.getOrElse(relationSrcArgPattern), relationSrcArgPattern)
             else
-              (relationSrcArgPattern, relationDstArgPattern.toList)
+              (relationSrcArgPattern, relationDstArgPattern.getOrElse(relationSrcArgPattern))
 
-            ArcRelationalPattern(ArcPattern(Some(relation), srcArgPattern, dstArgPatterns))
+            ArcRelationalPattern(ArcPattern(Some(relation), srcArgPattern, dstArgPattern))
           }
       case List(left, right) =>
         val leftType = NodeType.fromNameOption(left)
@@ -250,11 +253,11 @@ case class ArcExpr(ids: List[String], inverted: Boolean) extends RelationalExpr 
 
     if (relationName === Relation.AnyName) {
       Some(ArcRelationalPattern(ArcPattern(None, ArcPatternArgument(srcName, srcType),
-        List(ArcPatternArgument(dstName, dstType)))))
+        ArcPatternArgument(dstName, dstType))))
     } else {
       wordNet.getRelation(relationName, Map(srcName -> srcTypes, dstName -> dstTypes))
         .map(relation => ArcRelationalPattern(ArcPattern(Some(relation), ArcPatternArgument(srcName, Some(relation.sourceType)),
-        List(ArcPatternArgument(dstName, dstType)))))
+        ArcPatternArgument(dstName, dstType))))
     }
   }
 
@@ -446,23 +449,18 @@ case class ArcByArcExprReq(expr: ArcExpr) extends EvaluableExpr {
     val pattern = relationalPattern.pattern
 
     pattern.relation.some { relation =>
-      val arcs = pattern.destinations.map(destination => List(Arc(pattern.relation.get, pattern.source.name, destination.name)))
-      ConstantOp(DataSet(if (arcs.isEmpty) List(List(Arc(pattern.relation.get, pattern.source.name, pattern.source.name))) else arcs))
+      val arcs = List(List(Arc(pattern.relation.get, pattern.source.name, pattern.destination.name)))
+      ConstantOp(DataSet(arcs))
     }.none {
-      val toMap = pattern.destinations match {
-        case List(ArcPatternArgument.Any) =>
-          ∅[Map[String, Option[NodeType]]]
-        case _ =>
-          pattern.destinations.map(arg => (arg.name, arg.nodeType)).toMap
-      }
+      val toMap = Map(pattern.destination.name -> pattern.destination.nodeType)
+      val (source, destination) = if (expr.inverted)
+        (Relation.Dst, Relation.Src)
+      else
+        (Relation.Src, Relation.Dst)
 
-      val arcs = (for (relation <- wordNet.relations;
-           source <- relation.argumentNames if (pattern.source.name === ArcPatternArgument.AnyName ||
-             pattern.source.name === source)  && pattern.source.nodeType.some(_ === relation.demandArgument(source).nodeType).none(true);
-           destination <- relation.argumentNames if toMap.isEmpty || toMap.get(destination).some(nodeTypeOption =>
-             nodeTypeOption.some(_ === relation.demandArgument(destination).nodeType).none(true)).none(false)
-           if relation.arguments.size === 1 || (source /== destination))
-        yield List(Arc(relation, source, destination)))
+      val arcs = for (relation <- wordNet.relations if relation.isTraversable && pattern.source.nodeType.some(_ === relation.demandArgument(source).nodeType).none(true)
+           && toMap.get(destination).some(nodeTypeOption => nodeTypeOption.some(_ === relation.demandArgument(destination).nodeType).none(true)).none(false))
+        yield List(Arc(relation, source, destination))
 
       ConstantOp(DataSet(arcs))
     }

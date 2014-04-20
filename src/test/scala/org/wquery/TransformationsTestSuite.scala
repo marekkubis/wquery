@@ -62,7 +62,7 @@ class TransformationsTestSuite extends WQueryTestSuite {
 
   @Test def testWrongDestinationTypeSpecifier0() = result of "car:1:n.senses&zzz" should startWith ("ERROR: No valid type name found in arc expression senses&zzz")
 
-  @Test def testAnyRelationTransformation() = result of ("count({car:2:n}._)") should equal ("21\n")
+  @Test def testAnyRelationTransformation() = result of ("count({car:2:n}._)") should equal ("12\n")
 
   @Test def testAnyRelationTransformationBySourceAndDestinationAndDestinationNodeType() = result of "count({car:2:n}._&synset)" should equal ("1\n")
 

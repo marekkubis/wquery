@@ -82,7 +82,9 @@ class GeneratorsTestSuite extends WQueryTestSuite {
   
   @Test def testInvertedArcGenerator() = result of ("\\^hypernym") should equal ("^hypernym\n")
 
-  @Test def testAnyRelationArcGenerator() = result of ("count(\\_)") should equal ("64\n")
+  @Test def testAnyRelationArcGenerator() = result of ("count(\\_)") should equal ("25\n")
+
+  @Test def testAnyRelationBackwardArcGenerator() = result of ("count(\\^_)") should equal ("25\n")
 
   @Test def testAnyBinaryRelationWithDestinationTypeArcGenerator() = result of "count(\\_&synset)" should equal ("12\n")
 
