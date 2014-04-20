@@ -40,9 +40,9 @@ trait WordNet {
 
   def fetch(relation: Relation, from: List[(String, List[Any])], to: List[String], withArcs: Boolean = false): DataSet
 
-  def extend(extensionSet: ExtensionSet, relation: Relation, through: String, to: String): ExtendedExtensionSet
+  def extend(extensionSet: ExtensionSet, relation: Relation, inverted: Boolean): ExtendedExtensionSet
 
-  def extend(extensionSet: ExtensionSet, through: (String, Option[NodeType]), to: (String, Option[NodeType])): ExtendedExtensionSet
+  def extend(extensionSet: ExtensionSet, through: Option[NodeType], to: Option[NodeType], inverted: Boolean): ExtendedExtensionSet
 
   def getSenses(synset: Synset): List[Sense]
 

@@ -153,9 +153,11 @@ case class QuantifiedRelationPattern(pattern: RelationalPattern, quantifier: Qua
 
 case class ArcRelationalPattern(pattern: ArcPattern) extends RelationalPattern {
   def extend(wordNet: WordNet, bindings: Bindings, extensionSet: ExtensionSet) = {
-    pattern.relation.some(wordNet.extend(extensionSet, _, pattern.source.name, pattern.destination.name))
-      .none(wordNet.extend(extensionSet, (pattern.source.name, pattern.source.nodeType),
-        (pattern.destination.name, pattern.destination.nodeType)))
+    val inverted = pattern.source.name == Relation.Dst && pattern.destination.name == Relation.Src
+
+    pattern.relation.some(wordNet.extend(extensionSet, _, inverted))
+      .none(wordNet.extend(extensionSet, pattern.source.nodeType,
+        pattern.destination.nodeType, inverted))
   }
 
   val minTupleSize = if (pattern.source == pattern.destination) 0 else 2
