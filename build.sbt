@@ -1,10 +1,8 @@
 import com.typesafe.sbt.SbtGhPages.ghpages
 import com.typesafe.sbt.SbtGit.git
 import com.typesafe.sbt.SbtSite.SiteKeys._
-import com.typesafe.sbt.SbtSite.{SiteKeys, site}
+import com.typesafe.sbt.SbtSite.site
 import de.johoop.jacoco4sbt.JacocoPlugin._
-import de.johoop.jacoco4sbt._
-import sbtfilter.Plugin.FilterKeys
 import sbtfilter.Plugin.FilterKeys._
 
 //
@@ -41,9 +39,6 @@ libraryDependencies ++= Seq(
     "org.scala-stm" %% "scala-stm" % "0.7",
     "org.clapper" %% "argot" % "1.0.1" exclude("jline", "jline"),
     "org.rogach" %% "scallop" % "0.9.5",
-    "org.scalikejdbc" %% "scalikejdbc"               % "1.7.5",
-    "org.scalikejdbc" %% "scalikejdbc-interpolation" % "1.7.5",
-    "com.h2database" % "h2" % "1.3.175",
     "org.scalatest" %% "scalatest" % "2.0" % "test",
     "org.testng" % "testng" % "6.1" % "test"
 )

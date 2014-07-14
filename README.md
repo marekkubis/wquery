@@ -32,8 +32,6 @@ Third-party libraries
 
  * This code depends on Apache Commons Pool library (see [commons-pool-LICENSE.txt](src/main/assembly/template/doc/licenses/commons-pool-LICENSE.txt), [commons-pool-NOTICE.txt](src/main/assembly/template/doc/licenses/commons-pool-NOTICE.txt) and http://commons.apache.org/proper/commons-pool/).
 
- * This software contains unmodified binary redistributions for H2 database engine (http://www.h2database.com/), which is dual licensed and available under a modified version of the MPL 1.1 (Mozilla Public License) or under the (unmodified) EPL 1.0 (Eclipse Public License) (see [h2-LICENSE.txt](src/main/assembly/template/doc/licenses/h2-LICENSE.txt)). An original copy of the license agreement can be found at: http://www.h2database.com/html/license.html.
-
  * This code depends on Joda Convert library (see [joda-convert-LICENSE.txt](src/main/assembly/template/doc/licenses/joda-convert-LICENSE.txt), [joda-convert-NOTICE.txt](src/main/assembly/template/doc/licenses/joda-convert-NOTICE.txt) and http://www.joda.org).
 
  * This code depends on Joda Time library (see [joda-time-LICENSE.txt](src/main/assembly/template/doc/licenses/joda-time-LICENSE.txt), [joda-time-NOTICE.txt](src/main/assembly/template/doc/licenses/joda-time-NOTICE.txt) and http://www.joda.org).
@@ -41,7 +39,5 @@ Third-party libraries
  * This code depends on ScalaSTM library (see [scala-stm-LICENSE.txt](src/main/assembly/template/doc/licenses/scala-stm-LICENSE.txt) and http://nbronson.github.io/scala-stm/).
 
  * This code depends on Scalaz library (see [scalaz-LICENSE.txt](src/main/assembly/template/doc/licenses/scalaz-LICENSE.txt) and https://code.google.com/p/scalaz/).
-
- * This code depends on ScalikeJDBC library (see [scalikejdbc-LICENSE.txt](src/main/assembly/template/doc/licenses/scalikejdbc-LICENSE.txt) and http://scalikejdbc.org/).
 
  * This code depends on Scallop library (see [scallop-LICENSE.txt](src/main/assembly/template/doc/licenses/scallop-LICENSE.txt) and https://github.com/scallop/scallop).

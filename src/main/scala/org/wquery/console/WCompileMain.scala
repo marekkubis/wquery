@@ -1,10 +1,10 @@
 package org.wquery.console
 
 import org.rogach.scallop._
-import org.wquery.WQueryProperties
 import org.rogach.scallop.exceptions.ScallopException
+import org.wquery.WQueryProperties
 import org.wquery.loader.GridLoader
-import org.wquery.model.impl.H2WordNet
+import org.wquery.model.impl.InMemoryWordNet
 
 object WCompileMain {
   def main(args: Array[String]) {
@@ -21,7 +21,7 @@ object WCompileMain {
     try {
       opts.verify
       val loader = new GridLoader
-      val wordNet = new H2WordNet
+      val wordNet = new InMemoryWordNet
       wordNet.open(opts[String]("OFILE"))
       loader.load(opts[String]("IFILE"), wordNet)
       wordNet.close()
