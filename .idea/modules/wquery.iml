@@ -39,9 +39,16 @@
     <orderEntry type="library" scope="TEST" name="SBT: org.testng:testng:6.1" level="project" />
     <orderEntry type="library" scope="TEST" name="SBT: org.yaml:snakeyaml:1.6" level="project" />
     <orderEntry type="library" name="SBT: org.rogach:scallop_2.10:0.9.5" level="project" />
-    <orderEntry type="library" name="SBT: org.scala-lang:scala-reflect:2.10.3" level="project" />
     <orderEntry type="library" name="SBT: org.scala-lang:scala-library:2.10.4" level="project" />
     <orderEntry type="library" name="SBT: org.slf4j:slf4j-api:1.7.5" level="project" />
+    <orderEntry type="library" name="SBT: com.esotericsoftware.kryo:kryo:2.21" level="project" />
+    <orderEntry type="library" name="SBT: com.esotericsoftware.minlog:minlog:1.2" level="project" />
+    <orderEntry type="library" name="SBT: com.esotericsoftware.reflectasm:reflectasm:1.07" level="project" />
+    <orderEntry type="library" name="SBT: com.twitter:chill-java:0.4.0" level="project" />
+    <orderEntry type="library" name="SBT: com.twitter:chill_2.10:0.4.0" level="project" />
+    <orderEntry type="library" name="SBT: org.objenesis:objenesis:1.2" level="project" />
+    <orderEntry type="library" name="SBT: org.ow2.asm:asm:4.0" level="project" />
+    <orderEntry type="library" name="SBT: org.scala-lang:scala-reflect:2.10.3" level="project" />
   </component>
 </module>
 

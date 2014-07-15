@@ -1,20 +1,28 @@
 package org.wquery
 
-import lang.{Error, Answer}
+import java.io.FileOutputStream
+
+import org.scalatest.Matchers
 import org.scalatest.testng.TestNGSuite
 import org.testng.annotations.BeforeClass
+import org.wquery.compile.WCompile
+import org.wquery.emitter.{PlainWQueryEmitter, WQueryEmitter}
+import org.wquery.lang.{Answer, Error}
 import org.wquery.loader.WordNetLoader
 import org.wquery.update.WUpdate
-import org.wquery.emitter.{PlainWQueryEmitter, WQueryEmitter}
-import org.scalatest.Matchers
 
 object WQueryRuntime {
   val wquery = createWQuery
   val emitter = new PlainWQueryEmitter
 
   def createWQuery = {
-    val wordNet = WordNetLoader.load("src/main/assembly/template/samples/samplenet.xml") 
-    val wquery = new WUpdate(wordNet)
+    val wcompile = new WCompile
+    val compiledWordNetPath = "target/samplenet.wn"
+    val sourceNet = WordNetLoader.load("src/main/assembly/template/samples/samplenet.xml")
+    wcompile.compile(sourceNet, new FileOutputStream(compiledWordNetPath))
+
+    val loadedWordNet = WordNetLoader.load(compiledWordNetPath)
+    val wquery = new WUpdate(loadedWordNet)
 
     wquery.execute("\\hypernym transitivity := true")
     wquery.execute("\\partial_meronym transitivity := true")

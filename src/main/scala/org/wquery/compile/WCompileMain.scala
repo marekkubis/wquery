@@ -1,10 +1,11 @@
-package org.wquery.console
+package org.wquery.compile
+
+import java.io.FileOutputStream
 
 import org.rogach.scallop._
 import org.rogach.scallop.exceptions.ScallopException
 import org.wquery.WQueryProperties
 import org.wquery.loader.GridLoader
-import org.wquery.model.impl.InMemoryWordNet
 
 object WCompileMain {
   def main(args: Array[String]) {
@@ -21,10 +22,10 @@ object WCompileMain {
     try {
       opts.verify
       val loader = new GridLoader
-      val wordNet = new InMemoryWordNet
-      wordNet.open(opts[String]("OFILE"))
-      loader.load(opts[String]("IFILE"), wordNet)
-      wordNet.close()
+      val wordNet = loader.load(opts[String]("IFILE"))
+      val wcompile = new WCompile
+      val outputFileName: String = opts[String]("OFILE")
+      wcompile.compile(wordNet, new FileOutputStream(outputFileName))
     } catch {
       case e: ScallopException =>
         println(e.message)

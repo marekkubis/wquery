@@ -3,16 +3,19 @@
 
 package org.wquery.loader
 
-import scalaz._
-import Scalaz._
-import org.wquery.utils.Logging
+import java.io.{BufferedReader, File, FileReader}
 import javax.xml.parsers.SAXParserFactory
-import java.io.{File, FileReader, BufferedReader}
+
+import org.wquery.model._
+import org.wquery.model.impl.InMemoryWordNet
+import org.wquery.utils.Logging
 import org.xml.sax.helpers.DefaultHandler
 import org.xml.sax.{Attributes, Locator}
-import collection.mutable.{ListBuffer, Map}
+
 import scala.collection.immutable.{Map => IMap}
-import org.wquery.model._
+import scala.collection.mutable.{ListBuffer, Map}
+import scalaz.Scalaz._
+import scalaz._
 
 class LmfLoader extends WordNetLoader with Logging {
   def canLoad(url: String) = { // TODO provide an XML parser based load check
@@ -23,11 +26,13 @@ class LmfLoader extends WordNetLoader with Logging {
     header.contains("<LexicalResource")
   }
 
-  override def load(url: String, wordNet: WordNet) = {
+  override def load(url: String) = {
     val factory = SAXParserFactory.newInstance
+    val wordNet = new InMemoryWordNet
 
     factory.newSAXParser.parse(new File(url), new LmfHandler(wordNet))
     info("WordNet loaded via LmfLoader")
+    wordNet
   }
 }
 

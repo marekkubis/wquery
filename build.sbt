@@ -39,6 +39,7 @@ libraryDependencies ++= Seq(
     "org.scala-stm" %% "scala-stm" % "0.7",
     "org.clapper" %% "argot" % "1.0.1" exclude("jline", "jline"),
     "org.rogach" %% "scallop" % "0.9.5",
+    "com.twitter" %% "chill" % "0.4.0",
     "org.scalatest" %% "scalatest" % "2.0" % "test",
     "org.testng" % "testng" % "6.1" % "test"
 )

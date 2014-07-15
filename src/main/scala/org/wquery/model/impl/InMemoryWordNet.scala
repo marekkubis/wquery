@@ -1,16 +1,16 @@
 package org.wquery.model.impl
 
-import collection.mutable.ListBuffer
-import collection.mutable.{Map => MMap}
 import org.wquery.model._
-import org.wquery.{WQueryUpdateBreaksRelationPropertyException, WQueryModelException}
-import scala.concurrent.stm._
-import scalaz._
-import Scalaz._
 import org.wquery.path.operations.NewSynset
+import org.wquery.{WQueryModelException, WQueryUpdateBreaksRelationPropertyException}
+
+import scala.collection.mutable.{ListBuffer, Map => MMap}
+import scala.concurrent.stm._
+import scalaz.Scalaz._
+import scalaz._
 
 class InMemoryWordNet extends WordNet {
-  private val successors = TMap[Relation, MMap[(String, Any), Vector[Map[String, Any]]]]()
+  private val successors = MMap[Relation, MMap[(String, Any), Vector[Map[String, Any]]]]()
   private val aliasMap = scala.collection.mutable.Map[Relation, List[Arc]]()
   private var relationsList = List[Relation]()
 

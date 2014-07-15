@@ -2,26 +2,31 @@
 // scalastyle:off multiple.string.literals
 
 package org.wquery.loader
-import javax.xml.parsers.SAXParserFactory
 import java.io.File
-import org.wquery.utils.Logging
-import org.xml.sax.{Locator, Attributes}
-import org.xml.sax.helpers.DefaultHandler
-import scala.collection.mutable.{Set, Map, ListBuffer}
-import scala.collection.immutable.{Map => IMap, Set => ISet}
-import org.wquery.model._
+import javax.xml.parsers.SAXParserFactory
+
 import org.wquery.WQueryUpdateBreaksRelationPropertyException
+import org.wquery.model._
+import org.wquery.model.impl.InMemoryWordNet
+import org.wquery.utils.Logging
+import org.xml.sax.helpers.DefaultHandler
+import org.xml.sax.{Attributes, Locator}
+
+import scala.collection.immutable.{Map => IMap, Set => ISet}
+import scala.collection.mutable.{ListBuffer, Map, Set}
+import scalaz.Scalaz._
 import scalaz._
-import Scalaz._
 
 class GridLoader extends WordNetLoader with Logging {
   override def canLoad(url: String): Boolean = url.endsWith(".xml") // TODO provide a better check
 
-  override def load(url: String, wordNet: WordNet) = {
+  override def load(url: String) = {
     val factory = SAXParserFactory.newInstance
+    val wordNet = new InMemoryWordNet
 
     factory.newSAXParser.parse(new File(url), new GridHandler(wordNet))
     info("WordNet loaded via GridLoader")
+    wordNet
   }
 
 }
