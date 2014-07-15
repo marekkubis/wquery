@@ -1,0 +1,9 @@
+#!/bin/sh
+#
+#   wcompile
+#       Compiles wordnets in various formats into the wn format.
+#
+DIR=`dirname $0`
+LIBS=`ls -1 $DIR/../lib/* | tr "\\n" ":"`
+
+java $JAVA_OPTS -cp $LIBS org.wquery.compile.WCompileMain "$@"
