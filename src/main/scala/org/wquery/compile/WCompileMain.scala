@@ -17,15 +17,18 @@ object WCompileMain {
                  | """.stripMargin)
       .opt[String]("type", short = 't', default = () => Some("deb"))
       .trailArg[String](name = "IFILE")
-      .trailArg[String](name = "OFILE")
+      .trailArg[String](name = "OFILE", required = false)
 
     try {
       opts.verify
       val loader = new GridLoader
       val wordNet = loader.load(opts[String]("IFILE"))
       val wcompile = new WCompile
-      val outputFileName: String = opts[String]("OFILE")
-      wcompile.compile(wordNet, new BufferedOutputStream(new FileOutputStream(outputFileName)))
+      val outputStream = opts.get[String]("OFILE")
+        .map(outputFileName => new BufferedOutputStream(new FileOutputStream(outputFileName)))
+        .getOrElse(Console.out)
+
+      wcompile.compile(wordNet, outputStream)
     } catch {
       case e: ScallopException =>
         println(e.message)

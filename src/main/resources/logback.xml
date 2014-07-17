@@ -1,8 +1,9 @@
 <configuration>
-    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <appender name="STDERR" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>%-5level [%logger{0}] %msg%n</pattern>
         </encoder>
+        <target>System.err</target>
     </appender>
 
     <appender name="LOGFILE" class="ch.qos.logback.core.FileAppender">
@@ -13,7 +14,7 @@
     </appender>
 
     <root level="${org.wquery.log.level:-info}">
-        <appender-ref ref="STDOUT"/>
+        <appender-ref ref="STDERR"/>
         <appender-ref ref="LOGFILE"/>
     </root>
 </configuration>
