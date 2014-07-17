@@ -1,0 +1,9 @@
+#!/bin/sh
+#
+#   wupate
+#       Executes WUpdate commands.
+#
+DIR=`dirname $0`
+LIBS=`ls -1 $DIR/../lib/* | tr "\\n" ":"`
+
+java $JAVA_OPTS -cp $LIBS org.wquery.update.WUpdateMain "$@"
