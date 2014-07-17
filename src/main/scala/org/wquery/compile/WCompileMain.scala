@@ -1,6 +1,6 @@
 package org.wquery.compile
 
-import java.io.FileOutputStream
+import java.io.{BufferedOutputStream, FileOutputStream}
 
 import org.rogach.scallop._
 import org.rogach.scallop.exceptions.ScallopException
@@ -25,7 +25,7 @@ object WCompileMain {
       val wordNet = loader.load(opts[String]("IFILE"))
       val wcompile = new WCompile
       val outputFileName: String = opts[String]("OFILE")
-      wcompile.compile(wordNet, new FileOutputStream(outputFileName))
+      wcompile.compile(wordNet, new BufferedOutputStream(new FileOutputStream(outputFileName)))
     } catch {
       case e: ScallopException =>
         println(e.message)

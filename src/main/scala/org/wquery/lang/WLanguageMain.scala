@@ -6,6 +6,7 @@ import org.wquery.WQueryProperties
 import org.wquery.emitter.PlainWQueryEmitter
 import org.wquery.loader.WnLoader
 import org.wquery.model.WordNet
+import org.wquery.utils.FileUtils
 
 abstract class WLanguageMain {
   def languageName: String
@@ -33,8 +34,11 @@ abstract class WLanguageMain {
       val lang = language(wordNet)
       val result = lang.execute(opts[String]("command"))
       val emitter = new PlainWQueryEmitter
+      val output = emitter.emit(result)
 
-      println(emitter.emit(result))
+      opts.get[String]("OFILE")
+        .map(outputFileName => FileUtils.dump(output, outputFileName))
+        .getOrElse(print(output))
     } catch {
       case e: ScallopException =>
         println(e.message)
