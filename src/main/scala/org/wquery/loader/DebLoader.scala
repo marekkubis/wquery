@@ -15,23 +15,22 @@ import org.xml.sax.{Attributes, Locator}
 import scala.collection.immutable.{Map => IMap, Set => ISet}
 import scala.collection.mutable.{ListBuffer, Map, Set}
 import scalaz.Scalaz._
-import scalaz._
 
-class GridLoader extends WordNetLoader with Logging {
+class DebLoader extends WordNetLoader with Logging {
   override def canLoad(url: String): Boolean = url.endsWith(".xml") // TODO provide a better check
 
   override def load(url: String) = {
     val factory = SAXParserFactory.newInstance
     val wordNet = new InMemoryWordNet
 
-    factory.newSAXParser.parse(new File(url), new GridHandler(wordNet))
+    factory.newSAXParser.parse(new File(url), new DebHandler(wordNet))
     info("WordNet loaded via GridLoader")
     wordNet
   }
 
 }
 
-class GridHandler(wordnet: WordNet) extends DefaultHandler with Logging {
+class DebHandler(wordnet: WordNet) extends DefaultHandler with Logging {
   // parser attributes
   private var locator: Locator = null
 

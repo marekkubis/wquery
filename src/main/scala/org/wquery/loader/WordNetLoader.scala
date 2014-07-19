@@ -15,7 +15,7 @@ object WordNetLoader {
   val loaders = new ListBuffer[WordNetLoader]()
 
   registerLoader(new LmfLoader)
-  registerLoader(new GridLoader)
+  registerLoader(new DebLoader)
   registerLoader(new WnLoader)
 
   def registerLoader(loader: WordNetLoader) { loaders += loader }
