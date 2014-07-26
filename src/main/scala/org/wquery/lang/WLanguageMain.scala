@@ -28,8 +28,8 @@ abstract class WLanguageMain {
                  |
                  |Options:
                  | """.stripMargin)
-      .opt[String]("command", short = 'c', descr = "Execute a query", required = false)
-      .opt[String]("file", short = 'f', descr = "Read queries from a file", required = false)
+      .opt[String]("command", short = 'c', descr = "Execute a command", required = false)
+      .opt[String]("file", short = 'f', descr = "Read commands from a file", required = false)
       .opt[Boolean]("help", short = 'h', descr = "Show help message")
       .opt[Boolean]("quiet", short = 'q', descr = "Silent mode")
       .opt[Boolean]("version", short = 'v', descr = "Show version")

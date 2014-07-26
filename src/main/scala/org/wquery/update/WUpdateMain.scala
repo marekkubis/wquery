@@ -1,12 +1,13 @@
 package org.wquery.update
 
-import java.io.{BufferedOutputStream, FileInputStream, FileOutputStream}
+import java.io.{BufferedOutputStream, FileInputStream, FileOutputStream, FileReader}
 
 import org.rogach.scallop.Scallop
 import org.rogach.scallop.exceptions.{Help, ScallopException, Version}
 import org.wquery.WQueryProperties
 import org.wquery.compile.WCompile
 import org.wquery.loader.WnLoader
+import org.wquery.reader.{ExpressionReader, InputLineReader}
 import org.wquery.utils.Logging
 
 object WUpdateMain {
@@ -20,7 +21,8 @@ object WUpdateMain {
                  |
                  |Options:
                  | """.stripMargin)
-      .opt[String]("command", short = 'c')
+      .opt[String]("command", short = 'c', descr = "Execute a command", required = false)
+      .opt[String]("file", short = 'f', descr = "Read commands from a file", required = false)
       .opt[Boolean]("help", short = 'h', descr = "Show help message")
       .opt[Boolean]("quiet", short = 'q', descr = "Silent mode")
       .opt[Boolean]("version", short = 'v', descr = "Show version")
@@ -39,12 +41,25 @@ object WUpdateMain {
 
       val output = opts.get[String]("OFILE")
         .map(outputFileName => new BufferedOutputStream(new FileOutputStream(outputFileName)))
-        .getOrElse(Console.out)
+        .getOrElse(System.out)
 
       val loader = new WnLoader
       val wordNet = loader.load(input)
       val wupdate = new WUpdate(wordNet)
-      wupdate.execute(opts[String]("command"))
+
+      opts.get[String]("file").map { fileName =>
+        val expressionReader = new ExpressionReader(new InputLineReader(new FileReader(fileName)))
+
+        expressionReader.foreach { expr =>
+          wupdate.execute(expr)
+        }
+
+        expressionReader.close()
+      }
+
+      opts.get[String]("command").map { command =>
+        wupdate.execute(command)
+      }
 
       val wcompile = new WCompile()
 
