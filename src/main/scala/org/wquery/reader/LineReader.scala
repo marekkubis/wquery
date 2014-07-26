@@ -1,7 +1,9 @@
 package org.wquery.reader
 
 trait LineReader {
-    def readFirstLine: String
+  def readFirstLine: String
 
-    def readNextLine: String
+  def readNextLine: String
+
+  def close()
 }

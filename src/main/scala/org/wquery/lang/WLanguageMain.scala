@@ -56,19 +56,14 @@ abstract class WLanguageMain {
       val lang = language(wordNet)
 
       opts.get[String]("file").map { fileName =>
-        val reader = new ExpressionReader(new InputLineReader(new FileReader(fileName)))
-        var done = false
+        val expressionReader = new ExpressionReader(new InputLineReader(new FileReader(fileName)))
 
-        while(!done) {
-          val expr = reader.readExpression
-
-          if (expr == null) {
-            done = true
-          } else {
-            val result = lang.execute(expr)
-            output.write(emitter.emit(result))
-          }
+        expressionReader.foreach { expr =>
+          val result = lang.execute(expr)
+          output.write(emitter.emit(result))
         }
+
+        expressionReader.close()
       }
 
       opts.get[String]("command").map { command =>

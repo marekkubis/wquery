@@ -1,12 +1,27 @@
 package org.wquery.reader
 
 class ExpressionReader(reader: LineReader) {
-  def readExpression: String = {
+  private def readExpression: String = {
     val s = reader.readFirstLine
 
     if (s == null || s == "")
-      return s
+      s
     else
-      return s + "\n" + readExpression
+      s + "\n" + readExpression
   }
+
+  def foreach(f: String => Unit) {
+    var done = false
+
+    while(!done) {
+      val expr = readExpression
+
+      if (expr == null)
+        done = true
+      else
+        f(expr)
+    }
+  }
+
+  def close() = reader.close()
 }

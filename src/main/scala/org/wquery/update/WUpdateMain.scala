@@ -37,17 +37,18 @@ object WUpdateMain {
         .map(inputName => new FileInputStream(inputName))
         .getOrElse(System.in)
 
+      val output = opts.get[String]("OFILE")
+        .map(outputFileName => new BufferedOutputStream(new FileOutputStream(outputFileName)))
+        .getOrElse(Console.out)
+
       val loader = new WnLoader
       val wordNet = loader.load(input)
       val wupdate = new WUpdate(wordNet)
       wupdate.execute(opts[String]("command"))
 
       val wcompile = new WCompile()
-      val outputStream = opts.get[String]("OFILE")
-        .map(outputFileName => new BufferedOutputStream(new FileOutputStream(outputFileName)))
-        .getOrElse(Console.out)
 
-      wcompile.compile(wupdate.wordNet, outputStream)
+      wcompile.compile(wupdate.wordNet, output)
     } catch {
       case e: Help =>
         opts.printHelp()
