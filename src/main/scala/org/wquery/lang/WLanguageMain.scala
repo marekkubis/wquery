@@ -1,6 +1,6 @@
 package org.wquery.lang
 
-import java.io.FileInputStream
+import java.io._
 
 import org.rogach.scallop.Scallop
 import org.rogach.scallop.exceptions.{Help, ScallopException, Version}
@@ -8,7 +8,8 @@ import org.wquery.WQueryProperties
 import org.wquery.emitter.PlainWQueryEmitter
 import org.wquery.loader.WnLoader
 import org.wquery.model.WordNet
-import org.wquery.utils.{FileUtils, Logging}
+import org.wquery.reader.{ExpressionReader, InputLineReader}
+import org.wquery.utils.Logging
 
 abstract class WLanguageMain {
   def languageName: String
@@ -27,7 +28,8 @@ abstract class WLanguageMain {
                  |
                  |Options:
                  | """.stripMargin)
-      .opt[String]("command", short = 'c')
+      .opt[String]("command", short = 'c', descr = "Execute a query", required = false)
+      .opt[String]("file", short = 'f', descr = "Read queries from a file", required = false)
       .opt[Boolean]("help", short = 'h', descr = "Show help message")
       .opt[Boolean]("quiet", short = 'q', descr = "Silent mode")
       .opt[Boolean]("version", short = 'v', descr = "Show version")
@@ -44,16 +46,37 @@ abstract class WLanguageMain {
         .map(inputName => new FileInputStream(inputName))
         .getOrElse(System.in)
 
+      val output = opts.get[String]("OFILE")
+        .map(outputName => new BufferedWriter(new FileWriter(outputName)))
+        .getOrElse(new OutputStreamWriter(System.out))
+
       val loader = new WnLoader
+      val emitter = new PlainWQueryEmitter
       val wordNet = loader.load(input)
       val lang = language(wordNet)
-      val result = lang.execute(opts[String]("command"))
-      val emitter = new PlainWQueryEmitter
-      val output = emitter.emit(result)
 
-      opts.get[String]("OFILE")
-        .map(outputFileName => FileUtils.dump(output, outputFileName))
-        .getOrElse(print(output))
+      opts.get[String]("file").map { fileName =>
+        val reader = new ExpressionReader(new InputLineReader(new FileReader(fileName)))
+        var done = false
+
+        while(!done) {
+          val expr = reader.readExpression
+
+          if (expr == null) {
+            done = true
+          } else {
+            val result = lang.execute(expr)
+            output.write(emitter.emit(result))
+          }
+        }
+      }
+
+      opts.get[String]("command").map { command =>
+        val result = lang.execute(command)
+        output.write(emitter.emit(result))
+      }
+
+      output.close()
     } catch {
       case e: Help =>
         opts.printHelp()
