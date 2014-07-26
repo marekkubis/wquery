@@ -1,6 +1,6 @@
 package org.wquery.compile
 
-import java.io.{BufferedOutputStream, FileOutputStream}
+import java.io.{BufferedOutputStream, FileInputStream, FileOutputStream}
 
 import org.rogach.scallop._
 import org.rogach.scallop.exceptions.{Help, ScallopException, Version}
@@ -15,7 +15,7 @@ object WCompileMain {
       .banner( """
                  |Saves a wordnet loaded from a file in a binary representation
                  |
-                 |usage: wcompile [OPTIONS] IFILE [OFILE]
+                 |usage: wcompile [OPTIONS] [IFILE] [OFILE]
                  |
                  |Options:
                  | """.stripMargin)
@@ -24,7 +24,7 @@ object WCompileMain {
       .opt[Boolean]("version", short = 'v', descr = "Show version")
       .opt[String]("type", short = 't', default = () => Some("deb"),
         validate = arg => List("deb", "lmf").contains(arg), descr = "Set input file type - either deb or lmf")
-      .trailArg[String](name = "IFILE")
+      .trailArg[String](name = "IFILE", required = false)
       .trailArg[String](name = "OFILE", required = false)
 
     try {
@@ -40,7 +40,11 @@ object WCompileMain {
           new LmfLoader()
       }
 
-      val wordNet = loader.load(opts[String]("IFILE"))
+      val input = opts.get[String]("IFILE")
+        .map(ifile => new FileInputStream(ifile))
+        .getOrElse(System.in)
+
+      val wordNet = loader.load(input)
       val wcompile = new WCompile
       val outputStream = opts.get[String]("OFILE")
         .map(outputFileName => new BufferedOutputStream(new FileOutputStream(outputFileName)))

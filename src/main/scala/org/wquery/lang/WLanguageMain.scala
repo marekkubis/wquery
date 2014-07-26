@@ -1,5 +1,7 @@
 package org.wquery.lang
 
+import java.io.FileInputStream
+
 import org.rogach.scallop.Scallop
 import org.rogach.scallop.exceptions.{Help, ScallopException, Version}
 import org.wquery.WQueryProperties
@@ -21,7 +23,7 @@ abstract class WLanguageMain {
       .banner(s"""
                  |Executes a $languageName query
                  |
-                 |usage: $commandName [OPTIONS] IFILE [OFILE]
+                 |usage: $commandName [OPTIONS] [IFILE] [OFILE]
                  |
                  |Options:
                  | """.stripMargin)
@@ -29,7 +31,7 @@ abstract class WLanguageMain {
       .opt[Boolean]("help", short = 'h', descr = "Show help message")
       .opt[Boolean]("quiet", short = 'q', descr = "Silent mode")
       .opt[Boolean]("version", short = 'v', descr = "Show version")
-      .trailArg[String](name = "IFILE")
+      .trailArg[String](name = "IFILE", required = false)
       .trailArg[String](name = "OFILE", required = false)
 
     try {
@@ -38,8 +40,12 @@ abstract class WLanguageMain {
       if (opts[Boolean]("quiet"))
         Logging.tryDisableLoggers()
 
+      val input = opts.get[String]("IFILE")
+        .map(inputName => new FileInputStream(inputName))
+        .getOrElse(System.in)
+
       val loader = new WnLoader
-      val wordNet = loader.load(opts[String]("IFILE"))
+      val wordNet = loader.load(input)
       val lang = language(wordNet)
       val result = lang.execute(opts[String]("command"))
       val emitter = new PlainWQueryEmitter

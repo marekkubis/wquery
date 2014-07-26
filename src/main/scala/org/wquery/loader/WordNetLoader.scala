@@ -1,33 +1,32 @@
 package org.wquery.loader
 
-import org.wquery.WQueryLoadingException
+import java.io.InputStream
+
+import org.wquery.WQueryLoaderNotFoundException
 import org.wquery.model.WordNet
 
-import scala.collection.mutable.ListBuffer
+import scala.collection.mutable
 
 trait WordNetLoader {
-  def canLoad(url:String): Boolean
-
-  def load(url:String): WordNet
+  def load(input: InputStream): WordNet
 }
 
 object WordNetLoader {
-  val loaders = new ListBuffer[WordNetLoader]()
+  val loaders = mutable.Map[String, WordNetLoader]()
 
-  registerLoader(new LmfLoader)
-  registerLoader(new DebLoader)
-  registerLoader(new WnLoader)
+  registerLoader("lmf", new LmfLoader)
+  registerLoader("deb", new DebLoader)
+  registerLoader("wn", new WnLoader)
 
-  def registerLoader(loader: WordNetLoader) { loaders += loader }
+  def registerLoader(name: String, loader: WordNetLoader) {
+    loaders.put(name, loader)
+  }
 
-  def unregisterLoader(loader: WordNetLoader) { loaders -= loader }
+  def unregisterLoader(name: String) { loaders.remove(name) }
 
-  def load(from: String): WordNet = {
-    val validLoaders = loaders.filter(_.canLoad(from))
+  def getLoader(name: String): Option[WordNetLoader] = loaders.get(name)
 
-    if (validLoaders.isEmpty)
-      throw new WQueryLoadingException(from + " cannot be loaded by any loader")
-
-    validLoaders.head.load(from)
+  def demandLoader(name: String): WordNetLoader = {
+    loaders.getOrElse(name, throw new WQueryLoaderNotFoundException(name))
   }
 }

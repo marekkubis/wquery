@@ -1,6 +1,6 @@
 package org.wquery.update
 
-import java.io.{BufferedOutputStream, FileOutputStream}
+import java.io.{BufferedOutputStream, FileInputStream, FileOutputStream}
 
 import org.rogach.scallop.Scallop
 import org.rogach.scallop.exceptions.{Help, ScallopException, Version}
@@ -16,7 +16,7 @@ object WUpdateMain {
       .banner( """
                  |Executes a WUpdate command
                  |
-                 |usage: wupdate [OPTIONS] IFILE [OFILE]
+                 |usage: wupdate [OPTIONS] [IFILE] [OFILE]
                  |
                  |Options:
                  | """.stripMargin)
@@ -24,7 +24,7 @@ object WUpdateMain {
       .opt[Boolean]("help", short = 'h', descr = "Show help message")
       .opt[Boolean]("quiet", short = 'q', descr = "Silent mode")
       .opt[Boolean]("version", short = 'v', descr = "Show version")
-      .trailArg[String](name = "IFILE")
+      .trailArg[String](name = "IFILE", required = false)
       .trailArg[String](name = "OFILE", required = false)
 
     try {
@@ -33,8 +33,12 @@ object WUpdateMain {
       if (opts[Boolean]("quiet"))
         Logging.tryDisableLoggers()
 
+      val input = opts.get[String]("IFILE")
+        .map(inputName => new FileInputStream(inputName))
+        .getOrElse(System.in)
+
       val loader = new WnLoader
-      val wordNet = loader.load(opts[String]("IFILE"))
+      val wordNet = loader.load(input)
       val wupdate = new WUpdate(wordNet)
       wupdate.execute(opts[String]("command"))
 

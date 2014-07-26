@@ -1,6 +1,6 @@
 package org.wquery
 
-import java.io.FileOutputStream
+import java.io.{FileInputStream, FileOutputStream}
 
 import org.scalatest.Matchers
 import org.scalatest.testng.TestNGSuite
@@ -18,10 +18,12 @@ object WQueryRuntime {
   def createWQuery = {
     val wcompile = new WCompile
     val compiledWordNetPath = "target/samplenet.wn"
-    val sourceNet = WordNetLoader.load("src/main/assembly/template/samples/samplenet.xml")
+    val sourceNet = WordNetLoader.demandLoader("deb")
+      .load(new FileInputStream("src/main/assembly/template/samples/samplenet.xml"))
     wcompile.compile(sourceNet, new FileOutputStream(compiledWordNetPath))
 
-    val loadedWordNet = WordNetLoader.load(compiledWordNetPath)
+    val loadedWordNet = WordNetLoader.demandLoader("wn")
+      .load(new FileInputStream(compiledWordNetPath))
     val wquery = new WUpdate(loadedWordNet)
 
     wquery.execute("\\hypernym transitivity := true")

@@ -2,7 +2,7 @@
 
 package org.wquery.console
 
-import java.io.{FileReader, Reader, StringReader}
+import java.io.{FileInputStream, FileReader, Reader, StringReader}
 
 import org.clapper.argot.ArgotConverters._
 import org.clapper.argot.{ArgotParser, ArgotUsageException}
@@ -41,7 +41,7 @@ object WQueryConsole extends Logging {
       argsParser.parse(args)
       val quiet = quietOption.value|false
 
-      val wordNet = WordNetLoader.load(wordnetParameter.value.get)
+      val wordNet = WordNetLoader.demandLoader("deb").load(new FileInputStream(wordnetParameter.value.get))
       val wquery = new WUpdate(wordNet)
       val emitter = emitterOption.value|new PlainWQueryEmitter
 
