@@ -10,7 +10,7 @@ import org.wquery.reader.{ExpressionReader, InputLineReader}
 
 object WUpdateMain extends WLanguageMain("WUpdate") {
   override def appendOptions(opts: Scallop) = {
-    opts.opt[Boolean]("emit", short = 'e', default = () => Some(false),
+    opts.opt[Boolean]("emit", short = 'e',
       descr = "Emit output of the executed commands to stderr")
   }
 

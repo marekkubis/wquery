@@ -15,9 +15,11 @@ object WCompileMain {
       .banner( """
                  |Saves a wordnet loaded from a file in a binary representation
                  |
-                 |usage: wcompile [OPTIONS] [IFILE] [OFILE]
+                 |usage:
                  |
-                 |Options:
+                 |  wcompile [OPTIONS] [IFILE] [OFILE]
+                 |
+                 |options:
                  | """.stripMargin)
       .opt[Boolean]("help", short = 'h', descr = "Show help message")
       .opt[Boolean]("quiet", short = 'q', descr = "Silent mode")

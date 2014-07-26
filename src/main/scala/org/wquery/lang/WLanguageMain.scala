@@ -25,12 +25,15 @@ abstract class WLanguageMain(languageName: String) {
       .banner(s"""
                  |Executes a $languageName command
                  |
-                 |usage: $commandName [OPTIONS] [IFILE] [OFILE]
+                 |usage:
                  |
-                 |Options:
+                 |  $commandName [OPTIONS] [IFILE] [OFILE]
+                 |
+                 |options:
                  | """.stripMargin)
       .opt[String]("command", short = 'c', descr = "Execute a command", required = false)
       .opt[String]("file", short = 'f', descr = "Execute commands from a file", required = false)
+      .opt[Boolean]("interactive", short = 'i', descr = "Run in the interactive interpreter mode", required = false)
       .opt[Boolean]("help", short = 'h', descr = "Show help message")
       .opt[Boolean]("quiet", short = 'q', descr = "Silent mode")
       .opt[Boolean]("version", short = 'v', descr = "Show version")
