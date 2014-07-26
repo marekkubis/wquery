@@ -1,4 +1,6 @@
 package org.wquery.utils
+
+import ch.qos.logback.classic.{Level, Logger}
 import org.slf4j.LoggerFactory
 
 trait Logging {
@@ -53,4 +55,19 @@ trait Logging {
       log.error(message, t) 
   }
 
+}
+
+object Logging {
+  def tryDisableLoggers() {
+    // slf4j - wquery and akka
+    LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME) match {
+      case logger: Logger =>
+        logger.setLevel(Level.OFF)
+      case logger =>
+        logger.warn("Cannot disable the root logger (the logger is not an instance of " + classOf[Logger].getName + ")")
+    }
+
+    // java.util.Logging
+    java.util.logging.Logger.getLogger("").setLevel(java.util.logging.Level.OFF)
+  }
 }

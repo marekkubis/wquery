@@ -1,12 +1,12 @@
 package org.wquery.lang
 
 import org.rogach.scallop.Scallop
-import org.rogach.scallop.exceptions.ScallopException
+import org.rogach.scallop.exceptions.{Help, ScallopException, Version}
 import org.wquery.WQueryProperties
 import org.wquery.emitter.PlainWQueryEmitter
 import org.wquery.loader.WnLoader
 import org.wquery.model.WordNet
-import org.wquery.utils.FileUtils
+import org.wquery.utils.{FileUtils, Logging}
 
 abstract class WLanguageMain {
   def languageName: String
@@ -17,17 +17,26 @@ abstract class WLanguageMain {
 
   def main(args: Array[String]) {
     val opts = Scallop(args)
-      .version(commandName + " " + WQueryProperties.version)
-      .banner( """usage: ${commandName} [OPTIONS] IFILE [OFILE]
-                 |Executes a ${languageName} query
+      .version(commandName + " " + WQueryProperties.version + " " + WQueryProperties.copyright)
+      .banner(s"""
+                 |Executes a $languageName query
+                 |
+                 |usage: $commandName [OPTIONS] IFILE [OFILE]
+                 |
                  |Options:
                  | """.stripMargin)
       .opt[String]("command", short = 'c')
+      .opt[Boolean]("help", short = 'h', descr = "Show help message")
+      .opt[Boolean]("quiet", short = 'q', descr = "Silent mode")
+      .opt[Boolean]("version", short = 'v', descr = "Show version")
       .trailArg[String](name = "IFILE")
       .trailArg[String](name = "OFILE", required = false)
 
     try {
       opts.verify
+
+      if (opts[Boolean]("quiet"))
+        Logging.tryDisableLoggers()
 
       val loader = new WnLoader
       val wordNet = loader.load(opts[String]("IFILE"))
@@ -40,8 +49,13 @@ abstract class WLanguageMain {
         .map(outputFileName => FileUtils.dump(output, outputFileName))
         .getOrElse(print(output))
     } catch {
+      case e: Help =>
+        opts.printHelp()
+      case Version =>
+        opts.printHelp()
       case e: ScallopException =>
-        println(e.message)
+        println("ERROR: " + e.message)
+        println()
         opts.printHelp()
         sys.exit(1)
     }

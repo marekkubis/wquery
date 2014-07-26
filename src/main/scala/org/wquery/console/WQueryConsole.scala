@@ -2,18 +2,17 @@
 
 package org.wquery.console
 
-import org.wquery.update.WUpdate
-import org.wquery.WQueryProperties
-import org.wquery.loader.WordNetLoader
-import org.wquery.utils.Logging
-import org.clapper.argot.{ArgotUsageException, ArgotParser}
+import java.io.{FileReader, Reader, StringReader}
+
 import org.clapper.argot.ArgotConverters._
-import org.wquery.emitter.{WQueryEmitter, PlainWQueryEmitter}
-import org.slf4j.LoggerFactory
-import ch.qos.logback.classic.{Logger, Level}
-import java.io.{StringReader, FileReader, Reader}
-import scalaz._
-import Scalaz._
+import org.clapper.argot.{ArgotParser, ArgotUsageException}
+import org.wquery.WQueryProperties
+import org.wquery.emitter.{PlainWQueryEmitter, WQueryEmitter}
+import org.wquery.loader.WordNetLoader
+import org.wquery.update.WUpdate
+import org.wquery.utils.Logging
+
+import scalaz.Scalaz._
 
 object WQueryConsole extends Logging {
   val WQueryBanner = "WQuery " + WQueryProperties.version + "\n" + WQueryProperties.copyright
@@ -42,9 +41,6 @@ object WQueryConsole extends Logging {
       argsParser.parse(args)
       val quiet = quietOption.value|false
 
-      if (quiet)
-        tryDisableLoggers
-
       val wordNet = WordNetLoader.load(wordnetParameter.value.get)
       val wquery = new WUpdate(wordNet)
       val emitter = emitterOption.value|new PlainWQueryEmitter
@@ -66,19 +62,6 @@ object WQueryConsole extends Logging {
         println(e.message)
         System.exit(1)
     }
-  }
-
-  private def tryDisableLoggers {
-    // slf4j - wquery and akka
-    LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME) match {
-      case logger: Logger =>
-        logger.setLevel(Level.OFF)
-      case logger =>
-        logger.warn("Cannot disable the root logger in -q mode (the logger is not an instance of " + classOf[Logger].getName + ")")
-    }
-
-    // java.util.Logging - multiverse
-    java.util.logging.Logger.getLogger("").setLevel(java.util.logging.Level.OFF);
   }
 
   private def readQueriesFromReader(reader: Reader, wquery: WUpdate, emitter: WQueryEmitter, prompt: Boolean) {
