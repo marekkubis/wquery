@@ -1,10 +1,5 @@
 package org.wquery.query
 
-import org.wquery.lang.WLanguageMain
-import org.wquery.model.WordNet
+import org.wquery.lang.WQueryLanguageMain
 
-object WQueryMain extends WLanguageMain {
-  override def languageName = "WQuery"
-
-  override def language(wordNet: WordNet) = new WQuery(wordNet)
-}
+object WQueryMain extends WQueryLanguageMain("WQuery", new WQuery(_))

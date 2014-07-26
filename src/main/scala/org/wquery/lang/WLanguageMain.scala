@@ -8,28 +8,27 @@ import org.wquery.WQueryProperties
 import org.wquery.emitter.PlainWQueryEmitter
 import org.wquery.loader.WnLoader
 import org.wquery.model.WordNet
-import org.wquery.reader.{ExpressionReader, InputLineReader}
 import org.wquery.utils.Logging
 
-abstract class WLanguageMain {
-  def languageName: String
+abstract class WLanguageMain(languageName: String) {
+  val loader = new WnLoader
+  val emitter = new PlainWQueryEmitter
 
-  def language(wordNet: WordNet): WLanguage
-
-  def commandName = languageName.toLowerCase
+  def doMain(wordNet: WordNet, output: OutputStream, opts: Scallop)
 
   def main(args: Array[String]) {
+    val commandName = languageName.toLowerCase
     val opts = Scallop(args)
       .version(commandName + " " + WQueryProperties.version + " " + WQueryProperties.copyright)
       .banner(s"""
-                 |Executes a $languageName query
+                 |Executes a $languageName command
                  |
                  |usage: $commandName [OPTIONS] [IFILE] [OFILE]
                  |
                  |Options:
                  | """.stripMargin)
       .opt[String]("command", short = 'c', descr = "Execute a command", required = false)
-      .opt[String]("file", short = 'f', descr = "Read commands from a file", required = false)
+      .opt[String]("file", short = 'f', descr = "Execute commands from a file", required = false)
       .opt[Boolean]("help", short = 'h', descr = "Show help message")
       .opt[Boolean]("quiet", short = 'q', descr = "Silent mode")
       .opt[Boolean]("version", short = 'v', descr = "Show version")
@@ -47,30 +46,12 @@ abstract class WLanguageMain {
         .getOrElse(System.in)
 
       val output = opts.get[String]("OFILE")
-        .map(outputName => new BufferedWriter(new FileWriter(outputName)))
-        .getOrElse(new OutputStreamWriter(System.out))
+        .map(outputName => new BufferedOutputStream(new FileOutputStream(outputName)))
+        .getOrElse(System.out)
 
-      val loader = new WnLoader
-      val emitter = new PlainWQueryEmitter
       val wordNet = loader.load(input)
-      val lang = language(wordNet)
 
-      opts.get[String]("file").map { fileName =>
-        val expressionReader = new ExpressionReader(new InputLineReader(new FileReader(fileName)))
-
-        expressionReader.foreach { expr =>
-          val result = lang.execute(expr)
-          output.write(emitter.emit(result))
-        }
-
-        expressionReader.close()
-      }
-
-      opts.get[String]("command").map { command =>
-        val result = lang.execute(command)
-        output.write(emitter.emit(result))
-      }
-
+      doMain(wordNet, output, opts)
       output.close()
     } catch {
       case e: Help =>
