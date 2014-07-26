@@ -23,6 +23,7 @@
       <sourceFolder url="file://$MODULE_DIR$/../../src/main/resources" type="java-resource" />
       <sourceFolder url="file://$MODULE_DIR$/../../src/test/resources" type="java-test-resource" />
       <sourceFolder url="file://$MODULE_DIR$/../../target/scala-2.10/resource_managed/test" type="java-test-resource" />
+      <excludeFolder url="file://$MODULE_DIR$/../../target" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
@@ -31,8 +32,6 @@
     <orderEntry type="library" scope="TEST" name="SBT: com.beust:jcommander:1.12" level="project" />
     <orderEntry type="library" scope="TEST" name="SBT: junit:junit:3.8.1" level="project" />
     <orderEntry type="library" scope="TEST" name="SBT: org.beanshell:bsh:2.0b4" level="project" />
-    <orderEntry type="library" name="SBT: org.clapper:argot_2.10:1.0.1" level="project" />
-    <orderEntry type="library" name="SBT: org.clapper:grizzled-scala_2.10:1.1.2" level="project" />
     <orderEntry type="library" name="SBT: org.scala-stm:scala-stm_2.10:0.7" level="project" />
     <orderEntry type="library" scope="TEST" name="SBT: org.scalatest:scalatest_2.10:2.0" level="project" />
     <orderEntry type="library" name="SBT: org.scalaz:scalaz-core_2.10:6.0.4" level="project" />

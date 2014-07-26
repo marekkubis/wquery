@@ -37,7 +37,6 @@ libraryDependencies ++= Seq(
     "org.slf4j" % "slf4j-api" % "1.7.5",
     "ch.qos.logback" % "logback-classic" % "1.0.13",
     "org.scala-stm" %% "scala-stm" % "0.7",
-    "org.clapper" %% "argot" % "1.0.1" exclude("jline", "jline"),
     "org.rogach" %% "scallop" % "0.9.5",
     "com.twitter" %% "chill" % "0.4.0",
     "org.scalatest" %% "scalatest" % "2.0" % "test",
