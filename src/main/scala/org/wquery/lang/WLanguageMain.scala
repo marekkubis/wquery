@@ -16,9 +16,11 @@ abstract class WLanguageMain(languageName: String) {
 
   def doMain(wordNet: WordNet, output: OutputStream, opts: Scallop)
 
+  def appendOptions(opts: Scallop) = opts
+
   def main(args: Array[String]) {
     val commandName = languageName.toLowerCase
-    val opts = Scallop(args)
+    val coreOpts = Scallop(args)
       .version(commandName + " " + WQueryProperties.version + " " + WQueryProperties.copyright)
       .banner(s"""
                  |Executes a $languageName command
@@ -34,6 +36,8 @@ abstract class WLanguageMain(languageName: String) {
       .opt[Boolean]("version", short = 'v', descr = "Show version")
       .trailArg[String](name = "IFILE", required = false)
       .trailArg[String](name = "OFILE", required = false)
+
+    val opts = appendOptions(coreOpts)
 
     try {
       opts.verify
