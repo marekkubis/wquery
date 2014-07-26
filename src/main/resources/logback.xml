@@ -6,15 +6,7 @@
         <target>System.err</target>
     </appender>
 
-    <appender name="LOGFILE" class="ch.qos.logback.core.FileAppender">
-        <file>wquery.log</file>
-        <encoder>
-            <pattern>%d{HH:mm:ss.SSS} %-5level [%logger{0}] %msg%n</pattern>
-        </encoder>
-    </appender>
-
     <root level="${org.wquery.log.level:-info}">
         <appender-ref ref="STDERR"/>
-        <appender-ref ref="LOGFILE"/>
     </root>
 </configuration>
