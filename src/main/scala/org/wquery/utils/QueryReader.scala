@@ -1,6 +1,7 @@
 // scalastyle:off return
 
-package org.wquery.console
+package org.wquery.utils
+
 import java.io.{BufferedReader, Reader}
 
 class QueryReader(reader: Reader) {

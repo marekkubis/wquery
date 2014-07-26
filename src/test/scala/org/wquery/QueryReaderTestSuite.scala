@@ -1,7 +1,8 @@
 package org.wquery
 import java.io.StringReader
+
 import org.testng.annotations.Test
-import org.wquery.console.QueryReader
+import org.wquery.utils.QueryReader
 
 class QueryReaderTestSuite extends WQueryTestSuite {
   @Test def testSingleLineComment() = queryReaderFor("123-- comment").readQuery.get should equal ("123")
