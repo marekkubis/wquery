@@ -2,11 +2,12 @@ package org.wquery.update
 
 import java.io._
 
+import jline.console.ConsoleReader
 import org.rogach.scallop.Scallop
 import org.wquery.compile.WCompile
 import org.wquery.lang.WLanguageMain
 import org.wquery.model.WordNet
-import org.wquery.reader.{ExpressionReader, InputLineReader}
+import org.wquery.reader.{ConsoleLineReader, ExpressionReader, InputLineReader}
 
 object WUpdateMain extends WLanguageMain("WUpdate") {
   override def appendOptions(opts: Scallop) = {
@@ -16,7 +17,7 @@ object WUpdateMain extends WLanguageMain("WUpdate") {
 
   def doMain(wordNet: WordNet, output: OutputStream, opts: Scallop) {
     val wupdate = new WUpdate(wordNet)
-    val emit = opts[Boolean]("emit")
+    val emitMode = opts[Boolean]("emit")
 
     opts.get[String]("file").map { fileName =>
       val expressionReader = new ExpressionReader(new InputLineReader(new FileReader(fileName)))
@@ -24,7 +25,7 @@ object WUpdateMain extends WLanguageMain("WUpdate") {
       expressionReader.foreach { expr =>
         val result = wupdate.execute(expr)
 
-        if (emit)
+        if (emitMode)
           System.err.print(emitter.emit(result))
       }
 
@@ -34,8 +35,23 @@ object WUpdateMain extends WLanguageMain("WUpdate") {
     opts.get[String]("command").map { command =>
       val result = wupdate.execute(command)
 
-      if (emit)
+      if (emitMode)
         System.err.print(emitter.emit(result))
+    }
+
+    if (opts[Boolean]("interactive")) {
+      val reader = new ConsoleReader(System.in, System.err)
+      val expressionReader = new ExpressionReader(new ConsoleLineReader(reader))
+
+      reader.setPrompt("wupdate> ")
+      val writer = reader.getOutput
+
+      expressionReader.foreach { expr =>
+        val result = wupdate.execute(expr)
+        writer.write(emitter.emit(result))
+      }
+
+      expressionReader.close()
     }
 
     val wcompile = new WCompile()
