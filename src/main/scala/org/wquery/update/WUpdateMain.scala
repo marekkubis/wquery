@@ -11,8 +11,9 @@ import org.wquery.reader.{ConsoleLineReader, ExpressionReader, InputLineReader}
 
 object WUpdateMain extends WLanguageMain("WUpdate") {
   override def appendOptions(opts: Scallop) = {
-    opts.opt[Boolean]("emit", short = 'e',
-      descr = "Emit output of the executed commands to stderr")
+    opts
+      .opt[Boolean]("emit", short = 'e', descr = "Emit output of the executed commands to stderr")
+      .opt[String]("update", short = 'u', descr = "Same as -c but prepends the 'update' keyword to the command", required = false)
   }
 
   def doMain(wordNet: WordNet, output: OutputStream, opts: Scallop) {
@@ -34,6 +35,13 @@ object WUpdateMain extends WLanguageMain("WUpdate") {
 
     opts.get[String]("command").map { command =>
       val result = wupdate.execute(command)
+
+      if (emitMode)
+        System.err.print(emitter.emit(result))
+    }
+
+    opts.get[String]("update").map { command =>
+      val result = wupdate.execute("update " + command)
 
       if (emitMode)
         System.err.print(emitter.emit(result))
