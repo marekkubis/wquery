@@ -38,3 +38,5 @@ class WQueryUpdateBreaksRelationPropertyException(val property: String, val rela
 class WQueryLoadingException(message: String) extends WQueryException(message)
 
 class WQueryLoaderNotFoundException(name: String) extends WQueryLoadingException("Loader '" + name + "' not found")
+
+class WQueryCommandLineException(val message: String) extends WQueryException(message)

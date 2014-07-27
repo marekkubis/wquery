@@ -2,9 +2,7 @@
 
 package org.wquery.emitter
 
-import org.wquery.lang.Answer
-import org.wquery.lang.Error
-import org.wquery.lang.Result
+import org.wquery.lang.{Answer, Error, Result}
 import org.wquery.model._
 
 class PlainWQueryEmitter extends WQueryEmitter {
@@ -13,7 +11,7 @@ class PlainWQueryEmitter extends WQueryEmitter {
       case Answer(wordNet, dataSet) =>
         emitDataSet(wordNet, dataSet)
       case Error(exception) =>
-        "ERROR: " + exception.getMessage
+        "ERROR: " + exception.getMessage + "\n"
     }
   }
 

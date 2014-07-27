@@ -248,7 +248,7 @@ class UpdatesTestSuite extends WQueryTestSuite {
     result of "{taxi:1:n}.hypo" should equal ("{ cab:3:n hack:5:n taxi:1:n taxicab:1:n } ^hypernym { gypsy cab:1:n }\n{ cab:3:n hack:5:n taxi:1:n taxicab:1:n } ^hypernym { minicab:1:n }\n")
     result of "{taxi:1:n}.^hypo" should equal ("{ cab:3:n hack:5:n taxi:1:n taxicab:1:n } hypernym { car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n }\n")
     result of "update aliases -= `hypernym`, `dst`, `src`, `hypo`" should equal ("(no result)\n")
-    result of "{minicab:1:n}.hypo" should equal ("ERROR: Arc expression hypo references an unknown relation or argument")
+    result of "{minicab:1:n}.hypo" should startWith ("ERROR: Arc expression hypo references an unknown relation or argument")
   }
 
   @Test def testAddMultipleAliases() = {

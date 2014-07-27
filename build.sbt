@@ -38,6 +38,7 @@ libraryDependencies ++= Seq(
     "ch.qos.logback" % "logback-classic" % "1.0.13",
     "org.scala-stm" %% "scala-stm" % "0.7",
     "org.rogach" %% "scallop" % "0.9.5",
+    "jline" % "jline" % "2.12",
     "com.twitter" %% "chill" % "0.4.0",
     "org.scalatest" %% "scalatest" % "2.0" % "test",
     "org.testng" % "testng" % "6.1" % "test"

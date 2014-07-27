@@ -4,11 +4,11 @@ import java.io._
 
 import org.rogach.scallop.Scallop
 import org.rogach.scallop.exceptions.{Help, ScallopException, Version}
-import org.wquery.WQueryProperties
 import org.wquery.emitter.PlainWQueryEmitter
 import org.wquery.loader.WnLoader
 import org.wquery.model.WordNet
 import org.wquery.utils.Logging
+import org.wquery.{WQueryCommandLineException, WQueryProperties}
 
 abstract class WLanguageMain(languageName: String) {
   val loader = new WnLoader
@@ -44,13 +44,19 @@ abstract class WLanguageMain(languageName: String) {
 
     try {
       opts.verify
+      val interactiveMode = opts[Boolean]("interactive")
 
       if (opts[Boolean]("quiet"))
         Logging.tryDisableLoggers()
 
       val input = opts.get[String]("IFILE")
         .map(inputName => new FileInputStream(inputName))
-        .getOrElse(System.in)
+        .getOrElse(
+          if (interactiveMode)
+            throw new WQueryCommandLineException("IFILE has to be specified in the interactive mode")
+          else
+            System.in
+        )
 
       val output = opts.get[String]("OFILE")
         .map(outputName => new BufferedOutputStream(new FileOutputStream(outputName)))
@@ -70,7 +76,11 @@ abstract class WLanguageMain(languageName: String) {
         println()
         opts.printHelp()
         sys.exit(1)
+      case e: WQueryCommandLineException =>
+        println("ERROR: " + e.message)
+        println()
+        opts.printHelp()
+        sys.exit(1)
     }
   }
-
 }

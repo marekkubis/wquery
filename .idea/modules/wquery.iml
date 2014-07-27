@@ -48,6 +48,7 @@
     <orderEntry type="library" name="SBT: org.objenesis:objenesis:1.2" level="project" />
     <orderEntry type="library" name="SBT: org.ow2.asm:asm:4.0" level="project" />
     <orderEntry type="library" name="SBT: org.scala-lang:scala-reflect:2.10.3" level="project" />
+    <orderEntry type="library" name="SBT: jline:jline:2.12" level="project" />
   </component>
 </module>
 
