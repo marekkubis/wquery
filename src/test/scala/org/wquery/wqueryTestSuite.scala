@@ -19,7 +19,7 @@ object WQueryRuntime {
     val wcompile = new WCompile
     val compiledWordNetPath = "target/samplenet.wn"
     val sourceNet = WordNetLoader.demandLoader("deb")
-      .load(new FileInputStream("src/main/assembly/template/samples/samplenet.xml"))
+      .load(new FileInputStream("src/universal/samples/samplenet.xml"))
     wcompile.compile(sourceNet, new FileOutputStream(compiledWordNetPath))
 
     val loadedWordNet = WordNetLoader.demandLoader("wn")
