@@ -22,7 +22,7 @@ class DebLoader extends WordNetLoader with Logging {
     val wordNet = new InMemoryWordNet
 
     factory.newSAXParser.parse(input, new DebHandler(wordNet))
-    info("WordNet loaded via GridLoader")
+    info("WordNet loaded via DebLoader")
     wordNet
   }
 }
