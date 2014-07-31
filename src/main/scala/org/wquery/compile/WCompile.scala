@@ -9,7 +9,6 @@ import org.wquery.model.WordNet
 class WCompile {
   def compile(wordNet: WordNet, ostream: OutputStream) {
     val instantiator = new ScalaKryoInstantiator
-    // TODO instantiator.setRegistrationRequired(false)
 
     val kryo = instantiator.newKryo()
     val output = new Output(ostream)

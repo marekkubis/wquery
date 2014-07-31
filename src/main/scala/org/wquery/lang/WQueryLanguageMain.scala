@@ -1,6 +1,6 @@
 package org.wquery.lang
 
-import java.io.{FileReader, OutputStream, OutputStreamWriter}
+import java.io.{BufferedWriter, FileReader, OutputStream, OutputStreamWriter}
 
 import jline.console.ConsoleReader
 import org.rogach.scallop.Scallop
@@ -16,10 +16,9 @@ class WQueryLanguageMain(languageName: String, language: WordNet => WLanguage) e
         descr = "A file to store query results (printed to stdout if not specified)")
   }
 
-
   def doMain(wordNet: WordNet, output: OutputStream, opts: Scallop) {
     val lang = language(wordNet)
-    val writer = new OutputStreamWriter(output)
+    val writer = new BufferedWriter(new OutputStreamWriter(output))
 
     opts.get[String]("file").map { fileName =>
       val expressionReader = new ExpressionReader(new InputLineReader(new FileReader(fileName)))
