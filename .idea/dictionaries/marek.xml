@@ -9,6 +9,8 @@
       <w>instantiator</w>
       <w>kryo</w>
       <w>railcar</w>
+      <w>stdin</w>
+      <w>stdout</w>
       <w>wcompile</w>
       <w>wlanguage</w>
       <w>wupdate</w>

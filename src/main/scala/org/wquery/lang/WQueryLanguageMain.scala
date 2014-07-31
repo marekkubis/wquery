@@ -8,6 +8,15 @@ import org.wquery.model.WordNet
 import org.wquery.reader.{ConsoleLineReader, ExpressionReader, InputLineReader}
 
 class WQueryLanguageMain(languageName: String, language: WordNet => WLanguage) extends WLanguageMain(languageName) {
+  override def appendOptions(opts: Scallop) = {
+    opts
+      .trailArg[String](name = "IFILE", required = false,
+        descr = "A wordnet model as created by wcompile (read from stdin if not specified)")
+      .trailArg[String](name = "OFILE", required = false,
+        descr = "A file to store query results (printed to stdout if not specified)")
+  }
+
+
   def doMain(wordNet: WordNet, output: OutputStream, opts: Scallop) {
     val lang = language(wordNet)
     val writer = new OutputStreamWriter(output)

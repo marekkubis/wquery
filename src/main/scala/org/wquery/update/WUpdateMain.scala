@@ -14,6 +14,10 @@ object WUpdateMain extends WLanguageMain("WUpdate") {
     opts
       .opt[Boolean]("emit", short = 'e', descr = "Emit output of the executed commands to stderr")
       .opt[String]("update", short = 'u', descr = "Same as -c but prepends the 'update' keyword to the command", required = false)
+      .trailArg[String](name = "IFILE", required = false,
+        descr = "A  wordnet model as created by wcompile (read from stdin if not specified)")
+      .trailArg[String](name = "OFILE", required = false,
+        descr = "A file to store the wordnet model updated by executing the update commands (printed to stdout if not specified)")
   }
 
   def doMain(wordNet: WordNet, output: OutputStream, opts: Scallop) {

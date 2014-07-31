@@ -37,8 +37,6 @@ abstract class WLanguageMain(languageName: String) {
       .opt[Boolean]("help", short = 'h', descr = "Show help message")
       .opt[Boolean]("quiet", short = 'q', descr = "Silent mode")
       .opt[Boolean]("version", short = 'v', descr = "Show version")
-      .trailArg[String](name = "IFILE", required = false)
-      .trailArg[String](name = "OFILE", required = false)
 
     val opts = appendOptions(coreOpts)
 

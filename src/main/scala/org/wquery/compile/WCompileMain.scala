@@ -13,7 +13,7 @@ object WCompileMain {
     val opts = Scallop(args)
       .version("wcompile " + WQueryProperties.version + " " + WQueryProperties.copyright)
       .banner( """
-                 |Saves a wordnet loaded from a file in a binary representation
+                 |Creates a binary model of a wordnet
                  |
                  |usage:
                  |
@@ -25,9 +25,12 @@ object WCompileMain {
       .opt[Boolean]("quiet", short = 'q', descr = "Silent mode")
       .opt[Boolean]("version", short = 'v', descr = "Show version")
       .opt[String]("type", short = 't', default = () => Some("deb"),
-        validate = arg => List("deb", "lmf").contains(arg), descr = "Set input file type - either deb or lmf")
-      .trailArg[String](name = "IFILE", required = false)
-      .trailArg[String](name = "OFILE", required = false)
+        validate = arg => List("deb", "lmf").contains(arg),
+        descr = "Set input file type - either deb or lmf")
+      .trailArg[String](name = "IFILE", required = false,
+        descr = "A wordnet in the format specified by the -t option (read from stdin if not specified)")
+      .trailArg[String](name = "OFILE", required = false,
+        descr = "A file to store the wordnet model (printed to stdout if not specified)")
 
     try {
       opts.verify
