@@ -6,6 +6,7 @@ import org.rogach.scallop._
 import org.rogach.scallop.exceptions.{Help, ScallopException, Version}
 import org.wquery.WQueryProperties
 import org.wquery.loader.WordNetLoader
+import org.wquery.printer.WnPrinter
 import org.wquery.utils.Logging
 
 object WCompileMain {
@@ -43,12 +44,12 @@ object WCompileMain {
         .map(ifile => new FileInputStream(ifile))
         .getOrElse(System.in)
       val wordNet = loader.load(input)
-      val wcompile = new WCompile
+      val printer = new WnPrinter
       val outputStream = opts.get[String]("OFILE")
         .map(outputFileName => new BufferedOutputStream(new FileOutputStream(outputFileName)))
         .getOrElse(Console.out)
 
-      wcompile.compile(wordNet, outputStream)
+      printer.print(wordNet, outputStream)
     } catch {
       case e: Help =>
         opts.printHelp()

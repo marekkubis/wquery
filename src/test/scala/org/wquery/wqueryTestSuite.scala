@@ -5,10 +5,10 @@ import java.io.{FileInputStream, FileOutputStream}
 import org.scalatest.Matchers
 import org.scalatest.testng.TestNGSuite
 import org.testng.annotations.BeforeClass
-import org.wquery.compile.WCompile
 import org.wquery.emitter.{PlainWQueryEmitter, WQueryEmitter}
 import org.wquery.lang.{Answer, Error}
 import org.wquery.loader.WordNetLoader
+import org.wquery.printer.WnPrinter
 import org.wquery.update.WUpdate
 
 object WQueryRuntime {
@@ -16,11 +16,11 @@ object WQueryRuntime {
   val emitter = new PlainWQueryEmitter
 
   def createWQuery = {
-    val wcompile = new WCompile
+    val printer = new WnPrinter
     val compiledWordNetPath = "target/samplenet.wn"
     val sourceNet = WordNetLoader.demandLoader("deb")
       .load(new FileInputStream("src/universal/samples/samplenet.xml"))
-    wcompile.compile(sourceNet, new FileOutputStream(compiledWordNetPath))
+    printer.print(sourceNet, new FileOutputStream(compiledWordNetPath))
 
     val loadedWordNet = WordNetLoader.demandLoader("wn")
       .load(new FileInputStream(compiledWordNetPath))

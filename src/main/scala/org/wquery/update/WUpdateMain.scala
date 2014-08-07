@@ -4,9 +4,9 @@ import java.io._
 
 import jline.console.ConsoleReader
 import org.rogach.scallop.Scallop
-import org.wquery.compile.WCompile
 import org.wquery.lang.WLanguageMain
 import org.wquery.model.WordNet
+import org.wquery.printer.WnPrinter
 import org.wquery.reader.{ConsoleLineReader, ExpressionReader, InputLineReader}
 
 object WUpdateMain extends WLanguageMain("WUpdate") {
@@ -66,8 +66,8 @@ object WUpdateMain extends WLanguageMain("WUpdate") {
       expressionReader.close()
     }
 
-    val wcompile = new WCompile()
+    val printer = new WnPrinter()
 
-    wcompile.compile(wupdate.wordNet, output)
+    printer.print(wupdate.wordNet, output)
   }
 }
