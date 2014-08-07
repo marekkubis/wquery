@@ -5,7 +5,7 @@ import java.io.{BufferedOutputStream, FileInputStream, FileOutputStream}
 import org.rogach.scallop._
 import org.rogach.scallop.exceptions.{Help, ScallopException, Version}
 import org.wquery.WQueryProperties
-import org.wquery.loader.{DebLoader, LmfLoader}
+import org.wquery.loader.WordNetLoader
 import org.wquery.utils.Logging
 
 object WCompileMain {
@@ -25,7 +25,7 @@ object WCompileMain {
       .opt[Boolean]("quiet", short = 'q', descr = "Silent mode")
       .opt[Boolean]("version", short = 'v', descr = "Show version")
       .opt[String]("type", short = 't', default = () => Some("deb"),
-        validate = arg => List("deb", "lmf").contains(arg),
+        validate = arg => WordNetLoader.loaders.contains(arg),
         descr = "Set input file type - either deb or lmf")
       .trailArg[String](name = "IFILE", required = false,
         descr = "A wordnet in the format specified by the -t option (read from stdin if not specified)")
@@ -38,17 +38,10 @@ object WCompileMain {
       if (opts[Boolean]("quiet"))
         Logging.tryDisableLoggers()
 
-      val loader = opts[String]("type") match {
-        case "deb" =>
-          new DebLoader()
-        case "lmf" =>
-          new LmfLoader()
-      }
-
+      val loader = WordNetLoader.demandLoader(opts[String]("type"))
       val input = opts.get[String]("IFILE")
         .map(ifile => new FileInputStream(ifile))
         .getOrElse(System.in)
-
       val wordNet = loader.load(input)
       val wcompile = new WCompile
       val outputStream = opts.get[String]("OFILE")
