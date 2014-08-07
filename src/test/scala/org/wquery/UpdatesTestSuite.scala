@@ -172,15 +172,14 @@ class UpdatesTestSuite extends WQueryTestSuite {
    result of "{apple:1:n}.hypernym" should equal ("{ apple:1:n } hypernym { person:2:n }\n")
  }
 
-//  TODO reintroduce STM
-//  @Test def testSetLinksFunctionalPropertyBreak() = {
-//    result of "update `desc`, `src` properties := `functional`" should equal ("(no result)\n")
-//    result of "update {apple:1} desc := `aaa`" should equal ("(no result)\n")
-//    result of "{apple:1}.desc" should equal ("{ apple:1:n } desc aaa\n")
-//    result of "update {apple:1} desc := `bbb` union `ddd`" should startWith ("ERROR: Update breaks property 'functional' of relation 'desc' on argument 'src'")
-//    result of "{apple:1}.desc" should equal ("{ apple:1:n } desc aaa\n")
-//    result of "update `desc`, `src` properties -= `functional`" should equal ("(no result)\n")
-//  }
+  @Test def testSetLinksFunctionalPropertyBreak() = {
+    result of "update `desc`, `src` properties := `functional`" should equal ("(no result)\n")
+    result of "update {apple:1} desc := `aaa`" should equal ("(no result)\n")
+    result of "{apple:1}.desc" should equal ("{ apple:1:n } desc aaa\n")
+    result of "update {apple:1} desc := `bbb` union `ddd`" should startWith ("ERROR: Update breaks property 'functional' of relation 'desc' on argument 'src'")
+    result of "{apple:1}.desc" should equal ("{ apple:1:n } desc aaa\n")
+    result of "update `desc`, `src` properties -= `functional`" should equal ("(no result)\n")
+  }
 
   @Test def testSetLinksRequiredByPropertyBreak() = {
     result of "update `desc`, `src` properties += `required`" should equal ("(no result)\n")
@@ -223,14 +222,13 @@ class UpdatesTestSuite extends WQueryTestSuite {
     result of "{compact:3:n}.hypernym" should equal ("{ coupe:1:n compact:3:n compact car:1:n } hypernym { car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n }\n")
   }
 
-//  TODO reintroduce STM
-//  @Test def testMergeSynsetsInTransitiveRelationTree() = {
-//    result of "update pair_properties += `hypernym`, `src`, `dst`, `antisymmetric`, `preserve`" should equal ("(no result)\n")
-//    result of "update pair_properties += `hypernym`, `src`, `dst`, `transitive`, `preserve`" should equal ("(no result)\n")
-//    result of "merge {`motor vehicle`} union {`wheeled vehicle`}" should startWith ("ERROR: Update breaks property 'transitive antisymmetry' of relation 'hypernym'")
-//    result of "update pair_properties -= `hypernym`, `src`, `dst`, `antisymmetric`, `preserve`" should equal ("(no result)\n")
-//    result of "update pair_properties -= `hypernym`, `src`, `dst`, `transitive`, `preserve`" should equal ("(no result)\n")
-//  }
+  @Test def testMergeSynsetsInTransitiveRelationTree() = {
+    result of "update pair_properties += `hypernym`, `src`, `dst`, `antisymmetric`, `preserve`" should equal ("(no result)\n")
+    result of "update pair_properties += `hypernym`, `src`, `dst`, `transitive`, `preserve`" should equal ("(no result)\n")
+    result of "merge {`motor vehicle`} union {`wheeled vehicle`}" should startWith ("ERROR: Update breaks property 'transitive antisymmetry' of relation 'hypernym'")
+    result of "update pair_properties -= `hypernym`, `src`, `dst`, `antisymmetric`, `preserve`" should equal ("(no result)\n")
+    result of "update pair_properties -= `hypernym`, `src`, `dst`, `transitive`, `preserve`" should equal ("(no result)\n")
+  }
 
   @Test def testMergeSenses() = {
     result of "merge 'funny wagon':1:n union 'beach wagon':1:n" should equal ("(no result)\n")

@@ -10,7 +10,7 @@ import scalaz.Scalaz._
 
 class InMemoryWordNet extends WordNet {
   private val version = WQueryProperties.version // for the purpose of serialization
-  private val successors = MMap[Relation, MMap[(String, Any), Vector[Map[String, Any]]]]()
+  private val store = new InMemoryWordNetStore(TMap())
   private val aliasMap = scala.collection.mutable.Map[Relation, List[Arc]]()
   private var relationsList = List[Relation]()
 
@@ -48,7 +48,7 @@ class InMemoryWordNet extends WordNet {
   }
 
   private def createRelation(relation: Relation) = atomic { implicit txn =>
-    successors(relation) = TMap[(String, Any), Vector[Map[String, Any]]]()
+    store.successors(relation) = TMap[(String, Any), Vector[Map[String, Any]]]()
   }
 
   def removeRelation(relation: Relation) = atomic { implicit txn =>
@@ -56,7 +56,7 @@ class InMemoryWordNet extends WordNet {
       throw new WQueryModelException("Cannot remove the mandatory relation '" + relation + "'")
 
     relationsList = relationsList.filterNot(_ == relation)
-    successors.remove(relation)
+    store.successors.remove(relation)
   }
 
   def setRelations(newRelations: List[Relation]) {
@@ -71,7 +71,7 @@ class InMemoryWordNet extends WordNet {
   }
 
   private def follow(relation: Relation, from: String, through: Any, to: String) = atomic { implicit txn =>
-    successors(relation).get((from, through)).map(_.map(succ => succ(to))).orZero
+    store.successors(relation).get((from, through)).map(_.map(succ => succ(to))).orZero
   }
 
   def getSenses(synset: Synset) = follow(WordNet.SynsetToSenses, Relation.Src, synset, Relation.Dst).toList.asInstanceOf[List[Sense]]
@@ -88,11 +88,11 @@ class InMemoryWordNet extends WordNet {
     val destinations = from.tail
 
     if (sourceValues.isEmpty) {
-      for (((src, obj), destinationMaps) <- successors(relation) if (src == sourceName))
+      for (((src, obj), destinationMaps) <- store.successors(relation) if (src == sourceName))
         appendDestinationTuples(destinationMaps, destinations, to, relation, buffer, withArcs)
     } else {
       for (sourceValue <- sourceValues)
-        successors(relation).get((sourceName, sourceValue))
+        store.successors(relation).get((sourceName, sourceValue))
           .map(appendDestinationTuples(_, destinations, to, relation, buffer, withArcs))
     }
 
@@ -145,7 +145,7 @@ class InMemoryWordNet extends WordNet {
   }
 
   private def extendWithRelationTuples(extensionSet: ExtensionSet, relation: Relation, inverted: Boolean) = atomic { implicit txn =>
-    val relationSuccessors = successors(relation)
+    val relationSuccessors = store.successors(relation)
     val builder = new ExtensionSetBuilder(extensionSet)
 
     val (through, to) = if (inverted)
@@ -234,11 +234,11 @@ class InMemoryWordNet extends WordNet {
   def addPartOfSpeechSymbol(pos: String) { if (!isPartOfSpeechSymbol(pos)) addNode(POSType, pos) }
 
   private def isWord(word: String) = atomic { implicit txn =>
-    successors(WordNet.WordSet).get(Relation.Src, word).some(!_.isEmpty).none(false)
+    store.successors(WordNet.WordSet).get(Relation.Src, word).some(!_.isEmpty).none(false)
   }
 
   private def isPartOfSpeechSymbol(pos: String) = atomic { implicit txn =>
-    successors(WordNet.PosSet).get(Relation.Src, pos).some(!_.isEmpty).none(false)
+    store.successors(WordNet.PosSet).get(Relation.Src, pos).some(!_.isEmpty).none(false)
   }
 
   private def addNode(nodeType: NodeType, node: Any) = atomic { implicit txn =>
@@ -590,7 +590,7 @@ class InMemoryWordNet extends WordNet {
   }
 
   private def addEdge(relation: Relation, tuple: Map[String, Any]) = atomic { implicit txn =>
-    val relationSuccessors = successors(relation)
+    val relationSuccessors = store.successors(relation)
 
     for ((sourceName, sourceValue) <- tuple) {
       if (!(relationSuccessors.contains((sourceName, sourceValue)))) {
@@ -603,7 +603,7 @@ class InMemoryWordNet extends WordNet {
   }
 
   private def removeEdge(relation: Relation, tuple: Map[String, Any]) = atomic { implicit txn =>
-    val relationSuccessors = successors(relation)
+    val relationSuccessors = store.successors(relation)
 
     for ((sourceName, sourceValue) <- tuple if relationSuccessors.contains((sourceName, sourceValue))) {
       relationSuccessors((sourceName, sourceValue)) = relationSuccessors((sourceName, sourceValue)).filterNot(_ == tuple)
@@ -612,11 +612,11 @@ class InMemoryWordNet extends WordNet {
   }
 
   private def containsLink(relation: Relation, tuple: Map[String, Any]) = atomic { implicit txn =>
-    successors(relation).get(Relation.Src, tuple(Relation.Src)).some(_.contains(tuple)).none(false)
+    store.successors(relation).get(Relation.Src, tuple(Relation.Src)).some(_.contains(tuple)).none(false)
   }
 
   private def handleFunctionalForPropertyForAddLink(relation: Relation, tuple: Map[String, Any]) = atomic { implicit txn =>
-    val relationSuccessors = successors(relation)
+    val relationSuccessors = store.successors(relation)
 
     for (param <- ~functionalFor.get(relation) if (tuple.contains(param))) {
       val node = tuple(param)
@@ -752,7 +752,7 @@ class InMemoryWordNet extends WordNet {
 
   def removeLinkByNode(relation: Relation, tuple: Map[String, Any], node: Option[Any], removeFunction: Map[String, Any] => Unit,
                        symmetricEdge: Boolean = false, withDependentNodes: Boolean = true, withCollectionDependentNodes: Boolean = true): Unit = atomic { implicit txn =>
-    val relationSuccessors = successors(relation)
+    val relationSuccessors = store.successors(relation)
 
     for ((sourceName, sourceValue) <- tuple if (relationSuccessors.contains(sourceName, sourceValue))) {
       val updatedSuccessors = relationSuccessors((sourceName, sourceValue)).filterNot(_ == tuple)
@@ -802,7 +802,7 @@ class InMemoryWordNet extends WordNet {
 
   def removeMatchingLinksByNode(relation: Relation, tuple: Map[String, Any], node: Option[Any],
                                 withDependentNodes: Boolean, withCollectionDependentNodes: Boolean) = atomic { implicit txn =>
-    val relationSuccessors = successors(relation)
+    val relationSuccessors = store.successors(relation)
 
     for ((sourceName, sourceValue) <- tuple if (relationSuccessors.contains(sourceName, sourceValue))) {
       val matchingSuccessors = relationSuccessors((sourceName, sourceValue)).filter(succ => tuple.forall(elem => succ.exists(_ == elem)))
@@ -822,7 +822,7 @@ class InMemoryWordNet extends WordNet {
 
   def replaceLinks(relation: Relation, destinationNames: List[String], destinations: List[List[Any]],
                    addFunction: Map[String, Any] => Unit, removeFunction: Map[String, Any] => Unit) = atomic { implicit txn =>
-    successors(relation).clear()
+    store.successors(relation).clear()
 
     for (destination <- destinations)
       addLink(relation, destinationNames.zip(destination).toMap)
@@ -831,7 +831,7 @@ class InMemoryWordNet extends WordNet {
   def replaceLinksBySource(relation: Relation, sources: List[List[Any]], sourceNames: List[String],
                            destinationNames: List[String], destinations: List[List[Any]],
                            addFunction: Map[String, Any] => Unit, removeFunction: Map[String, Any] => Unit) = atomic { implicit txn =>
-    val relationSuccessors = successors(relation)
+    val relationSuccessors = store.successors(relation)
 
     for (source <- sources; i <- 0 until sourceNames.size) {
       val sourceName = sourceNames(i)
@@ -888,7 +888,7 @@ class InMemoryWordNet extends WordNet {
   }
 
   private def copyLinks(relation: Relation, requiredType: DataType, source: Any, destination: Any) = atomic { implicit txn =>
-    val relationSuccessors = successors(relation)
+    val relationSuccessors = store.successors(relation)
 
     for (argument <- relation.arguments if argument.nodeType == requiredType) {
       for (succs <- relationSuccessors.get((argument.name, source)); successor <- succs) {

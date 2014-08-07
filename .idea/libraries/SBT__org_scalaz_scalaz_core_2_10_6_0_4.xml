@@ -3,11 +3,7 @@
     <CLASSES>
       <root url="jar://$USER_HOME$/.ivy2/cache/org.scalaz/scalaz-core_2.10/jars/scalaz-core_2.10-6.0.4.jar!/" />
     </CLASSES>
-    <JAVADOC>
-      <root url="jar://$USER_HOME$/.ivy2/cache/org.scalaz/scalaz-core_2.10/docs/scalaz-core_2.10-6.0.4-javadoc.jar!/" />
-    </JAVADOC>
-    <SOURCES>
-      <root url="jar://$USER_HOME$/.ivy2/cache/org.scalaz/scalaz-core_2.10/srcs/scalaz-core_2.10-6.0.4-sources.jar!/" />
-    </SOURCES>
+    <JAVADOC />
+    <SOURCES />
   </library>
 </component>

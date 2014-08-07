@@ -8,9 +8,11 @@
       <w>hyponyms</w>
       <w>instantiator</w>
       <w>kryo</w>
+      <w>ostream</w>
       <w>railcar</w>
       <w>stdin</w>
       <w>stdout</w>
+      <w>succ</w>
       <w>wcompile</w>
       <w>wlanguage</w>
       <w>wupdate</w>
