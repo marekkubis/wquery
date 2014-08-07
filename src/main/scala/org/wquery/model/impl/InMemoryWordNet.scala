@@ -899,8 +899,4 @@ class InMemoryWordNet extends WordNet {
       }
     }
   }
-
-  override def open(url: String) = { /* do notihhg */ }
-
-  override def close() = { /* do notihhg */ }
 }
