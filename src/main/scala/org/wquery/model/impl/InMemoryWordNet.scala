@@ -2,14 +2,13 @@ package org.wquery.model.impl
 
 import org.wquery.model._
 import org.wquery.path.operations.NewSynset
-import org.wquery.{WQueryModelException, WQueryProperties, WQueryUpdateBreaksRelationPropertyException}
+import org.wquery.{WQueryModelException, WQueryUpdateBreaksRelationPropertyException}
 
 import scala.collection.mutable.{ListBuffer, Map => MMap}
 import scala.concurrent.stm._
 import scalaz.Scalaz._
 
 class InMemoryWordNet extends WordNet {
-  private val version = WQueryProperties.version // for the purpose of serialization
   private val store = new InMemoryWordNetStore(TMap())
   private val aliasMap = scala.collection.mutable.Map[Relation, List[Arc]]()
   private var relationsList = List[Relation]()

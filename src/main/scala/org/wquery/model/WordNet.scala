@@ -1,10 +1,9 @@
 package org.wquery.model
 
-import org.wquery.WQueryModelException
+import org.wquery.{WQueryModelException, WQueryProperties}
 
 import scala.collection.mutable.{Map => MMap}
 import scalaz.Scalaz._
-import scalaz._
 
 trait WordNet {
   class Schema {
@@ -29,6 +28,8 @@ trait WordNet {
       getRelation(name, arguments, includingMeta).isDefined
     }
   }
+
+  val version = WQueryProperties.version // for the purpose of serialization
 
   // querying
   def relations: List[Relation]
