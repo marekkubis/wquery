@@ -16,3 +16,4 @@ class WnPrinter extends WordNetPrinter {
     out.close()
   }
 }
+
