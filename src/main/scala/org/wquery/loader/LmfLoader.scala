@@ -21,6 +21,7 @@ class LmfLoader extends WordNetLoader with Logging {
     val factory = SAXParserFactory.newInstance
     val wordNet = new InMemoryWordNet
 
+    factory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false)
     factory.newSAXParser.parse(input, new LmfHandler(wordNet))
     info("WordNet loaded via LmfLoader")
     wordNet
