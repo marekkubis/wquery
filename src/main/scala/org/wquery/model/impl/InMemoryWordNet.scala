@@ -75,6 +75,8 @@ class InMemoryWordNet extends WordNet {
 
   def getSenses(synset: Synset) = follow(WordNet.SynsetToSenses, Relation.Src, synset, Relation.Dst).toList.asInstanceOf[List[Sense]]
 
+  def getSenses(word: String) = follow(WordNet.WordFormToSenses, Relation.Src, word, Relation.Dst).toList.asInstanceOf[List[Sense]]
+
   def getSynset(sense: Sense) = {
     val synsets = follow(WordNet.SenseToSynset, Relation.Src, sense, Relation.Dst).toList
 

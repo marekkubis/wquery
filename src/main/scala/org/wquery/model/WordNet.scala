@@ -44,6 +44,8 @@ trait WordNet {
 
   def getSenses(synset: Synset): List[Sense]
 
+  def getSenses(word: String): List[Sense]
+
   def getSynset(sense: Sense): Option[Synset]
 
   // schema
