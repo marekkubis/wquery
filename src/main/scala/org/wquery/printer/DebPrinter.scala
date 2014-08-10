@@ -40,7 +40,7 @@ class DebPrinter extends WordNetPrinter {
         </SYNSET>}
       </SYNSETS>
     val writer = new OutputStreamWriter(output)
-    XML.write(writer, wordNetXml, "utf-8", true, null)
+    XML.write(writer, Utility.trim(wordNetXml), "utf-8", true, null)
     writer.flush()
   }
 }

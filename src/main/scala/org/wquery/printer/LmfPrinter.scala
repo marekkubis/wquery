@@ -4,7 +4,7 @@ import java.io.{OutputStream, OutputStreamWriter}
 
 import org.wquery.model._
 
-import scala.xml.XML
+import scala.xml.{Utility, XML}
 
 class LmfPrinter extends WordNetPrinter {
   override def print(wordNet: WordNet, output: OutputStream) = {
@@ -53,7 +53,7 @@ class LmfPrinter extends WordNetPrinter {
         </Lexicon>
       </LexicalResource>
     val writer = new OutputStreamWriter(output)
-    XML.write(writer, wordNetXml, "utf-8", true, null)
+    XML.write(writer, Utility.trim(wordNetXml), "utf-8", true, null)
     writer.flush()
   }
 }
