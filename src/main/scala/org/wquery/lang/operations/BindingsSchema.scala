@@ -1,8 +1,9 @@
 package org.wquery.lang.operations
 
 import org.wquery.model._
+
+import scalaz.Scalaz._
 import scalaz._
-import Scalaz._
 
 class BindingsSchema(val parent: Option[BindingsSchema], updatesParent: Boolean) extends BindingsPattern {
   override def bindStepVariableType(name: String, types: Set[DataType]) {
@@ -58,6 +59,12 @@ class BindingsSchema(val parent: Option[BindingsSchema], updatesParent: Boolean)
 
     for ((name, (op, left, right)) <- pattern.tupleVariablesTypes)
       sum.bindTupleVariableType(name, op, left, right)
+
+    for ((name, op) <- setVariablesTypes)
+      sum.bindSetVariableType(name, op)
+
+    for ((name, op) <- pattern.setVariablesTypes)
+      sum.bindSetVariableType(name, op)
 
     sum
   }

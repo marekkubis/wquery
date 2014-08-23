@@ -2,6 +2,7 @@
 <!-- 
 This file contains a simple lexical ontology distributed with WQuery for testing purposes.
 It has been derived from Princeton WordNet by choosing ca. 90 synsets.
+Some additional synsets have been created for the purpose of test queries.
 Princeton WordNet is distributed under the following license.
 
 WordNet Release 3.0
@@ -50,9 +51,131 @@ Princeton University and LICENSEE agrees to preserve same.
 		</SYNONYM>
 		<ILR type="hypernym">103791235</ILR>
         <ILR type="del_this_rel">103791235</ILR>
+        <ILR type="ili">102958343-PL</ILR>
         <NL>false</NL>
+        <LANG>en</LANG>
+        <USAGE>An invalid example of usage example.</USAGE>
+        <BCS>true</BCS>
 	</SYNSET>
-	<SYNSET>
+    <SYNSET>
+        <ID>102958343-PL</ID>
+        <POS>n</POS>
+        <DESC>a motor vehicle with four wheels; usually propelled by an internal combustion engine; "he needs a car to get to work"</DESC>
+        <SYNONYM>
+            <LITERAL sense="1">samochód</LITERAL>
+            <LITERAL sense="2">auto</LITERAL>
+        </SYNONYM>
+        <ILR type="ili">102958343</ILR>
+        <NL>false</NL>
+        <LANG>pl</LANG>
+        <BCS>false</BCS>
+    </SYNSET>
+    <SYNSET>
+        <ID>102958343-ERR-1</ID>
+        <POS>n</POS>
+        <DESC>Invalid synset introduced for the purpose of validation queries</DESC>
+        <SYNONYM>
+            <LITERAL sense="3">auto</LITERAL>
+        </SYNONYM>
+        <ILR type="hypernym">102958343-PL</ILR>
+        <NL>false</NL>
+        <LANG>pl</LANG>
+        <BCS>false</BCS>
+    </SYNSET>
+    <SYNSET>
+        <ID>102958343-ERR-2</ID>
+        <POS>v</POS>
+        <DESC>Invalid synset introduced for the purpose of validation queries</DESC>
+        <SYNONYM>
+            <LITERAL sense="3">auto</LITERAL>
+        </SYNONYM>
+        <ILR type="hypernym">102958343-ERR-1</ILR>
+        <ILR type="hypernym">102958343-PL</ILR>
+        <NL>false</NL>
+        <LANG>pl</LANG>
+        <BCS>false</BCS>
+    </SYNSET>
+    <SYNSET>
+        <ID>102958343-ERR-3</ID>
+        <POS>n</POS>
+        <DESC>Invalid synset introduced for the purpose of validation queries</DESC>
+        <SYNONYM>
+            <LITERAL sense="4">auto</LITERAL>
+            <LITERAL sense="5">auto</LITERAL>
+        </SYNONYM>
+        <ILR type="hypernym">102958343-ERR-2</ILR>
+        <NL>false</NL>
+        <LANG>pl</LANG>
+        <BCS>false</BCS>
+    </SYNSET>
+    <SYNSET>
+        <ID>102958343-ERR-MER</ID>
+        <POS>n</POS>
+        <DESC>Invalid synset introduced for the purpose of validation queries</DESC>
+        <SYNONYM>
+            <LITERAL sense="1">wheel</LITERAL>
+        </SYNONYM>
+        <ILR type="hypernym">102958343-ERR-2</ILR>
+        <ILR type="partial_holonym">102958343-ERR-2</ILR>
+        <ILR type="partial_holonym">102958343-ERR-3</ILR>
+        <ILR type="near_antonym">102958343-ERR-MER-ANT</ILR>
+        <NL>false</NL>
+        <LANG>pl</LANG>
+        <BCS>false</BCS>
+    </SYNSET>
+    <SYNSET>
+        <ID>102958343-ERR-MET-ANT</ID>
+        <POS>n</POS>
+        <DESC>Invalid synset introduced for the purpose of validation queries</DESC>
+        <SYNONYM>
+            <LITERAL sense="6">auto</LITERAL>
+        </SYNONYM>
+        <ILR type="hypernym">102958343-ERR-3</ILR>
+        <ILR type="near_antonym">102958343-ERR-MER</ILR>
+        <NL>false</NL>
+        <LANG>pl</LANG>
+        <BCS>false</BCS>
+    </SYNSET>
+    <SYNSET>
+        <ID>ERR-MERGE-1</ID>
+        <POS>n</POS>
+        <DESC>Invalid synset introduced for the purpose of validation queries</DESC>
+        <SYNONYM>
+            <LITERAL sense="1">generated</LITERAL>
+            <LITERAL sense="1">prepared</LITERAL>
+        </SYNONYM>
+        <ILR type="hypernym">102958343-ERR-MER</ILR>
+        <NL>false</NL>
+        <LANG>en</LANG>
+        <BCS>false</BCS>
+    </SYNSET>
+    <SYNSET>
+        <ID>ERR-MERGE-2</ID>
+        <POS>n</POS>
+        <DESC>Invalid synset introduced for the purpose of validation queries</DESC>
+        <SYNONYM>
+            <LITERAL sense="2">generated</LITERAL>
+            <LITERAL sense="2">prepared</LITERAL>
+        </SYNONYM>
+        <ILR type="hypernym">102958343-ERR-MER</ILR>
+        <NL>false</NL>
+        <LANG>en</LANG>
+        <BCS>false</BCS>
+    </SYNSET>
+    <SYNSET>
+        <ID>ERR-MERGE-3</ID>
+        <POS>n</POS>
+        <DESC>Invalid synset introduced for the purpose of validation queries</DESC>
+        <SYNONYM>
+            <LITERAL sense="3">generated</LITERAL>
+            <LITERAL sense="3">prepared</LITERAL>
+        </SYNONYM>
+        <ILR type="hypernym">102958343-ERR-MER</ILR>
+        <NL>false</NL>
+        <LANG>en</LANG>
+        <BCS>false</BCS>
+    </SYNSET>
+    <SYNSET>
 		<ID>100007846</ID>
 		<POS>n</POS>
 		<DESC>a human being; "there was too much for one person to do"</DESC>
@@ -69,6 +192,9 @@ Princeton University and LICENSEE agrees to preserve same.
 		<ILR type="hypernym">100007347</ILR>
         <ILR type="similar">105217688</ILR>
         <NL>false</NL>
+        <SNOTE>testnote</SNOTE>
+        <LANG>en</LANG>
+        <BCS>true</BCS>
 	</SYNSET>
 	<SYNSET>
 		<ID>105217688</ID>

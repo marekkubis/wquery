@@ -858,8 +858,10 @@ class InMemoryWordNet extends WordNet {
     follow(WordNet.SenseToSynset, Relation.Src, sense, Relation.Dst).head.asInstanceOf[Synset]
   }
 
-  def merge(synsets: List[Synset], senses: List[Sense]) = atomic { implicit txn =>
-    if (!synsets.isEmpty || !senses.isEmpty) {
+  def merge(synsetsList: List[Synset], sensesList: List[Sense]) = atomic { implicit txn =>
+    if (!synsetsList.isEmpty || !sensesList.isEmpty) {
+      val synsets = synsetsList.distinct
+      val senses = sensesList.distinct
       val (destination, sources) = if (synsets.isEmpty) (Synset("synset#" + senses.head.toString), Nil) else (synsets.head, synsets.tail)
       val notAnyRelations = relations.filter(relation => relation.name != Relation.AnyName)
       val destinationType = DataType.fromValue(destination)

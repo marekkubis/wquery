@@ -1,11 +1,12 @@
 package org.wquery.path.operations
 
 import org.wquery.WQueryEvaluationException
-import org.wquery.model._
 import org.wquery.lang._
 import org.wquery.lang.operations._
+import org.wquery.model._
+
+import scalaz.Scalaz._
 import scalaz._
-import Scalaz._
 
 sealed abstract class Condition extends ReferencesVariables {
   def satisfied(wordNet: WordNet, bindings: Bindings, context: Context): Boolean
@@ -76,6 +77,8 @@ case class BinaryCondition(op: String, leftOp: AlgebraOp, rightOp: AlgebraOp) ex
         leftGroup.forall { leftElem => { (leftElem: @unchecked) match {
           case (elem: String, _) =>
             regexps.forall(_.findFirstIn(elem).isDefined)
+          case _ =>
+            false
         }}}
       case _ =>
         tryComparingAsSingletons(leftResult, rightResult)
