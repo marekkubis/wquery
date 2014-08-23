@@ -14,10 +14,11 @@ import org.wquery.update.WUpdate
 object WQueryTestSuiteRuntime {
   val SampleNetPath = "src/universal/samples/samplenet.xml"
   val CompiledSampleNetPath = "target/samplenet.wn"
-  val wquery = newWUpdate
-  val emitter = new PlainWQueryEmitter
 
   compileSampleNet
+
+  val wupdate = newWUpdate
+  val emitter = new PlainWQueryEmitter
 
   def compileSampleNet = {
     val printer = new WnPrinter
@@ -70,7 +71,7 @@ abstract class WQueryTestSuite extends TestNGSuite with Matchers {
   }
 
   @BeforeClass def setUp() {
-    wupdate = WQueryTestSuiteRuntime.wquery
+    wupdate = WQueryTestSuiteRuntime.wupdate
     emitter = WQueryTestSuiteRuntime.emitter
     result = new ResultOf(wupdate)
   }   
