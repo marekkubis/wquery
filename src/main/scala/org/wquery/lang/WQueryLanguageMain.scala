@@ -40,6 +40,7 @@ class WQueryLanguageMain(languageName: String, language: WordNet => WLanguage) e
 
     if (opts[Boolean]("interactive")) {
       val reader = new ConsoleReader(System.in, output)
+      reader.addCompleter(new WLanguageCompleter(wordNet))
       val expressionReader = new ExpressionReader(new ConsoleLineReader(reader, languageName.toLowerCase + "> "))
       val writer = reader.getOutput
 

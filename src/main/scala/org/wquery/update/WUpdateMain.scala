@@ -4,7 +4,7 @@ import java.io._
 
 import jline.console.ConsoleReader
 import org.rogach.scallop.Scallop
-import org.wquery.lang.WLanguageMain
+import org.wquery.lang.{WLanguageCompleter, WLanguageMain}
 import org.wquery.model.WordNet
 import org.wquery.printer.WnPrinter
 import org.wquery.reader.{ConsoleLineReader, ExpressionReader, InputLineReader}
@@ -53,6 +53,7 @@ object WUpdateMain extends WLanguageMain("WUpdate") {
 
     if (opts[Boolean]("interactive")) {
       val reader = new ConsoleReader(System.in, System.err)
+      reader.addCompleter(new WLanguageCompleter(wordNet))
       val expressionReader = new ExpressionReader(new ConsoleLineReader(reader, "wupdate> "))
       val writer = reader.getOutput
 
