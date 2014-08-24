@@ -79,11 +79,7 @@ class FiltersTestSuite extends WQueryTestSuite {
     
   @Test def testSenseInSensesFalse() = result of "[individual:1:n in {person:3:n}.senses]" should equal ("false\n")
     
-  @Test def testSensePinSensesTrue() = result of "[{individual:1:n}.senses pin {person}.senses]" should equal ("true\n")
-    
-  @Test def testSensePinSensesFalse() = result of "[{individual:1:n}.senses pin {person:1:n}.senses]" should equal ("false\n")
-    
-  // comparison exceptions -- after exception refactoring  
+  // comparison exceptions -- after exception refactoring
   
   //
   // logical operators

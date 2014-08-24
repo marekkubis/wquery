@@ -12,7 +12,6 @@ import org.wquery.query.operations.IfElseOp
 
 import scala.collection.mutable.ListBuffer
 import scalaz.Scalaz._
-import scalaz._
 
 /*
  * Path expressions
@@ -320,32 +319,16 @@ case class NotExpr(expr: ConditionalExpr) extends ConditionalExpr {
 }
 
 case class BinaryConditionalExpr(op: String, leftExpr: EvaluableExpr, rightExpr: EvaluableExpr) extends ConditionalExpr {
+  val Operators = Set("=", "!=", "in", "=~", "<=", "<", ">=", ">")
+
   def conditionPlan(wordNet: WordNet#Schema, bindings: BindingsSchema, context: Context) = {
     val leftOp = leftExpr.evaluationPlan(wordNet, bindings, context)
     val rightOp = rightExpr.evaluationPlan(wordNet, bindings, context)
 
-    op match {
-      case "=" =>
-        BinaryCondition(op, leftOp, rightOp)
-      case "!=" =>
-        BinaryCondition(op, leftOp, rightOp)
-      case "in" =>
-        BinaryCondition(op, leftOp, rightOp)
-      case "pin" =>
-        BinaryCondition(op, leftOp, rightOp)
-      case "=~" =>
-        BinaryCondition(op, leftOp, rightOp)
-      case "<=" =>
-        BinaryCondition(op, leftOp, rightOp)
-      case "<" =>
-        BinaryCondition(op, leftOp, rightOp)
-      case ">=" =>
-        BinaryCondition(op, leftOp, rightOp)
-      case ">" =>
-        BinaryCondition(op, leftOp, rightOp)
-      case _ =>
-        throw new IllegalArgumentException("Unknown comparison operator '" + op + "'")
-    }
+    if (Operators.contains(op))
+      BinaryCondition(op, leftOp, rightOp)
+    else
+      throw new IllegalArgumentException("Unknown comparison operator '" + op + "'")
   }
 }
 

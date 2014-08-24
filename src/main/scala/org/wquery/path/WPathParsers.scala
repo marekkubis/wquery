@@ -1,14 +1,15 @@
 package org.wquery.path.parsers
 
-import org.wquery.lang.parsers.WParsers
 import org.wquery.lang.exprs._
+import org.wquery.lang.parsers.WParsers
+import org.wquery.model.DataSet
 import org.wquery.path._
 import org.wquery.path.exprs._
 import org.wquery.path.operations._
 import org.wquery.query.SetVariable
-import org.wquery.model.DataSet
+
+import scalaz.Scalaz._
 import scalaz._
-import Scalaz._
 
 trait WPathParsers extends WParsers {
 
@@ -113,7 +114,7 @@ trait WPathParsers extends WParsers {
     | path ^^ { PathConditionExpr(_) }
   )
 
-  def comparison = expr ~ ("<="|"<"|">="|">"|"=~"|"="|"!="|"in"|"pin") ~ expr ^^ {
+  def comparison = expr ~ ("<="|"<"|">="|">"|"=~"|"="|"!="|"in") ~ expr ^^ {
     case lexpr~op~rexpr => BinaryConditionalExpr(op, lexpr, rexpr)
   }
 
