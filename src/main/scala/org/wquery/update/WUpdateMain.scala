@@ -53,9 +53,7 @@ object WUpdateMain extends WLanguageMain("WUpdate") {
 
     if (opts[Boolean]("interactive")) {
       val reader = new ConsoleReader(System.in, System.err)
-      val expressionReader = new ExpressionReader(new ConsoleLineReader(reader))
-
-      reader.setPrompt("wupdate> ")
+      val expressionReader = new ExpressionReader(new ConsoleLineReader(reader, "wupdate> "))
       val writer = reader.getOutput
 
       expressionReader.foreach { expr =>
