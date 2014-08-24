@@ -1,7 +1,7 @@
 package org.wquery.reader
 
 class ExpressionReader(reader: LineReader) {
-  type ExpressionState = (Boolean, Boolean, Boolean, Int)
+  type ExpressionState = (Boolean, Boolean, Boolean, Int, Boolean)
 
   private def stripComments(s: String): String = {
     if (s == null)
@@ -18,9 +18,18 @@ class ExpressionReader(reader: LineReader) {
       s.substring(0, commentIndex)
   }
 
+  private def stripContinuation(s: String, es: ExpressionState) = {
+    val (_, _, _, _, lineContinuesBelow) = es
+
+    if (lineContinuesBelow)
+      s.init
+    else
+      s
+  }
+
   private def isLastLine(es: ExpressionState) = {
     es match {
-      case (false, false, false, 0) =>
+      case (false, false, false, 0, false) =>
         true
       case _ =>
         false
@@ -28,8 +37,6 @@ class ExpressionReader(reader: LineReader) {
   }
 
   private def skipQoute(line: String, begin: Int, quote: Char): (Int, Boolean) = {
-    var idx = begin
-
     for (idx <- begin until line.size) {
       if (line(idx) == quote && (idx == begin || line(idx - 1) != '\\'))
         return (idx + 1, false)
@@ -39,7 +46,7 @@ class ExpressionReader(reader: LineReader) {
   }
 
   private def updateExpressionState(es: ExpressionState, line: String) = {
-    var (inSingleQuote, inDoubleQuote, inBackQuote, doCount) = es
+    var (inSingleQuote, inDoubleQuote, inBackQuote, doCount, _) = es
     var idx = 0
 
     while (idx < line.size) {
@@ -90,7 +97,8 @@ class ExpressionReader(reader: LineReader) {
       }
     }
 
-    (inSingleQuote, inDoubleQuote, inBackQuote, doCount)
+    val lineContinuesBelow = !(inSingleQuote || inDoubleQuote || inBackQuote) && line.nonEmpty && line.last == '\\'
+    (inSingleQuote, inDoubleQuote, inBackQuote, doCount, lineContinuesBelow)
   }
 
   private def readExpression(): String = {
@@ -98,16 +106,16 @@ class ExpressionReader(reader: LineReader) {
 
     var line = stripComments(reader.readFirstLine)
     if (line == null) return line
-    expression.append(line)
+    var expressionState = updateExpressionState((false, false, false, 0, false), line)
+    expression.append(stripContinuation(line, expressionState))
     expression.append('\n')
-    var expressionState = updateExpressionState((false, false, false, 0), line)
 
     while (!isLastLine(expressionState)) {
       line = stripComments(reader.readNextLine)
       if (line == null) return expression.toString()
-      expression.append(line)
-      expression.append('\n')
       expressionState = updateExpressionState(expressionState, line)
+      expression.append(stripContinuation(line, expressionState))
+      expression.append('\n')
     }
 
     expression.toString()

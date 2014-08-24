@@ -168,6 +168,21 @@ class ExpressionReaderTestSuite extends TestNGSuite with Matchers {
       |end
       |""".stripMargin))
 
+  @Test def lineContinuation() = result of
+    """from {}$a \
+      |  emit $a
+      |""".stripMargin should equal (List("from {}$a \n  emit $a\n"))
+
+  @Test def lineContinuations() = result of
+    """from {}$a \
+      |  emit $a \
+      |  emit $a
+      |""".stripMargin should equal (List("from {}$a \n  emit $a \n  emit $a\n"))
+
+  @Test def continuationSymbolInQuotedString() = result of
+    """emit '\
+      | here is the end'
+      |""".stripMargin should equal (List("emit '\\\n here is the end'\n"))
 
   //
   // initialization
