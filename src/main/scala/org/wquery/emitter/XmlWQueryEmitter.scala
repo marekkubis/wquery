@@ -1,6 +1,6 @@
 package org.wquery.emitter
 
-import org.wquery.lang.{Result, Error, Answer}
+import org.wquery.lang.{Answer, Error, Result}
 import org.wquery.model._
 
 class XmlWQueryEmitter extends WQueryEmitter {
@@ -25,7 +25,7 @@ class XmlWQueryEmitter extends WQueryEmitter {
 
       val tuple = dataSet.paths(i)
 
-      if (!pathVarNames.isEmpty || !stepVarNames.isEmpty) {
+      if (pathVarNames.nonEmpty || stepVarNames.nonEmpty) {
         builder append "<BINDINGS>\n"
 
         for (pathVarName <- pathVarNames) {
@@ -53,7 +53,7 @@ class XmlWQueryEmitter extends WQueryEmitter {
     }
 
     builder append "</RESULTS>\n"
-    builder.toString
+    builder.toString()
   }
 
   private def emitTuple(wordNet: WordNet, tuple: List[Any], builder: StringBuilder) {

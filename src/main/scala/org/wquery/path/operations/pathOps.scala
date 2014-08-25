@@ -1,13 +1,14 @@
 package org.wquery.path.operations
 
-import scalaz._
-import Scalaz._
-import org.wquery.model._
 import org.wquery.lang._
 import org.wquery.lang.operations._
+import org.wquery.model._
 import org.wquery.path._
 import org.wquery.query.SetVariable
 import org.wquery.utils.IntOptionW._
+
+import scalaz.Scalaz._
+import scalaz._
 
 sealed abstract class PathOp extends AlgebraOp
 
@@ -491,7 +492,7 @@ case class SynsetFetchOp(op: AlgebraOp) extends AlgebraOp {
    if (context.creation) {
      val senses = op.evaluate(wordNet, bindings, context).paths.map(_.last.asInstanceOf[Sense])
 
-     if (!senses.isEmpty) {
+     if (senses.nonEmpty) {
        val synset = wordNet.getSynset(senses.head).some { synset =>
          if (wordNet.getSenses(synset) == senses)
            synset

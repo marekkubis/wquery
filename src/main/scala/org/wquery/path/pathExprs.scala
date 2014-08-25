@@ -344,7 +344,7 @@ case class SynsetByExprReq(expr: EvaluableExpr) extends EvaluableExpr {
     val op = expr.evaluationPlan(wordNet, bindings, context)
     val contextTypes = op.rightType(0).filter(t => t === StringType || t === SenseType)
 
-    if (!contextTypes.isEmpty) {
+    if (contextTypes.nonEmpty) {
       SynsetFetchOp(op)
     } else {
       throw new WQueryStaticCheckException("{...} requires an expression that generates either senses or word forms")

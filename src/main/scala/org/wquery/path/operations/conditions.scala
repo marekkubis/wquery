@@ -162,7 +162,7 @@ case class RightFringeCondition(op: AlgebraOp) extends Condition {
   def satisfied(wordNet: WordNet, bindings: Bindings, context: Context) = {
     val lastSteps = op.evaluate(wordNet, bindings, context).paths.map(_.last)
 
-    !lastSteps.isEmpty && lastSteps.forall(x => x.isInstanceOf[Boolean] && x.asInstanceOf[Boolean])
+    lastSteps.nonEmpty && lastSteps.forall(x => x.isInstanceOf[Boolean] && x.asInstanceOf[Boolean])
   }
 
   val referencedVariables = op.referencedVariables

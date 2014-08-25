@@ -115,16 +115,16 @@ class DebHandler(wordnet: WordNet) extends DefaultHandler with Logging {
     }
   }
 
-  private def pushText {
+  private def pushText() {
     previousText = text
     text = new StringBuilder
   }
 
-  private def popText {
+  private def popText() {
     text = previousText
   }
 
-  private def endSynsetTag {
+  private def endSynsetTag() {
     if (synsetId == null) {
       locatedWarn("SYNSET tag does not contain ID subtag")
     } else {
@@ -181,13 +181,13 @@ class DebHandler(wordnet: WordNet) extends DefaultHandler with Logging {
     }
   }
 
-  override def endDocument {
+  override def endDocument() {
     info("Synsets loaded")
     createIlrRelations
     createGenericRelations
   }
 
-  private def createIlrRelations {
+  private def createIlrRelations() {
     // create semantic relations names
     val ilrRelationsNames = Set[String]()
 
@@ -204,21 +204,19 @@ class DebHandler(wordnet: WordNet) extends DefaultHandler with Logging {
     // create semantic relations successors
     for ((synset, relname, reldest) <- ilrRelationsTuples) {
       val relation = wordnet.schema.demandRelation(relname, IMap((Relation.Src, ISet[DataType](SynsetType))))
-      relation.destinationType.some { dt =>
-        dt match {
-          case SynsetType =>
-            synsetsById.get(reldest).some { destination =>
-              try {
-                wordnet.addSuccessor(synset, relation, destination)
-              } catch {
-                case e: WQueryUpdateBreaksRelationPropertyException =>
-                  warn("ILR tag with type '" + relname + "' found in synset '" + synset.id + "' that points to synset '" + reldest +
-                    "' breaks property '" + e.property + "' of relation '" + e.relation.name + "'")
-              }
-            }.none(warn("ILR tag with type '" + relname + "' found in synset '" + synset.id + "' points to unknown synset '" + reldest + "'"))
-          case dtype =>
-            throw new RuntimeException("ILR tag points to relation " + relation + " that has incorrect destination type " + dtype)
-        }
+      relation.destinationType.some {
+        case SynsetType =>
+          synsetsById.get(reldest).some { destination =>
+            try {
+              wordnet.addSuccessor(synset, relation, destination)
+            } catch {
+              case e: WQueryUpdateBreaksRelationPropertyException =>
+                warn("ILR tag with type '" + relname + "' found in synset '" + synset.id + "' that points to synset '" + reldest +
+                  "' breaks property '" + e.property + "' of relation '" + e.relation.name + "'")
+            }
+          }.none(warn("ILR tag with type '" + relname + "' found in synset '" + synset.id + "' points to unknown synset '" + reldest + "'"))
+        case dtype =>
+          throw new RuntimeException("ILR tag points to relation " + relation + " that has incorrect destination type " + dtype)
       }.none(throw new RuntimeException("Relation '" + relname + "' has no destination type"))
 
     }
@@ -226,13 +224,13 @@ class DebHandler(wordnet: WordNet) extends DefaultHandler with Logging {
     info("ILR relations loaded")
   }
 
-  private def createGenericRelations {
+  private def createGenericRelations() {
     createGenericRelationsDefinitions
     createGenericRelationsSuccessors
     info("non-ILR relations loaded")
   }
 
-  private def createGenericRelationsDefinitions {
+  private def createGenericRelationsDefinitions() {
     val genericRelationsDestTypes = Map[String, NodeType]()
 
     for ((synset, relname, reldest) <- genericRelationsTuples) {
@@ -250,25 +248,23 @@ class DebHandler(wordnet: WordNet) extends DefaultHandler with Logging {
     }
   }
 
-  private def createGenericRelationsSuccessors {
+  private def createGenericRelationsSuccessors() {
     for ((synset, relname, reldest) <- genericRelationsTuples) {
       val relation = wordnet.schema.demandRelation(relname, IMap((Relation.Src, ISet[DataType](SynsetType))))
 
-      relation.destinationType.some { dt =>
-        dt match {
-          case SynsetType =>
-            wordnet.addSuccessor(synset, relation, synsetsById(reldest))
-          case BooleanType =>
-            wordnet.addSuccessor(synset, relation, reldest.toBoolean)
-          case IntegerType =>
-            wordnet.addSuccessor(synset, relation, reldest.toInt)
-          case FloatType =>
-            wordnet.addSuccessor(synset, relation, reldest.toFloat)
-          case StringType =>
-            wordnet.addSuccessor(synset, relation, reldest)
-          case dtype =>
-            throw new RuntimeException("Incorrect destination type " + dtype + " as a successor of relation '" + relation + "'")
-        }
+      relation.destinationType.some {
+        case SynsetType =>
+          wordnet.addSuccessor(synset, relation, synsetsById(reldest))
+        case BooleanType =>
+          wordnet.addSuccessor(synset, relation, reldest.toBoolean)
+        case IntegerType =>
+          wordnet.addSuccessor(synset, relation, reldest.toInt)
+        case FloatType =>
+          wordnet.addSuccessor(synset, relation, reldest.toFloat)
+        case StringType =>
+          wordnet.addSuccessor(synset, relation, reldest)
+        case dtype =>
+          throw new RuntimeException("Incorrect destination type " + dtype + " as a successor of relation '" + relation + "'")
       }.none(throw new RuntimeException("Relation '" + relname + "' has no destination type"))
     }
   }

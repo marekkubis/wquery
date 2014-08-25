@@ -20,7 +20,7 @@ object WQueryTestSuiteRuntime {
   val wupdate = newWUpdate
   val emitter = new PlainWQueryEmitter
 
-  def compileSampleNet = {
+  def compileSampleNet() = {
     val printer = new WnPrinter
     val sampleNet = WordNetLoader.demandLoader("deb").load(new FileInputStream(SampleNetPath))
     val wupdate = new WUpdate(sampleNet)

@@ -20,7 +20,7 @@ class PlainWQueryEmitter extends WQueryEmitter {
     val pathVarNames = dataSet.pathVars.keys.toSeq.filterNot(_.startsWith("_")).sortWith((x, y) => x < y)
     val stepVarNames = dataSet.stepVars.keys.toSeq.filterNot(_.startsWith("_")).sortWith((x, y) => x < y)
 
-    if (!content.isEmpty) {
+    if (content.nonEmpty) {
       val builder = new StringBuilder
 
       for (i <- 0 until content.size) {
@@ -50,17 +50,17 @@ class PlainWQueryEmitter extends WQueryEmitter {
         builder append "\n"
       }
 
-      builder.toString
+      builder.toString()
     } else {
       "(no result)\n"
     }
   }
 
   private def emitTuple(wordNet: WordNet, tuple: List[Any], builder: StringBuilder) {
-    if (!tuple.isEmpty) {
+    if (tuple.nonEmpty) {
         emitElement(wordNet, tuple.head, builder)
 
-        for (i <- (1 until tuple.size)) {
+        for (i <- 1 until tuple.size) {
           builder append " "
           emitElement(wordNet, tuple(i), builder)
         }

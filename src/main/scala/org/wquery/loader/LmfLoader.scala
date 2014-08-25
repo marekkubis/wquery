@@ -93,66 +93,62 @@ class LmfHandler(wordNet: WordNet) extends DefaultHandler with Logging {
       stringRelationsTuples.append((synsetIdOption.get, "bcs", bcs))
   }
 
-  override def endDocument {
+  override def endDocument() {
     createSynsets
     createSynsetRelations
     createStringRelations
   }
 
-  private def createSynsets {
+  private def createSynsets() {
     for ((synsetId, senses) <- sensesBySynsetId) {
       synsetsById(synsetId) = wordNet.addSynset(Some(synsetId), senses.toList, moveSenses = false)
     }
     info("Synsets loaded")
   }
 
-  private def createSynsetRelations {
+  private def createSynsetRelations() {
     for ((sourceSynsetId, relationName, destinationSynsetId) <- synsetRelationsTuples) {
       val relation = wordNet.schema.getRelation(relationName, IMap((Relation.Src, Set[DataType](SynsetType))))|{
         wordNet.addRelation(Relation.binary(relationName, SynsetType, SynsetType))
         wordNet.schema.demandRelation(relationName, IMap((Relation.Src, Set[DataType](SynsetType))))
       }
 
-      relation.destinationType.some { dt =>
-        dt match {
-          case SynsetType =>
-            val sourceSynset = synsetsById.get(sourceSynsetId)
-            val destinationSynset =  synsetsById.get(destinationSynsetId)
+      relation.destinationType.some {
+        case SynsetType =>
+          val sourceSynset = synsetsById.get(sourceSynsetId)
+          val destinationSynset = synsetsById.get(destinationSynsetId)
 
-            if (sourceSynset == None)
-              warn("Semantic relation '" + relation.name + "' points to an empty or unknown source synset '" + sourceSynsetId + "'")
-            else if (destinationSynset == None)
-              warn("Semantic relation '" + relation.name + "' points to an unknown destination synset '" + destinationSynsetId + "'")
-            else
-              wordNet.addSuccessor(sourceSynset.get, relation, destinationSynset.get)
-          case destinationType =>
-            throw new RuntimeException("Semantic relation '" + relation.name + "' has incorrect destination type " + destinationType)
-        }
+          if (sourceSynset == None)
+            warn("Semantic relation '" + relation.name + "' points to an empty or unknown source synset '" + sourceSynsetId + "'")
+          else if (destinationSynset == None)
+            warn("Semantic relation '" + relation.name + "' points to an unknown destination synset '" + destinationSynsetId + "'")
+          else
+            wordNet.addSuccessor(sourceSynset.get, relation, destinationSynset.get)
+        case destinationType =>
+          throw new RuntimeException("Semantic relation '" + relation.name + "' has incorrect destination type " + destinationType)
       }.none(throw new RuntimeException("Semantic relation '" + relation.name + "' has no destination type"))
     }
 
     info("Synset relations loaded")
   }
 
-  private def createStringRelations {
+  private def createStringRelations() {
     for ((sourceSynsetId, relationName, destination) <- stringRelationsTuples) {
       val relation = wordNet.schema.getRelation(relationName, IMap((Relation.Src, Set[DataType](SynsetType))))| {
         wordNet.addRelation(Relation.binary(relationName, SynsetType, StringType))
         wordNet.schema.demandRelation(relationName, IMap((Relation.Src, Set[DataType](SynsetType))))
       }
 
-      relation.destinationType.some { dt =>
-        dt match {
-          case StringType =>
-            val sourceSynset = synsetsById.get(sourceSynsetId)
+      relation.destinationType.some {
+        case StringType =>
+          val sourceSynset = synsetsById.get(sourceSynsetId)
 
-            if (sourceSynset == None)
-              warn("Relation '" + relation.name + "' points to an empty or unknown source synset '" + sourceSynsetId + "'")
-            else
-              wordNet.addSuccessor(sourceSynset.get, relation, destination)
-          case destinationType =>
-            throw new RuntimeException("Relation '" + relation.name + "' has incorrect destination type " + destinationType)
-        }
+          if (sourceSynset == None)
+            warn("Relation '" + relation.name + "' points to an empty or unknown source synset '" + sourceSynsetId + "'")
+          else
+            wordNet.addSuccessor(sourceSynset.get, relation, destination)
+        case destinationType =>
+          throw new RuntimeException("Relation '" + relation.name + "' has incorrect destination type " + destinationType)
       }.none(throw new RuntimeException("Relation '" + relation.name + "' has no destination type"))
     }
 

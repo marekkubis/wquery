@@ -11,7 +11,7 @@ object WQueryProperties {
 
   if (resourceStream != null) {
     properties.load(resourceStream)
-    resourceStream.close
+    resourceStream.close()
   }
 
   def version = properties.getProperty("wquery.version")

@@ -1,11 +1,11 @@
 package org.wquery.model
-import scala.collection.mutable.ListBuffer
-import java.lang.IllegalArgumentException
 import org.wquery.WQueryStepVariableCannotBeBoundException
-import scalaz._
-import Scalaz._
-import org.wquery.lang.operations.{ProvidesTypes,ProvidesTupleSizes}
+import org.wquery.lang.operations.{ProvidesTupleSizes, ProvidesTypes}
 import org.wquery.path.VariableTemplate
+
+import scala.collection.mutable.ListBuffer
+import scalaz.Scalaz._
+import scalaz._
 
 class DataSet(val paths: List[List[Any]], val pathVars: Map[String, List[(Int, Int)]], val stepVars: Map[String, List[Int]])
  extends ProvidesTypes with ProvidesTupleSizes {
@@ -68,7 +68,7 @@ class DataSet(val paths: List[List[Any]], val pathVars: Map[String, List[(Int, I
     buffer.toList
   }
 
-  override def toString = paths.toString
+  override def toString = paths.toString()
 
   def distinct = DataSet.fromBoundPaths(toBoundPaths.distinct)
 

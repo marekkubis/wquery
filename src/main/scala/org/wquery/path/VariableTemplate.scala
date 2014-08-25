@@ -1,10 +1,11 @@
 package org.wquery.path
 
-import scalaz._
-import Scalaz._
-import org.wquery.{WQueryStepVariableCannotBeBoundException, WQueryEvaluationException}
 import org.wquery.lang.Variable
 import org.wquery.utils.IntOptionW._
+import org.wquery.{WQueryEvaluationException, WQueryStepVariableCannotBeBoundException}
+
+import scalaz.Scalaz._
+import scalaz._
 
 case class VariableTemplate(pattern: List[Variable]) {
   val variables = pattern.filterNot(_.isUnnamed).toSet
@@ -23,7 +24,7 @@ case class VariableTemplate(pattern: List[Variable]) {
   val pathVariableName = pathVariablePosition.map(pattern(_)).filterNot(_.isUnnamed).map(_.name)
 
   val stepVariableNames = {
-    val nameList = pattern.filterNot(x => (x.isInstanceOf[TupleVariable] || x.isUnnamed)).map(_.name)
+    val nameList = pattern.filterNot(x => x.isInstanceOf[TupleVariable] || x.isUnnamed).map(_.name)
     val distinctNames = nameList.distinct
 
     if (nameList /== distinctNames)

@@ -28,7 +28,7 @@ case class Relation(name: String, arguments: List[Argument]) {
   override def toString = name
 }
 
-case class Argument(val name: String, val nodeType: NodeType)
+case class Argument(name: String, nodeType: NodeType)
 
 object Relation {
   val AnyName = "_"
