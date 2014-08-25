@@ -80,8 +80,12 @@ case class BinaryCondition(op: String, leftOp: AlgebraOp, rightOp: AlgebraOp) ex
         !multiSetEqual(leftGroup, rightGroup)
       case "!===" =>
         leftResult != rightResult
+      case "@<<" =>
+        setInclusion(leftGroup, rightGroup)
       case "<<" =>
         setInclusion(leftGroup, rightGroup)
+      case "@<<<" =>
+        multiSetInclusion(leftGroup, rightGroup)
       case "<<<" =>
         multiSetInclusion(leftGroup, rightGroup)
       case "in" =>

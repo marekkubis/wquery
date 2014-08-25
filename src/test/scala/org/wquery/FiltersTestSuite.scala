@@ -83,6 +83,16 @@ class FiltersTestSuite extends WQueryTestSuite {
 
   @Test def testSenseInSetSensesFalse() = result of "[individual:1:n << {person:3:n}.senses]" should equal ("false\n")
 
+  @Test def testPathSenseInSetSensesTrue() = result of "[{person:1:n},individual:1:n @<< {person}$a.senses$b<$a,$b>]" should equal ("true\n")
+
+  @Test def testPathSenseInSetSensesFalse() = result of "[{person:1:n},individual:1:n @<< {person:3:n}$a.senses$b<$a,$b>]" should equal ("false\n")
+
+  @Test def testPathSenseInSetSensesPrefixFalse() = result of "[individual:1:n @<< {person}$a.senses$b<$a, $b>]" should equal ("false\n")
+
+  @Test def testPathSenseInMultiSetSensesTrue() = result of "[{person:1:n},individual:1:n union {person:1:n},individual:1:n @<<< {person}$a.senses$b<$a,$b> union {person}$a.senses$b<$a,$b>]" should equal ("true\n")
+
+  @Test def testPathSenseInMultiSetSensesFalse() = result of "[{person:1:n},individual:1:n union {person:1:n},individual:1:n @<<< {person}$a.senses$b<$a,$b>]" should equal ("false\n")
+
   @Test def testTwoCopiesOfSenseSetInclusionTrue() = result of "[individual:1:n union individual:1:n << {person}.senses]" should equal ("true\n")
 
   @Test def testTwoCopiesOfSenseAtPathEndsSetInclusionTrue() = result of "[`a`,individual:1:n union `b`,individual:1:n << {person}.senses]" should equal ("true\n")
