@@ -193,6 +193,10 @@ class FiltersTestSuite extends WQueryTestSuite {
 
   @Test def testPathSetEqualityFalse()  = result of "[`a`,(car union car) @= `b`,car]" should equal ("false\n")
 
+  @Test def testPathSetInequalityTrue()  = result of "[`a`,(car union car) @!= `b`,car]" should equal ("true\n")
+
+  @Test def testPathSetInequalityFalse()  = result of "[`a`,(car union car) @!= `a`,car]" should equal ("false\n")
+
   @Test def testMultiSetEqualityTrue()  = result of "[`a`,(car union car) == `b`,(car union car)]" should equal ("true\n")
 
   @Test def testMultiSetEqualityFalse()  = result of "[`a`,car == `b`,(car union car)]" should equal ("false\n")
@@ -202,6 +206,12 @@ class FiltersTestSuite extends WQueryTestSuite {
   @Test def testPathMultiSetEqualityFalse()  = result of "[`a`,(car union car) @== `a`,car]" should equal ("false\n")
 
   @Test def testPathMultiSetEqualityPrefixFalse()  = result of "[`a`,(car union car) @== `b`,(car union car)]" should equal ("false\n")
+
+  @Test def testPathMultiSetInequalityTrue()  = result of "[`a`,(car union car) @!== `a`,car]" should equal ("true\n")
+
+  @Test def testPathMultiSetInequalityFalse()  = result of "[`a`,(car union car) @!== `a`,(car union car)]" should equal ("false\n")
+
+  @Test def testPathMultiSetInequalityPrefixTrue()  = result of "[`a`,(car union car) @!== `b`,(car union car)]" should equal ("true\n")
 
   @Test def testMultiSetEqualityOutOfOrderTrue()  = result of "[`a`,(car union car union auto) == `b`,(car union auto union car)]" should equal ("true\n")
 
@@ -214,6 +224,12 @@ class FiltersTestSuite extends WQueryTestSuite {
   @Test def testPathDataSetEqualityFalse()  = result of "[`a`,(car union car union auto) @=== `a`,(car union auto union car)]" should equal ("false\n")
 
   @Test def testPathDataSetEqualityPrefixFalse()  = result of "[`a`,(car union car union auto) @=== `b`,(car union car union auto)]" should equal ("false\n")
+
+  @Test def testPathDataSetInequalityTrue()  = result of "[`a`,(car union car union auto) @!=== `a`,(car union auto union car)]" should equal ("true\n")
+
+  @Test def testPathDataSetInequalityFalse()  = result of "[`a`,(car union car union auto) @!=== `a`,(car union car union auto)]" should equal ("false\n")
+
+  @Test def testPathDataSetInequalityPrefixTrue()  = result of "[`a`,(car union car union auto) @!=== `b`,(car union car union auto)]" should equal ("true\n")
 
   @Test def testSetInequalityTrue()  = result of "[car != car union auto]" should equal ("true\n")
 

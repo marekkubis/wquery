@@ -74,10 +74,16 @@ case class BinaryCondition(op: String, leftOp: AlgebraOp, rightOp: AlgebraOp) ex
         leftResult == rightResult
       case "===" =>
         leftResult == rightResult
+      case "@!=" =>
+        !setEqual(leftGroup, rightGroup)
       case "!=" =>
         !setEqual(leftGroup, rightGroup)
+      case "@!==" =>
+        !multiSetEqual(leftGroup, rightGroup)
       case "!==" =>
         !multiSetEqual(leftGroup, rightGroup)
+      case "@!===" =>
+        leftResult != rightResult
       case "!===" =>
         leftResult != rightResult
       case "@<<" =>
