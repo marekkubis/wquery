@@ -179,15 +179,31 @@ class FiltersTestSuite extends WQueryTestSuite {
 
   @Test def testSetEqualityFalse()  = result of "[`a`,car = `b`,auto]" should equal ("false\n")
 
+  @Test def testPathSetEqualityTrue()  = result of "[`a`,(car union car) @= `a`,car]" should equal ("true\n")
+
+  @Test def testPathSetEqualityFalse()  = result of "[`a`,(car union car) @= `b`,car]" should equal ("false\n")
+
   @Test def testMultiSetEqualityTrue()  = result of "[`a`,(car union car) == `b`,(car union car)]" should equal ("true\n")
 
   @Test def testMultiSetEqualityFalse()  = result of "[`a`,car == `b`,(car union car)]" should equal ("false\n")
+
+  @Test def testPathMultiSetEqualityTrue()  = result of "[`a`,(car union car) @== `a`,(car union car)]" should equal ("true\n")
+
+  @Test def testPathMultiSetEqualityFalse()  = result of "[`a`,(car union car) @== `a`,car]" should equal ("false\n")
+
+  @Test def testPathMultiSetEqualityPrefixFalse()  = result of "[`a`,(car union car) @== `b`,(car union car)]" should equal ("false\n")
 
   @Test def testMultiSetEqualityOutOfOrderTrue()  = result of "[`a`,(car union car union auto) == `b`,(car union auto union car)]" should equal ("true\n")
 
   @Test def testDataSetEqualityTrue()  = result of "[`a`,(car union car union auto) === `b`,(car union car union auto)]" should equal ("true\n")
 
   @Test def testDataSetEqualityFalse()  = result of "[`a`,(car union car union auto) === `b`,(car union auto union car)]" should equal ("false\n")
+
+  @Test def testPathDataSetEqualityTrue()  = result of "[`a`,(car union car union auto) @=== `a`,(car union car union auto)]" should equal ("true\n")
+
+  @Test def testPathDataSetEqualityFalse()  = result of "[`a`,(car union car union auto) @=== `a`,(car union auto union car)]" should equal ("false\n")
+
+  @Test def testPathDataSetEqualityPrefixFalse()  = result of "[`a`,(car union car union auto) @=== `b`,(car union car union auto)]" should equal ("false\n")
 
   @Test def testSetInequalityTrue()  = result of "[car != car union auto]" should equal ("true\n")
 

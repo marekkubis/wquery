@@ -37,8 +37,11 @@ case class BinaryCondition(op: String, leftOp: AlgebraOp, rightOp: AlgebraOp) ex
   var rightCache = none[(List[Any], Map[Any, List[Any]])]
 
   def satisfied(wordNet: WordNet, bindings: Bindings, context: Context) = {
+    val pathOp = op.startsWith("@")
+
     val (leftResult, leftGroup) = leftCache|{
-      val result = leftOp.evaluate(wordNet, bindings, context).paths.map(_.last)
+      val paths = leftOp.evaluate(wordNet, bindings, context).paths
+      val result = if (pathOp) paths else paths.map(_.last)
       val group = result.groupBy(x => x)
 
       if (leftOp.referencedVariables.isEmpty)
@@ -48,7 +51,8 @@ case class BinaryCondition(op: String, leftOp: AlgebraOp, rightOp: AlgebraOp) ex
     }
 
     val (rightResult, rightGroup) = rightCache|{
-      val result = rightOp.evaluate(wordNet, bindings, context).paths.map(_.last)
+      val paths = rightOp.evaluate(wordNet, bindings, context).paths
+      val result = if (pathOp) paths else paths.map(_.last)
       val group = result.groupBy(x => x)
 
       if (rightOp.referencedVariables.isEmpty)
@@ -58,10 +62,16 @@ case class BinaryCondition(op: String, leftOp: AlgebraOp, rightOp: AlgebraOp) ex
     }
 
     op match {
+      case "@=" =>
+        setEqual(leftGroup, rightGroup)
       case "=" =>
         setEqual(leftGroup, rightGroup)
+      case "@==" =>
+        multiSetEqual(leftGroup, rightGroup)
       case "==" =>
         multiSetEqual(leftGroup, rightGroup)
+      case "@===" =>
+        leftResult == rightResult
       case "===" =>
         leftResult == rightResult
       case "!=" =>
