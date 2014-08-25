@@ -70,8 +70,12 @@ case class BinaryCondition(op: String, leftOp: AlgebraOp, rightOp: AlgebraOp) ex
         !multiSetEqual(leftGroup, rightGroup)
       case "!===" =>
         leftResult != rightResult
+      case "<<" =>
+        setInclusion(leftGroup, rightGroup)
+      case "<<<" =>
+        multiSetInclusion(leftGroup, rightGroup)
       case "in" =>
-        leftGroup.forall{ case (left, leftValues) => rightGroup.get(left).some(rightValues => leftValues.size <= rightValues.size).none(false) }
+        setInclusion(leftGroup, rightGroup)
       case "=~" =>
         val regexps = rightResult.collect{ case pattern: String => pattern.r }
 
@@ -86,14 +90,20 @@ case class BinaryCondition(op: String, leftOp: AlgebraOp, rightOp: AlgebraOp) ex
     }
   }
 
+  private def setInclusion(leftGroup: Map[Any, scala.List[Any]], rightGroup: Map[Any, scala.List[Any]]) = {
+    leftGroup.forall{ case (left, leftValues) => rightGroup.contains(left) }
+  }
+
+  private def multiSetInclusion(leftGroup: Map[Any, scala.List[Any]], rightGroup: Map[Any, scala.List[Any]]) = {
+    leftGroup.forall{ case (left, leftValues) => rightGroup.get(left).some(rightValues => leftValues.size <= rightValues.size).none(false) }
+  }
+
   private def setEqual(leftGroup: Map[Any, scala.List[Any]], rightGroup: Map[Any, scala.List[Any]]) = {
-    leftGroup.forall{ case (left, leftValues) => rightGroup.contains(left) } &&
-      rightGroup.forall{ case (right, rightValues) => leftGroup.contains(right) }
+    setInclusion(leftGroup, rightGroup) && setInclusion(rightGroup, leftGroup)
   }
 
   private def multiSetEqual(leftGroup: Map[Any, scala.List[Any]], rightGroup: Map[Any, scala.List[Any]]) = {
-    leftGroup.forall{ case (left, leftValues) => rightGroup.get(left).some(rightValues => rightValues.size == leftValues.size).none(false) } &&
-      rightGroup.forall{ case (right, rightValues) => leftGroup.get(right).some(leftValues => leftValues.size == rightValues.size).none(false) }
+    multiSetInclusion(leftGroup, rightGroup) && multiSetInclusion(rightGroup, leftGroup)
   }
 
   private def tryComparingAsSingletons(leftResult: List[Any], rightResult: List[Any]) = {

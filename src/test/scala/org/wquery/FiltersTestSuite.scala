@@ -78,9 +78,23 @@ class FiltersTestSuite extends WQueryTestSuite {
   @Test def testSenseInSensesTrue() = result of "[individual:1:n in {person}.senses]" should equal ("true\n")    
     
   @Test def testSenseInSensesFalse() = result of "[individual:1:n in {person:3:n}.senses]" should equal ("false\n")
-    
-  // comparison exceptions -- after exception refactoring
-  
+
+  @Test def testSenseInSetSensesTrue() = result of "[individual:1:n << {person}.senses]" should equal ("true\n")
+
+  @Test def testSenseInSetSensesFalse() = result of "[individual:1:n << {person:3:n}.senses]" should equal ("false\n")
+
+  @Test def testTwoCopiesOfSenseSetInclusionTrue() = result of "[individual:1:n union individual:1:n << {person}.senses]" should equal ("true\n")
+
+  @Test def testTwoCopiesOfSenseAtPathEndsSetInclusionTrue() = result of "[`a`,individual:1:n union `b`,individual:1:n << {person}.senses]" should equal ("true\n")
+
+  @Test def testTwoCopiesOfSenseSetInclusionFalse() = result of "[individual:1:n union person:3:n << {person:1:n}.senses]" should equal ("false\n")
+
+  @Test def testTwoCopiesOfSenseMultiSetInclusionTrue() = result of "[individual:1:n union person:1:n <<< {person}.senses]" should equal ("true\n")
+
+  @Test def testTwoCopiesOfSenseAtPathEndsMultiSetInclusionTrue() = result of "[`a`,individual:1:n union `b`,person:1:n <<< {person}.senses]" should equal ("true\n")
+
+  @Test def testTwoCopiesOfSenseMultiSetInclusionFalse() = result of "[individual:1:n union individual:1:n <<< {person:1:n}.senses]" should equal ("false\n")
+
   //
   // logical operators
   //  

@@ -113,7 +113,7 @@ trait WPathParsers extends WParsers {
     | path ^^ { PathConditionExpr(_) }
   )
 
-  def comparison = expr ~ ("<="|"<"|">="|">"|"=~"|"==="|"=="|"="|"!==="|"!=="|"!="|"in") ~ expr ^^ {
+  def comparison = expr ~ ("<<<"|"<<"|"<="|"<"|">="|">"|"=~"|"==="|"=="|"="|"!==="|"!=="|"!="|"in") ~ expr ^^ {
     case lexpr~op~rexpr => BinaryConditionalExpr(op, lexpr, rexpr)
   }
 
