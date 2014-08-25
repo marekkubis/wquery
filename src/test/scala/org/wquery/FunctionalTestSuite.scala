@@ -44,7 +44,7 @@ class FunctionalTestSuite extends WQueryTestSuite {
   @Test def findBaseConcepts() = result of "{}[bcs]" should equal ("{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n }\n{ car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n }\n")
 
   // Q10
-  @Test def findSynsetsThatArePredecessorsOfASynsetWithASpecificIdentifierWithRegardToAnySemanticRelation() = result of "{}[id = `100007846`].^_&synset$a<$a>" should equal ("{ human body:1:n physical body:1:n material body:1:n soma:3:n build:2:n figure:2:n physique:2:n anatomy:2:n shape:3:n bod:1:n chassis:1:n frame:3:n form:5:n flesh:2:n }\n{ person:2:n }\n")
+  @Test def findSynsetsThatArePredecessorsOfASynsetWithASpecificIdentifierWithRegardToAnySemanticRelation() = result of "{}[id = `100007846`].^_&synset<#>" should equal ("{ human body:1:n physical body:1:n material body:1:n soma:3:n build:2:n figure:2:n physique:2:n anatomy:2:n shape:3:n bod:1:n chassis:1:n frame:3:n form:5:n flesh:2:n }\n{ person:2:n }\n")
 
   // Q11: Find synsets that fulfil a query that is a combination of some of the queries Q1, Q3, Q4 and Q6-Q10 combined together with logical 'and' and 'or'.
   // Q11a
@@ -54,9 +54,9 @@ class FunctionalTestSuite extends WQueryTestSuite {
 
   // Q12: find meronyms of synsets determined using Q2 or Q3
   // Q12a(Q2)
-  @Test def findMeronymsOfNounSynsetsThatContainSpecificWord() = result of "{person}[pos = `n`].^partial_holonym$a<$a>" should equal ("{ human body:1:n physical body:1:n material body:1:n soma:3:n build:2:n figure:2:n physique:2:n anatomy:2:n shape:3:n bod:1:n chassis:1:n frame:3:n form:5:n flesh:2:n }\n")
+  @Test def findMeronymsOfNounSynsetsThatContainSpecificWord() = result of "{person}[pos = `n`].^partial_holonym<#>" should equal ("{ human body:1:n physical body:1:n material body:1:n soma:3:n build:2:n figure:2:n physique:2:n anatomy:2:n shape:3:n bod:1:n chassis:1:n frame:3:n form:5:n flesh:2:n }\n")
   // Q12b(Q3)
-  @Test def findMeronymsOfASynsetThatContainsASpecificWordSense() = result of "{person:1:n}.^partial_holonym$a<$a>" should equal ("{ human body:1:n physical body:1:n material body:1:n soma:3:n build:2:n figure:2:n physique:2:n anatomy:2:n shape:3:n bod:1:n chassis:1:n frame:3:n form:5:n flesh:2:n }\n")
+  @Test def findMeronymsOfASynsetThatContainsASpecificWordSense() = result of "{person:1:n}.^partial_holonym<#>" should equal ("{ human body:1:n physical body:1:n material body:1:n soma:3:n build:2:n figure:2:n physique:2:n anatomy:2:n shape:3:n bod:1:n chassis:1:n frame:3:n form:5:n flesh:2:n }\n")
 
   // Q13: find trees of transitive hyponyms of the synsets determined using Q2 or Q3
   // Q13a - paths
@@ -67,27 +67,27 @@ class FunctionalTestSuite extends WQueryTestSuite {
   @Test def findAllEdgesThatLinksASynsetThatContainsASpecificWordSenseWithItsHyponyms() = result of "({car:1:n}.^hypernym+$a)<$a>.^hypernym" should equal ("{ ambulance:1:n } ^hypernym { funny wagon:1:n }\n{ beach wagon:1:n station wagon:1:n wagon:5:n estate car:1:n beach waggon:1:n station waggon:1:n waggon:2:n } ^hypernym { shooting brake:1:n }\n{ cab:3:n hack:5:n taxi:1:n taxicab:1:n } ^hypernym { gypsy cab:1:n }\n{ cab:3:n hack:5:n taxi:1:n taxicab:1:n } ^hypernym { minicab:1:n }\n{ cruiser:1:n police cruiser:1:n patrol car:1:n police car:1:n prowl car:1:n squad car:1:n } ^hypernym { panda car:1:n }\n{ limousine:1:n limo:1:n } ^hypernym { berlin:3:n }\n{ minicar:1:n } ^hypernym { minicab:1:n }\n{ racer:2:n race car:1:n racing car:1:n } ^hypernym { finisher:5:n }\n{ racer:2:n race car:1:n racing car:1:n } ^hypernym { stock car:2:n }\n{ sedan:1:n saloon:3:n } ^hypernym { brougham:2:n }\n")
 
   // Q14: find hyponyms of hypernyms of the synsets determined using Q2 or Q3
-  @Test def findHyponymsOfHypernymsOfNounSynsetsThatContainASpecificWord() = result of "{person}[pos = `n`].hypernym.^hypernym$a<$a>" should equal ("{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n }\n{ person:2:n }\n{ person:3:n }\n")
-  @Test def findHyponymsOfHypernymsOfASynsetThatContainsASpecificWordSense() = result of "{person:1:n}.hypernym.^hypernym$a<$a>" should equal ("{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n }\n")
+  @Test def findHyponymsOfHypernymsOfNounSynsetsThatContainASpecificWord() = result of "{person}[pos = `n`].hypernym.^hypernym<#>" should equal ("{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n }\n{ person:2:n }\n{ person:3:n }\n")
+  @Test def findHyponymsOfHypernymsOfASynsetThatContainsASpecificWordSense() = result of "{person:1:n}.hypernym.^hypernym<#>" should equal ("{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n }\n")
 
   // Q15: Find antonyms of a given word sense/word
   // Q15.1: word sense
-  @Test def findAntonymsOfAGivenWordSense() = result of "generated:2:n.antonym$a<$a>" should equal ("generated:1:n\n")
+  @Test def findAntonymsOfAGivenWordSense() = result of "generated:2:n.antonym<#>" should equal ("generated:1:n\n")
   // Q15.2: word
-  @Test def findAntonymsOfAGivenWord() = result of "generated.senses.antonym$a<$a>" should equal ("generated:1:n\n")
+  @Test def findAntonymsOfAGivenWord() = result of "generated.senses.antonym<#>" should equal ("generated:1:n\n")
 
   // Q16: For a given word or word sense find a disjunction of some queries from Q12-Q15
   // Q16a
-  @Test def findMeronymsAndHyponymsOfHypernymsOfASynsetThatContainsASpecificWordSense() = result of "{car:1:n}.^partial_holonym$a<$a> union {person:1:n}.hypernym.^hypernym$a<$a>" should equal ("{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n }\n")
+  @Test def findMeronymsAndHyponymsOfHypernymsOfASynsetThatContainsASpecificWordSense() = result of "{car:1:n}.^partial_holonym<#> union {person:1:n}.hypernym.^hypernym<#>" should equal ("{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n }\n")
 
   // Q17
-  @Test def findSensesOfAnEnglishSynsetWithAGivenIdentifier() = result of "{}[id = `100007846` and lang=`en`].senses$a<$a>" should equal ("individual:1:n\nmortal:1:n\nperson:1:n\nsomebody:1:n\nsomeone:1:n\nsoul:2:n\n")
+  @Test def findSensesOfAnEnglishSynsetWithAGivenIdentifier() = result of "{}[id = `100007846` and lang=`en`].senses<#>" should equal ("individual:1:n\nmortal:1:n\nperson:1:n\nsomebody:1:n\nsomeone:1:n\nsoul:2:n\n")
 
   // Q18
-  @Test def findHyponymsOfAnEnglishSynsetWithASpecifiedIdentifier() = result of "{}[id = `102958343` and lang=`en`].^hypernym$a<$a>" should equal ("{ ambulance:1:n }\n{ beach wagon:1:n station wagon:1:n wagon:5:n estate car:1:n beach waggon:1:n station waggon:1:n waggon:2:n }\n{ bus:4:n jalopy:1:n heap:3:n }\n{ cab:3:n hack:5:n taxi:1:n taxicab:1:n }\n{ compact:3:n compact car:1:n }\n{ convertible:1:n }\n{ coupe:1:n }\n{ cruiser:1:n police cruiser:1:n patrol car:1:n police car:1:n prowl car:1:n squad car:1:n }\n{ electric:1:n electric automobile:1:n electric car:1:n }\n{ gas guzzler:1:n }\n{ hardtop:1:n }\n{ hatchback:1:n }\n{ horseless carriage:1:n }\n{ hot rod:1:n hot-rod:1:n }\n{ jeep:1:n landrover:1:n }\n{ limousine:1:n limo:1:n }\n{ loaner:2:n }\n{ minicar:1:n }\n{ minivan:1:n }\n{ Model T:1:n }\n{ pace car:1:n }\n{ racer:2:n race car:1:n racing car:1:n }\n{ roadster:1:n runabout:1:n two-seater:1:n }\n{ sedan:1:n saloon:3:n }\n{ sports car:1:n sport car:1:n }\n{ sport utility:1:n sport utility vehicle:1:n S.U.V.:1:n SUV:1:n }\n{ Stanley Steamer:1:n }\n{ stock car:1:n }\n{ subcompact:1:n subcompact car:1:n }\n{ touring car:1:n phaeton:1:n tourer:2:n }\n{ used-car:1:n secondhand car:1:n }\n")
+  @Test def findHyponymsOfAnEnglishSynsetWithASpecifiedIdentifier() = result of "{}[id = `102958343` and lang=`en`].^hypernym<#>" should equal ("{ ambulance:1:n }\n{ beach wagon:1:n station wagon:1:n wagon:5:n estate car:1:n beach waggon:1:n station waggon:1:n waggon:2:n }\n{ bus:4:n jalopy:1:n heap:3:n }\n{ cab:3:n hack:5:n taxi:1:n taxicab:1:n }\n{ compact:3:n compact car:1:n }\n{ convertible:1:n }\n{ coupe:1:n }\n{ cruiser:1:n police cruiser:1:n patrol car:1:n police car:1:n prowl car:1:n squad car:1:n }\n{ electric:1:n electric automobile:1:n electric car:1:n }\n{ gas guzzler:1:n }\n{ hardtop:1:n }\n{ hatchback:1:n }\n{ horseless carriage:1:n }\n{ hot rod:1:n hot-rod:1:n }\n{ jeep:1:n landrover:1:n }\n{ limousine:1:n limo:1:n }\n{ loaner:2:n }\n{ minicar:1:n }\n{ minivan:1:n }\n{ Model T:1:n }\n{ pace car:1:n }\n{ racer:2:n race car:1:n racing car:1:n }\n{ roadster:1:n runabout:1:n two-seater:1:n }\n{ sedan:1:n saloon:3:n }\n{ sports car:1:n sport car:1:n }\n{ sport utility:1:n sport utility vehicle:1:n S.U.V.:1:n SUV:1:n }\n{ Stanley Steamer:1:n }\n{ stock car:1:n }\n{ subcompact:1:n subcompact car:1:n }\n{ touring car:1:n phaeton:1:n tourer:2:n }\n{ used-car:1:n secondhand car:1:n }\n")
 
   // Q19
-  @Test def findTransitiveHyponymsOfAnEnglishSynsetWithASpecifiedIdentifier() = result of "{}[id = `102958343` and lang=`en`].^hypernym+$a<$a>" should equal ("{ ambulance:1:n }\n{ beach wagon:1:n station wagon:1:n wagon:5:n estate car:1:n beach waggon:1:n station waggon:1:n waggon:2:n }\n{ berlin:3:n }\n{ brougham:2:n }\n{ bus:4:n jalopy:1:n heap:3:n }\n{ cab:3:n hack:5:n taxi:1:n taxicab:1:n }\n{ compact:3:n compact car:1:n }\n{ convertible:1:n }\n{ coupe:1:n }\n{ cruiser:1:n police cruiser:1:n patrol car:1:n police car:1:n prowl car:1:n squad car:1:n }\n{ electric:1:n electric automobile:1:n electric car:1:n }\n{ finisher:5:n }\n{ funny wagon:1:n }\n{ gas guzzler:1:n }\n{ gypsy cab:1:n }\n{ hardtop:1:n }\n{ hatchback:1:n }\n{ horseless carriage:1:n }\n{ hot rod:1:n hot-rod:1:n }\n{ jeep:1:n landrover:1:n }\n{ limousine:1:n limo:1:n }\n{ loaner:2:n }\n{ minicab:1:n }\n{ minicar:1:n }\n{ minivan:1:n }\n{ Model T:1:n }\n{ pace car:1:n }\n{ panda car:1:n }\n{ racer:2:n race car:1:n racing car:1:n }\n{ roadster:1:n runabout:1:n two-seater:1:n }\n{ sedan:1:n saloon:3:n }\n{ shooting brake:1:n }\n{ sports car:1:n sport car:1:n }\n{ sport utility:1:n sport utility vehicle:1:n S.U.V.:1:n SUV:1:n }\n{ Stanley Steamer:1:n }\n{ stock car:2:n }\n{ stock car:1:n }\n{ subcompact:1:n subcompact car:1:n }\n{ touring car:1:n phaeton:1:n tourer:2:n }\n{ used-car:1:n secondhand car:1:n }\n")
+  @Test def findTransitiveHyponymsOfAnEnglishSynsetWithASpecifiedIdentifier() = result of "{}[id = `102958343` and lang=`en`].^hypernym+<#>" should equal ("{ ambulance:1:n }\n{ beach wagon:1:n station wagon:1:n wagon:5:n estate car:1:n beach waggon:1:n station waggon:1:n waggon:2:n }\n{ berlin:3:n }\n{ brougham:2:n }\n{ bus:4:n jalopy:1:n heap:3:n }\n{ cab:3:n hack:5:n taxi:1:n taxicab:1:n }\n{ compact:3:n compact car:1:n }\n{ convertible:1:n }\n{ coupe:1:n }\n{ cruiser:1:n police cruiser:1:n patrol car:1:n police car:1:n prowl car:1:n squad car:1:n }\n{ electric:1:n electric automobile:1:n electric car:1:n }\n{ finisher:5:n }\n{ funny wagon:1:n }\n{ gas guzzler:1:n }\n{ gypsy cab:1:n }\n{ hardtop:1:n }\n{ hatchback:1:n }\n{ horseless carriage:1:n }\n{ hot rod:1:n hot-rod:1:n }\n{ jeep:1:n landrover:1:n }\n{ limousine:1:n limo:1:n }\n{ loaner:2:n }\n{ minicab:1:n }\n{ minicar:1:n }\n{ minivan:1:n }\n{ Model T:1:n }\n{ pace car:1:n }\n{ panda car:1:n }\n{ racer:2:n race car:1:n racing car:1:n }\n{ roadster:1:n runabout:1:n two-seater:1:n }\n{ sedan:1:n saloon:3:n }\n{ shooting brake:1:n }\n{ sports car:1:n sport car:1:n }\n{ sport utility:1:n sport utility vehicle:1:n S.U.V.:1:n SUV:1:n }\n{ Stanley Steamer:1:n }\n{ stock car:2:n }\n{ stock car:1:n }\n{ subcompact:1:n subcompact car:1:n }\n{ touring car:1:n phaeton:1:n tourer:2:n }\n{ used-car:1:n secondhand car:1:n }\n")
 
   // Q20
   @Test def checkIfAnEnglishSynsetWithAGivenIdentifierIsABaseConcept() = result of "[{}[id = `100007846` and lang=`en`].bcs]" should equal ("true\n")
@@ -103,16 +103,16 @@ class FunctionalTestSuite extends WQueryTestSuite {
   //
 
   // Q23
-  @Test def findSynsetsThatContainTwoOrMoreSensesOfTheSameWord() = result of "{}[count(distinct(senses.word$w<$w>)) < count(senses)]" should equal ("{ auto:4:n auto:5:n }\n")
+  @Test def findSynsetsThatContainTwoOrMoreSensesOfTheSameWord() = result of "{}[count(distinct(senses.word<#>)) < count(senses)]" should equal ("{ auto:4:n auto:5:n }\n")
 
   // Q24
   @Test def findSensesOfTheSameWordThatBelongToTheSameSynset() = result of "::$a.synset.senses$b[$a != $b and $a.word = $b.word]<$a, $b>" should equal ("auto:4:n auto:5:n\nauto:5:n auto:4:n\n")
 
   // Q25
-  @Test def findSensesOfTheWordsThatBelongToTheGlossesOfTheirSynsets() = result of "::[word in flatten(string_split(synset.desc$a<$a>, ` `))]" should equal ("area:5:n\ncar:1:n\ncar:4:n\ncar:5:n\ncold:1:a\ncold:2:a\nconstruction:4:n\nfixed:2:s\nflesh:2:n\nhatchback:1:n\norange:1:n\norange:1:s\norange:2:n\norange:4:n\npeople:1:n\nperson:1:n\nrigid:5:s\nset:2:n\nset:2:s\nstructure:1:n\n")
+  @Test def findSensesOfTheWordsThatBelongToTheGlossesOfTheirSynsets() = result of "::[word in flatten(string_split(synset.desc<#>, ` `))]" should equal ("area:5:n\ncar:1:n\ncar:4:n\ncar:5:n\ncold:1:a\ncold:2:a\nconstruction:4:n\nfixed:2:s\nflesh:2:n\nhatchback:1:n\norange:1:n\norange:1:s\norange:2:n\norange:4:n\npeople:1:n\nperson:1:n\nrigid:5:s\nset:2:n\nset:2:s\nstructure:1:n\n")
 
   // Q26
-  @Test def findUsageExamplesWhichDoNotContainWordsWhatBelongToTheWordSensesOfTheSynsetsForWhichTheUsageExamplesHaveBeeCreated() = result of "{}$a.usage$b[empty($a.senses.word$w<$w> intersect flatten(string_split($b, ` `)))]<$b>" should equal ("'An invalid example of usage example.'\n")
+  @Test def findUsageExamplesWhichDoNotContainWordsWhatBelongToTheWordSensesOfTheSynsetsForWhichTheUsageExamplesHaveBeeCreated() = result of "{}$a.usage$b[empty($a.senses.word<#> intersect flatten(string_split($b, ` `)))]<$b>" should equal ("'An invalid example of usage example.'\n")
 
   // Q27
   @Test def findWordSensesThatHaveInvalidPOSSymbol() = result of "::[pos != `n` and pos != `v` and pos != `a` and pos != `s`]" should equal ("(no result)\n")
@@ -148,7 +148,7 @@ class FunctionalTestSuite extends WQueryTestSuite {
   @Test def findIdentifiersAssignedToMoreThanOneSense() = result of "{}.id$a[count($a.^id) > 1]<$a>" should equal ("(no result)\n")
 
   // Q38
-  @Test def findSynsetsWithEmptyIdentifiers() = result of "{}[string_length(id$a<$a>) = 0]" should equal ("(no result)\n")
+  @Test def findSynsetsWithEmptyIdentifiers() = result of "{}[string_length(id<#>) = 0]" should equal ("(no result)\n")
 
   // Q39
   @Test def findWordsThatHaveNonConsecutiveSenseNumbers() = result of "''$w[not empty(senses$s.pos$p[$w.senses[pos = $p].sensenum != range(1, count($w.senses[pos = $p]))])]<$w>" should equal ("anatomy\narea\nauto\nbeing\nberlin\nbrougham\nbuild\nbus\ncab\ncause\ncompact\ncompartment\nconstruction\nconveyance\ndetermine\nferment\nfermentation\nfigure\nfinisher\nfixed\nfleet\nflesh\nform\nframe\ngondola\nhack\nheap\nhomo\ninstrumentality\nloaner\nmachine\nman\nman-eater\nphysique\nracer\nrigid\nsaloon\nset\nshape\nsoma\nsoul\ntourer\nunit\nwaggon\nwagon\nwhole\n")
@@ -163,7 +163,7 @@ class FunctionalTestSuite extends WQueryTestSuite {
   @Test def findPolishSynsetsSuchThatTheirEnglishCounterpartsHaveHypernymsThatAreNotCounterpartsOfThePolishSynsetsHypernyms() = result of "{}$a[lang = `pl` and not empty(ili[lang = `en` and not hypernym in $a.hypernym.ili])]<$a>" should equal ("{ samochód:1:n auto:2:n }\n")
 
   // Q43
-  @Test def findHyponymHypernymPairsThatContainSensesOfTheSameWord() = result of "{}$a.hypernym$b[count($a.senses.word$w<$w> intersect senses.word$v<$v>) > 0]<$a, $b>" should equal ("{ auto:3:n } { samochód:1:n auto:2:n }\n{ auto:3:v } { auto:3:n }\n{ auto:3:v } { samochód:1:n auto:2:n }\n{ auto:4:n auto:5:n } { auto:3:v }\n{ auto:6:n } { auto:4:n auto:5:n }\n")
+  @Test def findHyponymHypernymPairsThatContainSensesOfTheSameWord() = result of "{}$a.hypernym$b[count($a.senses.word<#> intersect senses.word<#>) > 0]<$a, $b>" should equal ("{ auto:3:n } { samochód:1:n auto:2:n }\n{ auto:3:v } { auto:3:n }\n{ auto:3:v } { samochód:1:n auto:2:n }\n{ auto:4:n auto:5:n } { auto:3:v }\n{ auto:6:n } { auto:4:n auto:5:n }\n")
 
   // Q44
   @Test def findPairsOfSynsetsTharParticipateBothInHypernymyAndMeronymy() = result of "{}$a.hypernym$b[$a in $b.^partial_holonym]<$a, $b>" should equal ("{ wheel:1:n } { auto:3:v }\n")
@@ -264,7 +264,7 @@ class FunctionalTestSuite extends WQueryTestSuite {
   @Test def countTheNumberOfSynsetsThatHaveMultipleHypernymsAtTheThirdLevelOfHypernymyHierarchy() = result of "count({}[count(hypernym)>1 and 3 in size(hypernym+[empty(hypernym)])])" should equal ("1\n")
 
   // Q63
-  @Test def countHowManySynsetsThatHaveMultipleHypernymsInheritFromMoreThanOneHypernymyTree() = result of "count({}[count(hypernym)>1 and count(distinct(hypernym+[empty(hypernym)]$a<$a>))>1])" should equal ("1\n")
+  @Test def countHowManySynsetsThatHaveMultipleHypernymsInheritFromMoreThanOneHypernymyTree() = result of "count({}[count(hypernym)>1 and count(distinct(hypernym+[empty(hypernym)]<#>))>1])" should equal ("1\n")
 
   // Q64: How many leaves/roots/inner nodes there are in the hypernymy hierarchy?
   // Q64.1: leaves
@@ -275,7 +275,7 @@ class FunctionalTestSuite extends WQueryTestSuite {
   @Test def countInnerNodesOfHypernymy() = result of "count({}[not empty(^hypernym) and not empty(hypernym)])" should equal ("29\n")
 
   // Q65
-  @Test def countTransitiveHyponymsOfASynsetThatContainsAGivenSense() = result of "count(distinct({car:1:n}.^hypernym+$a<$a>))" should equal ("40\n")
+  @Test def countTransitiveHyponymsOfASynsetThatContainsAGivenSense() = result of "count(distinct({car:1:n}.^hypernym+<#>))" should equal ("40\n")
 
   // Q66
   @Test def countSynsetsThatDoNotTakePartInHypernymy() = result of "count({}[empty(hypernym) and empty(^hypernym)])" should equal ("21\n")
@@ -296,7 +296,7 @@ class FunctionalTestSuite extends WQueryTestSuite {
     @Test def findMaximalDistanceFromTheSynsetThatContainsAGivenSenseToTheLeavesOfHypernymyTree() = result of "size(longest(({car:1:n}.^hypernym*)$a[empty($a.^hypernym)]))" should equal ("3\n")
 
   // Q70
-  @Test def determineClusteringCoefficientForTheSynsetThatContainsAGivenSense() = result of "(count(({auto:2:n}._&synset|^_&synset$b<$b>)._$a[$a in {auto:2:n}._&synset|^_&synset])$kna,count({auto:2:n}._&synset|^_&synset)$ka)<$kna/($ka*($ka - 1))>" should startWith ("0.083")
+  @Test def determineClusteringCoefficientForTheSynsetThatContainsAGivenSense() = result of "(count(({auto:2:n}._&synset|^_&synset<#>)._$a[$a in {auto:2:n}._&synset|^_&synset])$kna,count({auto:2:n}._&synset|^_&synset)$ka)<$kna/($ka*($ka - 1))>" should startWith ("0.083")
 
   // Q71: How many paths of a given length can be constructed from arbitrary chosen semantic relations
   // Q71.1: 3-elemnt paths build from hyponyms followed by meronyms meronyms
@@ -395,7 +395,7 @@ class FunctionalTestSuite extends WQueryTestSuite {
     val wupdate = WQueryTestSuiteRuntime.newWUpdate
 
     result(wupdate) of "{car:1:n}" should equal ("{ car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n }\n")
-    result(wupdate) of "from {}$a[count(senses) > 1] merge {$a.senses.word}[not empty(last(senses.word) intersect last($a.senses.word)) and count(senses) > 1]" should equal ("(no result)\n")
+    result(wupdate) of "from {}$a[count(senses) > 1] merge {$a.senses.word}[not empty(senses.word<#> intersect $a.senses.word<#>) and count(senses) > 1]" should equal ("(no result)\n")
     result(wupdate) of "{car:1:n}" should equal ("{ samochód:1:n auto:2:n auto:4:n auto:5:n cable car:1:n car:5:n car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n car:2:n railcar:1:n railway car:1:n railroad car:1:n car:3:n gondola:3:n car:4:n elevator car:1:n }\n")
   }
 
@@ -404,7 +404,7 @@ class FunctionalTestSuite extends WQueryTestSuite {
     val wupdate = WQueryTestSuiteRuntime.newWUpdate
 
     result(wupdate) of "{car:3:n}" should equal ("{ car:3:n gondola:3:n }\n")
-    result(wupdate) of "from {}$a merge {$a.senses.word}[not empty(last(senses.word) intersect last($a.senses.word)) and not empty(last(hypernym) intersect last($a.hypernym))]" should equal ("(no result)\n")
+    result(wupdate) of "from {}$a merge {$a.senses.word}[not empty(senses.word<#> intersect $a.senses.word<#>) and not empty(hypernym<#> intersect $a.hypernym<#>)]" should equal ("(no result)\n")
     result(wupdate) of "{car:3:n}" should equal ("{ cable car:1:n car:5:n car:3:n gondola:3:n car:4:n elevator car:1:n }\n")
   }
 
@@ -414,7 +414,7 @@ class FunctionalTestSuite extends WQueryTestSuite {
     val wupdate = WQueryTestSuiteRuntime.newWUpdate
 
     result(wupdate) of "{generated}" should equal ("{ generated:1:n prepared:1:n }\n{ generated:2:n prepared:2:n }\n{ generated:3:n prepared:3:n }\n")
-    result(wupdate) of "from {}$a merge {$a.senses.word}[count(last(senses.word) intersect last($a.senses.word)) > 1]" should equal ("(no result)\n")
+    result(wupdate) of "from {}$a merge {$a.senses.word}[count(senses.word<#> intersect $a.senses.word<#>) > 1]" should equal ("(no result)\n")
     result(wupdate) of "{generated}" should equal ("{ generated:1:n prepared:1:n generated:2:n prepared:2:n generated:3:n prepared:3:n }\n")
   }
 
