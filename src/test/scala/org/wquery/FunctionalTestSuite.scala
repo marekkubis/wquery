@@ -19,9 +19,7 @@ class FunctionalTestSuite extends WQueryTestSuite {
   @Test def searchForSynsetsThatContainSpecificWord() = result of "{person}" should equal ("{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n }\n{ person:2:n }\n{ person:3:n }\n")
 
   // Q02
-  @Test def searchForVerbSynsetsThatContainSpecificWord() = result of "{set}[pos = `v`]" should equal ("{ determine:3:v set:2:v }\n")
-  // original: {set}[senses.pos = `n`]
-  // alternative: {set}[distinct(last(senses.pos)) = `v`]
+  @Test def searchForVerbSynsetsThatContainSpecificWord() = result of "{set}[senses.pos = `v`]" should equal ("{ determine:3:v set:2:v }\n")
 
   // Q03
   @Test def searchForASynsetThatContainsASpecificWordSense() = result of "{person:1:n}" should equal ("{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n }\n")
@@ -37,9 +35,7 @@ class FunctionalTestSuite extends WQueryTestSuite {
   @Test def searchForASynsetWithAGivenIdentifier() = result of "{}[id = `100007846`]" should equal ("{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n }\n")
 
   // Q07
-  @Test def findAdjectiveSynsets() = result of "{}[pos = `a`]" should equal ("{ cold:1:a }\n{ cold:2:a }\n{ zymotic:1:a zymolytic:1:a }\n")
-  // original: {}[senses.pos = `a`]
-  // alternative: {}[distinct(last(senses.pos)) = `a`]
+  @Test def findAdjectiveSynsets() = result of "{}[senses.pos = `a`]" should equal ("{ cold:1:a }\n{ cold:2:a }\n{ zymotic:1:a zymolytic:1:a }\n")
 
   // Q08
   @Test def findSynsetsThatHaveASpecificNote() = result of "{}[snote = `testnote`]" should equal ("{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n }\n")
@@ -137,7 +133,7 @@ class FunctionalTestSuite extends WQueryTestSuite {
   @Test def findPolishSynsetsThatDoNotHaveGlosses() = result of "{}[lang = `pl` and empty(desc)]" should equal ("(no result)\n")
 
   // Q33
-  @Test def findCrossPartOfSpeechHypernymyEdges() = result of "{}$a.hypernym$b[distinct($a.senses.pos$c<$c>) != distinct($b.senses.pos$c<$c>)]<$a, $b>" should equal ("{ auto:3:v } { auto:3:n }\n{ auto:3:v } { samochód:1:n auto:2:n }\n{ auto:4:n auto:5:n } { auto:3:v }\n{ wheel:1:n } { auto:3:v }\n")
+  @Test def findCrossPartOfSpeechHypernymyEdges() = result of "{}$a.hypernym$b[$a.senses.pos != $b.senses.pos]<$a, $b>" should equal ("{ auto:3:v } { auto:3:n }\n{ auto:3:v } { samochód:1:n auto:2:n }\n{ auto:4:n auto:5:n } { auto:3:v }\n{ wheel:1:n } { auto:3:v }\n")
 
   // Q34
   @Test def findRedundantHypernymyEdges() = result of "{}$b.hypernym$a[$a in $b.hypernym{2,}]<$a, $b>" should equal ("{ samochód:1:n auto:2:n } { auto:3:v }\n")
@@ -215,23 +211,23 @@ class FunctionalTestSuite extends WQueryTestSuite {
   // Q53a.1: words
   @Test def countNouns() = result of "count(''[`n` in senses.pos])" should equal ("167\n")
   // Q53a.2: synsets
-  @Test def countNounSynsets() = result of "count({}[senses.pos = `n`])" should equal ("44\n")
+  @Test def countNounSynsets() = result of "count({}[senses.pos = `n`])" should equal ("91\n")
   // Q53a.3: word senses
   @Test def countNounWordSenses() = result of "count(::[pos = `n`])" should equal ("187\n")
   // Q53a.4: glosses
-  @Test def countNounGlosses() = result of "count({}[senses.pos = `n`].desc)" should equal ("44\n")
+  @Test def countNounGlosses() = result of "count({}[senses.pos = `n`].desc)" should equal ("91\n")
 
   // Q54
   @Test def countSemanticRelationEdges() = result of "count({}._&synset)" should equal ("92\n")
 
   // Q54a
-  @Test def countEdgesOfSemanticRelationsThatHoldBetweenNounSynsets() = result of "count({}$a._&synset$b[distinct($a.senses.pos$c<$c>) = `n` and distinct($b.senses.pos$c<$c>) = `n`])" should equal ("87\n")
+  @Test def countEdgesOfSemanticRelationsThatHoldBetweenNounSynsets() = result of "count({}$a._&synset$b[$a.senses.pos = `n` and $b.senses.pos = `n`])" should equal ("87\n")
 
   // Q55
   @Test def countHypernymyEdges() = result of "count({}.hypernym)" should equal ("77\n")
 
   // Q55a
-  @Test def countHypernymyEdgesThatHoldBetweenNouns() = result of "count({}$a.hypernym$b[distinct($a.senses.pos$c<$c>) = `n` and distinct($b.senses.pos$c<$c>) = `n`])" should equal ("73\n")
+  @Test def countHypernymyEdgesThatHoldBetweenNouns() = result of "count({}$a.hypernym$b[$a.senses.pos = `n` and $b.senses.pos = `n`])" should equal ("73\n")
 
   // Q56
   @Test def countTheNumberOfEdgesPerSynset() = result of "count({}._&synset)/count({})" should startWith ("0.929")
@@ -247,7 +243,7 @@ class FunctionalTestSuite extends WQueryTestSuite {
 
   // Q57a: count the number of senses per noun synset/noun
   // Q57a.1: synset
-  @Test def countTheNumberOfSensesPerNounSynset() = result of "count(::[pos = `n`])/count({}[senses.pos = `n`])" should startWith ("4.25")
+  @Test def countTheNumberOfSensesPerNounSynset() = result of "count(::[pos = `n`])/count({}[senses.pos = `n`])" should startWith ("2.054")
   // Q57a.2: word
   @Test def countTheNumberOfSensesPerNoun() = result of "count(::[pos = `n`])/count(''[`n` in senses.pos])" should startWith ("1.1197")
 

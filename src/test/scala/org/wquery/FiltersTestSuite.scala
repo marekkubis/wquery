@@ -161,12 +161,30 @@ class FiltersTestSuite extends WQueryTestSuite {
 
   @Test def testBooleanPathFilterIsFalse()  = result of "{person}[not nl]" should equal ("{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n }\n{ person:2:n }\n{ person:3:n }\n")
 
-  @Test def testMultisetEqualityTrue()  = result of "[car union car = car union car]" should equal ("true\n")
+  @Test def testSetEqualityTrue()  = result of "[`a`,(car union car) = `b`,car]" should equal ("true\n")
 
-  @Test def testMultisetEqualityFalse()  = result of "[car = car union car]" should equal ("false\n")
+  @Test def testSetEqualityFalse()  = result of "[`a`,car = `b`,auto]" should equal ("false\n")
 
-  @Test def testMultisetInequalityTrue()  = result of "[car != car union car]" should equal ("true\n")
+  @Test def testMultiSetEqualityTrue()  = result of "[`a`,(car union car) == `b`,(car union car)]" should equal ("true\n")
 
-  @Test def testMultisetInequalityFalse()  = result of "[car union car != car union car]" should equal ("false\n")
+  @Test def testMultiSetEqualityFalse()  = result of "[`a`,car == `b`,(car union car)]" should equal ("false\n")
+
+  @Test def testMultiSetEqualityOutOfOrderTrue()  = result of "[`a`,(car union car union auto) == `b`,(car union auto union car)]" should equal ("true\n")
+
+  @Test def testDataSetEqualityTrue()  = result of "[`a`,(car union car union auto) === `b`,(car union car union auto)]" should equal ("true\n")
+
+  @Test def testDataSetEqualityFalse()  = result of "[`a`,(car union car union auto) === `b`,(car union auto union car)]" should equal ("false\n")
+
+  @Test def testSetInequalityTrue()  = result of "[car != car union auto]" should equal ("true\n")
+
+  @Test def testSetInequalityFalse()  = result of "[car != car union car]" should equal ("false\n")
+
+  @Test def testMultiSetInequalityTrue()  = result of "[car union car !== car]" should equal ("true\n")
+
+  @Test def testMultisetInequalityFalse()  = result of "[car union car !== car union car]" should equal ("false\n")
+
+  @Test def testDataSetInequalityTrue()  = result of "[`a`,(car union car union auto) !=== `b`,(car union auto union car)]" should equal ("true\n")
+
+  @Test def testDataSetInequalityFalse()  = result of "[`a`,(car union car union auto) !=== `b`,(car union car union auto)]" should equal ("false\n")
 
 }

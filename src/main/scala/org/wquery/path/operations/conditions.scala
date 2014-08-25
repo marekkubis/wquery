@@ -59,11 +59,17 @@ case class BinaryCondition(op: String, leftOp: AlgebraOp, rightOp: AlgebraOp) ex
 
     op match {
       case "=" =>
-        leftGroup.forall{ case (left, leftValues) => rightGroup.get(left).some(rightValues => rightValues.size == leftValues.size).none(false) } &&
-          rightGroup.forall{ case (right, rightValues) => leftGroup.get(right).some(leftValues => leftValues.size == rightValues.size).none(false) }
+        setEqual(leftGroup, rightGroup)
+      case "==" =>
+        multiSetEqual(leftGroup, rightGroup)
+      case "===" =>
+        leftResult == rightResult
       case "!=" =>
-        !(leftGroup.forall{ case (left, leftValues) => rightGroup.get(left).some(rightValues => rightValues.size == leftValues.size).none(false) } &&
-            rightGroup.forall{ case (right, rightValues) => leftGroup.get(right).some(leftValues => leftValues.size == rightValues.size).none(false) })
+        !setEqual(leftGroup, rightGroup)
+      case "!==" =>
+        !multiSetEqual(leftGroup, rightGroup)
+      case "!===" =>
+        leftResult != rightResult
       case "in" =>
         leftGroup.forall{ case (left, leftValues) => rightGroup.get(left).some(rightValues => leftValues.size <= rightValues.size).none(false) }
       case "=~" =>
@@ -78,6 +84,16 @@ case class BinaryCondition(op: String, leftOp: AlgebraOp, rightOp: AlgebraOp) ex
       case _ =>
         tryComparingAsSingletons(leftResult, rightResult)
     }
+  }
+
+  private def setEqual(leftGroup: Map[Any, scala.List[Any]], rightGroup: Map[Any, scala.List[Any]]) = {
+    leftGroup.forall{ case (left, leftValues) => rightGroup.contains(left) } &&
+      rightGroup.forall{ case (right, rightValues) => leftGroup.contains(right) }
+  }
+
+  private def multiSetEqual(leftGroup: Map[Any, scala.List[Any]], rightGroup: Map[Any, scala.List[Any]]) = {
+    leftGroup.forall{ case (left, leftValues) => rightGroup.get(left).some(rightValues => rightValues.size == leftValues.size).none(false) } &&
+      rightGroup.forall{ case (right, rightValues) => leftGroup.get(right).some(leftValues => leftValues.size == rightValues.size).none(false) }
   }
 
   private def tryComparingAsSingletons(leftResult: List[Any], rightResult: List[Any]) = {

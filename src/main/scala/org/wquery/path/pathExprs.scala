@@ -319,7 +319,7 @@ case class NotExpr(expr: ConditionalExpr) extends ConditionalExpr {
 }
 
 case class BinaryConditionalExpr(op: String, leftExpr: EvaluableExpr, rightExpr: EvaluableExpr) extends ConditionalExpr {
-  val Operators = Set("=", "!=", "in", "=~", "<=", "<", ">=", ">")
+  val Operators = Set("=", "==", "===", "!=", "!==", "!===", "in", "=~", "<=", "<", ">=", ">")
 
   def conditionPlan(wordNet: WordNet#Schema, bindings: BindingsSchema, context: Context) = {
     val leftOp = leftExpr.evaluationPlan(wordNet, bindings, context)
