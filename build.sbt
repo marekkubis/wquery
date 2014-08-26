@@ -3,8 +3,10 @@ import com.typesafe.sbt.SbtGit.git
 import com.typesafe.sbt.SbtNativePackager._
 import com.typesafe.sbt.SbtSite.SiteKeys._
 import com.typesafe.sbt.SbtSite.site
+import com.typesafe.sbt.packager.universal
 import de.johoop.jacoco4sbt.JacocoPlugin._
 import sbtfilter.Plugin.FilterKeys._
+import sbtrelease._
 
 //
 // Project information
@@ -12,8 +14,6 @@ import sbtfilter.Plugin.FilterKeys._
 name := "WQuery"
 
 organization := "org.wquery"
-
-version := "0.8-SNAPSHOT"
 
 scalaVersion := "2.10.4"
 
@@ -70,6 +70,44 @@ infoFilesMappings <<= baseDirectory map { base =>
 }
 
 mappings in Universal ++= infoFilesMappings.value
+
+val assemblyFileName = TaskKey[File]("assembly-file", "Creates the assembly file name.")
+
+assemblyFileName <<= (target, version, ReleaseKeys.releaseVersion) map {
+  (t: File, v: String, r: String => String) =>
+    t / ("wquery-" + r(v) + ".tar.gz")
+}
+
+val assembly = TaskKey[File]("assembly", "Creates an assembly.")
+
+assembly <<= (universal.Keys.packageZipTarball in Universal, assemblyFileName) map {
+  (packagedFile, assemblyFile) =>
+    IO.move(packagedFile, assemblyFile)
+    assemblyFile
+}
+
+//
+// Release
+//
+releaseSettings
+
+ReleaseKeys.releaseProcess <<= thisProjectRef apply { ref =>
+  import sbtrelease.ReleaseStateTransformations._
+  Seq[ReleaseStep](
+    checkSnapshotDependencies,
+    inquireVersions,
+    runClean,
+    runTest,
+    setReleaseVersion,
+    commitReleaseVersion,
+    tagRelease,
+    releaseTask(assembly in ThisBuild in ref),
+//    publishArtifacts,
+    setNextVersion,
+    commitNextVersion
+//    pushChanges
+  )
+}
 
 //
 // Scalastyle

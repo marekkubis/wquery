@@ -13,3 +13,5 @@ addSbtPlugin("com.typesafe.sbt" % "sbt-ghpages" % "0.5.2")
 addSbtPlugin("de.johoop" % "jacoco4sbt" % "2.1.4")
 
 addSbtPlugin("com.typesafe.sbt" % "sbt-native-packager" % "0.7.1")
+
+addSbtPlugin("com.github.gseitz" % "sbt-release" % "0.8.4")
