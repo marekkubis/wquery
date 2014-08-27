@@ -130,8 +130,8 @@ ReleaseKeys.releaseProcess <<= thisProjectRef apply { ref =>
     releaseTask(assembly in ThisBuild in ref),
 //    publishArtifacts,
     setNextVersion,
-    commitNextVersion
-//    pushChanges
+    commitNextVersion,
+    pushChanges
   )
 }
 
