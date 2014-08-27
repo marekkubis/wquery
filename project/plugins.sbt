@@ -15,3 +15,7 @@ addSbtPlugin("de.johoop" % "jacoco4sbt" % "2.1.4")
 addSbtPlugin("com.typesafe.sbt" % "sbt-native-packager" % "0.7.1")
 
 addSbtPlugin("com.github.gseitz" % "sbt-release" % "0.8.4")
+
+addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "0.2.1")
+
+addSbtPlugin("com.typesafe.sbt" % "sbt-pgp" % "0.8.3")

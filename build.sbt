@@ -87,6 +87,32 @@ assembly <<= (universal.Keys.packageZipTarball in Universal, assemblyFileName) m
 }
 
 //
+// Sonatype Deployment
+//
+sonatypeSettings
+
+pomExtra := {
+  <url>http://www.wquery.org</url>
+    <licenses>
+      <license>
+        <name>BSD-style</name>
+        <url>http://raw.githubusercontent.com/marekkubis/wquery/master/LICENSE</url>
+      </license>
+    </licenses>
+    <scm>
+      <connection>scm:git:github.com/marekkubis/wquery.git</connection>
+      <url>github.com/marekkubis/wquery.git</url>
+    </scm>
+    <developers>
+      <developer>
+        <id>marekkubis</id>
+        <name>Marek Kubis</name>
+        <url>http://marekkubis.com</url>
+      </developer>
+    </developers>
+}
+
+//
 // Release
 //
 releaseSettings
