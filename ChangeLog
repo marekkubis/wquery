@@ -1,4 +1,13 @@
 =====================
+0.8.0 (28 Aug 2014)
+=====================
+        * per language shell commands (wpath, wquery, wupdate)
+
+        * release package structure changed
+
+        * bug fixes
+
+=====================
 0.5.2 (13 Dec 2011)
 =====================
         * bug fixes
