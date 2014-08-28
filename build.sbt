@@ -26,7 +26,7 @@ homepage := Some(url("http://www.wquery.org"))
 
 startYear := Some(2007)
 
-licenses += "WQuery License" -> url("file://LICENSE")
+licenses += "WQuery License (BSD-style)" -> url("http://raw.githubusercontent.com/marekkubis/wquery/master/LICENSE")
 
 publishMavenStyle := true
 
@@ -92,13 +92,6 @@ assembly <<= (universal.Keys.packageZipTarball in Universal, assemblyFileName) m
 sonatypeSettings
 
 pomExtra := {
-  <url>http://www.wquery.org</url>
-    <licenses>
-      <license>
-        <name>BSD-style</name>
-        <url>http://raw.githubusercontent.com/marekkubis/wquery/master/LICENSE</url>
-      </license>
-    </licenses>
     <scm>
       <connection>scm:git:github.com/marekkubis/wquery.git</connection>
       <url>github.com/marekkubis/wquery.git</url>
