@@ -89,15 +89,48 @@ tar xzvf wquery-0.8.0.tar.gz
 
         <pre><code># wcompile samples/samplenet.xml | wupdate -c 'from {}$a.hypernym$b[$a.pos != $b.pos] update $a hypernym -= $b' | wprint -t lmf > sample2.xml</code></pre>
 
-        <h3>User Guide</h3>
+        <h3>Usage</h3>
 
         <p>The syntax of the query languages available in WQuery is discussed
             in the <a href="https://github.com/marekkubis/wquery/wiki">User Guide</a>.
-            Many examples of queries of practical importance can be found in the <a href="https://github.com/marekkubis/wquery/blob/master/src/test/scala/org/wquery/FunctionalTestSuite.scala">test suite</a>.</p>
+            Examples of queries of practical importance can be found in the <a href="https://github.com/marekkubis/wquery/blob/master/src/test/scala/org/wquery/FunctionalTestSuite.scala">test suite</a>.</p>
 
         <h3>Citing</h3>
 
-        <p>If you have found WQuery useful, please consider citing one of the <a href="https://github.com/marekkubis/wquery/wiki/Citing">related papers</a>.</p>
+        <p>If you have found WQuery useful, please consider citing the following paper</p>
+
+        <p>Marek Kubis. A Query Language for WordNet-like Lexical Databases. In Jeng-Shyang Pan, Shyi-Ming Chen, and Ngoc-Thanh Nguyen, editors, <em>Intelligent Information and Database Systems</em>, volume 7198 of <em>Lecture Notes in Artificial Intelligence</em>, pages 436–445. Springer Heidelberg, 2012.</p>
+
+<pre><code>@incollection{Kubis12,
+    author    = {Marek Kubis},
+    title     = {{A Query Language for WordNet-like Lexical Databases}},
+    booktitle = {Intelligent Information and Database Systems},
+    series    = {Lecture Notes in Artificial Intelligence},
+    editor    = {Jeng-Shyang Pan and Shyi-Ming Chen and Ngoc-Thanh Nguyen},
+    publisher = {Springer Heidelberg},
+    volume    = {7198},
+    year      = {2012},
+    pages     = {436--445},
+}
+</code></pre>
+
+<p>If you use update facilities of the system, you may also consider citing the WUpdate paper</p>
+
+<p>Marek Kubis. A Tool for Transforming WordNet-Like Databases. In Zygmunt Vetulani and Joseph Mariani, editors, <em>Human Language Technology Challenges for Computer Science and Linguistics</em>, volume 8387 of <em>Lecture Notes in Computer Science</em>, pages 343–355. Springer International Publishing, 2014.</p>
+
+<pre><code>@incollection{Kubis14,
+    author    = {Marek Kubis},
+    title     = {{A Tool for Transforming WordNet-Like Databases}},
+    booktitle = {Human Language Technology Challenges for Computer Science and Linguistics},
+    series    = {Lecture Notes in Computer Science},
+    editor    = {Zygmunt Vetulani and Joseph Mariani},
+    publisher = {Springer International Publishing},
+    volume    = {8387},
+    year      = {2014},
+    pages     = {343--355},
+}
+</code></pre>
+
 
     </section>
 </div>
