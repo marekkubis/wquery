@@ -5,7 +5,16 @@ package org.wquery.emitter
 import org.wquery.lang.{Answer, Error, Result}
 import org.wquery.model._
 
-class PlainWQueryEmitter extends WQueryEmitter {
+class PlainWQueryEmitter(escaping: Boolean = false) extends WQueryEmitter {
+  val escape = if(escaping) {
+    (s: String, builder: StringBuilder) =>
+      builder append "'"
+      builder append s
+      builder append "'"
+  } else {
+    (s: String, builder: StringBuilder) => builder append s
+  }
+
   def emit(result: Result):String = {
     result match {
       case Answer(wordNet, dataSet) =>
@@ -94,20 +103,18 @@ class PlainWQueryEmitter extends WQueryEmitter {
           builder append element.to
         }
       case element: String =>
-        if (element.indexOf(' ') != -1) {
-          builder append "'"
-          builder append element
-          builder append "'"
-        } else {
-          builder append element
-        }
+        escape(element, builder)
       case _ =>
         builder append element
     }
   }
 
   private def emitSense(sense: Sense, builder: StringBuilder) {
-    builder append sense.wordForm append ":" append sense.senseNumber append ":" append sense.pos
+    escape(sense.wordForm, builder)
+    builder append ":"
+    builder append sense.senseNumber
+    builder append ":"
+    builder append sense.pos
   }
 
 }

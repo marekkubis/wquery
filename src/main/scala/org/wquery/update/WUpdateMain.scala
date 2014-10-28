@@ -4,6 +4,7 @@ import java.io._
 
 import jline.console.ConsoleReader
 import org.rogach.scallop.Scallop
+import org.wquery.emitter.WQueryEmitter
 import org.wquery.lang.{WLanguageCompleter, WLanguageMain}
 import org.wquery.model.WordNet
 import org.wquery.printer.WnPrinter
@@ -12,7 +13,7 @@ import org.wquery.reader.{ConsoleLineReader, ExpressionReader, InputLineReader}
 object WUpdateMain extends WLanguageMain("WUpdate") {
   override def appendOptions(opts: Scallop) = {
     opts
-      .opt[Boolean]("emit", short = 'e', descr = "Emit output of the executed commands to stderr")
+      .opt[Boolean]("print", short = 'p', descr = "Print output of the executed commands to stderr")
       .opt[String]("update", short = 'u', descr = "Same as -c but prepends the 'update' keyword to the command", required = false)
       .trailArg[String](name = "IFILE", required = false,
         descr = "A  wordnet model as created by wcompile (read from stdin if not specified)")
@@ -20,9 +21,9 @@ object WUpdateMain extends WLanguageMain("WUpdate") {
         descr = "A file to store the wordnet model updated by executing the update commands (printed to stdout if not specified)")
   }
 
-  def doMain(wordNet: WordNet, output: OutputStream, opts: Scallop) {
+  def doMain(wordNet: WordNet, output: OutputStream, emitter: WQueryEmitter, opts: Scallop) {
     val wupdate = new WUpdate(wordNet)
-    val emitMode = opts[Boolean]("emit")
+    val printMode = opts[Boolean]("print")
 
     opts.get[String]("file").map { fileName =>
       val expressionReader = new ExpressionReader(new InputLineReader(new FileReader(fileName)))
@@ -30,7 +31,7 @@ object WUpdateMain extends WLanguageMain("WUpdate") {
       expressionReader.foreach { expr =>
         val result = wupdate.execute(expr)
 
-        if (emitMode)
+        if (printMode)
           System.err.print(emitter.emit(result))
       }
 
@@ -40,14 +41,14 @@ object WUpdateMain extends WLanguageMain("WUpdate") {
     opts.get[String]("command").map { command =>
       val result = wupdate.execute(command)
 
-      if (emitMode)
+      if (printMode)
         System.err.print(emitter.emit(result))
     }
 
     opts.get[String]("update").map { command =>
       val result = wupdate.execute("update " + command)
 
-      if (emitMode)
+      if (printMode)
         System.err.print(emitter.emit(result))
     }
 

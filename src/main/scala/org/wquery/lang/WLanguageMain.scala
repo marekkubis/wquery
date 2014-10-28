@@ -4,7 +4,7 @@ import java.io._
 
 import org.rogach.scallop.Scallop
 import org.rogach.scallop.exceptions.{Help, ScallopException, Version}
-import org.wquery.emitter.PlainWQueryEmitter
+import org.wquery.emitter.WQueryEmitter
 import org.wquery.loader.WnLoader
 import org.wquery.model.WordNet
 import org.wquery.utils.Logging
@@ -12,9 +12,8 @@ import org.wquery.{WQueryCommandLineException, WQueryProperties}
 
 abstract class WLanguageMain(languageName: String) {
   val loader = new WnLoader
-  val emitter = new PlainWQueryEmitter
 
-  def doMain(wordNet: WordNet, output: OutputStream, opts: Scallop)
+  def doMain(wordNet: WordNet, output: OutputStream, emitter: WQueryEmitter, opts: Scallop)
 
   def appendOptions(opts: Scallop) = opts
 
@@ -36,6 +35,9 @@ abstract class WLanguageMain(languageName: String) {
       .opt[Boolean]("interactive", short = 'i', descr = "Run in the interactive interpreter mode", required = false)
       .opt[Boolean]("help", short = 'h', descr = "Show help message")
       .opt[Boolean]("quiet", short = 'q', descr = "Silent mode")
+      .opt[String]("emitter", short = 'e', default = () => Some("plain"),
+        validate = arg => WQueryEmitter.emitters.contains(arg),
+        descr = "Set result emitter (i.e. output format) - either raw, plain or escaping")
       .opt[Boolean]("version", short = 'v', descr = "Show version")
 
     val opts = appendOptions(coreOpts)
@@ -61,8 +63,9 @@ abstract class WLanguageMain(languageName: String) {
         .getOrElse(System.out)
 
       val wordNet = loader.load(input)
+      val emitter = WQueryEmitter.demandEmitter(opts[String]("emitter"))
 
-      doMain(wordNet, output, opts)
+      doMain(wordNet, output, emitter, opts)
       output.close()
     } catch {
       case e: Help =>

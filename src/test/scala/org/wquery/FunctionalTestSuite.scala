@@ -96,7 +96,7 @@ class FunctionalTestSuite extends WQueryTestSuite {
   @Test def checkIfAnEnglishSynsetWithAGivenIdentifierHasAGloss() = result of "[not empty({}[id = `100007846` and lang=`en`].desc)]" should equal ("true\n")
 
   // Q22
-  @Test def findWordSensesAGlossAndAllEdgesOfSemanticRelationsOfAnEnglishSynsetWithAGivenIdentifier() = result of "{}[id = `100007846` and lang=`en`].senses|desc|_&synset|^_&synset" should equal ("{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n } desc 'a human being; \"there was too much for one person to do\"'\n{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n } hypernym { organism:1:n being:2:n }\n{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n } hypernym { causal agent:1:n cause:4:n causal agency:1:n }\n{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n } member_holonym { people:1:n }\n{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n } ^partial_holonym { human body:1:n physical body:1:n material body:1:n soma:3:n build:2:n figure:2:n physique:2:n anatomy:2:n shape:3:n bod:1:n chassis:1:n frame:3:n form:5:n flesh:2:n }\n{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n } senses individual:1:n\n{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n } senses mortal:1:n\n{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n } senses person:1:n\n{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n } senses somebody:1:n\n{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n } senses someone:1:n\n{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n } senses soul:2:n\n{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n } ^similar { person:2:n }\n{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n } similar { person:2:n }\n")
+  @Test def findWordSensesAGlossAndAllEdgesOfSemanticRelationsOfAnEnglishSynsetWithAGivenIdentifier() = result of "{}[id = `100007846` and lang=`en`].senses|desc|_&synset|^_&synset" should equal ("{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n } desc a human being; \"there was too much for one person to do\"\n{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n } hypernym { organism:1:n being:2:n }\n{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n } hypernym { causal agent:1:n cause:4:n causal agency:1:n }\n{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n } member_holonym { people:1:n }\n{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n } ^partial_holonym { human body:1:n physical body:1:n material body:1:n soma:3:n build:2:n figure:2:n physique:2:n anatomy:2:n shape:3:n bod:1:n chassis:1:n frame:3:n form:5:n flesh:2:n }\n{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n } senses individual:1:n\n{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n } senses mortal:1:n\n{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n } senses person:1:n\n{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n } senses somebody:1:n\n{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n } senses someone:1:n\n{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n } senses soul:2:n\n{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n } ^similar { person:2:n }\n{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n } similar { person:2:n }\n")
 
   //
   // Use Case II: Data Validation
@@ -112,7 +112,7 @@ class FunctionalTestSuite extends WQueryTestSuite {
   @Test def findSensesOfTheWordsThatBelongToTheGlossesOfTheirSynsets() = result of "::[word in flatten(string_split(synset.desc<#>, ` `))]" should equal ("area:5:n\ncar:1:n\ncar:4:n\ncar:5:n\ncold:1:a\ncold:2:a\nconstruction:4:n\nfixed:2:s\nflesh:2:n\nhatchback:1:n\norange:1:n\norange:1:s\norange:2:n\norange:4:n\npeople:1:n\nperson:1:n\nrigid:5:s\nset:2:n\nset:2:s\nstructure:1:n\n")
 
   // Q26
-  @Test def findUsageExamplesWhichDoNotContainWordsWhatBelongToTheWordSensesOfTheSynsetsForWhichTheUsageExamplesHaveBeeCreated() = result of "{}$a.usage$b[empty($a.senses.word<#> intersect flatten(string_split($b, ` `)))]<$b>" should equal ("'An invalid example of usage example.'\n")
+  @Test def findUsageExamplesWhichDoNotContainWordsWhatBelongToTheWordSensesOfTheSynsetsForWhichTheUsageExamplesHaveBeeCreated() = result of "{}$a.usage$b[empty($a.senses.word<#> intersect flatten(string_split($b, ` `)))]<$b>" should equal ("An invalid example of usage example.\n")
 
   // Q27
   @Test def findWordSensesThatHaveInvalidPOSSymbol() = result of "::[pos != `n` and pos != `v` and pos != `a` and pos != `s`]" should equal ("(no result)\n")
@@ -142,7 +142,7 @@ class FunctionalTestSuite extends WQueryTestSuite {
   @Test def findRedundantMeronymyEdges() = result of "{}$b.^partial_holonym$a[$a in $b.hypernym+.^partial_holonym]<$a, $b>" should equal ("{ wheel:1:n } { auto:4:n auto:5:n }\n")
 
   // Q36
-  @Test def findGlossesAssignedToMoreThanOneSynset() = result of "{}.desc$a[count($a.^desc) > 1]<$a>" should equal ("'Invalid synset introduced for the purpose of validation queries'\n'a motor vehicle with four wheels; usually propelled by an internal combustion engine; \"he needs a car to get to work\"'\n")
+  @Test def findGlossesAssignedToMoreThanOneSynset() = result of "{}.desc$a[count($a.^desc) > 1]<$a>" should equal ("Invalid synset introduced for the purpose of validation queries\na motor vehicle with four wheels; usually propelled by an internal combustion engine; \"he needs a car to get to work\"\n")
 
   // Q37
   @Test def findIdentifiersAssignedToMoreThanOneSense() = result of "{}.id$a[count($a.^id) > 1]<$a>" should equal ("(no result)\n")
@@ -179,7 +179,7 @@ class FunctionalTestSuite extends WQueryTestSuite {
   @Test def findWordsThatHaveMoreThan3Senses() = result of "''[count(senses) > 3]" should equal ("auto\ncar\norange\n")
 
   // Q48
-  @Test def findWordsThatBelongToNonLexicalizedSynsets() = result of "''[senses.synset.nl]" should equal ("'non lexicalised sense'\n")
+  @Test def findWordsThatBelongToNonLexicalizedSynsets() = result of "''[senses.synset.nl]" should equal ("non lexicalised sense\n")
 
   // Q49: find text data that contain characters that do not belong to a specified set
   @Test def findTextDataThatContainCharactersThatDoNotBelongToEnglishAlphabet() = result of "__$a[$a =~ `[^a-zA-Z0-9 ()-;,\"'\n\t?]`]<$a>" should equal ("samochód\n")

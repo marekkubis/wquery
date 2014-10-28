@@ -18,7 +18,7 @@ object WQueryTestSuiteRuntime {
   compileSampleNet
 
   val wupdate = newWUpdate
-  val emitter = new PlainWQueryEmitter
+  val emitter = new PlainWQueryEmitter(escaping = false)
 
   def compileSampleNet() = {
     val printer = new WnPrinter

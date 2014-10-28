@@ -40,3 +40,7 @@ class WQueryLoadingException(message: String) extends WQueryException(message)
 class WQueryLoaderNotFoundException(name: String) extends WQueryLoadingException("Loader '" + name + "' not found")
 
 class WQueryCommandLineException(val message: String) extends WQueryException(message)
+
+class WQueryEmitterException(message: String) extends WQueryException(message)
+
+class WQueryEmitterNotFoundException(name: String) extends WQueryEmitterException("Emitter '" + name + "' not found")
