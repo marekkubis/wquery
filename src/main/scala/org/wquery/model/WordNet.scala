@@ -180,6 +180,8 @@ object WordNet {
     SenseToPos, SynsetToWordForms, SynsetToSenses, WordFormToSenses, SenseToSynset, WordFormToSynsets,
     SenseToWordFormSenseNumberAndPos, SynsetSet, SenseSet, WordSet, PosSet)
 
+  val derivedRelations = List(IdToSynset, SenseToWordFormSenseNumberAndPos, WordFormToSenses, SynsetToSenses, WordFormToSynsets, SynsetToWordForms)
+
   val dependent = List((SenseToWordFormSenseNumberAndPos, Set(Relation.Src)), (SenseToPos, Set(Relation.Src)),
     (SenseToWordForm, Set(Relation.Src)), (WordFormToSenses, Set(Relation.Dst)),
     (SenseToSynset, Set(Relation.Src)), (SynsetToSenses, Set(Relation.Dst)))

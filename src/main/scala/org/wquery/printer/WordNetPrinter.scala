@@ -15,6 +15,7 @@ object WordNetPrinter {
   val printers = mutable.Map[String, WordNetPrinter]()
 
   registerPrinter("deb", new DebPrinter)
+  registerPrinter("graphml", new GraphMLPrinter)
   registerPrinter("lmf", new LmfPrinter)
   registerPrinter("wn", new WnPrinter)
 
