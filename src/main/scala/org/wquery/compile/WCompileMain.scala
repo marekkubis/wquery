@@ -1,6 +1,6 @@
 package org.wquery.compile
 
-import java.io.{BufferedOutputStream, FileInputStream, FileOutputStream}
+import java.io.{BufferedOutputStream, FileOutputStream}
 
 import org.rogach.scallop._
 import org.rogach.scallop.exceptions.{Help, ScallopException, Version}
@@ -8,6 +8,8 @@ import org.wquery.WQueryProperties
 import org.wquery.loader.WordNetLoader
 import org.wquery.printer.WnPrinter
 import org.wquery.utils.Logging
+
+import scalaz.Scalaz._
 
 object WCompileMain {
   def main(args: Array[String]) {
@@ -39,11 +41,14 @@ object WCompileMain {
       if (opts[Boolean]("quiet"))
         Logging.tryDisableLoggers()
 
-      val loader = WordNetLoader.demandLoader(opts[String]("type"))
-      val input = opts.get[String]("IFILE")
-        .map(ifile => new FileInputStream(ifile))
-        .getOrElse(System.in)
-      val wordNet = loader.load(input)
+      val wordNet = opts.get[String]("IFILE").some { inputFileName =>
+        val loader = WordNetLoader.demandLoader(opts[String]("type"))
+        loader.load(inputFileName)
+      }.none{
+        val loader = WordNetLoader.demandStreamWordNetLoader(opts[String]("type"))
+        loader.load(System.in)
+      }
+
       val printer = new WnPrinter
       val outputStream = opts.get[String]("OFILE")
         .map(outputFileName => new BufferedOutputStream(new FileOutputStream(outputFileName)))

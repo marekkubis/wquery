@@ -1,6 +1,6 @@
 package org.wquery
 
-import java.io.{FileInputStream, FileOutputStream}
+import java.io.FileOutputStream
 
 import org.scalatest.Matchers
 import org.scalatest.testng.TestNGSuite
@@ -22,7 +22,7 @@ object WQueryTestSuiteRuntime {
 
   def compileSampleNet() = {
     val printer = new WnPrinter
-    val sampleNet = WordNetLoader.demandLoader("deb").load(new FileInputStream(SampleNetPath))
+    val sampleNet = WordNetLoader.demandLoader("deb").load(SampleNetPath)
     val wupdate = new WUpdate(sampleNet)
 
     // add some antonyms
@@ -40,8 +40,7 @@ object WQueryTestSuiteRuntime {
   }
 
   def newWUpdate = {
-    val sampleNet = WordNetLoader.demandLoader("wn")
-      .load(new FileInputStream(CompiledSampleNetPath))
+    val sampleNet = WordNetLoader.demandLoader("wn").load(CompiledSampleNetPath)
     new WUpdate(sampleNet)
   }
 }

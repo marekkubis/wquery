@@ -16,7 +16,7 @@ import scala.collection.immutable.{Map => IMap, Set => ISet}
 import scala.collection.mutable.{ListBuffer, Map, Set}
 import scalaz.Scalaz._
 
-class DebLoader extends WordNetLoader with Logging {
+class DebLoader extends StreamWordNetLoader with Logging {
   override def load(input: InputStream) = {
     val factory = SAXParserFactory.newInstance
     val wordNet = new InMemoryWordNet

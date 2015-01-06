@@ -7,7 +7,7 @@ import org.wquery.WQueryProperties
 import org.wquery.model.impl.{InMemoryWordNet, InMemoryWordNetKryoInstantiator}
 import org.wquery.utils.Logging
 
-class WnLoader extends WordNetLoader with Logging {
+class WnLoader extends StreamWordNetLoader with Logging {
   override def load(input: InputStream) = {
     val instantiator = new InMemoryWordNetKryoInstantiator
     val kryo = instantiator.newKryo()

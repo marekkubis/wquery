@@ -39,6 +39,8 @@ class WQueryLoadingException(message: String) extends WQueryException(message)
 
 class WQueryLoaderNotFoundException(name: String) extends WQueryLoadingException("Loader '" + name + "' not found")
 
+class WQueryStreamLoaderNotFoundException(name: String) extends WQueryLoadingException("Loader '" + name + "' cannot read a wordnet from stdin")
+
 class WQueryCommandLineException(val message: String) extends WQueryException(message)
 
 class WQueryEmitterException(message: String) extends WQueryException(message)

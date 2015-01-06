@@ -16,7 +16,7 @@ import scala.collection.immutable.{Map => IMap}
 import scala.collection.mutable.{ListBuffer, Map}
 import scalaz.Scalaz._
 
-class LmfLoader extends WordNetLoader with Logging {
+class LmfLoader extends StreamWordNetLoader with Logging {
   override def load(input: InputStream) = {
     val factory = SAXParserFactory.newInstance
     val wordNet = new InMemoryWordNet
