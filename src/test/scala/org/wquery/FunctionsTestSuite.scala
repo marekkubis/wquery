@@ -57,7 +57,9 @@ class FunctionsTestSuite extends WQueryTestSuite {
   @Test def testInt() = result of "int(2.0)" should equal ("2\n")
 
   @Test def testFloat() = result of "float(2)" should equal ("2.0\n")
-    
+
+  @Test def testRandom() = result of "random()" should fullyMatch regex "[01]\\.[0-9]+\n"
+
   // string functions
    
   @Test def testStringLength() = result of "string_length(person)" should equal ("6\n")

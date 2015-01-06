@@ -9,7 +9,6 @@ import org.wquery.model._
 
 import scala.collection.mutable.ListBuffer
 import scalaz.Scalaz._
-import scalaz._
 
 abstract class Function(val name: String) {
   def accepts(args: Option[AlgebraOp]): Boolean
@@ -652,6 +651,10 @@ abstract class JavaMethod(override val name: String, method: Method) extends Fun
 
     DataSet(buffer.toList)
   }
+
+  def evaluate(wordNet: WordNet, bindings: Bindings, context: Context) = {
+    DataSet.fromValue(method.invoke(null))
+  }
 }
 
 // scalastyle:off multiple.string.literals
@@ -726,6 +729,10 @@ object Functions {
         args.leftType(0).subsetOf(DataType.numeric) && args.leftType(1).subsetOf(DataType.numeric)
     }
 
+    def returnType(args: AlgebraOp) = Set(FloatType)
+  })
+
+  registerFunction(new JavaMethod("random", classOf[Math].getMethod("random")) with HasNoArguments {
     def returnType(args: AlgebraOp) = Set(FloatType)
   })
 }
