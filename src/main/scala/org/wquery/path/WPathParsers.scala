@@ -172,7 +172,7 @@ trait WPathParsers extends WParsers {
     }
   )
 
-  def function_call_generator = notQuotedString ~ ("(" ~> expr <~ ")") ^^ { case name~y => FunctionExpr(name, y) }
+  def function_call_generator = notQuotedString ~ ("(" ~> opt(expr) <~ ")") ^^ { case name~y => FunctionExpr(name, y) }
 
   def quoted_word_generator = (
     backQuotedString ^^ { value => AlgebraExpr(ConstantOp.fromValue(value)) }

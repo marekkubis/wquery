@@ -3,8 +3,9 @@
 package org.wquery.model
 
 import org.wquery.WQueryModelException
+
+import scalaz.Scalaz._
 import scalaz._
-import Scalaz._
 
 sealed abstract class DataType extends Ordered[DataType] {
   def rank: Int
@@ -70,6 +71,7 @@ object DataType {
   val all = NodeType.all.toSet[DataType] +  ArcType
   val domain = Set[DataType](SynsetType, SenseType, StringType, POSType)
   val numeric = Set[DataType](IntegerType, FloatType)
+  val empty = Set[DataType]()
 
   implicit val DataTypeEqual = equalA[DataType]
 

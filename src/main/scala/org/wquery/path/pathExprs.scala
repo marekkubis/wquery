@@ -83,9 +83,9 @@ case class MinusExpr(expr: EvaluableExpr) extends EvaluableExpr {
 /*
  * Function call expressions
  */
-case class FunctionExpr(name: String, args: EvaluableExpr) extends EvaluableExpr {
+case class FunctionExpr(name: String, args: Option[EvaluableExpr]) extends EvaluableExpr {
   def evaluationPlan(wordNet: WordNet#Schema, bindings: BindingsSchema, context: Context) = {
-    val argsOp = args.evaluationPlan(wordNet, bindings, context)
+    val argsOp = args.map(_.evaluationPlan(wordNet, bindings, context))
 
     Functions.findFunctionsByName(name).some { functions =>
       functions.find(_.accepts(argsOp)).some(FunctionOp(_, argsOp))

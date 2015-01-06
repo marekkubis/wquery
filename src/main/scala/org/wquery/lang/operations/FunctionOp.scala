@@ -1,9 +1,12 @@
 package org.wquery.lang.operations
 
-import org.wquery.model.WordNet
 import org.wquery.lang.Context
+import org.wquery.model.WordNet
 
-case class FunctionOp(function: Function, args: AlgebraOp) extends AlgebraOp {
+import scalaz.Scalaz._
+import scalaz._
+
+case class FunctionOp(function: Function, args: Option[AlgebraOp]) extends AlgebraOp {
   def evaluate(wordNet: WordNet, bindings: Bindings, context: Context) = function.evaluate(args, wordNet, bindings, context)
 
   def leftType(pos: Int) = function.leftType(args, pos)
@@ -16,7 +19,7 @@ case class FunctionOp(function: Function, args: AlgebraOp) extends AlgebraOp {
 
   def bindingsPattern = function.bindingsPattern(args)
 
-  val referencedVariables = args.referencedVariables
+  val referencedVariables = args.map(_.referencedVariables).orZero
 
 }
 

@@ -2,25 +2,27 @@
 
 package org.wquery.lang.operations
 
-import collection.mutable.ListBuffer
 import java.lang.reflect.Method
-import scalaz._
-import Scalaz._
-import org.wquery.model._
+
 import org.wquery.lang._
+import org.wquery.model._
+
+import scala.collection.mutable.ListBuffer
+import scalaz.Scalaz._
+import scalaz._
 
 abstract class Function(val name: String) {
-  def accepts(args: AlgebraOp): Boolean
-  def evaluate(args: AlgebraOp, wordNet: WordNet, bindings: Bindings, context: Context): DataSet
-  def leftType(args: AlgebraOp, pos: Int): Set[DataType]
-  def rightType(args: AlgebraOp, pos: Int): Set[DataType]
-  def minTupleSize(args: AlgebraOp): Int
-  def maxTupleSize(args: AlgebraOp): Option[Int]
-  def bindingsPattern(args: AlgebraOp): BindingsPattern
+  def accepts(args: Option[AlgebraOp]): Boolean
+  def evaluate(args: Option[AlgebraOp], wordNet: WordNet, bindings: Bindings, context: Context): DataSet
+  def leftType(args: Option[AlgebraOp], pos: Int): Set[DataType]
+  def rightType(args: Option[AlgebraOp], pos: Int): Set[DataType]
+  def minTupleSize(args: Option[AlgebraOp]): Int
+  def maxTupleSize(args: Option[AlgebraOp]): Option[Int]
+  def bindingsPattern(args: Option[AlgebraOp]): BindingsPattern
   override def toString = name
 }
 
-abstract class DataSetFunction(override val name: String) extends Function(name) {
+abstract class DataSetFunction(override val name: String) extends Function(name) with HasArguments {
   def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings, context: Context): DataSet
 
   def evaluate(args: AlgebraOp, wordNet: WordNet, bindings: Bindings, context: Context) = {
@@ -28,15 +30,55 @@ abstract class DataSetFunction(override val name: String) extends Function(name)
   }
 }
 
-trait AcceptsAll {
+trait HasArguments {
+  def accepts(args: AlgebraOp): Boolean
+  def evaluate(args: AlgebraOp, wordNet: WordNet, bindings: Bindings, context: Context): DataSet
+  def leftType(args: AlgebraOp, pos: Int): Set[DataType]
+  def rightType(args: AlgebraOp, pos: Int): Set[DataType]
+  def minTupleSize(args: AlgebraOp): Int
+  def maxTupleSize(args: AlgebraOp): Option[Int]
+  def bindingsPattern(args: AlgebraOp): BindingsPattern
+
+  def accepts(args: Option[AlgebraOp]): Boolean = accepts(args.get)
+
+  def evaluate(args: Option[AlgebraOp], wordNet: WordNet, bindings: Bindings, context: Context): DataSet = {
+    evaluate(args.get, wordNet, bindings, context)
+  }
+
+  def leftType(args: Option[AlgebraOp], pos: Int): Set[DataType] = leftType(args.get, pos)
+
+  def rightType(args: Option[AlgebraOp], pos: Int): Set[DataType] = rightType(args.get, pos)
+
+  def minTupleSize(args: Option[AlgebraOp]): Int = minTupleSize(args.get)
+
+  def maxTupleSize(args: Option[AlgebraOp]): Option[Int] = maxTupleSize(args.get)
+
+  def bindingsPattern(args: Option[AlgebraOp]): BindingsPattern = bindingsPattern(args.get)
+}
+
+trait HasNoArguments {
+  def evaluate(wordNet: WordNet, bindings: Bindings, context: Context): DataSet
+
+  def accepts(args: Option[AlgebraOp]) = args.isEmpty
+  def evaluate(args: Option[AlgebraOp], wordNet: WordNet, bindings: Bindings, context: Context): DataSet = {
+    evaluate(wordNet, bindings, context)
+  }
+  def leftType(args: Option[AlgebraOp], pos: Int) = DataType.empty
+  def rightType(args: Option[AlgebraOp], pos: Int) = DataType.empty
+  def minTupleSize(args: Option[AlgebraOp]) = 0
+  def maxTupleSize(args: Option[AlgebraOp]) = Some(0)
+  def bindingsPattern(args: Option[AlgebraOp]) = BindingsPattern()
+}
+
+trait AcceptsAll extends HasArguments {
   def accepts(args: AlgebraOp) = true
 }
 
-trait AcceptsNumbers {
+trait AcceptsNumbers extends HasArguments {
   def accepts(args: AlgebraOp) = args.rightType(0).subsetOf(DataType.numeric)
 }
 
-trait AcceptsTypes {
+trait AcceptsTypes extends HasArguments {
   def argumentTypes: List[Set[DataType]]
 
   def accepts(args: AlgebraOp) = {
@@ -416,6 +458,16 @@ object EmptyFunction extends DataSetFunction("empty") with AcceptsAll with Retur
   def returnType(args: AlgebraOp) = Set(BooleanType)
 }
 
+object ReadFunction extends Function("read") with HasNoArguments with ReturnsSingleValue
+with ClearsBindingsPattern {
+
+  def evaluate(wordNet: WordNet, bindings: Bindings, context: Context) = {
+    DataSet.fromValue(Console.readLine().stripLineEnd)
+  }
+
+  def returnType(args: AlgebraOp) = Set(StringType)
+}
+
 object StringLengthFunction extends DataSetFunction("string_length") with AcceptsTypes with ReturnsValueSetOfSimilarSize
  with ClearsBindingsPattern {
   def argumentTypes = List(Set(StringType))
@@ -633,6 +685,7 @@ object Functions {
   registerFunction(SizeFunction)
   registerFunction(LengthFunction)
   registerFunction(EmptyFunction)
+  registerFunction(ReadFunction)
   registerFunction(StringLengthFunction)
   registerFunction(StringSplitFunction)
   registerFunction(SubstringFromToFunction)
@@ -667,7 +720,7 @@ object Functions {
     def returnType(args: AlgebraOp) = Set(FloatType)
   })
 
-  registerFunction(new JavaMethod("power", classOf[Math].getMethod("pow", FloatType.associatedClass, FloatType.associatedClass)) {
+  registerFunction(new JavaMethod("power", classOf[Math].getMethod("pow", FloatType.associatedClass, FloatType.associatedClass)) with HasArguments {
     def accepts(args: AlgebraOp) = {
       args.minTupleSize == 2 && args.maxTupleSize == Some(2) &&
         args.leftType(0).subsetOf(DataType.numeric) && args.leftType(1).subsetOf(DataType.numeric)

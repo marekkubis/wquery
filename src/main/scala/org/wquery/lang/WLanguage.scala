@@ -1,9 +1,9 @@
 package org.wquery.lang
 
-import org.wquery.model.WordNet
 import org.wquery._
 import org.wquery.lang.operations._
 import org.wquery.lang.parsers.WParsers
+import org.wquery.model.WordNet
 import org.wquery.utils.Logging
 
 class WLanguage(val wordNet: WordNet, parsers: WParsers) extends Logging {
@@ -18,8 +18,8 @@ class WLanguage(val wordNet: WordNet, parsers: WParsers) extends Logging {
       debug("Expr: " + expr)
 
       val op = expr.evaluationPlan(wordNet.schema, bindingsSchema, Context())
-      val distinctOp = if (makeDistinct) FunctionOp(DistinctFunction, op) else op
-      val sortedOp = if (sort) FunctionOp(SortFunction, distinctOp) else distinctOp
+      val distinctOp = if (makeDistinct) FunctionOp(DistinctFunction, Some(op)) else op
+      val sortedOp = if (sort) FunctionOp(SortFunction, Some(distinctOp)) else distinctOp
       debug("Plan: " + sortedOp)
 
       val dataSet = sortedOp.evaluate(wordNet, bindings, Context())
