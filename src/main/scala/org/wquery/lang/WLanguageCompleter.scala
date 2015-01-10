@@ -16,7 +16,7 @@ class WLanguageCompleter(wordNet: WordNet) extends Completer {
       if (lastRelationIndex > lastTypeIndex) {
         val prefix = buffer.substring(lastRelationIndex + 1)
 
-        if (prefix.forall(_.isLetter)) {
+        if (prefix.isEmpty || prefix.head.isLetter && prefix.forall(c => c.isLetterOrDigit || c == '_')) {
           for (name <- wordNet.relations.filter(_.arguments.size == 2).map(_.name) if name.startsWith(prefix))
             candidates.add(name)
         }
