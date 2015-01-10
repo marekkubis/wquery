@@ -29,7 +29,7 @@ object WCompileMain {
       .opt[Boolean]("version", short = 'v', descr = "Show version")
       .opt[String]("type", short = 't', default = () => Some("deb"),
         validate = arg => WordNetLoader.loaders.contains(arg),
-        descr = "Set input file type - either deb or lmf")
+        descr = "Set input file type - either deb, lmf or pwn")
       .trailArg[String](name = "IFILE", required = false,
         descr = "A wordnet in the format specified by the -t option (read from stdin if not specified)")
       .trailArg[String](name = "OFILE", required = false,
