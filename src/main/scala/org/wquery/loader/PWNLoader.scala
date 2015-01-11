@@ -2,9 +2,9 @@ package org.wquery.loader
 
 import java.net.URL
 
-import edu.mit.jwi.Dictionary
-import edu.mit.jwi.item.{IPointer, IWord, POS, Pointer}
-import org.wquery.model._
+import edu.mit.jwi.item._
+import edu.mit.jwi.{Dictionary, IDictionary}
+import org.wquery.model.{Synset, _}
 import org.wquery.model.impl.InMemoryWordNet
 import org.wquery.utils.Logging
 
@@ -49,16 +49,36 @@ class PWNLoader extends WordNetLoader with Logging {
 
   private val spacesRegex = " +".r
 
+  val sensesByWord = mutable.Map[(String, Int, String), Sense]()
+
   private def mapPointerToRelationName(pointer: IPointer) = {
     pointerMap.getOrElse(pointer, spacesRegex.replaceAllIn(
       pointerNameSpecialCharRegex.replaceAllIn(pointer.getName.toLowerCase, " "), "_"))
   }
 
-  private def unescapeWord(word: String) = word.replace('_', ' ')
+  private def mapWordToSense(dict: IDictionary, word: IWord) = {
+    val lemma = unescapeWord(word.getLemma)
+    val senseKey = word.getSenseKey
+    val senseEntry = dict.getSenseEntry(senseKey)
+    val senseNumber = if (senseEntry != null) {
+      senseEntry.getSenseNumber
+    } else {
+      log.warn("Sense entry not found for sense key '" + senseKey + "'. Setting sense number to 0.")
+      0
+    }
 
-  private def mapWordToSense(word: IWord) = {
-    Sense(unescapeWord(word.getLemma), word.getLexicalID + 1, word.getPOS.getTag.toString)
+    val pos = word.getPOS.getTag.toString
+
+    if (sensesByWord.contains((lemma, senseNumber, pos))) {
+      sensesByWord((lemma, senseNumber, pos))
+    } else {
+      val sense = Sense(lemma, senseNumber, pos)
+      sensesByWord.put((lemma, senseNumber, pos), sense)
+      sense
+    }
   }
+
+  private def unescapeWord(word: String) = word.replace('_', ' ')
 
   override def load(path: String) = {
     val url = new URL("file", null, path)
@@ -66,14 +86,25 @@ class PWNLoader extends WordNetLoader with Logging {
     val wordNet = new InMemoryWordNet
     val synsetsById = mutable.Map[String, Synset]()
 
+    val adjMarkerRelation = wordNet.addRelation(Relation.binary("adj_marker", SenseType, StringType))
+    val glossRelation = wordNet.addRelation(Relation.binary("gloss", SynsetType, StringType))
+    val lexicalFileRelation = wordNet.addRelation(Relation.binary("lexical_file", SynsetType, StringType))
+    val posRelation = wordNet.addRelation(Relation.binary("pos", SynsetType, POSType))
+    val senseKeyRelation = wordNet.addRelation(Relation.binary("sense_key", SenseType, StringType))
+    val verbFrameRelation = wordNet.addRelation(Relation.binary("verb_frame", SenseType, StringType))
+
     dict.open()
 
     for (pos <- POS.values()) {
-      for (synset <- dict.getSynsetIterator(pos)) {
-        val synsetId = synset.getID.toString
-        val senses = synset.getWords.map(word => mapWordToSense(word)).toList
+      for (iSynset <- dict.getSynsetIterator(pos)) {
+        val synsetId = iSynset.getID.toString
+        val senses = iSynset.getWords.map{ word => mapWordToSense(dict, word)}.toList
+        val synset = wordNet.addSynset(Some(synsetId), senses, moveSenses = false)
 
-        synsetsById(synsetId) = wordNet.addSynset(Some(synsetId), senses, moveSenses = false)
+        synsetsById(synsetId) = synset
+        wordNet.addSuccessor(synset, glossRelation, iSynset.getGloss)
+        wordNet.addSuccessor(synset, lexicalFileRelation, iSynset.getLexicalFile.getName)
+        wordNet.addSuccessor(synset, posRelation, iSynset.getPOS.getTag.toString)
       }
     }
 
@@ -84,7 +115,6 @@ class PWNLoader extends WordNetLoader with Logging {
           val relationName = mapPointerToRelationName(pointer)
           val relation = wordNet.schema.getRelation(relationName, Map((Relation.Src, Set[DataType](SynsetType)))) | {
             wordNet.addRelation(Relation.binary(relationName, SynsetType, SynsetType))
-            wordNet.schema.demandRelation(relationName, Map((Relation.Src, Set[DataType](SynsetType))))
           }
 
           for (destination <- destinations) {
@@ -95,18 +125,28 @@ class PWNLoader extends WordNetLoader with Logging {
         }
 
         for (word <- synset.getWords) {
+          val sourceSense = mapWordToSense(dict, word)
+
           for ((pointer, destinations) <- word.getRelatedMap) {
-            val sourceSense = mapWordToSense(word)
             val relationName = mapPointerToRelationName(pointer)
             val relation = wordNet.schema.getRelation(relationName, Map((Relation.Src, Set[DataType](SenseType)))) | {
               wordNet.addRelation(Relation.binary(relationName, SenseType, SenseType))
-              wordNet.schema.demandRelation(relationName, Map((Relation.Src, Set[DataType](SenseType))))
             }
 
             for (destination <- destinations) {
-              wordNet.addSuccessor(sourceSense, relation, mapWordToSense(dict.getWord(destination)))
+              wordNet.addSuccessor(sourceSense, relation, mapWordToSense(dict, dict.getWord(destination)))
             }
           }
+
+          for (verbFrame <- word.getVerbFrames) {
+            wordNet.addSuccessor(sourceSense, verbFrameRelation, verbFrame.getTemplate)
+          }
+
+          if (word.getAdjectiveMarker != null) {
+            wordNet.addSuccessor(sourceSense, adjMarkerRelation, word.getAdjectiveMarker.getSymbol)
+          }
+
+          wordNet.addSuccessor(sourceSense, senseKeyRelation, word.getSenseKey.toString)
         }
       }
     }

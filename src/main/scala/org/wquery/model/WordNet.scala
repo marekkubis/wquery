@@ -2,7 +2,6 @@ package org.wquery.model
 
 import org.wquery.{WQueryModelException, WQueryProperties}
 
-import scala.collection.mutable.{Map => MMap}
 import scalaz.Scalaz._
 
 trait WordNet {
@@ -71,7 +70,7 @@ trait WordNet {
   def setWords(newWords: List[String])
 
   // updating relations
-  def addRelation(relation: Relation)
+  def addRelation(relation: Relation): Relation
 
   def removeRelation(relation: Relation)
 

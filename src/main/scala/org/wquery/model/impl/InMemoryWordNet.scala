@@ -37,13 +37,15 @@ class InMemoryWordNet extends WordNet {
   dependent ++= WordNet.dependent
   collectionDependent ++= WordNet.collectionDependent
 
-  def addRelation(relation: Relation) {
+  def addRelation(relation: Relation) = {
     if (!relations.contains(relation)) {
       relationsList = (relationsList :+ relation)
         .sortWith((l, r) => l.name < r.name || l.name == r.name && l.arguments.size < r.arguments.size ||
           l.name == r.name && l.arguments.size == r.arguments.size && l.sourceType < r.sourceType)
       createRelation(relation)
     }
+
+    relation
   }
 
   private def createRelation(relation: Relation) = atomic { implicit txn =>
