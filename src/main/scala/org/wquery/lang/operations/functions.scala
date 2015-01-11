@@ -461,7 +461,13 @@ object ReadFunction extends Function("read") with HasNoArguments with ReturnsSin
 with ClearsBindingsPattern {
 
   def evaluate(wordNet: WordNet, bindings: Bindings, context: Context) = {
-    DataSet.fromValue(Console.readLine().stripLineEnd)
+    val line = Console.readLine()
+
+    if (line != null) {
+      DataSet.fromValue(line.stripLineEnd)
+    } else {
+      DataSet.empty
+    }
   }
 
   def returnType(args: AlgebraOp) = Set(StringType)

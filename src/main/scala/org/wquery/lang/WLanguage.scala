@@ -3,12 +3,18 @@ package org.wquery.lang
 import org.wquery._
 import org.wquery.lang.operations._
 import org.wquery.lang.parsers.WParsers
-import org.wquery.model.WordNet
+import org.wquery.model.{DataSet, WordNet}
+import org.wquery.path.operations.ConstantOp
 import org.wquery.utils.Logging
 
 class WLanguage(val wordNet: WordNet, parsers: WParsers) extends Logging {
   val bindingsSchema = BindingsSchema()
   val bindings = Bindings()
+
+  def bindSetVariable(name: String, dataSet: DataSet) {
+    bindingsSchema.bindSetVariableType(name, ConstantOp(dataSet))
+    bindings.bindSetVariable(name, dataSet)
+  }
 
   def execute(input: String, makeDistinct: Boolean = false, sort: Boolean = false): Result = {
     try {

@@ -5,7 +5,7 @@ import java.io.{BufferedWriter, FileReader, OutputStream, OutputStreamWriter}
 import jline.console.ConsoleReader
 import org.rogach.scallop.Scallop
 import org.wquery.emitter.WQueryEmitter
-import org.wquery.model.WordNet
+import org.wquery.model.{DataSet, WordNet}
 import org.wquery.reader.{ConsoleLineReader, ExpressionReader, InputLineReader}
 
 class WQueryLanguageMain(languageName: String, language: WordNet => WLanguage) extends WLanguageMain(languageName) {
@@ -34,9 +34,25 @@ class WQueryLanguageMain(languageName: String, language: WordNet => WLanguage) e
     }
 
     opts.get[String]("command").map { command =>
-      val result = lang.execute(command)
-      writer.write(emitter.emit(result))
-      writer.flush()
+      if (opts[Boolean]("loop")) {
+        for (line <- scala.io.Source.fromInputStream(System.in).getLines()) {
+          val dataSet = if (opts[Boolean]("analyze")) {
+            DataSet.fromTuple(line.split(opts[String]("field-separator")).toList)
+          } else {
+            DataSet.fromValue(line)
+          }
+
+          lang.bindSetVariable("D", dataSet)
+          val result = lang.execute(command)
+          writer.write(emitter.emit(result))
+        }
+
+        writer.flush()
+      } else {
+        val result = lang.execute(command)
+        writer.write(emitter.emit(result))
+        writer.flush()
+      }
     }
 
     if (opts[Boolean]("interactive")) {

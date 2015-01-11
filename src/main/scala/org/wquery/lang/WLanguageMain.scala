@@ -30,9 +30,12 @@ abstract class WLanguageMain(languageName: String) {
                  |
                  |options:
                  | """.stripMargin)
+      .opt[Boolean]("analyze", short = 'a', descr = "Analyze input line (to be used with -l option)", required = false)
       .opt[String]("command", short = 'c', descr = "Execute a command", required = false)
       .opt[String]("file", short = 'f', descr = "Execute commands from a file", required = false)
+      .opt[String]("field-separator", short = 'F', descr = "Set field separator for -a option", default = () => Some("\t"), required = false)
       .opt[Boolean]("interactive", short = 'i', descr = "Run in the interactive interpreter mode", required = false)
+      .opt[Boolean]("loop", short = 'l', descr = "Loop over stdin, pass every line of input as variable %D to -c command", required = false)
       .opt[Boolean]("help", short = 'h', descr = "Show help message")
       .opt[Boolean]("quiet", short = 'q', descr = "Silent mode")
       .opt[String]("emitter", short = 'e', default = () => Some("plain"),
@@ -45,6 +48,7 @@ abstract class WLanguageMain(languageName: String) {
     try {
       opts.verify
       val interactiveMode = opts[Boolean]("interactive")
+      val loopMode = opts[Boolean]("loop")
 
       if (opts[Boolean]("quiet"))
         Logging.tryDisableLoggers()
@@ -54,6 +58,8 @@ abstract class WLanguageMain(languageName: String) {
         .getOrElse(
           if (interactiveMode)
             throw new WQueryCommandLineException("IFILE has to be specified in the interactive mode")
+          else if (loopMode)
+            throw new WQueryCommandLineException("IFILE has to be specified in the loop mode")
           else
             System.in
         )
