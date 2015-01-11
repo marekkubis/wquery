@@ -4,8 +4,8 @@ import java.net.URL
 
 import edu.mit.jwi.item._
 import edu.mit.jwi.{Dictionary, IDictionary}
-import org.wquery.model.{Synset, _}
 import org.wquery.model.impl.InMemoryWordNet
+import org.wquery.model.{Synset, _}
 import org.wquery.utils.Logging
 
 import scala.collection.JavaConversions._
@@ -50,6 +50,7 @@ class PWNLoader extends WordNetLoader with Logging {
   private val spacesRegex = " +".r
 
   val sensesByWord = mutable.Map[(String, Int, String), Sense]()
+  val tagCounts = mutable.Map[Sense, Int]()
 
   private def mapPointerToRelationName(pointer: IPointer) = {
     pointerMap.getOrElse(pointer, spacesRegex.replaceAllIn(
@@ -74,6 +75,7 @@ class PWNLoader extends WordNetLoader with Logging {
     } else {
       val sense = Sense(lemma, senseNumber, pos)
       sensesByWord.put((lemma, senseNumber, pos), sense)
+      tagCounts.put(sense, if (senseEntry != null) senseEntry.getTagCount else 0)
       sense
     }
   }
@@ -91,6 +93,7 @@ class PWNLoader extends WordNetLoader with Logging {
     val lexicalFileRelation = wordNet.addRelation(Relation.binary("lexical_file", SynsetType, StringType))
     val posRelation = wordNet.addRelation(Relation.binary("pos", SynsetType, POSType))
     val senseKeyRelation = wordNet.addRelation(Relation.binary("sense_key", SenseType, StringType))
+    val tagCountRelation = wordNet.addRelation(Relation.binary("tag_count", SenseType, IntegerType))
     val verbFrameRelation = wordNet.addRelation(Relation.binary("verb_frame", SenseType, StringType))
 
     dict.open()
@@ -102,9 +105,14 @@ class PWNLoader extends WordNetLoader with Logging {
         val synset = wordNet.addSynset(Some(synsetId), senses, moveSenses = false)
 
         synsetsById(synsetId) = synset
+
         wordNet.addSuccessor(synset, glossRelation, iSynset.getGloss)
         wordNet.addSuccessor(synset, lexicalFileRelation, iSynset.getLexicalFile.getName)
         wordNet.addSuccessor(synset, posRelation, iSynset.getPOS.getTag.toString)
+
+        for (sense <- senses) {
+          wordNet.addSuccessor(sense, tagCountRelation, tagCounts(sense))
+        }
       }
     }
 
