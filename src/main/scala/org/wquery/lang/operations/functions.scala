@@ -626,25 +626,29 @@ with ClearsBindingsPattern {
           (elem, DefaultSeparator)
       }
 
-      literal.split(sep).map { elem =>
-        tokenParsers.parseAll(tokenParsers.tokenLit, elem) match {
-          case tokenParsers.Success((SynsetType, (word: String, num: Int, pos: String)), _) =>
-            wordNet.getSense(word, num, pos).map(wordNet.getSynset).flatten
-          case tokenParsers.Success((SenseType, (word: String, num: Int, pos: String)), _) =>
-            wordNet.getSense(word, num, pos)
-          case tokenParsers.Success((StringType, false, value: String), _) =>
-            Some(value)
-          case tokenParsers.Success((StringType, true, value: String), _) =>
-            wordNet.getWord(value)
-          case tokenParsers.Success((FloatType, num), _) =>
-            Some(num)
-          case tokenParsers.Success((IntegerType, num), _) =>
-            Some(num)
-          case _ =>
-            None
-        }
-      }.toList.flatten
+      asTuple(wordNet, literal, sep)
     })
+  }
+
+  def asTuple(wordNet: WordNet, value: String, sep: String) = {
+    value.split(sep).map { elem =>
+      tokenParsers.parseAll(tokenParsers.tokenLit, elem) match {
+        case tokenParsers.Success((SynsetType, (word: String, num: Int, pos: String)), _) =>
+          wordNet.getSense(word, num, pos).map(wordNet.getSynset).flatten
+        case tokenParsers.Success((SenseType, (word: String, num: Int, pos: String)), _) =>
+          wordNet.getSense(word, num, pos)
+        case tokenParsers.Success((StringType, false, value: String), _) =>
+          Some(value)
+        case tokenParsers.Success((StringType, true, value: String), _) =>
+          wordNet.getWord(value)
+        case tokenParsers.Success((FloatType, num), _) =>
+          Some(num)
+        case tokenParsers.Success((IntegerType, num), _) =>
+          Some(num)
+        case _ =>
+          None
+      }
+    }.toList.flatten
   }
 
   override def minTupleSize(args: AlgebraOp) = 0

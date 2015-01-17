@@ -5,6 +5,7 @@ import java.io.{BufferedWriter, FileReader, OutputStream, OutputStreamWriter}
 import jline.console.ConsoleReader
 import org.rogach.scallop.Scallop
 import org.wquery.emitter.WQueryEmitter
+import org.wquery.lang.operations.AsTupleFunction
 import org.wquery.model.{DataSet, WordNet}
 import org.wquery.reader.{ConsoleLineReader, ExpressionReader, InputLineReader}
 
@@ -37,7 +38,7 @@ class WQueryLanguageMain(languageName: String, language: WordNet => WLanguage) e
       if (opts[Boolean]("loop")) {
         for (line <- scala.io.Source.fromInputStream(System.in).getLines()) {
           val dataSet = if (opts[Boolean]("analyze")) {
-            DataSet.fromTuple(line.split(opts[String]("field-separator")).toList)
+            DataSet.fromTuple(AsTupleFunction.asTuple(wordNet, line, opts[String]("field-separator")))
           } else {
             DataSet.fromValue(line)
           }
