@@ -98,6 +98,8 @@ class FunctionsTestSuite extends WQueryTestSuite {
 
   @Test def testAsTupleWords() = result of "as_tuple(`car\tz12345\tauto`)" should equal ("car auto\n")
 
+  @Test def testAsTupleStrings() = result of "as_tuple(`car\t\\`z12345\\`\tauto`)" should equal ("car z12345 auto\n")
+
   @Test def testAsTupleSenses() = result of "as_tuple(`car:5:n\tcar:245:v\tauto:1:n`)" should equal ("car:5:n auto:1:n\n")
 
   @Test def testAsTupleSynsets() = result of "as_tuple(`{car:5:n}\t{car:245:v}\t{auto:1:n}`)" should equal ("{ cable car:1:n car:5:n } { car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n }\n")

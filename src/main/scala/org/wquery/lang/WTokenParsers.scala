@@ -42,9 +42,9 @@ trait WTokenParsers extends RegexParsers {
   }
 
   def integerNum: Parser[Int] = "[0-9]+".r ^^ { _.toInt }
-  def doubleQuotedString: Parser[String] = "\"(\\\\\"|[^\"])*?\"".r ^^ { x => x.substring(1, x.length - 1).replaceAll("\\\"","\"") }
-  def backQuotedString: Parser[String] = "`(\\\\`|[^`])*?`".r ^^ { x => x.substring(1, x.length - 1).replaceAll("\\`","`") }
-  def quotedString: Parser[String] = "'(\\\\'|[^'])*?'".r ^^ { x => x.substring(1, x.length - 1).replaceAll("\\'","'") }
+  def doubleQuotedString: Parser[String] = "\"(\\\\\"|[^\"])*?\"".r ^^ { x => x.substring(1, x.length - 1).replaceAll("\\\\\"", "\"") }
+  def backQuotedString: Parser[String] = "`(\\\\`|[^`])*?`".r ^^ { x => x.substring(1, x.length - 1).replaceAll("\\\\`", "`") }
+  def quotedString: Parser[String] = "'(\\\\'|[^'])*?'".r ^^ { x => x.substring(1, x.length - 1).replaceAll("\\\\'", "'") }
 
   def notQuotedString: Parser[String] = new Parser[String] {
     def apply(in: Input): ParseResult[String] = {
