@@ -75,6 +75,16 @@ class InMemoryWordNet extends WordNet {
     store.successors(relation).get((from, through)).map(_.map(succ => succ(to))).orZero
   }
 
+  def getWord(value: String) = {
+    val words = follow(WordNet.WordSet, Relation.Src, value, Relation.Src)
+    if (words.isEmpty) None else Some(value)
+  }
+
+  def getSense(word: String, senseNum: Int, pos: String) = {
+    val senses = follow(WordNet.SenseSet, Relation.Src, Sense(word, senseNum, pos), Relation.Src)
+    if (senses.isEmpty) None else Some(senses.head.asInstanceOf[Sense])
+  }
+
   def getSenses(synset: Synset) = follow(WordNet.SynsetToSenses, Relation.Src, synset, Relation.Dst).toList.asInstanceOf[List[Sense]]
 
   def getSenses(word: String) = follow(WordNet.WordFormToSenses, Relation.Src, word, Relation.Dst).toList.asInstanceOf[List[Sense]]

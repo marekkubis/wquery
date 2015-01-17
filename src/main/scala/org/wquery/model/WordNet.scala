@@ -41,6 +41,10 @@ trait WordNet {
 
   def extend(extensionSet: ExtensionSet, through: Option[NodeType], to: Option[NodeType], inverted: Boolean): ExtendedExtensionSet
 
+  def getWord(value: String): Option[String]
+
+  def getSense(word: String, senseNum: Int, pos: String): Option[Sense]
+
   def getSenses(synset: Synset): List[Sense]
 
   def getSenses(word: String): List[Sense]

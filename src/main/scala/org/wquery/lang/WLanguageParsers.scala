@@ -1,10 +1,10 @@
 package org.wquery.lang.parsers
 
-import scala.util.parsing.combinator.RegexParsers
-import org.wquery.{WQueryParsingErrorException, WQueryParsingFailureException}
+import org.wquery.lang.WTokenParsers
 import org.wquery.lang.exprs._
+import org.wquery.{WQueryParsingErrorException, WQueryParsingFailureException}
 
-trait WParsers extends RegexParsers {
+trait WLanguageParsers extends WTokenParsers {
 
   def expr: Parser[EvaluableExpr] 
 

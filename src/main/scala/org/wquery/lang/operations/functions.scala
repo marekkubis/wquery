@@ -604,6 +604,59 @@ with ClearsBindingsPattern {
   def returnType(args: AlgebraOp) = Set(FloatType)
 }
 
+object AsTupleFunction extends DataSetFunction("as_tuple")
+with ClearsBindingsPattern {
+  val DefaultSeparator = "\t"
+  val tokenParsers = new Object with WTokenParsers
+
+  override def accepts(args: AlgebraOp) = args.rightType(0) == Set(StringType)
+
+  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
+    DataSet(dataSet.paths.map{ tuple =>
+      val (literal, sep) = tuple.takeRight(2) match {
+        case List(left: String, right: String) =>
+          if (right.startsWith("/") && right.endsWith("/")) {
+            (left, right.substring(1, right.size - 1))
+          } else {
+            (right, DefaultSeparator)
+          }
+        case List(left, right: String) =>
+          (right, DefaultSeparator)
+        case List(elem: String) =>
+          (elem, DefaultSeparator)
+      }
+
+      literal.split(sep).map { elem =>
+        tokenParsers.parseAll(tokenParsers.tokenLit, elem) match {
+          case tokenParsers.Success((SynsetType, (word: String, num: Int, pos: String)), _) =>
+            wordNet.getSense(word, num, pos).map(wordNet.getSynset).flatten
+          case tokenParsers.Success((SenseType, (word: String, num: Int, pos: String)), _) =>
+            wordNet.getSense(word, num, pos)
+          case tokenParsers.Success((StringType, false, value: String), _) =>
+            Some(value)
+          case tokenParsers.Success((StringType, true, value: String), _) =>
+            wordNet.getWord(value)
+          case tokenParsers.Success((FloatType, num), _) =>
+            Some(num)
+          case tokenParsers.Success((IntegerType, num), _) =>
+            Some(num)
+          case _ =>
+            None
+        }
+      }.toList.flatten
+    })
+  }
+
+  override def minTupleSize(args: AlgebraOp) = 0
+
+  override def maxTupleSize(args: AlgebraOp) = None
+
+  override def leftType(args: AlgebraOp, pos: Int) = DataType.all
+
+  override def rightType(args: AlgebraOp, pos: Int) = DataType.all
+
+}
+
 object ArcNameFunction extends DataSetFunction("arc_name") with AcceptsTypes with ReturnsValueSetOfSimilarSize
 with ClearsBindingsPattern {
   def argumentTypes = List(Set(ArcType))
@@ -704,6 +757,7 @@ object Functions {
   registerFunction(RangeFunction)
   registerFunction(IntFunction)
   registerFunction(FloatFunction)
+  registerFunction(AsTupleFunction)
   registerFunction(ArcNameFunction)
   registerFunction(ArcSourceFunction)
   registerFunction(ArcDestinationFunction)

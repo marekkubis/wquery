@@ -96,4 +96,16 @@ class FunctionsTestSuite extends WQueryTestSuite {
 
   @Test def testDestinationName() = result of "arc_dst(\\hypernym)" should equal ("dst\n")
 
+  @Test def testAsTupleWords() = result of "as_tuple(`car\tz12345\tauto`)" should equal ("car auto\n")
+
+  @Test def testAsTupleSenses() = result of "as_tuple(`car:5:n\tcar:245:v\tauto:1:n`)" should equal ("car:5:n auto:1:n\n")
+
+  @Test def testAsTupleSynsets() = result of "as_tuple(`{car:5:n}\t{car:245:v}\t{auto:1:n}`)" should equal ("{ cable car:1:n car:5:n } { car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n }\n")
+
+  @Test def testAsTupleNumbers() = result of "as_tuple(`1.3\t234\t-1\t-1.3`)" should equal ("1.3 234 -1 -1.3\n")
+
+  @Test def testAsTupleVarious() = result of "as_tuple(`car:1:n\tcar\t-1\t1.3\t{person:3:n}`)" should equal ("car:1:n car -1 1.3 { person:3:n }\n")
+
+  @Test def testAsTupleSeparator() = result of "as_tuple(`car:1:n#car#{person:3:n}#4#5`,`/#/`)" should equal ("car:1:n car { person:3:n } 4 5\n")
+
 }

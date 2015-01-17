@@ -1,7 +1,7 @@
 package org.wquery.path.parsers
 
 import org.wquery.lang.exprs._
-import org.wquery.lang.parsers.WParsers
+import org.wquery.lang.parsers.WLanguageParsers
 import org.wquery.model.DataSet
 import org.wquery.path._
 import org.wquery.path.exprs._
@@ -10,7 +10,7 @@ import org.wquery.query.SetVariable
 
 import scalaz.Scalaz._
 
-trait WPathParsers extends WParsers {
+trait WPathParsers extends WLanguageParsers {
 
   def expr = multipath_expr
 
@@ -164,8 +164,8 @@ trait WPathParsers extends WParsers {
 
   def sense_generator = (
     "::" ^^ { _ => AlgebraExpr(FetchOp.senses) }
-    | alphaLit ~ ":" ~ integerNum ~ ":" ~ alphaLit ^^ {
-      case word~_~num~_~pos => SenseByWordFormAndSenseNumberAndPosReq(word, num, pos)
+    | senseLit ^^ {
+      case (word, num, pos) => SenseByWordFormAndSenseNumberAndPosReq(word, num, pos)
     }
     | alphaLit ~ ":" ~ integerNum ^^ {
       case word~_~num => AlgebraExpr(FetchOp.sensesByWordFormAndSenseNumber(word, num))
@@ -200,42 +200,4 @@ trait WPathParsers extends WParsers {
   def step_var_decl = "$" ~> notQuotedString ^^ { StepVariable(_) }
   def path_var_decl = "@" ~> notQuotedString ^^ { TupleVariable(_) }
   def set_var_decl = "%" ~> notQuotedString ^^ { SetVariable(_) }
-
-  // literals
-  def alphaLit = (
-    backQuotedString
-    | quotedString
-    | notQuotedString
-  )
-
-  def floatNum: Parser[Double] = {
-    "([0-9]+(([eE][+-]?[0-9]+)|\\.(([0-9]+[eE][+-]?[0-9]+)|([eE][+-]?[0-9]+)|([0-9]+))))|(\\.[0-9]+([eE][+-]?[0-9]+)?)".r ^^ { _.toDouble }
-  }
-
-  def integerNum: Parser[Int] = "[0-9]+".r ^^ { _.toInt }
-  def doubleQuotedString: Parser[String] = "\"(\\\\\"|[^\"])*?\"".r ^^ { x => x.substring(1, x.length - 1).replaceAll("\\\"","\"") }
-  def backQuotedString: Parser[String] = "`(\\\\`|[^`])*?`".r ^^ { x => x.substring(1, x.length - 1).replaceAll("\\`","`") }
-  def quotedString: Parser[String] = "'(\\\\'|[^'])*?'".r ^^ { x => x.substring(1, x.length - 1).replaceAll("\\'","'") }
-
-  def notQuotedString: Parser[String] = new Parser[String] {
-    def apply(in: Input): ParseResult[String] = {
-      val source = in.source
-      val offset = in.offset
-      val start = handleWhiteSpace(source, offset)
-      var i = start
-
-      if (i < source.length && (source.charAt(i).isLetter || source.charAt(i) == '_')) {
-        i += 1
-
-        while (i < source.length && (source.charAt(i).isLetterOrDigit || source.charAt(i) == '_')) {
-          i += 1
-        }
-
-        Success(source.subSequence(start, i).toString, in.drop(i - offset))
-      } else {
-        Failure("a letter expected but `" + in.first + "' found", in.drop(start - offset))
-      }
-    }
-  }
-
 }
