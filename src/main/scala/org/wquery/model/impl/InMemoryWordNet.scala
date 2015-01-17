@@ -90,8 +90,7 @@ class InMemoryWordNet extends WordNet {
   def getSenses(word: String) = follow(WordNet.WordFormToSenses, Relation.Src, word, Relation.Dst).toList.asInstanceOf[List[Sense]]
 
   def getSynset(sense: Sense) = {
-    val synsets = follow(WordNet.SenseToSynset, Relation.Src, sense, Relation.Dst).toList
-
+    val synsets = follow(WordNet.SenseToSynset, Relation.Src, sense, Relation.Dst)
     if (synsets.isEmpty) None else Some(synsets.head.asInstanceOf[Synset])
   }
 
