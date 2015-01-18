@@ -5,12 +5,10 @@ import java.io._
 import jline.console.ConsoleReader
 import org.rogach.scallop.Scallop
 import org.wquery.emitter.WQueryEmitter
-import org.wquery.lang.{WLanguageCompleter, WLanguageMain}
-import org.wquery.model.WordNet
+import org.wquery.lang.{WLanguage, WLanguageMain}
 import org.wquery.printer.WnPrinter
-import org.wquery.reader.{ConsoleLineReader, ExpressionReader, InputLineReader}
 
-object WUpdateMain extends WLanguageMain("WUpdate") {
+object WUpdateMain extends WLanguageMain("WUpdate", new WUpdate(_)) {
   override def appendOptions(opts: Scallop) = {
     opts
       .opt[Boolean]("print", short = 'p', descr = "Print output of the executed commands to stderr")
@@ -21,53 +19,18 @@ object WUpdateMain extends WLanguageMain("WUpdate") {
         descr = "A file to store the wordnet model updated by executing the update commands (printed to stdout if not specified)")
   }
 
-  def doMain(wordNet: WordNet, output: OutputStream, emitter: WQueryEmitter, opts: Scallop) {
-    val wupdate = new WUpdate(wordNet)
-    val printMode = opts[Boolean]("print")
+  def doMain(lang: WLanguage, output: OutputStream, emitter: WQueryEmitter, opts: Scallop) {
+    val resultLog = if (opts[Boolean]("print")) Some(new BufferedWriter(new OutputStreamWriter(System.err)), emitter) else None
 
-    opts.get[String]("file").map { fileName =>
-      val expressionReader = new ExpressionReader(new InputLineReader(new FileReader(fileName)))
+    opts.get[String]("file").map(executeCommandFile(lang, _, resultLog))
+    opts.get[String]("command").map(executeCommand(opts, lang, _, resultLog))
+    opts.get[String]("update").map(command => executeCommand(opts, lang, "update " + command, resultLog))
 
-      expressionReader.foreach { expr =>
-        val result = wupdate.execute(expr)
-
-        if (printMode)
-          System.err.print(emitter.emit(result))
-      }
-
-      expressionReader.close()
-    }
-
-    opts.get[String]("command").map { command =>
-      val result = wupdate.execute(command)
-
-      if (printMode)
-        System.err.print(emitter.emit(result))
-    }
-
-    opts.get[String]("update").map { command =>
-      val result = wupdate.execute("update " + command)
-
-      if (printMode)
-        System.err.print(emitter.emit(result))
-    }
-
-    if (opts[Boolean]("interactive")) {
-      val reader = new ConsoleReader(System.in, System.err)
-      reader.addCompleter(new WLanguageCompleter(wordNet))
-      val expressionReader = new ExpressionReader(new ConsoleLineReader(reader, "wupdate> "))
-      val writer = reader.getOutput
-
-      expressionReader.foreach { expr =>
-        val result = wupdate.execute(expr)
-        writer.write(emitter.emit(result))
-      }
-
-      expressionReader.close()
-    }
+    if (opts[Boolean]("interactive"))
+      executeInteractive(lang, new ConsoleReader(System.in, System.err), emitter)
 
     val printer = new WnPrinter()
 
-    printer.print(wupdate.wordNet, output)
+    printer.print(lang.wordNet, output)
   }
 }

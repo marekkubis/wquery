@@ -1,15 +1,13 @@
 package org.wquery.lang
 
-import java.io.{BufferedWriter, FileReader, OutputStream, OutputStreamWriter}
+import java.io.{BufferedWriter, OutputStream, OutputStreamWriter}
 
 import jline.console.ConsoleReader
 import org.rogach.scallop.Scallop
 import org.wquery.emitter.WQueryEmitter
-import org.wquery.lang.operations.AsTupleFunction
-import org.wquery.model.{DataSet, WordNet}
-import org.wquery.reader.{ConsoleLineReader, ExpressionReader, InputLineReader}
+import org.wquery.model.WordNet
 
-class WQueryLanguageMain(languageName: String, language: WordNet => WLanguage) extends WLanguageMain(languageName) {
+class WQueryLanguageMain(languageName: String, language: WordNet => WLanguage) extends WLanguageMain(languageName, language) {
   override def appendOptions(opts: Scallop) = {
     opts
       .trailArg[String](name = "IFILE", required = false,
@@ -18,57 +16,15 @@ class WQueryLanguageMain(languageName: String, language: WordNet => WLanguage) e
         descr = "A file to store query results (printed to stdout if not specified)")
   }
 
-  def doMain(wordNet: WordNet, output: OutputStream, emitter: WQueryEmitter, opts: Scallop) {
-    val lang = language(wordNet)
+  def doMain(lang: WLanguage, output: OutputStream, emitter: WQueryEmitter, opts: Scallop) {
     val writer = new BufferedWriter(new OutputStreamWriter(output))
+    val resultLog = Some(writer, emitter)
 
-    opts.get[String]("file").map { fileName =>
-      val expressionReader = new ExpressionReader(new InputLineReader(new FileReader(fileName)))
+    opts.get[String]("file").map(executeCommandFile(lang, _, resultLog))
+    opts.get[String]("command").map(executeCommand(opts, lang, _, resultLog))
 
-      expressionReader.foreach { expr =>
-        val result = lang.execute(expr)
-        writer.write(emitter.emit(result))
-      }
-
-      expressionReader.close()
-      writer.flush()
-    }
-
-    opts.get[String]("command").map { command =>
-      if (opts[Boolean]("loop")) {
-        for (line <- scala.io.Source.fromInputStream(System.in).getLines()) {
-          val dataSet = if (opts[Boolean]("analyze")) {
-            DataSet.fromTuple(AsTupleFunction.asTuple(wordNet, line, opts[String]("field-separator")))
-          } else {
-            DataSet.fromValue(line)
-          }
-
-          lang.bindSetVariable("D", dataSet)
-          val result = lang.execute(command)
-          writer.write(emitter.emit(result))
-        }
-
-        writer.flush()
-      } else {
-        val result = lang.execute(command)
-        writer.write(emitter.emit(result))
-        writer.flush()
-      }
-    }
-
-    if (opts[Boolean]("interactive")) {
-      val reader = new ConsoleReader(System.in, output)
-      reader.addCompleter(new WLanguageCompleter(wordNet))
-      val expressionReader = new ExpressionReader(new ConsoleLineReader(reader, languageName.toLowerCase + "> "))
-      val writer = reader.getOutput
-
-      expressionReader.foreach { expr =>
-        val result = lang.execute(expr)
-        writer.write(emitter.emit(result))
-      }
-
-      expressionReader.close()
-    }
+    if (opts[Boolean]("interactive"))
+      executeInteractive(lang, new ConsoleReader(System.in, output), emitter)
 
     writer.close()
   }

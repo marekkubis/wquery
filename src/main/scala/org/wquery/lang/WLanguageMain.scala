@@ -2,18 +2,21 @@ package org.wquery.lang
 
 import java.io._
 
+import jline.console.ConsoleReader
 import org.rogach.scallop.Scallop
 import org.rogach.scallop.exceptions.{Help, ScallopException, Version}
 import org.wquery.emitter.WQueryEmitter
+import org.wquery.lang.operations.AsTupleFunction
 import org.wquery.loader.WnLoader
-import org.wquery.model.WordNet
+import org.wquery.model.{DataSet, WordNet}
+import org.wquery.reader.{ConsoleLineReader, ExpressionReader, InputLineReader}
 import org.wquery.utils.Logging
 import org.wquery.{WQueryCommandLineException, WQueryProperties}
 
-abstract class WLanguageMain(languageName: String) {
+abstract class WLanguageMain(languageName: String, language: WordNet => WLanguage) {
   val loader = new WnLoader
 
-  def doMain(wordNet: WordNet, output: OutputStream, emitter: WQueryEmitter, opts: Scallop)
+  def doMain(lang: WLanguage, output: OutputStream, emitter: WQueryEmitter, opts: Scallop)
 
   def appendOptions(opts: Scallop) = opts
 
@@ -68,10 +71,10 @@ abstract class WLanguageMain(languageName: String) {
         .map(outputName => new BufferedOutputStream(new FileOutputStream(outputName)))
         .getOrElse(System.out)
 
-      val wordNet = loader.load(input)
+      val lang = language(loader.load(input))
       val emitter = WQueryEmitter.demandEmitter(opts[String]("emitter"))
 
-      doMain(wordNet, output, emitter, opts)
+      doMain(lang, output, emitter, opts)
       output.close()
     } catch {
       case e: Help =>
@@ -90,4 +93,54 @@ abstract class WLanguageMain(languageName: String) {
         sys.exit(1)
     }
   }
+
+  def executeCommand(opts: Scallop, lang: WLanguage, command: String, resultLog: Option[(BufferedWriter, WQueryEmitter)]) {
+    if (opts[Boolean]("loop")) {
+      for (line <- scala.io.Source.fromInputStream(System.in).getLines()) {
+        val dataSet = if (opts[Boolean]("analyze")) {
+          DataSet.fromTuple(AsTupleFunction.asTuple(lang.wordNet, line, opts[String]("field-separator")))
+        } else {
+          DataSet.fromValue(line)
+        }
+
+        lang.bindSetVariable("D", dataSet)
+        val result = lang.execute(command)
+        resultLog.map{ case (writer, emitter) => writer.write(emitter.emit(result)) }
+      }
+
+      resultLog.map{ case (writer, _) => writer.flush()}
+    } else {
+      val result = lang.execute(command)
+      resultLog.map{ case (writer, emitter) =>
+        writer.write(emitter.emit(result))
+        writer.flush()
+      }
+    }
+  }
+
+  def executeCommandFile(lang: WLanguage, fileName: String, resultLog: Option[(BufferedWriter, WQueryEmitter)]): Unit = {
+    val expressionReader = new ExpressionReader(new InputLineReader(new FileReader(fileName)))
+
+    expressionReader.foreach { expr =>
+      val result = lang.execute(expr)
+      resultLog.map{ case (writer, emitter) => writer.write(emitter.emit(result)) }
+    }
+
+    expressionReader.close()
+    resultLog.map{ case (writer, _) => writer.flush() }
+  }
+
+  def executeInteractive(lang: WLanguage, reader: ConsoleReader, emitter: WQueryEmitter): Unit = {
+    reader.addCompleter(new WLanguageCompleter(lang.wordNet))
+    val expressionReader = new ExpressionReader(new ConsoleLineReader(reader, languageName.toLowerCase + "> "))
+    val writer = reader.getOutput
+
+    expressionReader.foreach { expr =>
+      val result = lang.execute(expr)
+      writer.write(emitter.emit(result))
+    }
+
+    expressionReader.close()
+  }
+
 }
