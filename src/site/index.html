@@ -24,7 +24,7 @@
 
         <section id="downloads">
             <a class="tar_download_link"
-               href="https://github.com/marekkubis/wquery/releases/download/v0.8.0/wquery-0.8.0.tar.gz">Download this
+               href="https://github.com/marekkubis/wquery/releases/download/v0.9.0/wquery-0.9.0.tar.gz">Download this
                 project as a tar.gz file</a>
         </section>
     </header>
@@ -44,11 +44,11 @@
         <h3>Installation</h3>
 
         <p>WQuery requires Java Runtime Environment (JRE) version 1.6 or higher to run.
-            After <a href="https://github.com/marekkubis/wquery/releases/download/v0.8.0/wquery-0.8.0.tar.gz">downloading</a>
+            After <a href="https://github.com/marekkubis/wquery/releases/download/v0.9.0/wquery-0.9.0.tar.gz">downloading</a>
             and unpacking the tools are ready to use.</p>
 
-<pre><code>wget https://github.com/marekkubis/wquery/releases/download/v0.8.0/wquery-0.8.0.tar.gz
-tar xzvf wquery-0.8.0.tar.gz
+<pre><code>wget https://github.com/marekkubis/wquery/releases/download/v0.9.0/wquery-0.9.0.tar.gz
+tar xzvf wquery-0.9.0.tar.gz
 </code></pre>
 
         <p>It is also useful to add the <code>bin</code> subdirectory of WQuery to <code>$PATH</code>.</p>
@@ -89,48 +89,31 @@ tar xzvf wquery-0.8.0.tar.gz
 
         <pre><code># wcompile samples/samplenet.xml | wupdate -c 'from {}$a.hypernym$b[$a.pos != $b.pos] update $a hypernym -= $b' | wprint -t lmf > sample2.xml</code></pre>
 
-        <h3>Usage</h3>
-
-        <p>The syntax of the query languages available in WQuery is discussed
-            in the <a href="https://github.com/marekkubis/wquery/wiki">User Guide</a>.
-            Examples of queries of practical importance can be found in the <a href="https://github.com/marekkubis/wquery/blob/master/src/test/scala/org/wquery/FunctionalTestSuite.scala">test suite</a>.</p>
-
         <h3>Citing</h3>
 
         <p>If you have found WQuery useful, please consider citing the following paper</p>
 
-        <p>Marek Kubis. A Query Language for WordNet-like Lexical Databases. In Jeng-Shyang Pan, Shyi-Ming Chen, and Ngoc-Thanh Nguyen, editors, <em>Intelligent Information and Database Systems</em>, volume 7198 of <em>Lecture Notes in Artificial Intelligence</em>, pages 436–445. Springer Heidelberg, 2012.</p>
-
-<pre><code>@incollection{Kubis12,
-    author    = {Marek Kubis},
-    title     = {{A Query Language for WordNet-like Lexical Databases}},
-    booktitle = {Intelligent Information and Database Systems},
-    series    = {Lecture Notes in Artificial Intelligence},
-    editor    = {Jeng-Shyang Pan and Shyi-Ming Chen and Ngoc-Thanh Nguyen},
-    publisher = {Springer Heidelberg},
-    volume    = {7198},
-    year      = {2012},
-    pages     = {436--445},
-}
-</code></pre>
+        <p>Marek Kubis. A Query Language for WordNet-like Lexical Databases. In Jeng-Shyang Pan, Shyi-Ming Chen, and Ngoc-Thanh Nguyen, editors, <em>Intelligent Information and Database Systems</em>, volume 7198 of <em>Lecture Notes in Artificial Intelligence</em>, pages 436–445. Springer Heidelberg, 2012. <a href="wquery.bib">[bibtex]</a></p>
 
 <p>If you use update facilities of the system, you may also consider citing the WUpdate paper</p>
 
-<p>Marek Kubis. A Tool for Transforming WordNet-Like Databases. In Zygmunt Vetulani and Joseph Mariani, editors, <em>Human Language Technology Challenges for Computer Science and Linguistics</em>, volume 8387 of <em>Lecture Notes in Computer Science</em>, pages 343–355. Springer International Publishing, 2014.</p>
+<p>Marek Kubis. A Tool for Transforming WordNet-Like Databases. In Zygmunt Vetulani and Joseph Mariani, editors, <em>Human Language Technology Challenges for Computer Science and Linguistics</em>, volume 8387 of <em>Lecture Notes in Computer Science</em>, pages 343–355. Springer International Publishing, 2014. <a href="wupdate.bib">[bibtex]</a></p>
 
-<pre><code>@incollection{Kubis14,
-    author    = {Marek Kubis},
-    title     = {{A Tool for Transforming WordNet-Like Databases}},
-    booktitle = {Human Language Technology Challenges for Computer Science and Linguistics},
-    series    = {Lecture Notes in Computer Science},
-    editor    = {Zygmunt Vetulani and Joseph Mariani},
-    publisher = {Springer International Publishing},
-    volume    = {8387},
-    year      = {2014},
-    pages     = {343--355},
-}
-</code></pre>
+<p>For the purpose of compiling <a href="http://wordnet.princeton.edu">Princeton WordNet</a> <code>wcompile -t pwn</code> command uses internally the <a href="http://projects.csail.mit.edu/jwi/">JWI</a> library.</p>
 
+<p>The reference for citing JWI can be found at the JWI author's <a href="http://projects.csail.mit.edu/jwi/">website</a>.</p>
+
+        <h3>License Terms</h3>
+
+        <p>This software is provided under the terms of a BSD-like license <a href="https://github.com/marekkubis/wquery/blob/master/LICENSE">LICENSE</a>.</p>
+
+        The licenses of third-party libraries that are distributed with WQuery can be found in the <a href="https://github.com/marekkubis/wquery/tree/master/src/universal/doc/licenses">doc/licenses</a> directory.
+
+        <h3>Further Information</h3>
+
+        <p>The syntax of the query languages available in WQuery is discussed
+            in the <a href="https://github.com/marekkubis/wquery/wiki">User Guide</a>.
+            Examples of queries of practical importance can be found in the <a href="https://github.com/marekkubis/wquery/blob/master/src/test/scala/org/wquery/FunctionalTestSuite.scala">test suite</a>.</p>
 
     </section>
 </div>
