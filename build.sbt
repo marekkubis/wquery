@@ -50,8 +50,6 @@ libraryDependencies ++= Seq(
 //
 sbtfilter.Plugin.filterSettings
 
-includeFilter in (Compile, filterResources) ~= { f => f || ("wconsole" | "wguiconsole") }
-
 extraProps += "startYear" -> startYear.value.get.toString
 
 extraProps += "currentYear" -> new java.text.SimpleDateFormat("yyyy").format(new java.util.Date())

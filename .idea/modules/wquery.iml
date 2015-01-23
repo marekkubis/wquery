@@ -17,8 +17,6 @@
       <sourceFolder url="file://$MODULE_DIR$/../../target/scala-2.10/resource_managed/test" type="java-test-resource" />
       <excludeFolder url="file://$MODULE_DIR$/../../target/resolution-cache" />
       <excludeFolder url="file://$MODULE_DIR$/../../target/streams" />
-      <excludeFolder url="file://$MODULE_DIR$/../../target/universal" />
-      <excludeFolder url="file://$MODULE_DIR$/../../target/wquery-0.9-SNAPSHOT" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
