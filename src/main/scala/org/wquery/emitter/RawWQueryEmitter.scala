@@ -17,35 +17,12 @@ class RawWQueryEmitter extends WQueryEmitter {
 
   private def emitDataSet(wordNet: WordNet, dataSet: DataSet): String = {
     val content = dataSet.paths
-    val pathVarNames = dataSet.pathVars.keys.toSeq.filterNot(_.startsWith("_")).sortWith((x, y) => x < y)
-    val stepVarNames = dataSet.stepVars.keys.toSeq.filterNot(_.startsWith("_")).sortWith((x, y) => x < y)
 
     if (content.nonEmpty) {
       val builder = new StringBuilder
 
       for (i <- 0 until content.size) {
-          val tuple = content(i)
-
-        for (pathVarName <- pathVarNames) {
-          val varPos = dataSet.pathVars(pathVarName)(i)
-
-          builder append "@"
-          builder append pathVarName
-          builder append "="
-          builder append "("
-          emitTuple(wordNet, tuple.slice(varPos._1, varPos._2), builder)
-          builder append ")"
-          builder append " "
-        }
-
-        for (stepVarName <- stepVarNames) {
-          builder append "$"
-          builder append stepVarName
-          builder append "="
-          emitElement(wordNet, tuple(dataSet.stepVars(stepVarName)(i)), builder)
-          builder append " "
-        }
-
+        val tuple = content(i)
         emitTuple(wordNet, tuple, builder)
       }
 
@@ -60,7 +37,6 @@ class RawWQueryEmitter extends WQueryEmitter {
         emitElement(wordNet, tuple.head, builder)
 
         for (i <- 1 until tuple.size) {
-          builder append " "
           emitElement(wordNet, tuple(i), builder)
         }
     }
