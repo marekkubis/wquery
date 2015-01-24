@@ -31,8 +31,16 @@ class GeneratorsTestSuite extends WQueryTestSuite {
   @Test def testPersonBackQuotedWord() = result of "`person`" should equal ("person\n")        
     
   @Test def testA1b2c3d4BackQuotedWord() = result of "`a1b2c3d4`" should equal ("a1b2c3d4\n")        
-    
-  @Test def test123Integer() = result of "123" should equal ("123\n")        
+
+  @Test def testTabInBackQuotedString() = result of "`1\\t2`" should equal ("1\t2\n")
+
+  @Test def testNewLineInBackQuotedString() = result of "`1\\n2`" should equal ("1\n2\n")
+
+  @Test def testBackQuoteInBackQuotedString() = result of "`1\\`2`" should equal ("1`2\n")
+
+  @Test def testBackSlashInBackQuotedString() = result of "`1\\\\t`" should equal ("1\\t\n")
+
+  @Test def test123Integer() = result of "123" should equal ("123\n")
 
   @Test def test12E3Double() = result of "12e3" should equal ("12000.0\n")        
 

@@ -42,9 +42,9 @@ trait WTokenParsers extends RegexParsers {
   }
 
   def integerNum: Parser[Int] = "[0-9]+".r ^^ { _.toInt }
-  def doubleQuotedString: Parser[String] = "\"(\\\\\"|[^\"])*?\"".r ^^ { x => x.substring(1, x.length - 1).replaceAll("\\\\\"", "\"") }
-  def backQuotedString: Parser[String] = "`(\\\\`|[^`])*?`".r ^^ { x => x.substring(1, x.length - 1).replaceAll("\\\\`", "`") }
-  def quotedString: Parser[String] = "'(\\\\'|[^'])*?'".r ^^ { x => x.substring(1, x.length - 1).replaceAll("\\\\'", "'") }
+  def doubleQuotedString: Parser[String] = "\"(\\\\\"|[^\"])*?\"".r ^^ { x => escape(x.substring(1, x.length - 1), '"') }
+  def backQuotedString: Parser[String] = "`(\\\\`|[^`])*?`".r ^^ { x => escape(x.substring(1, x.length - 1), '`') }
+  def quotedString: Parser[String] = "'(\\\\'|[^'])*?'".r ^^ { x => escape(x.substring(1, x.length - 1), '\'') }
 
   def notQuotedString: Parser[String] = new Parser[String] {
     def apply(in: Input): ParseResult[String] = {
@@ -65,5 +65,40 @@ trait WTokenParsers extends RegexParsers {
         Failure("a letter expected but `" + in.first + "' found", in.drop(start - offset))
       }
     }
+  }
+
+  def escape(s: String, q: Char) = {
+    val builder = new StringBuilder
+    var idx = 0
+
+    while (idx < s.size - 1) {
+      val c = s.charAt(idx)
+      val d = s.charAt(idx + 1)
+
+      if (c == '\\') {
+        if (d == 't') {
+          builder.append('\t')
+        } else if (d == 'n') {
+          builder.append('\n')
+        } else if (d == '\\') {
+          builder.append('\\')
+        } else if (d == q) {
+          builder.append(q)
+        } else {
+          builder.append(c)
+          builder.append(d)
+        }
+
+        idx += 2
+      } else {
+        builder.append(c)
+        idx += 1
+      }
+    }
+
+    if (idx == s.size - 1)
+      builder.append(s.last)
+
+    builder.toString()
   }
 }
