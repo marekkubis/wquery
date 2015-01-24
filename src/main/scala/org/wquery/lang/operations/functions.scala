@@ -3,7 +3,9 @@
 package org.wquery.lang.operations
 
 import java.lang.reflect.Method
+import java.util.IllegalFormatException
 
+import org.wquery.FormatFunctionException
 import org.wquery.lang._
 import org.wquery.model._
 
@@ -694,6 +696,43 @@ with ClearsBindingsPattern {
   def returnType(args: AlgebraOp) = Set(StringType)
 }
 
+abstract class ForEachTupleFunction(override val name: String) extends DataSetFunction(name)
+ with ClearsBindingsPattern {
+  def invoke(args: List[Any]): List[Any]
+
+  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
+    val buffer = new ListBuffer[List[Any]]()
+
+    for (tuple <- dataSet.paths)
+      buffer.append(invoke(tuple))
+
+    DataSet(buffer.toList)
+  }
+}
+
+object FormatFunction extends ForEachTupleFunction("format") with ReturnsValueSetOfSimilarSize {
+  override def returnType(args: AlgebraOp) = Set(StringType)
+
+  override def invoke(args: List[Any]) = {
+    try {
+      val callArgs = args.tail.map {
+        case arg: Integer => arg
+        case arg: Double => arg
+        case arg: String => arg
+        case arg: Boolean => arg
+        case arg => arg.toString
+      }.asInstanceOf[List[AnyRef]]
+
+      List(String.format(args.head.asInstanceOf[String], args.tail.asInstanceOf[List[AnyRef]]: _*))
+    } catch {
+      case e: IllegalFormatException =>
+        throw new FormatFunctionException(e.getMessage)
+    }
+  }
+
+  override def accepts(args: AlgebraOp) = args.leftType(0) == Set(StringType)
+}
+
 abstract class JavaMethod(override val name: String, method: Method) extends Function(name)
  with ReturnsValueSetOfSimilarSize with ClearsBindingsPattern {
   def evaluate(args: AlgebraOp, wordNet: WordNet, bindings: Bindings, context: Context) = {
@@ -758,6 +797,7 @@ object Functions {
   registerFunction(ReplaceFunction)
   registerFunction(LowerFunction)
   registerFunction(UpperFunction)
+  registerFunction(FormatFunction)
   registerFunction(RangeFunction)
   registerFunction(IntFunction)
   registerFunction(FloatFunction)

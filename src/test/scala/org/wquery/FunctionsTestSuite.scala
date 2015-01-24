@@ -110,4 +110,22 @@ class FunctionsTestSuite extends WQueryTestSuite {
 
   @Test def testAsTupleSeparator() = result of "as_tuple(`car:1:n#car#{person:3:n}#4#5`,`/#/`)" should equal ("car:1:n car { person:3:n } 4 5\n")
 
+  @Test def testFormatString() = result of "format(`%s`, car)" should equal ("car\n")
+
+  @Test def testFormatSense() = result of "format(`%s`, car:1:n)" should equal ("car:1:n\n")
+
+  @Test def testFormatInt() = result of "format(`%d`, 3)" should equal ("3\n")
+
+  @Test def testFormatFloat() = result of "format(`%2.3f`, 1/3)" should equal ("0.333\n")
+
+  @Test def testFormatStringAsInt() = result of "format(`%d`, car)" should equal ("ERROR: Invalid format string: d != java.lang.String\n")
+
+  @Test def testFormatIntAsString() = result of "format(`%s`, 3)" should equal ("3\n")
+
+  @Test def testFormatFloatAsInt() = result of "format(`%2d`, 1/3)" should equal ("ERROR: Invalid format string: d != java.lang.Double\n")
+
+  @Test def testFormatIntAsFloat() = result of "format(`%2.3f`, 3)" should equal ("ERROR: Invalid format string: f != java.lang.Integer\n")
+
+  @Test def testFormatIncorectFormat() = result of "format(`%2.3d`, 3)" should equal ("ERROR: Invalid format string: 3\n")
+
 }

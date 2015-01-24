@@ -29,6 +29,9 @@ class WQueryInvalidValueSpecifiedForRelationPropertyException(property: String)
 class FoundReferenceToUnknownVariableWhileEvaluatingException(variable: Variable)
   extends WQueryEvaluationException("A reference to unknown variable " + variable + " found")
 
+class FormatFunctionException(message: String)
+  extends WQueryEvaluationException("Invalid format string: " + message)
+
 class WQueryModelException(message: String) extends WQueryException(message)
 
 class WQueryUpdateBreaksRelationPropertyException(val property: String, val relation: Relation, val argument: String = "")
