@@ -819,6 +819,10 @@ object Functions {
     def returnType(args: AlgebraOp) = Set(FloatType)
   })
 
+  registerFunction(new JavaMethod("exp", classOf[Math].getMethod("exp", FloatType.associatedClass)) with AcceptsNumbers {
+    def returnType(args: AlgebraOp) = Set(FloatType)
+  })
+
   registerFunction(new JavaMethod("floor", classOf[Math].getMethod("floor", FloatType.associatedClass)) with AcceptsNumbers {
     def returnType(args: AlgebraOp) = Set(FloatType)
   })
@@ -837,6 +841,14 @@ object Functions {
   })
 
   registerFunction(new JavaMethod("random", classOf[Math].getMethod("random")) with HasNoArguments {
+    def returnType(args: AlgebraOp) = Set(FloatType)
+  })
+
+  registerFunction(new JavaMethod("round", classOf[Math].getMethod("round", FloatType.associatedClass)) with AcceptsNumbers {
+    def returnType(args: AlgebraOp) = Set(IntegerType)
+  })
+
+  registerFunction(new JavaMethod("sqrt", classOf[Math].getMethod("sqrt", FloatType.associatedClass)) with AcceptsNumbers {
     def returnType(args: AlgebraOp) = Set(FloatType)
   })
 }

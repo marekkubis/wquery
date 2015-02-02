@@ -44,7 +44,9 @@ class FunctionsTestSuite extends WQueryTestSuite {
 
   @Test def testCeil() = result of "ceil(12.1)" should equal ("13.0\n")
     
-  @Test def testFloor() = result of "floor(12.1)" should equal ("12.0\n") 
+  @Test def testExp() = result of "exp(1)" should startWith ("2.71")
+
+  @Test def testFloor() = result of "floor(12.1)" should equal ("12.0\n")
     
   @Test def testLogFloat() = result of "log(10.0)" should equal ("2.302585092994046\n")    
 
@@ -59,6 +61,10 @@ class FunctionsTestSuite extends WQueryTestSuite {
   @Test def testFloat() = result of "float(2)" should equal ("2.0\n")
 
   @Test def testRandom() = result of "random()" should fullyMatch regex "[01]\\.[0-9]+\n"
+
+  @Test def testRound() = result of "round(1.6)" should equal ("2\n")
+
+  @Test def testSqrt() = result of "sqrt(4.0)" should equal ("2.0\n")
 
   // string functions
    
