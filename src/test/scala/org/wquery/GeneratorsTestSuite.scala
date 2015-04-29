@@ -94,12 +94,6 @@ class GeneratorsTestSuite extends WQueryTestSuite {
 
   @Test def testAnyRelationBackwardArcGenerator() = result of "count(\\^_)" should equal ("32\n")
 
-  @Test def testAnyBinaryRelationWithDestinationTypeArcGenerator() = result of "count(\\_&synset)" should equal ("14\n")
-
-  @Test def testAnyBinaryRelationWithSourceTypeArcGenerator() = result of "count(\\synset&_)" should equal ("21\n")
-
-  @Test def testAnyBinaryRelationWithSourceAndDestinationTypesArcGenerator() = result of "count(\\synset&_&synset)" should equal ("11\n")
-
   @Test def testFunctionGenerator() = result of "max('').senses" should equal ("zymurgy senses zymurgy:1:n\n")
 
   @Test def testEmptyDataSetGenerator() = result of "<>" should equal ("(no result)\n")

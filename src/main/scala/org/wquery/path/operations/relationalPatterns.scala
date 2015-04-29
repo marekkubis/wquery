@@ -1,12 +1,13 @@
 package org.wquery.path.operations
 
-import scalaz._
-import Scalaz._
-import collection.mutable.ListBuffer
+import org.wquery.lang.operations.{Bindings, ProvidesTupleSizes, ProvidesTypes}
 import org.wquery.model._
-import org.wquery.lang.operations.{Bindings, ProvidesTypes, ProvidesTupleSizes}
 import org.wquery.path._
 import org.wquery.utils.IntOptionW._
+
+import scala.collection.mutable.ListBuffer
+import scalaz.Scalaz._
+import scalaz._
 
 sealed abstract class RelationalPattern extends ProvidesTypes with ProvidesTupleSizes {
   def extend(wordNet: WordNet, bindings: Bindings, extensionSet: ExtensionSet): ExtendedExtensionSet
@@ -153,39 +154,37 @@ case class QuantifiedRelationPattern(pattern: RelationalPattern, quantifier: Qua
 
 case class ArcRelationalPattern(pattern: ArcPattern) extends RelationalPattern {
   def extend(wordNet: WordNet, bindings: Bindings, extensionSet: ExtensionSet) = {
-    val inverted = pattern.source.name == Relation.Dst && pattern.destination.name == Relation.Src
-
-    pattern.relation.some(wordNet.extend(extensionSet, _, inverted))
-      .none(wordNet.extend(extensionSet, pattern.source.nodeType,
-        pattern.destination.nodeType, inverted))
+    pattern.relation.some(wordNet.extend(extensionSet, _, pattern.source.name, pattern.destinations.map(_.name)))
+      .none(wordNet.extend(extensionSet, (pattern.source.name, pattern.source.nodeType),
+        if (pattern.destinations == List(ArcPatternArgument.Any)) Nil else pattern.destinations.map(dest => (dest.name, dest.nodeType))))
   }
 
-  val minTupleSize = if (pattern.source == pattern.destination) 0 else 2
+  val minTupleSize = 2*pattern.destinations.size
 
-  val maxTupleSize = some(if (pattern.source == pattern.destination) 0 else 2)
+  val maxTupleSize = some(2*pattern.destinations.size)
 
   def sourceType = demandArgumentType(pattern.source)
 
   def leftType(pos: Int) = {
-    pos match {
-      case 0 =>
+    if (pos < minTupleSize)
+      if (pos % 2 == 0) {
         Set(ArcType)
-      case 1 =>
-        demandArgumentType(pattern.destination)
-      case _ =>
-        Set.empty
-    }
+      } else {
+        demandArgumentType(pattern.destinations((pos - 1)/2))
+      }
+    else
+      Set.empty
   }
 
   def rightType(pos: Int) = {
-    pos match {
-      case 0 =>
-        demandArgumentType(pattern.destination)
-      case 1 =>
+    if (pos < pattern.destinations.size)
+      if (pos % 2 == 1) {
         Set(ArcType)
-      case _ =>
-        Set.empty
-    }
+      } else {
+        demandArgumentType(pattern.destinations(pattern.destinations.size - 1 - pos/2))
+      }
+    else
+      Set.empty
   }
 
   override def toString = pattern.toString

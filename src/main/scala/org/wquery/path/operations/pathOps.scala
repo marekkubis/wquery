@@ -8,7 +8,6 @@ import org.wquery.query.SetVariable
 import org.wquery.utils.IntOptionW._
 
 import scalaz.Scalaz._
-import scalaz._
 
 sealed abstract class PathOp extends AlgebraOp
 
@@ -509,10 +508,10 @@ case class SynsetFetchOp(op: AlgebraOp) extends AlgebraOp {
      val patterns = contextTypes.map{ contextType => (contextType: @unchecked) match {
        case StringType =>
          ArcRelationalPattern(ArcPattern(Some(WordNet.WordFormToSynsets), ArcPatternArgument(Relation.Src, Some(WordNet.WordFormToSynsets.sourceType)),
-           ArcPatternArgument(Relation.Dst, WordNet.WordFormToSynsets.destinationType)))
+           List(ArcPatternArgument(Relation.Dst, WordNet.WordFormToSynsets.destinationType))))
        case SenseType =>
          ArcRelationalPattern(ArcPattern(Some(WordNet.SenseToSynset), ArcPatternArgument(Relation.Src, Some(WordNet.SenseToSynset.sourceType)),
-           ArcPatternArgument(Relation.Dst, WordNet.SenseToSynset.destinationType)))
+           List(ArcPatternArgument(Relation.Dst, WordNet.SenseToSynset.destinationType))))
      }}.toList
 
      val projectedVariable = StepVariable("__p")

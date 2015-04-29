@@ -84,7 +84,7 @@ trait AcceptsTypes extends HasArguments {
 
   def accepts(args: AlgebraOp) = {
     args.minTupleSize >= argumentTypes.size &&
-      argumentTypes.zipWithIndex.forall{ case (dataType, pos) => args.leftType(pos) == dataType }
+      argumentTypes.zipWithIndex.forall{ case (dataType, pos) => args.leftType(pos).subsetOf(dataType) }
   }
 }
 
@@ -567,6 +567,28 @@ object UpperFunction extends DataSetFunction("upper") with AcceptsTypes with Ret
   def returnType(args: AlgebraOp) = Set(StringType)
 }
 
+object IsSynsetFunction extends DataSetFunction("issynset") with AcceptsTypes with ReturnsValueSetOfSimilarSize
+with ClearsBindingsPattern {
+  def argumentTypes = List(DataType.all)
+
+  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
+    DataSet(dataSet.paths.map(tuple => List(tuple.last.isInstanceOf[Synset])))
+  }
+
+  def returnType(args: AlgebraOp) = Set(BooleanType)
+}
+
+object IsStringFunction extends DataSetFunction("isstring") with AcceptsTypes with ReturnsValueSetOfSimilarSize
+with ClearsBindingsPattern {
+  def argumentTypes = List(DataType.all)
+
+  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
+    DataSet(dataSet.paths.map(tuple => List(tuple.last.isInstanceOf[String])))
+  }
+
+  def returnType(args: AlgebraOp) = Set(BooleanType)
+}
+
 object RangeFunction extends DataSetFunction("range") with AcceptsTypes with ReturnsValueSet
  with ClearsBindingsPattern {
   def argumentTypes = List(Set(IntegerType), Set(IntegerType))
@@ -798,6 +820,8 @@ object Functions {
   registerFunction(LowerFunction)
   registerFunction(UpperFunction)
   registerFunction(FormatFunction)
+  registerFunction(IsSynsetFunction)
+  registerFunction(IsStringFunction)
   registerFunction(RangeFunction)
   registerFunction(IntFunction)
   registerFunction(FloatFunction)

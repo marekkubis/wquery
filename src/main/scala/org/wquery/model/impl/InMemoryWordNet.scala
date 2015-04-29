@@ -2,7 +2,7 @@ package org.wquery.model.impl
 
 import org.wquery.model._
 import org.wquery.path.operations.NewSynset
-import org.wquery.{WQueryModelException, WQueryUpdateBreaksRelationPropertyException}
+import org.wquery.{WQueryEvaluationException, WQueryModelException, WQueryUpdateBreaksRelationPropertyException}
 
 import scala.collection.mutable.{ListBuffer, Map => MMap}
 import scala.concurrent.stm._
@@ -131,39 +131,44 @@ class InMemoryWordNet extends WordNet {
     }
   }
 
-  def extend(extensionSet: ExtensionSet, srcType: Option[NodeType],
-             dstType: Option[NodeType], inverted: Boolean): ExtendedExtensionSet = {
+  def extend(extensionSet: ExtensionSet, through: (String, Option[NodeType]),
+             to: List[(String, Option[NodeType])]): ExtendedExtensionSet = {
     val buffer = new ExtensionSetBuffer(extensionSet)
-    val (srcName, dstName) = if (inverted) (Relation.Dst, Relation.Src) else (Relation.Src, Relation.Dst)
-    val toMap = Map((dstName, dstType))
+    val toMap = to.toMap
 
-    for (relation <- relations if relation.isTraversable && srcType.some(_ == relation.demandArgument(srcName).nodeType).none(true)
-         if toMap.get(dstName).some(nodeTypeOption => nodeTypeOption.some(_ == relation.demandArgument(dstName).nodeType)
-        .none(true)).none(false))
-      buffer.append(extendWithRelationTuples(extensionSet, relation, inverted))
+    for (relation <- relations if relation.isTraversable;
+         source <- relation.argumentNames if ((through._1 == Relation.AnyName && source == Relation.Src) || through._1 == source) &&
+            through._2.some(_ == relation.demandArgument(source).nodeType).none(true);
+         destination <- relation.argumentNames if (toMap.isEmpty && destination == Relation.Dst) ||
+            toMap.get(destination)
+              .some(nodeTypeOption => nodeTypeOption.some(_ == relation.demandArgument(destination).nodeType).none(true)).none(false)
+         if source != destination)
+      buffer.append(extendWithRelationTuples(extensionSet, relation, source, List(destination)))
 
     buffer.toExtensionSet
   }
 
-  def extend(extensionSet: ExtensionSet, relation: Relation, inverted: Boolean) = {
+  def extend(extensionSet: ExtensionSet, relation: Relation, through: String, to: List[String]) = {
     val buffer = new ExtensionSetBuffer(extensionSet)
 
     if (aliasMap.contains(relation))
-      extendWithAlias(extensionSet, relation, inverted, buffer)
+      extendWithAlias(extensionSet, relation, through, to, buffer)
     else
-      buffer.append(extendWithRelationTuples(extensionSet, relation, inverted))
+      buffer.append(extendWithRelationTuples(extensionSet, relation, through, to))
 
     buffer.toExtensionSet
   }
 
-  private def extendWithRelationTuples(extensionSet: ExtensionSet, relation: Relation, inverted: Boolean) = atomic { implicit txn =>
+  private def extendWithRelationTuples(extensionSet: ExtensionSet, relation: Relation, through: String, to: List[String]) = {
+    relation.demandArgument(through)
+    to.foreach(relation.demandArgument)
+
+    extendWithRelationTuplesForward(extensionSet, relation, through, to)
+  }
+
+  private def extendWithRelationTuplesForward(extensionSet: ExtensionSet, relation: Relation, through: String, to: List[String]) = atomic { implicit txn =>
     val relationSuccessors = store.successors(relation)
     val builder = new ExtensionSetBuilder(extensionSet)
-
-    val (through, to) = if (inverted)
-      (Relation.Dst, Relation.Src)
-    else
-      (Relation.Src, Relation.Dst)
 
     for (pathPos <- 0 until extensionSet.size) {
       val source = extensionSet.right(pathPos)
@@ -171,9 +176,9 @@ class InMemoryWordNet extends WordNet {
       for (relSuccs <- relationSuccessors.get((through, source)); succs <- relSuccs) {
         val extensionBuffer = new ListBuffer[Any]
 
-        if (succs.contains(to)) {
-          extensionBuffer.append(Arc(relation, through, to))
-          extensionBuffer.append(succs(to))
+        for(destination <- to if (succs.contains(destination))) {
+          extensionBuffer.append(Arc(relation, through, destination))
+          extensionBuffer.append(succs(destination))
         }
 
         val extension = extensionBuffer.toList
@@ -187,13 +192,22 @@ class InMemoryWordNet extends WordNet {
   }
 
   private def extendWithAlias(extensionSet: ExtensionSet, relation: Relation,
-                                 inverted: Boolean, buffer: ExtensionSetBuffer) {
+                                 through: String, to: List[String], buffer: ExtensionSetBuffer) {
+    if (to.size == 1) {
     val arcs = aliasMap(relation)
 
-    for (arc <- arcs) {
-      val relationInverted = (arc.from == Relation.Src && arc.to == Relation.Dst && inverted
-        || arc.from == Relation.Dst && arc.to == Relation.Src && !inverted)
-      buffer.append(extendWithRelationTuples(extensionSet, arc.relation, relationInverted))
+      (through, to.head) match {
+        case (Relation.Src, Relation.Dst) =>
+          for (arc <- arcs)
+            buffer.append(extendWithRelationTuples(extensionSet, arc.relation, arc.from, List(arc.to)))
+        case (Relation.Dst, Relation.Src) =>
+          for (arc <- arcs)
+            buffer.append(extendWithRelationTuples(extensionSet, arc.relation, arc.to, List(arc.from)))
+        case _ =>
+          throw new WQueryEvaluationException("One cannot traverse the alias " + relation + " using custom source or destination arguments")
+    }
+    } else {
+      throw new WQueryEvaluationException("One cannot traverse the alias " + relation + " to multiple destinations")
     }
   }
 

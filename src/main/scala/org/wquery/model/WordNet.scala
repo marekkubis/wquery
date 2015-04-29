@@ -37,9 +37,9 @@ trait WordNet {
 
   def fetch(relation: Relation, from: List[(String, List[Any])], to: List[String], withArcs: Boolean = false): DataSet
 
-  def extend(extensionSet: ExtensionSet, relation: Relation, inverted: Boolean): ExtendedExtensionSet
+  def extend(extensionSet: ExtensionSet, relation: Relation, through: String, to: List[String]): ExtendedExtensionSet
 
-  def extend(extensionSet: ExtensionSet, through: Option[NodeType], to: Option[NodeType], inverted: Boolean): ExtendedExtensionSet
+  def extend(extensionSet: ExtensionSet, through: (String, Option[NodeType]), to: List[(String, Option[NodeType])]): ExtendedExtensionSet
 
   def getWord(value: String): Option[String]
 

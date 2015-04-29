@@ -2,7 +2,7 @@ package org.wquery.path.parsers
 
 import org.wquery.lang.exprs._
 import org.wquery.lang.parsers.WLanguageParsers
-import org.wquery.model.DataSet
+import org.wquery.model.{DataSet, Relation}
 import org.wquery.path._
 import org.wquery.path.exprs._
 import org.wquery.path.operations._
@@ -76,10 +76,12 @@ trait WPathParsers extends WLanguageParsers {
     | arc_expr
   )
 
-  def arc_expr = opt("^") ~ notQuotedString ~ opt("&" ~> notQuotedString) ~ opt("&" ~> notQuotedString) ^^ {
-    case inv~l~m~r =>
-      ArcExpr(l::m.toList ++ r.toList, inv.isDefined)
-  }
+  def arc_expr = (
+    ("^" ~> notQuotedString) ^^ { id => ArcExpr(List(Relation.Dst, id, Relation.Src).map(ArcExprArgument(_, None))) } // syntactic sugar
+    | rep1sep(arc_expr_arg, "^") ^^ { ArcExpr(_) }
+  )
+
+  def arc_expr_arg = notQuotedString ~ opt(("&" ~> notQuotedString)) ^^ { case name~dtype => ArcExprArgument(name, dtype) }
 
   def quantifier = (
     "+" ^^^ { Quantifier(1, None) }

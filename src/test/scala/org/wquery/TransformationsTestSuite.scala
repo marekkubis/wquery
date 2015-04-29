@@ -52,22 +52,23 @@ class TransformationsTestSuite extends WQueryTestSuite {
   
   @Test def testGenerateRegularPathOneOrMore() = result of "size(hypernym+)" should equal ("2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12\n13\n14\n")
 
-  @Test def testSourceTypeSpecifier() = result of "({car:1:n} union car).string&senses" should equal ("car senses car:1:n\ncar senses car:2:n\ncar senses car:3:n\ncar senses car:4:n\ncar senses car:5:n\n")
+  // TODO: former & syntax to be replaced by isstring()
+  //  @Test def testSourceTypeSpecifier() = result of "({car:1:n} union car).string&senses" should equal ("car senses car:1:n\ncar senses car:2:n\ncar senses car:3:n\ncar senses car:4:n\ncar senses car:5:n\n")
 
-  @Test def testWrongSourceTypeSpecifier() = result of "({car:1:n} union car).zzz&senses" should startWith ("ERROR: No valid type name found in arc expression zzz&senses")
+  @Test def testDestinationTypeSpecifier1() = result of "car:1:n.^senses[issynset(#)]" should equal ("car:1:n ^senses { car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n }\n")
 
-  @Test def testDestinationTypeSpecifier1() = result of "car:1:n.^senses&synset" should equal ("car:1:n ^senses { car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n }\n")
+  // TODO: former & syntax to be replaced by isstring()
+  //  @Test def testDestinationTypeSpecifier2() = result of "car:1:n.^senses&string" should equal ("car:1:n ^senses car\n")
 
-  @Test def testDestinationTypeSpecifier2() = result of "car:1:n.^senses&string" should equal ("car:1:n ^senses car\n")
-
-  @Test def testWrongDestinationTypeSpecifier0() = result of "car:1:n.senses&zzz" should startWith ("ERROR: No valid type name found in arc expression senses&zzz")
+  @Test def testWrongDestinationTypeSpecifier0() = result of "car:1:n.senses&zzz" should startWith ("ERROR: Datatype 'zzz' not found")
 
   @Test def testAnyRelationTransformation() = result of "count({car:2:n}._)" should equal ("12\n")
 
-  @Test def testAnyRelationTransformationBySourceAndDestinationAndDestinationNodeType() = result of "count({car:2:n}._&synset)" should equal ("1\n")
+  @Test def testAnyRelationTransformationBySourceAndDestinationAndDestinationNodeType() = result of "count({car:2:n}._[issynset(#)])" should equal ("1\n")
 
-  @Test def testAnyRelationTransformationBySourceAndDestinationAndSourceNodeType() = result of "count({car:2:n}.string&_)" should equal ("0\n")
+  @Test def testAnyRelationTransformationBySourceAndDestinationAndSourceNodeType() = result of "count({car:2:n}[isstring(#)]._)" should equal ("0\n")
 
-  @Test def testAnyRelationTransformationBySourceAndDestinationAndNodeTypes() = result of "count(({car:2:n} union car).string&_&synset)" should equal ("5\n")
+  // TODO: former & syntax to be replaced by isstring()
+  //  @Test def testAnyRelationTransformationBySourceAndDestinationAndNodeTypes() = result of "count(({car:2:n} union car).string&_&synset)" should equal ("5\n")
 
 }
