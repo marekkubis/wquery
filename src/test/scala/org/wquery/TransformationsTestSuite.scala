@@ -54,19 +54,19 @@ class TransformationsTestSuite extends WQueryTestSuite {
 
   @Test def testMultiRelationTransformation() = result of "({car:1:n} union car).senses" should equal ("{ car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n } senses auto:1:n\n{ car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n } senses automobile:1:n\n{ car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n } senses car:1:n\n{ car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n } senses machine:6:n\n{ car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n } senses motorcar:1:n\ncar senses car:1:n\ncar senses car:2:n\ncar senses car:3:n\ncar senses car:4:n\ncar senses car:5:n\n")
 
-  @Test def testSourceTypeSpecifier() = result of "({car:1:n} union car)[isstring(#)].senses" should equal ("car senses car:1:n\ncar senses car:2:n\ncar senses car:3:n\ncar senses car:4:n\ncar senses car:5:n\n")
+  @Test def testSourceTypeSpecifier() = result of "({car:1:n} union car)[is_string(#)].senses" should equal ("car senses car:1:n\ncar senses car:2:n\ncar senses car:3:n\ncar senses car:4:n\ncar senses car:5:n\n")
 
-  @Test def testDestinationTypeSpecifier1() = result of "car:1:n.^senses[issynset(#)]" should equal ("car:1:n ^senses { car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n }\n")
+  @Test def testDestinationTypeSpecifier1() = result of "car:1:n.^senses[is_synset(#)]" should equal ("car:1:n ^senses { car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n }\n")
 
-  @Test def testDestinationTypeSpecifier2() = result of "car:1:n.^senses[isstring(#)]" should equal ("car:1:n ^senses car\n")
+  @Test def testDestinationTypeSpecifier2() = result of "car:1:n.^senses[is_string(#)]" should equal ("car:1:n ^senses car\n")
 
   @Test def testWrongDestinationTypeSpecifier0() = result of "car:1:n.senses&zzz" should startWith ("ERROR: Datatype 'zzz' not found")
 
   @Test def testAnyRelationTransformation() = result of "count({car:2:n}._)" should equal ("12\n")
 
-  @Test def testAnyRelationTransformationBySourceAndDestinationAndDestinationNodeType() = result of "count({car:2:n}._[issynset(#)])" should equal ("1\n")
+  @Test def testAnyRelationTransformationBySourceAndDestinationAndDestinationNodeType() = result of "count({car:2:n}._[is_synset(#)])" should equal ("1\n")
 
-  @Test def testAnyRelationTransformationBySourceAndDestinationAndSourceNodeType() = result of "count({car:2:n}[isstring(#)]._)" should equal ("0\n")
+  @Test def testAnyRelationTransformationBySourceAndDestinationAndSourceNodeType() = result of "count({car:2:n}[is_string(#)]._)" should equal ("0\n")
 
   @Test def testAnyRelationTransformationBySourceAndDestinationAndNodeTypes() = result of "count(({car:2:n} union car).src&string^_^dst&synset)" should equal ("5\n")
 

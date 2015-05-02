@@ -567,7 +567,7 @@ object UpperFunction extends DataSetFunction("upper") with AcceptsTypes with Ret
   def returnType(args: AlgebraOp) = Set(StringType)
 }
 
-object IsSynsetFunction extends DataSetFunction("issynset") with AcceptsTypes with ReturnsValueSetOfSimilarSize
+object IsSynsetFunction extends DataSetFunction("is_synset") with AcceptsTypes with ReturnsValueSetOfSimilarSize
 with ClearsBindingsPattern {
   def argumentTypes = List(DataType.all)
 
@@ -578,12 +578,67 @@ with ClearsBindingsPattern {
   def returnType(args: AlgebraOp) = Set(BooleanType)
 }
 
-object IsStringFunction extends DataSetFunction("isstring") with AcceptsTypes with ReturnsValueSetOfSimilarSize
+object IsSenseFunction extends DataSetFunction("is_sense") with AcceptsTypes with ReturnsValueSetOfSimilarSize
+with ClearsBindingsPattern {
+  def argumentTypes = List(DataType.all)
+
+  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
+    DataSet(dataSet.paths.map(tuple => List(tuple.last.isInstanceOf[Sense])))
+  }
+
+  def returnType(args: AlgebraOp) = Set(BooleanType)
+}
+
+object IsStringFunction extends DataSetFunction("is_string") with AcceptsTypes with ReturnsValueSetOfSimilarSize
 with ClearsBindingsPattern {
   def argumentTypes = List(DataType.all)
 
   def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
     DataSet(dataSet.paths.map(tuple => List(tuple.last.isInstanceOf[String])))
+  }
+
+  def returnType(args: AlgebraOp) = Set(BooleanType)
+}
+
+object IsIntegerFunction extends DataSetFunction("is_integer") with AcceptsTypes with ReturnsValueSetOfSimilarSize
+with ClearsBindingsPattern {
+  def argumentTypes = List(DataType.all)
+
+  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
+    DataSet(dataSet.paths.map(tuple => List(tuple.last.isInstanceOf[Int])))
+  }
+
+  def returnType(args: AlgebraOp) = Set(BooleanType)
+}
+
+object IsFloatFunction extends DataSetFunction("is_float") with AcceptsTypes with ReturnsValueSetOfSimilarSize
+with ClearsBindingsPattern {
+  def argumentTypes = List(DataType.all)
+
+  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
+    DataSet(dataSet.paths.map(tuple => List(tuple.last.isInstanceOf[Double])))
+  }
+
+  def returnType(args: AlgebraOp) = Set(BooleanType)
+}
+
+object IsBooleanFunction extends DataSetFunction("is_boolean") with AcceptsTypes with ReturnsValueSetOfSimilarSize
+with ClearsBindingsPattern {
+  def argumentTypes = List(DataType.all)
+
+  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
+    DataSet(dataSet.paths.map(tuple => List(tuple.last.isInstanceOf[Boolean])))
+  }
+
+  def returnType(args: AlgebraOp) = Set(BooleanType)
+}
+
+object IsArcFunction extends DataSetFunction("is_arc") with AcceptsTypes with ReturnsValueSetOfSimilarSize
+with ClearsBindingsPattern {
+  def argumentTypes = List(DataType.all)
+
+  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
+    DataSet(dataSet.paths.map(tuple => List(tuple.last.isInstanceOf[Arc])))
   }
 
   def returnType(args: AlgebraOp) = Set(BooleanType)
@@ -821,7 +876,12 @@ object Functions {
   registerFunction(UpperFunction)
   registerFunction(FormatFunction)
   registerFunction(IsSynsetFunction)
+  registerFunction(IsSenseFunction)
   registerFunction(IsStringFunction)
+  registerFunction(IsIntegerFunction)
+  registerFunction(IsFloatFunction)
+  registerFunction(IsBooleanFunction)
+  registerFunction(IsArcFunction)
   registerFunction(RangeFunction)
   registerFunction(IntFunction)
   registerFunction(FloatFunction)

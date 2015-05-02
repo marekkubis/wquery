@@ -134,4 +134,34 @@ class FunctionsTestSuite extends WQueryTestSuite {
 
   @Test def testFormatIncorectFormat() = result of "format(`%2.3d`, 3)" should equal ("ERROR: Invalid format string: 3\n")
 
+  // is functions
+
+  @Test def tesIsSynsetTrue() = result of "is_synset({car:1:n})" should equal ("true\n")
+
+  @Test def tesIsSynsetFalse() = result of "is_synset(1)" should equal ("false\n")
+
+  @Test def tesIsSenseTrue() = result of "is_sense(car:1:n)" should equal ("true\n")
+
+  @Test def tesIsSenseFalse() = result of "is_sense(1)" should equal ("false\n")
+
+  @Test def tesIsStringTrue() = result of "is_string(car)" should equal ("true\n")
+
+  @Test def tesIsStringFalse() = result of "is_string(1)" should equal ("false\n")
+
+  @Test def tesIsIntegerTrue() = result of "is_integer(1)" should equal ("true\n")
+
+  @Test def tesIsIntegerFalse() = result of "is_integer(1.0)" should equal ("false\n")
+
+  @Test def tesIsFloatTrue() = result of "is_float(1.0)" should equal ("true\n")
+
+  @Test def tesIsFloatFalse() = result of "is_float(1)" should equal ("false\n")
+
+  @Test def tesIsBooleanTrue() = result of "is_boolean(false)" should equal ("true\n")
+
+  @Test def tesIsBooleanFalse() = result of "is_boolean(1)" should equal ("false\n")
+
+  @Test def tesIsArcTrue() = result of "is_arc(\\hypernym)" should equal ("true\n")
+
+  @Test def tesIsArcFalse() = result of "is_arc(1)" should equal ("false\n")
+
 }

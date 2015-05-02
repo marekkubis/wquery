@@ -44,7 +44,7 @@ class FunctionalTestSuite extends WQueryTestSuite {
   @Test def findBaseConcepts() = result of "{}[bcs]" should equal ("{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n }\n{ car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n }\n")
 
   // Q10
-  @Test def findSynsetsThatArePredecessorsOfASynsetWithASpecificIdentifierWithRegardToAnySemanticRelation() = result of "{}[id = `100007846`].^_[issynset(#)]<#>" should equal ("{ human body:1:n physical body:1:n material body:1:n soma:3:n build:2:n figure:2:n physique:2:n anatomy:2:n shape:3:n bod:1:n chassis:1:n frame:3:n form:5:n flesh:2:n }\n{ person:2:n }\n")
+  @Test def findSynsetsThatArePredecessorsOfASynsetWithASpecificIdentifierWithRegardToAnySemanticRelation() = result of "{}[id = `100007846`].^_[is_synset(#)]<#>" should equal ("{ human body:1:n physical body:1:n material body:1:n soma:3:n build:2:n figure:2:n physique:2:n anatomy:2:n shape:3:n bod:1:n chassis:1:n frame:3:n form:5:n flesh:2:n }\n{ person:2:n }\n")
 
   // Q11: Find synsets that fulfil a query that is a combination of some of the queries Q1, Q3, Q4 and Q6-Q10 combined together with logical 'and' and 'or'.
   // Q11a
@@ -155,10 +155,10 @@ class FunctionalTestSuite extends WQueryTestSuite {
   @Test def findWordsThatHaveNonConsecutiveSenseNumbers() = result of "''$w[not empty(senses$s.pos$p[$w.senses[pos = $p].sensenum != range(1, count($w.senses[pos = $p]))])]<$w>" should equal ("anatomy\narea\nauto\nbeing\nberlin\nbrougham\nbuild\nbus\ncab\ncause\ncompact\ncompartment\nconstruction\nconveyance\ndetermine\nferment\nfermentation\nfigure\nfinisher\nfixed\nfleet\nflesh\nform\nframe\ngondola\nhack\nheap\nhomo\ninstrumentality\nloaner\nmachine\nman\nman-eater\nphysique\nracer\nrigid\nsaloon\nset\nshape\nsoma\nsoul\ntourer\nunit\nwaggon\nwagon\nwhole\n")
 
   // Q40
-  @Test def findEdgesOfSemanticRelationsThatLinkSynsetsThatTakePartInMoreThanOneSemanticRelation() = result of "{}$a._$b[issynset($b) and count($a._|^_.$b) > 1]" should equal ("$a={ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n } $b={ person:2:n } { person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n } similar { person:2:n }\n$a={ car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n } $b={ motor vehicle:1:n automotive vehicle:1:n } { car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n } del_this_rel { motor vehicle:1:n automotive vehicle:1:n }\n$a={ car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n } $b={ motor vehicle:1:n automotive vehicle:1:n } { car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n } hypernym { motor vehicle:1:n automotive vehicle:1:n }\n$a={ car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n } $b={ samochód:1:n auto:2:n } { car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n } ili { samochód:1:n auto:2:n }\n$a={ wheel:1:n } $b={ auto:3:v } { wheel:1:n } hypernym { auto:3:v }\n$a={ wheel:1:n } $b={ auto:3:v } { wheel:1:n } partial_holonym { auto:3:v }\n$a={ samochód:1:n auto:2:n } $b={ car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n } { samochód:1:n auto:2:n } ili { car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n }\n$a={ person:2:n } $b={ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n } { person:2:n } similar { person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n }\n")
+  @Test def findEdgesOfSemanticRelationsThatLinkSynsetsThatTakePartInMoreThanOneSemanticRelation() = result of "{}$a._$b[is_synset($b) and count($a._|^_.$b) > 1]" should equal ("$a={ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n } $b={ person:2:n } { person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n } similar { person:2:n }\n$a={ car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n } $b={ motor vehicle:1:n automotive vehicle:1:n } { car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n } del_this_rel { motor vehicle:1:n automotive vehicle:1:n }\n$a={ car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n } $b={ motor vehicle:1:n automotive vehicle:1:n } { car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n } hypernym { motor vehicle:1:n automotive vehicle:1:n }\n$a={ car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n } $b={ samochód:1:n auto:2:n } { car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n } ili { samochód:1:n auto:2:n }\n$a={ wheel:1:n } $b={ auto:3:v } { wheel:1:n } hypernym { auto:3:v }\n$a={ wheel:1:n } $b={ auto:3:v } { wheel:1:n } partial_holonym { auto:3:v }\n$a={ samochód:1:n auto:2:n } $b={ car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n } { samochód:1:n auto:2:n } ili { car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n }\n$a={ person:2:n } $b={ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n } { person:2:n } similar { person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n }\n")
 
   // Q41
-  @Test def findSynsetsThatDoNotTakeParInAnySemanticRelation() = result of "{}[empty(_[issynset(#)]) and empty(^_[issynset(#)])]" should equal ("{ great white shark:1:n white shark:1:n man-eater:2:n man-eating shark:1:n Carcharodon carcharias:1:n }\n{ orange:2:n orangeness:1:n }\n{ zymology:1:n zymurgy:1:n }\n{ set:2:n }\n{ zymosis:1:n zymolysis:1:n fermentation:2:n fermenting:1:n ferment:3:n }\n{ orange:4:n }\n{ determine:3:v set:2:v }\n{ play:1:v }\n{ orange:1:s orangish:1:s }\n{ cold:1:a }\n{ cold:2:a }\n{ fixed:2:s set:2:s rigid:5:s }\n{ zymotic:1:a zymolytic:1:a }\n{ non lexicalised sense:1:n }\n")
+  @Test def findSynsetsThatDoNotTakeParInAnySemanticRelation() = result of "{}[empty(_[is_synset(#)]) and empty(^_[is_synset(#)])]" should equal ("{ great white shark:1:n white shark:1:n man-eater:2:n man-eating shark:1:n Carcharodon carcharias:1:n }\n{ orange:2:n orangeness:1:n }\n{ zymology:1:n zymurgy:1:n }\n{ set:2:n }\n{ zymosis:1:n zymolysis:1:n fermentation:2:n fermenting:1:n ferment:3:n }\n{ orange:4:n }\n{ determine:3:v set:2:v }\n{ play:1:v }\n{ orange:1:s orangish:1:s }\n{ cold:1:a }\n{ cold:2:a }\n{ fixed:2:s set:2:s rigid:5:s }\n{ zymotic:1:a zymolytic:1:a }\n{ non lexicalised sense:1:n }\n")
 
   // Q42
   @Test def findPolishSynsetsSuchThatTheirEnglishCounterpartsHaveHypernymsThatAreNotCounterpartsOfThePolishSynsetsHypernyms() = result of "{}$a[lang = `pl` and not empty(ili[lang = `en` and not hypernym in $a.hypernym.ili])]<$a>" should equal ("{ samochód:1:n auto:2:n }\n")
@@ -219,7 +219,7 @@ class FunctionalTestSuite extends WQueryTestSuite {
   @Test def countNounGlosses() = result of "count({}[senses.pos = `n`].desc)" should equal ("91\n")
 
   // Q54
-  @Test def countSemanticRelationEdges() = result of "count({}._[issynset(#)])" should equal ("92\n")
+  @Test def countSemanticRelationEdges() = result of "count({}._[is_synset(#)])" should equal ("92\n")
 
   // Q54a
     @Test def countEdgesOfSemanticRelationsThatHoldBetweenNounSynsets() = result of "count({}$a._^dst&synset$b[$a.senses.pos = `n` and $b.senses.pos = `n`])" should equal ("87\n")
@@ -231,10 +231,10 @@ class FunctionalTestSuite extends WQueryTestSuite {
   @Test def countHypernymyEdgesThatHoldBetweenNouns() = result of "count({}$a.hypernym$b[$a.senses.pos = `n` and $b.senses.pos = `n`])" should equal ("73\n")
 
   // Q56
-  @Test def countTheNumberOfEdgesPerSynset() = result of "count({}._[issynset(#)])/count({})" should startWith ("0.929")
+  @Test def countTheNumberOfEdgesPerSynset() = result of "count({}._[is_synset(#)])/count({})" should startWith ("0.929")
 
   // Q56a
-  @Test def countTheNumberOfEdgesPerNounSynset() = result of "count({}[pos = `n`]._[issynset(#)])/count({}[pos = `n`])" should startWith ("0.989")
+  @Test def countTheNumberOfEdgesPerNounSynset() = result of "count({}[pos = `n`]._[is_synset(#)])/count({}[pos = `n`])" should startWith ("0.989")
 
   // Q57: count the number of senses per synset/word
   // Q57.1: synset
@@ -252,7 +252,7 @@ class FunctionalTestSuite extends WQueryTestSuite {
   @Test def countTheNumberOfSynsetsThatDoNotHaveHypernyms() = result of "count({}[empty(hypernym)])" should equal ("26\n")
 
   // Q59
-  @Test def countTheNumberOfSemanticRelationsSuccessorsPerNonLeafSynset() = result of "count({}[not empty(^hypernym)]._[issynset(#)])/count({}[not empty(^hypernym)])" should startWith ("1.176")
+  @Test def countTheNumberOfSemanticRelationsSuccessorsPerNonLeafSynset() = result of "count({}[not empty(^hypernym)]._[is_synset(#)])/count({}[not empty(^hypernym)])" should startWith ("1.176")
 
   // Q60
   @Test def countTheNumberOfSynsetsPerHypernymyTree() = result of "count({})/count({}[empty(hypernym)])" should startWith ("3.807")
