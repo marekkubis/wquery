@@ -197,13 +197,14 @@ case class ArcExpr(left: ArcExprArgument, right: Option[(ArcExprArgument, Option
         Some(ArcRelationalPattern(ArcPattern(None, ArcPatternArgument.anyFor(nodeType.map(NodeType.fromName(_))), ArcPatternArgument.Any)))
       case (arg, None) =>
         if (arg.nodeType.isEmpty) {
-          wordNet.getRelation(arg.name, Map((Relation.Src, contextTypes)))
-            .map { relation =>
-              val sourcePattern = ArcPatternArgument(Relation.Src, Some(relation.sourceType))
-              val destinationPattern = if (relation.isTraversable) ArcPatternArgument(Relation.Dst, relation.destinationType) else sourcePattern
+          val relations = wordNet.getRelations(arg.name, Map((Relation.Src, contextTypes)))
 
-              ArcRelationalPattern(ArcPattern(Some(relation), sourcePattern, destinationPattern))
-            }
+          relations.nonEmpty.option {
+            val sourcePattern = ArcPatternArgument(Relation.Src, Some(relations.head.sourceType))
+            val destinationPattern = if (relations.head.isTraversable) ArcPatternArgument(Relation.Dst, relations.head.destinationType) else sourcePattern
+
+            ArcRelationalPattern(ArcPattern(Some(relations), sourcePattern, destinationPattern))
+          }
         } else {
           throw new WQueryStaticCheckException("Relation name " + arg.name + " cannot be followed by type specifier &")
         }
@@ -232,9 +233,10 @@ case class ArcExpr(left: ArcExprArgument, right: Option[(ArcExprArgument, Option
       Some(ArcRelationalPattern(ArcPattern(None, ArcPatternArgument(sourceName, left.nodeType),
         rest.some(arg => ArcPatternArgument(arg.name, arg.nodeType)).none(emptyDestination))))
     } else {
-      wordNet.getRelation(right.name, ((sourceName, sourceTypes) :: rest.map(_.nodeDescription).toList).toMap)
-        .map(relation => ArcRelationalPattern(ArcPattern(Some(relation), ArcPatternArgument(sourceName, Some(relation.sourceType)),
-        rest.some(arg => ArcPatternArgument(arg.name, relation.demandArgument(arg.name).nodeType.some)).none(emptyDestination))))
+      val relations = wordNet.getRelations(right.name, ((sourceName, sourceTypes) :: rest.map(_.nodeDescription).toList).toMap)
+
+      relations.nonEmpty.option(ArcRelationalPattern(ArcPattern(Some(relations), ArcPatternArgument(sourceName, Some(relations.head.sourceType)),
+        rest.some(arg => ArcPatternArgument(arg.name, relations.head.demandArgument(arg.name).nodeType.some)).none(emptyDestination))))
     }
   }
 
@@ -245,9 +247,10 @@ case class ArcExpr(left: ArcExprArgument, right: Option[(ArcExprArgument, Option
       Some(ArcRelationalPattern(ArcPattern(None, ArcPatternArgument(Relation.Src, None),
         ArcPatternArgument(right.name, right.nodeType))))
     } else {
-      wordNet.getRelation(relationName, Map((Relation.Src, contextTypes), right.nodeDescription))
-        .map(relation => ArcRelationalPattern(ArcPattern(Some(relation), ArcPatternArgument(Relation.Src, Some(relation.sourceType)),
-          ArcPatternArgument(right.name, relation.demandArgument(right.name).nodeType.some))))
+      val relations = wordNet.getRelations(relationName, Map((Relation.Src, contextTypes), right.nodeDescription))
+
+      relations.nonEmpty.option(ArcRelationalPattern(ArcPattern(Some(relations), ArcPatternArgument(Relation.Src, Some(relations.head.sourceType)),
+        ArcPatternArgument(right.name, relations.head.demandArgument(right.name).nodeType.some))))
     }
   }
 
@@ -422,8 +425,8 @@ case class ArcByArcExprReq(expr: ArcExpr) extends EvaluableExpr {
     val relationalPattern = expr.evaluationPattern(wordNet, DataType.all)
     val pattern = relationalPattern.pattern
 
-    pattern.relation.some { relation =>
-      ConstantOp(DataSet(List(List(Arc(pattern.relation.get, pattern.source.name, pattern.destination.name)))))
+    pattern.relations.some { relations =>
+      ConstantOp(DataSet.fromList(relations.map(relation => Arc(relation, pattern.source.name, pattern.destination.name))))
     }.none {
       val toMap = pattern.destination match {
         case ArcPatternArgument.Any =>

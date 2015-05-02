@@ -81,7 +81,7 @@ trait WPathParsers extends WLanguageParsers {
     | arc_expr_arg ~ opt("^" ~> arc_expr_arg ~ opt("^" ~> arc_expr_arg)) ^^ { case l~r => ArcExpr(l, r.map{ case a~b => (a, b) })}
   )
 
-  def arc_expr_arg = notQuotedString ~ opt(("&" ~> notQuotedString)) ^^ { case name~dtype => ArcExprArgument(name, dtype) }
+  def arc_expr_arg = notQuotedString ~ opt("&" ~> notQuotedString) ^^ { case name~dtype => ArcExprArgument(name, dtype) }
 
   def quantifier = (
     "+" ^^^ { Quantifier(1, None) }

@@ -153,7 +153,7 @@ case class QuantifiedRelationPattern(pattern: RelationalPattern, quantifier: Qua
 
 case class ArcRelationalPattern(pattern: ArcPattern) extends RelationalPattern {
   def extend(wordNet: WordNet, bindings: Bindings, extensionSet: ExtensionSet) = {
-    pattern.relation.some(wordNet.extend(extensionSet, _, pattern.source.name, pattern.destination.name))
+    pattern.relations.some(wordNet.extend(extensionSet, _, pattern.source.name, pattern.destination.name))
       .none(wordNet.extend(extensionSet, (pattern.source.name, pattern.source.nodeType),
         (pattern.destination.name, pattern.destination.nodeType)))
   }
@@ -189,7 +189,7 @@ case class ArcRelationalPattern(pattern: ArcPattern) extends RelationalPattern {
   override def toString = pattern.toString
 
   private def demandArgumentType(argument: ArcPatternArgument) = {
-    pattern.relation.some(rel => Set(rel.demandArgument(argument.name).nodeType))
+    pattern.relations.some(_.map(rel => rel.demandArgument(argument.name).nodeType).toSet)
       .none(argument.nodeType.some(Set(_)).none(NodeType.all)).asInstanceOf[Set[DataType]]
   }
 

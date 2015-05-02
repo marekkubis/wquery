@@ -146,13 +146,15 @@ class InMemoryWordNet extends WordNet {
     buffer.toExtensionSet
   }
 
-  def extend(extensionSet: ExtensionSet, relation: Relation, through: String, to: String) = {
+  def extend(extensionSet: ExtensionSet, relations: List[Relation], through: String, to: String) = {
     val buffer = new ExtensionSetBuffer(extensionSet)
 
-    if (aliasMap.contains(relation))
-      extendWithAlias(extensionSet, relation, through, to, buffer)
-    else
-      buffer.append(extendWithRelationTuples(extensionSet, relation, through, to))
+    for (relation <- relations) {
+      if (aliasMap.contains(relation))
+        extendWithAlias(extensionSet, relation, through, to, buffer)
+      else
+        buffer.append(extendWithRelationTuples(extensionSet, relation, through, to))
+    }
 
     buffer.toExtensionSet
   }

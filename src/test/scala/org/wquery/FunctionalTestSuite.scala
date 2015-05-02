@@ -96,8 +96,8 @@ class FunctionalTestSuite extends WQueryTestSuite {
   @Test def checkIfAnEnglishSynsetWithAGivenIdentifierHasAGloss() = result of "[not empty({}[id = `100007846` and lang=`en`].desc)]" should equal ("true\n")
 
   // Q22
-  // TODO: former & syntax to be replaced by isstring()
-  //  @Test def findWordSensesAGlossAndAllEdgesOfSemanticRelationsOfAnEnglishSynsetWithAGivenIdentifier() = result of "{}[id = `100007846` and lang=`en`].senses|desc|_&synset|^_&synset" should equal ("{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n } desc a human being; \"there was too much for one person to do\"\n{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n } hypernym { organism:1:n being:2:n }\n{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n } hypernym { causal agent:1:n cause:4:n causal agency:1:n }\n{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n } member_holonym { people:1:n }\n{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n } ^partial_holonym { human body:1:n physical body:1:n material body:1:n soma:3:n build:2:n figure:2:n physique:2:n anatomy:2:n shape:3:n bod:1:n chassis:1:n frame:3:n form:5:n flesh:2:n }\n{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n } senses individual:1:n\n{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n } senses mortal:1:n\n{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n } senses person:1:n\n{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n } senses somebody:1:n\n{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n } senses someone:1:n\n{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n } senses soul:2:n\n{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n } ^similar { person:2:n }\n{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n } similar { person:2:n }\n")
+
+  @Test def findWordSensesAGlossAndAllEdgesOfSemanticRelationsOfAnEnglishSynsetWithAGivenIdentifier() = result of "{}[id = `100007846` and lang=`en`].senses|desc|_^dst&synset|dst^_^src&synset" should equal ("{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n } desc a human being; \"there was too much for one person to do\"\n{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n } hypernym { organism:1:n being:2:n }\n{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n } hypernym { causal agent:1:n cause:4:n causal agency:1:n }\n{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n } member_holonym { people:1:n }\n{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n } ^partial_holonym { human body:1:n physical body:1:n material body:1:n soma:3:n build:2:n figure:2:n physique:2:n anatomy:2:n shape:3:n bod:1:n chassis:1:n frame:3:n form:5:n flesh:2:n }\n{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n } senses individual:1:n\n{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n } senses mortal:1:n\n{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n } senses person:1:n\n{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n } senses somebody:1:n\n{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n } senses someone:1:n\n{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n } senses soul:2:n\n{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n } ^similar { person:2:n }\n{ person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n } similar { person:2:n }\n")
 
   //
   // Use Case II: Data Validation
@@ -222,8 +222,7 @@ class FunctionalTestSuite extends WQueryTestSuite {
   @Test def countSemanticRelationEdges() = result of "count({}._[issynset(#)])" should equal ("92\n")
 
   // Q54a
-  // TODO: former & syntax to be replaced by isstring()
-  //  @Test def countEdgesOfSemanticRelationsThatHoldBetweenNounSynsets() = result of "count({}$a._&synset$b[$a.senses.pos = `n` and $b.senses.pos = `n`])" should equal ("87\n")
+    @Test def countEdgesOfSemanticRelationsThatHoldBetweenNounSynsets() = result of "count({}$a._^dst&synset$b[$a.senses.pos = `n` and $b.senses.pos = `n`])" should equal ("87\n")
 
   // Q55
   @Test def countHypernymyEdges() = result of "count({}.hypernym)" should equal ("77\n")
@@ -298,8 +297,7 @@ class FunctionalTestSuite extends WQueryTestSuite {
     @Test def findMaximalDistanceFromTheSynsetThatContainsAGivenSenseToTheLeavesOfHypernymyTree() = result of "size(longest(({car:1:n}.^hypernym*)$a[empty($a.^hypernym)]))" should equal ("3\n")
 
   // Q70
-  // TODO: former & syntax to be replaced by isstring()
-  //  @Test def determineClusteringCoefficientForTheSynsetThatContainsAGivenSense() = result of "(count(({auto:2:n}._&synset|^_&synset<#>)._$a[$a in {auto:2:n}._&synset|^_&synset])$kna,count({auto:2:n}._&synset|^_&synset)$ka)<$kna/($ka*($ka - 1))>" should startWith ("0.083")
+    @Test def determineClusteringCoefficientForTheSynsetThatContainsAGivenSense() = result of "(count(({auto:2:n}._^dst&synset|dst^_^src&synset<#>)._$a[$a in {auto:2:n}._^dst&synset|dst^_^src&synset])$kna,count({auto:2:n}._^dst&synset|dst^_^src&synset)$ka)<$kna/($ka*($ka - 1))>" should startWith ("0.083")
 
   // Q71: How many paths of a given length can be constructed from arbitrary chosen semantic relations
   // Q71.1: 3-elemnt paths build from hyponyms followed by meronyms meronyms

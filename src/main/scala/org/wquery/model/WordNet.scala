@@ -8,9 +8,13 @@ trait WordNet {
   class Schema {
     def relations = WordNet.this.relations
 
-    def getRelation(name: String, arguments: Map[String, Set[DataType]], includingMeta: Boolean = false) = {
+    def getRelations(name: String, arguments: Map[String, Set[DataType]], includingMeta: Boolean = false) = {
       val relations = WordNet.this.relations ++ (includingMeta ?? WordNet.Meta.relations) ++ WordNet.this.aliases
-      relations.find(r => relationMatchesNameAndArguments(r, name, arguments))
+      relations.filter(r => relationMatchesNameAndArguments(r, name, arguments))
+    }
+
+    def getRelation(name: String, arguments: Map[String, Set[DataType]], includingMeta: Boolean = false) = {
+      getRelations(name, arguments, includingMeta).headOption
     }
 
     private def relationMatchesNameAndArguments(relation: Relation, name: String, arguments: Map[String, Set[DataType]]) = {
@@ -37,7 +41,7 @@ trait WordNet {
 
   def fetch(relation: Relation, from: List[(String, List[Any])], to: List[String], withArcs: Boolean = false): DataSet
 
-  def extend(extensionSet: ExtensionSet, relation: Relation, through: String, to: String): ExtendedExtensionSet
+  def extend(extensionSet: ExtensionSet, relations: List[Relation], through: String, to: String): ExtendedExtensionSet
 
   def extend(extensionSet: ExtensionSet, through: (String, Option[NodeType]), to: (String, Option[NodeType])): ExtendedExtensionSet
 
