@@ -77,8 +77,8 @@ trait WPathParsers extends WLanguageParsers {
   )
 
   def arc_expr = (
-    ("^" ~> notQuotedString) ^^ { id => ArcExpr(List(Relation.Dst, id, Relation.Src).map(ArcExprArgument(_, None))) } // syntactic sugar
-    | rep1sep(arc_expr_arg, "^") ^^ { ArcExpr(_) }
+    ("^" ~> notQuotedString) ^^ { id => ArcExpr(ArcExprArgument(Relation.Dst, None), Some(ArcExprArgument(id, None)), Some(ArcExprArgument(Relation.Src, None))) } // syntactic sugar
+    | arc_expr_arg ~ opt("^" ~> arc_expr_arg) ~ opt("^" ~> arc_expr_arg) ^^ { case l~c~r => ArcExpr(l, c, r) }
   )
 
   def arc_expr_arg = notQuotedString ~ opt(("&" ~> notQuotedString)) ^^ { case name~dtype => ArcExprArgument(name, dtype) }

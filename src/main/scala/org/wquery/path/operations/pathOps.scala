@@ -508,10 +508,10 @@ case class SynsetFetchOp(op: AlgebraOp) extends AlgebraOp {
      val patterns = contextTypes.map{ contextType => (contextType: @unchecked) match {
        case StringType =>
          ArcRelationalPattern(ArcPattern(Some(WordNet.WordFormToSynsets), ArcPatternArgument(Relation.Src, Some(WordNet.WordFormToSynsets.sourceType)),
-           List(ArcPatternArgument(Relation.Dst, WordNet.WordFormToSynsets.destinationType))))
+           ArcPatternArgument(Relation.Dst, WordNet.WordFormToSynsets.destinationType)))
        case SenseType =>
          ArcRelationalPattern(ArcPattern(Some(WordNet.SenseToSynset), ArcPatternArgument(Relation.Src, Some(WordNet.SenseToSynset.sourceType)),
-           List(ArcPatternArgument(Relation.Dst, WordNet.SenseToSynset.destinationType))))
+           ArcPatternArgument(Relation.Dst, WordNet.SenseToSynset.destinationType)))
      }}.toList
 
      val projectedVariable = StepVariable("__p")

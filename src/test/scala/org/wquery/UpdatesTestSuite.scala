@@ -52,7 +52,7 @@ class UpdatesTestSuite extends WQueryTestSuite {
     val wupdate = WQueryTestSuiteRuntime.newWUpdate
 
     result(wupdate) of "update possyms += `z`" should equal ("(no result)\n")
-    result(wupdate) of "possyms" should equal ("a\nn\ns\nv\nz\n")
+    result(wupdate) of "!possyms" should equal ("a\nn\ns\nv\nz\n")
   }
 
   @Test def testAddRelations() = {
@@ -261,7 +261,7 @@ class UpdatesTestSuite extends WQueryTestSuite {
     val wupdate = WQueryTestSuiteRuntime.newWUpdate
 
     result(wupdate) of "update possyms := `a` union `n` union `v` union `e`" should equal ("(no result)\n")
-    result(wupdate) of "possyms" should equal ("a\ne\nn\nv\n")
+    result(wupdate) of "!possyms" should equal ("a\ne\nn\nv\n")
   }
 
   @Test def testSetWords() = {

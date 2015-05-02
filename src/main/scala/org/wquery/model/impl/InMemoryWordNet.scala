@@ -132,23 +132,21 @@ class InMemoryWordNet extends WordNet {
   }
 
   def extend(extensionSet: ExtensionSet, through: (String, Option[NodeType]),
-             to: List[(String, Option[NodeType])]): ExtendedExtensionSet = {
+             to: (String, Option[NodeType])): ExtendedExtensionSet = {
     val buffer = new ExtensionSetBuffer(extensionSet)
-    val toMap = to.toMap
 
     for (relation <- relations if relation.isTraversable;
          source <- relation.argumentNames if ((through._1 == Relation.AnyName && source == Relation.Src) || through._1 == source) &&
             through._2.some(_ == relation.demandArgument(source).nodeType).none(true);
-         destination <- relation.argumentNames if (toMap.isEmpty && destination == Relation.Dst) ||
-            toMap.get(destination)
-              .some(nodeTypeOption => nodeTypeOption.some(_ == relation.demandArgument(destination).nodeType).none(true)).none(false)
+         destination <- relation.argumentNames if
+              to._2.some(_ == relation.demandArgument(destination).nodeType).none(true)
          if source != destination)
-      buffer.append(extendWithRelationTuples(extensionSet, relation, source, List(destination)))
+      buffer.append(extendWithRelationTuples(extensionSet, relation, source, destination))
 
     buffer.toExtensionSet
   }
 
-  def extend(extensionSet: ExtensionSet, relation: Relation, through: String, to: List[String]) = {
+  def extend(extensionSet: ExtensionSet, relation: Relation, through: String, to: String) = {
     val buffer = new ExtensionSetBuffer(extensionSet)
 
     if (aliasMap.contains(relation))
@@ -159,14 +157,14 @@ class InMemoryWordNet extends WordNet {
     buffer.toExtensionSet
   }
 
-  private def extendWithRelationTuples(extensionSet: ExtensionSet, relation: Relation, through: String, to: List[String]) = {
+  private def extendWithRelationTuples(extensionSet: ExtensionSet, relation: Relation, through: String, to: String) = {
     relation.demandArgument(through)
-    to.foreach(relation.demandArgument)
+    relation.demandArgument(to)
 
     extendWithRelationTuplesForward(extensionSet, relation, through, to)
   }
 
-  private def extendWithRelationTuplesForward(extensionSet: ExtensionSet, relation: Relation, through: String, to: List[String]) = atomic { implicit txn =>
+  private def extendWithRelationTuplesForward(extensionSet: ExtensionSet, relation: Relation, through: String, to: String) = atomic { implicit txn =>
     val relationSuccessors = store.successors(relation)
     val builder = new ExtensionSetBuilder(extensionSet)
 
@@ -176,9 +174,9 @@ class InMemoryWordNet extends WordNet {
       for (relSuccs <- relationSuccessors.get((through, source)); succs <- relSuccs) {
         val extensionBuffer = new ListBuffer[Any]
 
-        for(destination <- to if (succs.contains(destination))) {
-          extensionBuffer.append(Arc(relation, through, destination))
-          extensionBuffer.append(succs(destination))
+        if (succs.contains(to)) {
+          extensionBuffer.append(Arc(relation, through, to))
+          extensionBuffer.append(succs(to))
         }
 
         val extension = extensionBuffer.toList
@@ -192,22 +190,18 @@ class InMemoryWordNet extends WordNet {
   }
 
   private def extendWithAlias(extensionSet: ExtensionSet, relation: Relation,
-                                 through: String, to: List[String], buffer: ExtensionSetBuffer) {
-    if (to.size == 1) {
+                                 through: String, to: String, buffer: ExtensionSetBuffer) {
     val arcs = aliasMap(relation)
 
-      (through, to.head) match {
-        case (Relation.Src, Relation.Dst) =>
-          for (arc <- arcs)
-            buffer.append(extendWithRelationTuples(extensionSet, arc.relation, arc.from, List(arc.to)))
-        case (Relation.Dst, Relation.Src) =>
-          for (arc <- arcs)
-            buffer.append(extendWithRelationTuples(extensionSet, arc.relation, arc.to, List(arc.from)))
-        case _ =>
-          throw new WQueryEvaluationException("One cannot traverse the alias " + relation + " using custom source or destination arguments")
-    }
-    } else {
-      throw new WQueryEvaluationException("One cannot traverse the alias " + relation + " to multiple destinations")
+    (through, to) match {
+      case (Relation.Src, Relation.Dst) =>
+        for (arc <- arcs)
+          buffer.append(extendWithRelationTuples(extensionSet, arc.relation, arc.from, arc.to))
+      case (Relation.Dst, Relation.Src) =>
+        for (arc <- arcs)
+          buffer.append(extendWithRelationTuples(extensionSet, arc.relation, arc.to, arc.from))
+      case _ =>
+        throw new WQueryEvaluationException("One cannot traverse the alias " + relation + " using custom source or destination arguments")
     }
   }
 
