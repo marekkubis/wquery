@@ -158,7 +158,7 @@ object WordNet {
   }
 
   val SynsetSet = Relation.unary("synsets", SynsetType)
-  val SenseSet = Relation.unary("senses", SenseType)
+  val SenseSet = Relation.unary("wordsenses", SenseType)
   val WordSet = Relation.unary("words", StringType)
   val PosSet = Relation.unary("possyms", POSType)
   val dataTypesRelations = Map[DataType, Relation](SynsetType -> SynsetSet, SenseType -> SenseSet, StringType -> WordSet, POSType -> PosSet)

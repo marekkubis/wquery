@@ -27,7 +27,7 @@ class UpdatesTestSuite extends WQueryTestSuite {
   @Test def testAddSensesOneSense() = {
     val wupdate = WQueryTestSuiteRuntime.newWUpdate
 
-    result(wupdate) of "update senses += newsense:1:n" should equal ("(no result)\n")
+    result(wupdate) of "update wordsenses += newsense:1:n" should equal ("(no result)\n")
     result(wupdate) of "newsense:1:n" should equal ("newsense:1:n\n")
     result(wupdate) of "{newsense:1:n}" should equal ("{ newsense:1:n }\n")
   }
@@ -35,7 +35,7 @@ class UpdatesTestSuite extends WQueryTestSuite {
   @Test def testAddSensesMultipleSenses() = {
     val wupdate = WQueryTestSuiteRuntime.newWUpdate
 
-    result(wupdate) of "do update senses += newsense:2:n union newsense:3:n update {newsense:2:n} desc := `d1` update {newsense:3:n} desc := `d2` end" should equal ("(no result)\n")
+    result(wupdate) of "do update wordsenses += newsense:2:n union newsense:3:n update {newsense:2:n} desc := `d1` update {newsense:3:n} desc := `d2` end" should equal ("(no result)\n")
     result(wupdate) of "{newsense:2:n}.desc" should equal ("{ newsense:2:n } desc d1\n")
     result(wupdate) of "{newsense:3:n}.desc" should equal ("{ newsense:3:n } desc d2\n")
   }
@@ -112,7 +112,7 @@ class UpdatesTestSuite extends WQueryTestSuite {
   @Test def testRemoveSense() = {
     val wupdate = WQueryTestSuiteRuntime.newWUpdate
 
-    result(wupdate) of "update senses -= car:1:n" should equal ("(no result)\n")
+    result(wupdate) of "update wordsenses -= car:1:n" should equal ("(no result)\n")
     result(wupdate) of "car:1:n" should equal ("(no result)\n")
     result(wupdate) of "{car:1:n}" should equal ("(no result)\n")
     result(wupdate) of "car.senses" should equal ("car senses car:2:n\ncar senses car:3:n\ncar senses car:4:n\ncar senses car:5:n\n")
@@ -276,7 +276,7 @@ class UpdatesTestSuite extends WQueryTestSuite {
     val wupdate = WQueryTestSuiteRuntime.newWUpdate
 
     result(wupdate) of "set:2:v" should equal ("set:2:v\n")
-    result(wupdate) of "update senses := ::$_a[$_a != set:2:v]" should equal ("(no result)\n")
+    result(wupdate) of "update wordsenses := ::$_a[$_a != set:2:v]" should equal ("(no result)\n")
     result(wupdate) of "set:2:v" should equal ("(no result)\n")
   }
 
