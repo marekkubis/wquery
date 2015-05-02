@@ -190,12 +190,12 @@ case class QuantifiedRelationExpr(expr: RelationalExpr, quantifier: Quantifier) 
   }
 }
 
-case class ArcExpr(left: ArcExprArgument, center: Option[ArcExprArgument], right: Option[ArcExprArgument]) extends RelationalExpr {
+case class ArcExpr(left: ArcExprArgument, right: Option[(ArcExprArgument, Option[ArcExprArgument])]) extends RelationalExpr {
   def evaluationPattern(wordNet: WordNet#Schema, contextTypes: Set[DataType]) = {
-    ((left, center, right) match {
-      case (ArcExprArgument("_", nodeType), None, None) =>
+    ((left, right) match {
+      case (ArcExprArgument("_", nodeType), None) =>
         Some(ArcRelationalPattern(ArcPattern(None, ArcPatternArgument.anyFor(nodeType.map(NodeType.fromName(_))), ArcPatternArgument.Any)))
-      case (arg, None, None) =>
+      case (arg, None) =>
         if (arg.nodeType.isEmpty) {
           wordNet.getRelation(arg.name, Map((Relation.Src, contextTypes)))
             .map { relation =>
@@ -207,7 +207,7 @@ case class ArcExpr(left: ArcExprArgument, center: Option[ArcExprArgument], right
         } else {
           throw new WQueryStaticCheckException("Relation name " + arg.name + " cannot be followed by type specifier &")
         }
-      case (left, Some(right), rest) =>
+      case (left, Some((right, rest))) =>
         if (left.nodeType.isDefined && right.nodeType.isDefined) {
           throw new WQueryStaticCheckException("No relation name found in arc expression " + toString)
         } else if (left.nodeType.isDefined) {
@@ -251,7 +251,7 @@ case class ArcExpr(left: ArcExprArgument, center: Option[ArcExprArgument], right
     }
   }
 
-  override def toString = left + ~center.map("^" + _) + ~right.map("^" + _)
+  override def toString = left + ~right.map{ case (a, b) => "^" + a + ~b.map("^" + _)}
 }
 
 case class ArcExprArgument(name: String, nodeTypeName: Option[String]) extends Expr {
@@ -349,7 +349,7 @@ case class SenseByWordFormAndSenseNumberAndPosReq(wordForm: String, senseNumber:
 case class ContextByRelationalExprReq(expr: RelationalExpr) extends EvaluableExpr {
   def evaluationPlan(wordNet: WordNet#Schema, bindings: BindingsSchema, context: Context) = {
     expr match {
-      case ArcExpr(ArcExprArgument(id, None), None, None) =>
+      case ArcExpr(ArcExprArgument(id, None), None) =>
         val sourceTypes = bindings.lookupStepVariableType(StepVariable.ContextVariable.name)|DataType.all
 
         if (wordNet.containsRelation(id, Map((Relation.Src, sourceTypes))) || id === Relation.AnyName) {
