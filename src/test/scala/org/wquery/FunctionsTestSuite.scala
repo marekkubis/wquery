@@ -36,6 +36,10 @@ class FunctionsTestSuite extends WQueryTestSuite {
 
   @Test def testEmptyTrue() = result of "empty(1 except 1)" should equal ("true\n")
 
+  @Test def testNAFalse() = result of "na(1)" should equal ("1\n")
+
+  @Test def testNATrue() = result of "na(zxcvbnm)" should equal ("NA\n")
+
   // scalars
 
   @Test def testAbsInt() = result of "abs(-1)" should equal ("1\n")    
@@ -136,32 +140,32 @@ class FunctionsTestSuite extends WQueryTestSuite {
 
   // is functions
 
-  @Test def tesIsSynsetTrue() = result of "is_synset({car:1:n})" should equal ("true\n")
+  @Test def testIsSynsetTrue() = result of "is_synset({car:1:n})" should equal ("true\n")
 
-  @Test def tesIsSynsetFalse() = result of "is_synset(1)" should equal ("false\n")
+  @Test def testIsSynsetFalse() = result of "is_synset(1)" should equal ("false\n")
 
-  @Test def tesIsSenseTrue() = result of "is_sense(car:1:n)" should equal ("true\n")
+  @Test def testIsSenseTrue() = result of "is_sense(car:1:n)" should equal ("true\n")
 
-  @Test def tesIsSenseFalse() = result of "is_sense(1)" should equal ("false\n")
+  @Test def testIsSenseFalse() = result of "is_sense(1)" should equal ("false\n")
 
-  @Test def tesIsStringTrue() = result of "is_string(car)" should equal ("true\n")
+  @Test def testIsStringTrue() = result of "is_string(car)" should equal ("true\n")
 
-  @Test def tesIsStringFalse() = result of "is_string(1)" should equal ("false\n")
+  @Test def testIsStringFalse() = result of "is_string(1)" should equal ("false\n")
 
-  @Test def tesIsIntegerTrue() = result of "is_integer(1)" should equal ("true\n")
+  @Test def testIsIntegerTrue() = result of "is_integer(1)" should equal ("true\n")
 
-  @Test def tesIsIntegerFalse() = result of "is_integer(1.0)" should equal ("false\n")
+  @Test def testIsIntegerFalse() = result of "is_integer(1.0)" should equal ("false\n")
 
-  @Test def tesIsFloatTrue() = result of "is_float(1.0)" should equal ("true\n")
+  @Test def testIsFloatTrue() = result of "is_float(1.0)" should equal ("true\n")
 
-  @Test def tesIsFloatFalse() = result of "is_float(1)" should equal ("false\n")
+  @Test def testIsFloatFalse() = result of "is_float(1)" should equal ("false\n")
 
-  @Test def tesIsBooleanTrue() = result of "is_boolean(false)" should equal ("true\n")
+  @Test def testIsBooleanTrue() = result of "is_boolean(false)" should equal ("true\n")
 
-  @Test def tesIsBooleanFalse() = result of "is_boolean(1)" should equal ("false\n")
+  @Test def testIsBooleanFalse() = result of "is_boolean(1)" should equal ("false\n")
 
-  @Test def tesIsArcTrue() = result of "is_arc(\\hypernym)" should equal ("true\n")
+  @Test def testIsArcTrue() = result of "is_arc(\\hypernym)" should equal ("true\n")
 
-  @Test def tesIsArcFalse() = result of "is_arc(1)" should equal ("false\n")
+  @Test def testIsArcFalse() = result of "is_arc(1)" should equal ("false\n")
 
 }

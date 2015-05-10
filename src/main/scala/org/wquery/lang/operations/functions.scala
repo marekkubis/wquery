@@ -644,6 +644,26 @@ with ClearsBindingsPattern {
   def returnType(args: AlgebraOp) = Set(BooleanType)
 }
 
+object NAFunction extends DataSetFunction("na") with AcceptsAll
+with ClearsBindingsPattern {
+
+  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
+    if (dataSet.isEmpty) {
+       DataSet.fromValue("NA")
+    } else {
+      dataSet
+    }
+  }
+
+  override def minTupleSize(args: AlgebraOp) = Math.min(args.minTupleSize, 1)
+
+  override def maxTupleSize(args: AlgebraOp) = args.maxTupleSize.map(x => Math.max(x, 1))
+
+  override def leftType(args: AlgebraOp, pos: Int) = if (pos == 0) args.leftType(pos) union Set(StringType)  else args.leftType(pos)
+
+  override def rightType(args: AlgebraOp, pos: Int) =  if (pos == 0) args.rightType(pos) union Set(StringType)  else args.rightType(pos)
+}
+
 object RangeFunction extends DataSetFunction("range") with AcceptsTypes with ReturnsValueSet
  with ClearsBindingsPattern {
   def argumentTypes = List(Set(IntegerType), Set(IntegerType))
@@ -882,6 +902,7 @@ object Functions {
   registerFunction(IsFloatFunction)
   registerFunction(IsBooleanFunction)
   registerFunction(IsArcFunction)
+  registerFunction(NAFunction)
   registerFunction(RangeFunction)
   registerFunction(IntFunction)
   registerFunction(FloatFunction)
