@@ -3,7 +3,8 @@
 #   wprint
 #       Prints wordnet models in various formats.
 #
-DIR=`dirname $0`
-LIBS=`ls -1 $DIR/../lib/* | tr "\\n" ":"`
+SCRIPT_PATH=`readlink -f $0`
+SCRIPT_DIR=`dirname $SCRIPT_PATH`
+LIBS=`ls -1 $SCRIPT_DIR/../lib/* | tr "\\n" ":"`
 
 java $JAVA_OPTS -cp $LIBS org.wquery.printer.WPrintMain "$@"
