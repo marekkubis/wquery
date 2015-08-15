@@ -8,6 +8,7 @@ import java.util.IllegalFormatException
 import org.wquery.FormatFunctionException
 import org.wquery.lang._
 import org.wquery.model._
+import org.wquery.query.SetVariable
 
 import scala.collection.mutable.ListBuffer
 import scalaz.Scalaz._
@@ -857,6 +858,28 @@ abstract class JavaMethod(override val name: String, method: Method) extends Fun
 }
 
 // scalastyle:off multiple.string.literals
+
+class WLanguageFunction(override val name: String, op: AlgebraOp) extends Function(name) {
+  def evaluate(args: Option[AlgebraOp], wordNet: WordNet, bindings: Bindings, context: Context) = {
+    val argsBindings = Bindings()
+    val argsValues = args.some(_.evaluate(wordNet, bindings, context)).none(DataSet.empty)
+
+    argsBindings.bindSetVariable(SetVariable.FunctionArgumentsVariable, argsValues)
+    op.evaluate(wordNet, argsBindings, context)
+  }
+
+  override def accepts(args: Option[AlgebraOp]) = true
+
+  override def leftType(args: Option[AlgebraOp], pos: Int) = op.leftType(pos)
+
+  override def rightType(args: Option[AlgebraOp], pos: Int) = op.rightType(pos)
+
+  override def minTupleSize(args: Option[AlgebraOp]) = op.minTupleSize
+
+  override def maxTupleSize(args: Option[AlgebraOp]) = op.maxTupleSize
+
+  override def bindingsPattern(args: Option[AlgebraOp]) = BindingsPattern()
+}
 
 object Functions {
   private val functions = scala.collection.mutable.Map[String, List[Function]]()

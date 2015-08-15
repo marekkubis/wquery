@@ -3,13 +3,14 @@
 
 package org.wquery.query.operations
 
-import scalaz._
-import Scalaz._
-import org.wquery.model._
 import org.wquery.lang._
 import org.wquery.lang.operations._
+import org.wquery.model._
 import org.wquery.query._
 import org.wquery.utils.IntOptionW._
+
+import scalaz.Scalaz._
+import scalaz._
 
 sealed abstract class QueryOp extends AlgebraOp
 
@@ -161,3 +162,41 @@ case class WhileDoOp(conditionOp: AlgebraOp, iteratedOp: AlgebraOp) extends Quer
 
 }
 
+case class FunctionDefinitionOp(name: String, op: AlgebraOp) extends QueryOp {
+  def evaluate(wordNet: WordNet, bindings: Bindings, context: Context) = {
+    Functions.registerFunction(new WLanguageFunction(name, op))
+    DataSet.empty
+  }
+
+  def leftType(pos: Int) = Set.empty
+
+  def rightType(pos: Int) = Set.empty
+
+  val minTupleSize = 0
+
+  val maxTupleSize = some(0)
+
+  def bindingsPattern = BindingsPattern()
+
+  val referencedVariables = op.referencedVariables
+
+}
+
+case class FunctionDefinitionArgumentsRefOp() extends QueryOp {
+  def evaluate(wordNet: WordNet, bindings: Bindings, context: Context) = {
+    DataSet.empty
+  }
+
+  def leftType(pos: Int) = DataType.all
+
+  def rightType(pos: Int) = DataType.all
+
+  val minTupleSize = 0
+
+  val maxTupleSize = None
+
+  def bindingsPattern = BindingsPattern()
+
+  val referencedVariables = Set.empty[Variable]
+
+}

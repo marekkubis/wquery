@@ -1,8 +1,8 @@
 package org.wquery.query.parsers
 
+import org.wquery.lang.exprs._
 import org.wquery.path.parsers.WPathParsers
 import org.wquery.query.exprs._
-import org.wquery.lang.exprs._
 
 trait WQueryParsers extends WPathParsers {
 
@@ -22,6 +22,7 @@ trait WQueryParsers extends WPathParsers {
     | assignment
     | ifelse
     | whiledo
+    | function
   )
 
   def iterator = "from" ~> multipath_expr ~ imp_expr ^^ { case mexpr~iexpr => IteratorExpr(mexpr, iexpr) }
@@ -35,5 +36,7 @@ trait WQueryParsers extends WPathParsers {
   }
 
   def whiledo = "while" ~> multipath_expr ~ imp_expr ^^ { case cexpr~iexpr => WhileDoExpr(cexpr, iexpr) }
+
+  def function = "function" ~> notQuotedString ~ imp_expr ^^ { case cexpr~iexpr => FunctionDefinitionExpr(cexpr, iexpr) }
 
 }

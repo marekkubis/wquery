@@ -1,11 +1,11 @@
 package org.wquery.query.exprs
 
-import org.wquery.query.operations._
-import org.wquery.model._
 import org.wquery.lang._
-import org.wquery.lang.operations._
 import org.wquery.lang.exprs._
+import org.wquery.lang.operations._
+import org.wquery.model._
 import org.wquery.query._
+import org.wquery.query.operations._
 
 case class EmissionExpr(expr: EvaluableExpr) extends EvaluableExpr {
   def evaluationPlan(wordNet: WordNet#Schema, bindings: BindingsSchema, context: Context) = EmitOp(expr.evaluationPlan(wordNet, bindings, context))
@@ -34,6 +34,13 @@ case class BlockExpr(exprs: List[EvaluableExpr]) extends EvaluableExpr {
 case class WhileDoExpr(conditionExpr: EvaluableExpr, iteratedExpr: EvaluableExpr) extends EvaluableExpr {
   def evaluationPlan(wordNet: WordNet#Schema, bindings: BindingsSchema, context: Context)
     = WhileDoOp(conditionExpr.evaluationPlan(wordNet, bindings, context), iteratedExpr.evaluationPlan(wordNet, bindings, context))
+}
+
+case class FunctionDefinitionExpr(name: String, expr: EvaluableExpr) extends EvaluableExpr {
+  def evaluationPlan(wordNet: WordNet#Schema, bindings: BindingsSchema, context: Context) = {
+    bindings.bindSetVariableType(SetVariable.FunctionArgumentsVariable, FunctionDefinitionArgumentsRefOp())
+    FunctionDefinitionOp(name, expr.evaluationPlan(wordNet, bindings, context))
+  }
 }
 
 case class VariableAssignmentExpr(variable: SetVariable, expr: EvaluableExpr) extends EvaluableExpr {
