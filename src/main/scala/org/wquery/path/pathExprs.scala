@@ -48,7 +48,8 @@ case class BinaryArithmeticExpr(op: String, left: EvaluableExpr, right: Evaluabl
     val leftOp = left.evaluationPlan(wordNet, bindings, context)
     val rightOp = right.evaluationPlan(wordNet, bindings, context)
 
-    if (leftOp.rightType(0).subsetOf(DataType.numeric) && rightOp.rightType(0).subsetOf(DataType.numeric)) {
+    if (leftOp.rightType(0).any(t => t == IntegerType || t == FloatType)
+      && rightOp.rightType(0).any(t => t == IntegerType || t == FloatType)) {
       op match {
         case "+" =>
           AddOp(leftOp, rightOp)
@@ -73,7 +74,7 @@ case class MinusExpr(expr: EvaluableExpr) extends EvaluableExpr {
   def evaluationPlan(wordNet: WordNet#Schema, bindings: BindingsSchema, context: Context) = {
     val op = expr.evaluationPlan(wordNet, bindings, context)
 
-    if (op.rightType(0).subsetOf(DataType.numeric))
+    if (op.rightType(0).any(t => t == IntegerType || t == FloatType))
       MinusOp(op)
     else
       throw new WQueryEvaluationException("Operator '-' requires a path that ends with float or integer values")

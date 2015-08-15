@@ -21,4 +21,29 @@ class ImperativeExprsTestSuite extends WQueryTestSuite {
     result of "%p := {car}" should equal ("(no result)\n")
     result of "while [ count(%p) < 50 ] do %p := %p union {car} emit count(%p) end" should equal ("10\n15\n20\n25\n30\n35\n40\n45\n50\n")
   }
+
+  @Test def testFunctionIdentity() = {
+    result of "function identity emit %A" should equal ("(no result)\n")
+    result of "identity(1)" should equal ("1\n")
+  }
+
+  @Test def testFunctionDuplicateColumn() = {
+    result of "function dup_col emit %A,%A" should equal ("(no result)\n")
+    result of "dup_col(1)" should equal ("1 1\n")
+  }
+
+  @Test def testFunctionDuplicateRow() = {
+    result of "function dup_row do emit %A emit %A end" should equal ("(no result)\n")
+    result of "count(dup_row(1))" should equal ("2\n")
+  }
+
+  @Test def testFunctionDuplicateValue() = {
+    result of "function dup_val emit %A + %A" should equal ("(no result)\n")
+    result of "dup_val(2)" should equal ("4\n")
+  }
+
+  @Test def testFunctionGetHypernyms() = {
+    result of "function get_hypernyms emit %A.hypernym" should equal ("(no result)\n")
+    result of "get_hypernyms({car:1:n})" should equal ("{ car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n } hypernym { motor vehicle:1:n automotive vehicle:1:n }\n")
+  }
 }

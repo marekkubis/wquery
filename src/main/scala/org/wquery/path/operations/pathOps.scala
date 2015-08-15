@@ -1,5 +1,6 @@
 package org.wquery.path.operations
 
+import org.wquery.NonNumericValuesException
 import org.wquery.lang._
 import org.wquery.lang.operations._
 import org.wquery.model._
@@ -198,6 +199,8 @@ case class AddOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends BinaryArithmetic
       leftVal + rightVal
     case (leftVal: Int, rightVal: Int) =>
       leftVal + rightVal
+    case _ =>
+      throw new NonNumericValuesException("+")
   }
 }
 
@@ -211,6 +214,8 @@ case class SubOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends BinaryArithmetic
       leftVal - rightVal
     case (leftVal: Int, rightVal: Int) =>
       leftVal - rightVal
+    case _ =>
+      throw new NonNumericValuesException("-")
   }
 }
 
@@ -224,6 +229,8 @@ case class MulOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends BinaryArithmetic
       leftVal * rightVal
     case (leftVal: Int, rightVal: Int) =>
       leftVal * rightVal
+    case _ =>
+      throw new NonNumericValuesException("*")
   }
 }
 
@@ -237,6 +244,8 @@ case class DivOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends BinaryArithmetic
       leftVal / rightVal
     case (leftVal: Int, rightVal: Int) =>
       leftVal.toDouble / rightVal.toDouble
+    case _ =>
+      throw new NonNumericValuesException("/")
   }
 }
 
@@ -250,6 +259,8 @@ case class IntDivOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends BinaryArithme
       (leftVal - leftVal % rightVal) / rightVal
     case (leftVal: Int, rightVal: Int) =>
       leftVal / rightVal
+    case _ =>
+      throw new NonNumericValuesException("div")
   }
 }
 
@@ -263,6 +274,8 @@ case class ModOp(leftOp: AlgebraOp, rightOp: AlgebraOp) extends BinaryArithmetic
       leftVal % rightVal
     case (leftVal: Int, rightVal: Int) =>
       leftVal % rightVal
+    case _ =>
+      throw new NonNumericValuesException("mod")
   }
 }
 
@@ -271,6 +284,7 @@ case class MinusOp(op: AlgebraOp) extends PathOp {
     DataSet(op.evaluate(wordNet, bindings, context).paths.map(_.last).map {
         case x: Int => List(-x)
         case x: Double => List(-x)
+        case _ => throw new NonNumericValuesException("-")
     })
   }
 

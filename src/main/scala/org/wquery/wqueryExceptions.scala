@@ -32,6 +32,9 @@ class FoundReferenceToUnknownVariableWhileEvaluatingException(variable: Variable
 class FormatFunctionException(message: String)
   extends WQueryEvaluationException("Invalid format string: " + message)
 
+class NonNumericValuesException(message: String)
+  extends WQueryEvaluationException("'" + message + "' cannot be applied to non-numeric values")
+
 class WQueryModelException(message: String) extends WQueryException(message)
 
 class WQueryUpdateBreaksRelationPropertyException(val property: String, val relation: Relation, val argument: String = "")
