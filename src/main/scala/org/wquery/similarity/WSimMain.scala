@@ -60,31 +60,55 @@ object WSimMain {
       writer.write(emitter.emit(wupdate.execute(
         """
           |function min_path_length do
-          |   %l := %A$a$_<$a>
-          |   %r := %A$a<$a>
-          |   %p := shortest({%l}.hypernym*.^hypernym*.{%r})
+          |  %l := %A$a$_<$a>
+          |  %r := %A$a<$a>
+          |  %p := shortest({%l}.hypernym*.^hypernym*.{%r})
           |
-          |   if [ empty(%p) ] do
-          |     %ll := size(shortest({%l}.hypernym*[empty(hypernym)]))
-          |     %rl := size(shortest({%r}.hypernym*[empty(hypernym)]))
-          |     emit distinct(%ll + %rl + 1)
-          |   end else
-          |     emit distinct(size(%p))
+          |  if [ empty(%p) ] do
+          |    %ll := size(shortest({%l}.hypernym*[empty(hypernym)]))
+          |    %rl := size(shortest({%r}.hypernym*[empty(hypernym)]))
+          |    emit distinct(%ll + %rl + 1)
+          |  end else
+          |    emit distinct(size(%p))
           |end
         """.stripMargin)))
 
       writer.write(emitter.emit(wupdate.execute(
         """
           |function path_measure do
-          |   emit 1/min_path_length(%A)
+          |  emit 1/min_path_length(%A)
           |end
         """.stripMargin)))
 
       writer.write(emitter.emit(wupdate.execute(
         """
           |function lch_measure do
-          |   %d := distinct(size(longest({}[empty(hypernym)].^hypernym*))) + 1
-          |   emit max(-log(min_path_length(%A)/(2*%d)))
+          |  %d := distinct(size(longest({}[empty(hypernym)].^hypernym*))) + 1
+          |  emit max(-log(min_path_length(%A)/(2*%d)))
+          |end
+        """.stripMargin)))
+
+      writer.write(emitter.emit(wupdate.execute(
+        """
+          |function lcs do
+          |  %l := %A$a$_<$a>
+          |  %r := %A$a<$a>
+          |  %lh := last(%l.hypernym*)
+          |  %rh := last(%r.hypernym*)
+          |  emit maxby((%lh intersect %rh)$a<$a,size($a.hypernym*)>,2)$a$_<$a>
+          |end
+        """.stripMargin)))
+
+      writer.write(emitter.emit(wupdate.execute(
+        """
+          |function wup_measure do
+          |  %l := %A$a$_<$a>
+          |  %r := %A$a<$a>
+          |  %lh := last({%l}.hypernym*)
+          |  %dl := distinct(min(size({%l}.hypernym*[empty(hypernym)])))
+          |  %dr := distinct(min(size({%r}.hypernym*[empty(hypernym)])))
+          |  %lcs := lcs(%l,%r)
+          |  emit %dl,%dr,(lcs({%l},{%r})).hypernym
           |end
         """.stripMargin)))
 
