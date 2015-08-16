@@ -65,8 +65,8 @@ object WSimMain {
           |   %p := shortest({%l}.hypernym*.^hypernym*.{%r})
           |
           |   if [ empty(%p) ] do
-          |     %ll := min(size(shortest({%l}.hypernym*[empty(hypernym)])))
-          |     %rl := min(size(shortest({%r}.hypernym*[empty(hypernym)])))
+          |     %ll := size(shortest({%l}.hypernym*[empty(hypernym)]))
+          |     %rl := size(shortest({%r}.hypernym*[empty(hypernym)]))
           |     emit distinct(%ll + %rl + 1)
           |   end else
           |     emit distinct(size(%p))
@@ -77,6 +77,14 @@ object WSimMain {
         """
           |function path_measure do
           |   emit 1/min_path_length(%A)
+          |end
+        """.stripMargin)))
+
+      writer.write(emitter.emit(wupdate.execute(
+        """
+          |function lch_measure do
+          |   %d := distinct(size(longest({}[empty(hypernym)].^hypernym*))) + 1
+          |   emit max(-log(min_path_length(%A)/(2*%d)))
           |end
         """.stripMargin)))
 
