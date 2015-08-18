@@ -95,7 +95,8 @@ object WSimMain {
           |  %r := %A$a<$a>
           |  %lh := last(%l.hypernym*)
           |  %rh := last(%r.hypernym*)
-          |  emit maxby((%lh intersect %rh)$a<$a,size($a.hypernym*)>,2)$a$_<$a>
+          |  %m := maxby((%lh intersect %rh)$a<$a,size($a.hypernym*)>,2)
+          |  emit as_synset(distinct(%m$a$_<$a>))
           |end
         """.stripMargin)))
 
@@ -104,11 +105,10 @@ object WSimMain {
           |function wup_measure do
           |  %l := %A$a$_<$a>
           |  %r := %A$a<$a>
-          |  %lh := last({%l}.hypernym*)
-          |  %dl := distinct(min(size({%l}.hypernym*[empty(hypernym)])))
-          |  %dr := distinct(min(size({%r}.hypernym*[empty(hypernym)])))
-          |  %lcs := lcs(%l,%r)
-          |  emit %dl,%dr,(lcs({%l},{%r})).hypernym
+          |  %dl := distinct(min(size({%l}.hypernym*[empty(hypernym)]))) + 1
+          |  %dr := distinct(min(size({%r}.hypernym*[empty(hypernym)]))) + 1
+          |  %ds := distinct(min(size(lcs({%l},{%r}).hypernym*[empty(hypernym)]))) + 1
+          |  emit 2*%ds/(%dl + %dr)
           |end
         """.stripMargin)))
 
