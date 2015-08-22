@@ -165,6 +165,16 @@ object WSimMain {
           |end
         """.stripMargin)))
 
+      writer.write(emitter.emit(wupdate.execute(
+        """
+          |function jcn_measure do
+          |  %l := {%A$a$_<$a>}
+          |  %r := {%A$a<$a>}
+          |  %lcs := lcs(%l, %r)
+          |  emit 1/(ic(%l) + ic(%r) - 2*ic(%lcs))
+          |end
+        """.stripMargin)))
+
       for (line <- scala.io.Source.fromInputStream(input).getLines()) {
         val result = wupdate.execute(measure + "_measure(as_tuple(`" + line + "`, `/ /`))")
         writer.write(emitter.emit(result))
