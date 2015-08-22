@@ -86,38 +86,38 @@ object WSimMain {
 
       val writer = new BufferedWriter(new OutputStreamWriter(output))
 
-      writer.write(emitter.emit(wupdate.execute(
+      wupdate.execute(
         """
           |function min_path_length do
           |  %l := %A$a$_<$a>
           |  %r := %A$a<$a>
-          |  %p := shortest({%l}.hypernym*.^hypernym*.{%r})
+          |  %p := shortest(%l.hypernym*.^hypernym*.%r)
           |
           |  if [ empty(%p) ] do
-          |    %ll := size(shortest({%l}.hypernym*[empty(hypernym)]))
-          |    %rl := size(shortest({%r}.hypernym*[empty(hypernym)]))
+          |    %ll := size(shortest(%l.hypernym*[empty(hypernym)]))
+          |    %rl := size(shortest(%r.hypernym*[empty(hypernym)]))
           |    emit distinct(%ll + %rl + 1)
           |  end else
           |    emit distinct(size(%p))
           |end
-        """.stripMargin)))
+        """.stripMargin)
 
-      writer.write(emitter.emit(wupdate.execute(
+      wupdate.execute(
         """
           |function path_measure do
           |  emit 1/min_path_length(%A)
           |end
-        """.stripMargin)))
+        """.stripMargin)
 
-      writer.write(emitter.emit(wupdate.execute(
+      wupdate.execute(
         """
           |function lch_measure do
           |  %d := distinct(size(longest({}[empty(hypernym)].^hypernym*))) + 1
           |  emit max(-log(min_path_length(%A)/(2*%d)))
           |end
-        """.stripMargin)))
+        """.stripMargin)
 
-      writer.write(emitter.emit(wupdate.execute(
+      wupdate.execute(
         """
           |function lcs do
           |  %l := %A$a$_<$a>
@@ -127,66 +127,74 @@ object WSimMain {
           |  %m := maxby((%lh intersect %rh)$a<$a,size($a.hypernym*)>,2)
           |  emit as_synset(distinct(%m$a$_<$a>))
           |end
-        """.stripMargin)))
+        """.stripMargin)
 
-      writer.write(emitter.emit(wupdate.execute(
+      wupdate.execute(
         """
           |function wup_measure do
           |  %l := %A$a$_<$a>
           |  %r := %A$a<$a>
-          |  %dl := distinct(min(size({%l}.hypernym*[empty(hypernym)]))) + 1
-          |  %dr := distinct(min(size({%r}.hypernym*[empty(hypernym)]))) + 1
-          |  %ds := distinct(min(size(lcs({%l},{%r}).hypernym*[empty(hypernym)]))) + 1
+          |  %dl := distinct(min(size(%l.hypernym*[empty(hypernym)]))) + 1
+          |  %dr := distinct(min(size(%r.hypernym*[empty(hypernym)]))) + 1
+          |  %ds := distinct(min(size(lcs(%l,%r).hypernym*[empty(hypernym)]))) + 1
           |  emit 2*%ds/(%dl + %dr)
           |end
-        """.stripMargin)))
+        """.stripMargin)
 
-      writer.write(emitter.emit(wupdate.execute(
+      wupdate.execute(
         """
           |function tree_count emit sum(last(%A.^hypernym*.senses.word.count))
-        """.stripMargin)))
+        """.stripMargin)
 
-      writer.write(emitter.emit(wupdate.execute(
+      wupdate.execute(
         """
           |function ic do
           |  %c := tree_count(%A)
           |  %d := sum(last(''.count))
           |  emit -log(%c/%d)
           |end
-        """.stripMargin)))
+        """.stripMargin)
 
-      writer.write(emitter.emit(wupdate.execute(
+      wupdate.execute(
         """
           |function resnik_measure do
-          |  %l := {%A$a$_<$a>}
-          |  %r := {%A$a<$a>}
+          |  %l := %A$a$_<$a>
+          |  %r := %A$a<$a>
           |  %lcs := lcs(%l, %r)
           |  emit ic(%lcs)
           |end
-        """.stripMargin)))
+        """.stripMargin)
 
-      writer.write(emitter.emit(wupdate.execute(
+      wupdate.execute(
         """
           |function jcn_measure do
-          |  %l := {%A$a$_<$a>}
-          |  %r := {%A$a<$a>}
+          |  %l := %A$a$_<$a>
+          |  %r := %A$a<$a>
           |  %lcs := lcs(%l, %r)
           |  emit 1/(ic(%l) + ic(%r) - 2*ic(%lcs))
           |end
-        """.stripMargin)))
+        """.stripMargin)
 
-      writer.write(emitter.emit(wupdate.execute(
+      wupdate.execute(
         """
           |function lin_measure do
-          |  %l := {%A$a$_<$a>}
-          |  %r := {%A$a<$a>}
+          |  %l := %A$a$_<$a>
+          |  %r := %A$a<$a>
           |  %lcs := lcs(%l, %r)
           |  emit 2*ic(%lcs)/(ic(%l) + ic(%r))
           |end
-        """.stripMargin)))
+        """.stripMargin)
 
       for (line <- scala.io.Source.fromInputStream(input).getLines()) {
-        val result = wupdate.execute(measure + "_measure(as_tuple(`" + line + "`, `/ /`))")
+        val result = wupdate.execute(
+          s"""
+            |do
+            |  %d := as_tuple(`$line`, `/ /`)
+            |  %l := %d$$a$$_<$$a>
+            |  %r := %d$$a<$$a>
+            |  emit distinct(max(from ({%l},{%r})$$a$$b emit ${measure}_measure($$a,$$b)))
+            |end
+          """.stripMargin)
         writer.write(emitter.emit(result))
       }
 
