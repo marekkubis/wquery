@@ -6,7 +6,6 @@ import jline.console.ConsoleReader
 import org.rogach.scallop.Scallop
 import org.rogach.scallop.exceptions.{Help, ScallopException, Version}
 import org.wquery.emitter.WQueryEmitter
-import org.wquery.lang.operations.AsTupleFunction
 import org.wquery.loader.WnLoader
 import org.wquery.model.{DataSet, WordNet}
 import org.wquery.reader.{ConsoleLineReader, ExpressionReader, InputLineReader}
@@ -15,6 +14,7 @@ import org.wquery.{WQueryCommandLineException, WQueryProperties}
 
 abstract class WLanguageMain(languageName: String, language: WordNet => WLanguage) {
   val loader = new WnLoader
+  val tupleParsers = new Object with WTupleParsers
 
   def doMain(lang: WLanguage, output: OutputStream, emitter: WQueryEmitter, opts: Scallop)
 
@@ -36,7 +36,7 @@ abstract class WLanguageMain(languageName: String, language: WordNet => WLanguag
       .opt[Boolean]("analyze", short = 'a', descr = "Analyze input line (to be used with -l option)", required = false)
       .opt[String]("command", short = 'c', descr = "Execute a command", required = false)
       .opt[String]("file", short = 'f', descr = "Execute commands from a file", required = false)
-      .opt[String]("field-separator", short = 'F', descr = "Set field separator for -a option", default = () => Some("\t"), required = false)
+      .opt[String]("field-separator", short = 'F', descr = "Set field separator for -a option", default = () => Some(tupleParsers.DefaultSeparator), required = false)
       .opt[Boolean]("interactive", short = 'i', descr = "Run in the interactive interpreter mode", required = false)
       .opt[Boolean]("loop", short = 'l', descr = "Loop over stdin, pass every line of input as variable %D to -c command", required = false)
       .opt[Boolean]("help", short = 'h', descr = "Show help message")
@@ -98,7 +98,7 @@ abstract class WLanguageMain(languageName: String, language: WordNet => WLanguag
     if (opts[Boolean]("loop")) {
       for (line <- scala.io.Source.fromInputStream(System.in).getLines()) {
         val dataSet = if (opts[Boolean]("analyze")) {
-          DataSet.fromTuple(AsTupleFunction.asTuple(lang.wordNet, line, opts[String]("field-separator")))
+          DataSet.fromTuple(tupleParsers.parse(lang.wordNet, line, opts[String]("field-separator")))
         } else {
           DataSet.fromValue(line)
         }

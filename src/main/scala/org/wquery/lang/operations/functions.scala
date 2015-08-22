@@ -717,49 +717,25 @@ with ClearsBindingsPattern {
 
 object AsTupleFunction extends DataSetFunction("as_tuple")
 with ClearsBindingsPattern {
-  val DefaultSeparator = "\t"
-  val tokenParsers = new Object with WTokenParsers
+  val tupleParsers = new Object with WTupleParsers
 
   override def accepts(args: AlgebraOp) = args.rightType(0) == Set(StringType)
 
   def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
     DataSet(dataSet.paths.map{ tuple =>
-      val (literal, sep) = tuple.takeRight(2) match {
+      tuple.takeRight(2) match {
         case List(left: String, right: String) =>
           if (right.startsWith("/") && right.endsWith("/")) {
-            (left, right.substring(1, right.size - 1))
+            tupleParsers.parse(wordNet, left, right.substring(1, right.size - 1))
           } else {
-            (right, DefaultSeparator)
+            tupleParsers.parse(wordNet, right)
           }
         case List(left, right: String) =>
-          (right, DefaultSeparator)
+          tupleParsers.parse(wordNet, right)
         case List(elem: String) =>
-          (elem, DefaultSeparator)
+          tupleParsers.parse(wordNet, elem)
       }
-
-      asTuple(wordNet, literal, sep)
     })
-  }
-
-  def asTuple(wordNet: WordNet, value: String, sep: String) = {
-    value.split(sep).map { elem =>
-      tokenParsers.parseAll(tokenParsers.tokenLit, elem) match {
-        case tokenParsers.Success((SynsetType, (word: String, num: Int, pos: String)), _) =>
-          wordNet.getSense(word, num, pos).map(wordNet.getSynset).flatten
-        case tokenParsers.Success((SenseType, (word: String, num: Int, pos: String)), _) =>
-          wordNet.getSense(word, num, pos)
-        case tokenParsers.Success((StringType, false, value: String), _) =>
-          Some(value)
-        case tokenParsers.Success((StringType, true, value: String), _) =>
-          wordNet.getWord(value)
-        case tokenParsers.Success((FloatType, num), _) =>
-          Some(num)
-        case tokenParsers.Success((IntegerType, num), _) =>
-          Some(num)
-        case _ =>
-          None
-      }
-    }.toList.flatten
   }
 
   override def minTupleSize(args: AlgebraOp) = 0

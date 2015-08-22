@@ -6,12 +6,36 @@ import org.rogach.scallop._
 import org.rogach.scallop.exceptions.{Help, ScallopException, Version}
 import org.wquery.WQueryProperties
 import org.wquery.emitter.TsvWQueryEmitter
+import org.wquery.lang.WTupleParsers
 import org.wquery.loader.WnLoader
+import org.wquery.model._
 import org.wquery.update.WUpdate
+
+import scala.io.Source
 
 object WSimMain {
   val loader = new WnLoader
   val emitter = new TsvWQueryEmitter
+
+  def loadCounts(wordNet: WordNet, fileName: String): Unit = {
+    val tupleParsers = new Object with WTupleParsers
+    val senseCountRelation = Relation.binary("count", SenseType, IntegerType)
+    val wordCountRelation = Relation.binary("count", StringType, IntegerType)
+
+    wordNet.addRelation(senseCountRelation)
+    wordNet.addRelation(wordCountRelation)
+
+    for (line <- Source.fromFile(fileName).getLines()) {
+      if (!line.startsWith("#")) {
+        tupleParsers.parse(wordNet, line) match {
+          case List(sense: Sense, count: Int) =>
+            wordNet.addSuccessor(sense, senseCountRelation, count)
+          case List(word: String, count: Int) =>
+            wordNet.addSuccessor(word, wordCountRelation, count)
+        }
+      }
+    }
+  }
 
   def main(args: Array[String]) {
     val opts = Scallop(args)
@@ -29,6 +53,7 @@ object WSimMain {
       .opt[Boolean]("version", short = 'v', descr = "Show version")
       .opt[String]("measure", short = 'm', default = () => Some("path"),
         descr = "Similarity measure")
+      .opt[String]("counts", short = 'c', descr = "Word and/or sense counts for IC-based measures", required = false)
       .trailArg[String](name = "WORDNET", required = false,
         descr = "A wordnet model as created by wcompile (read from stdin if not specified)")
       .trailArg[String](name = "IFILE", required = false,
@@ -45,7 +70,11 @@ object WSimMain {
         .map(inputName => new FileInputStream(inputName))
         .getOrElse(System.in)
 
-      val wupdate = new WUpdate(loader.load(wordNetInput))
+      val wordNet = loader.load(wordNetInput)
+
+      opts.get[String]("counts").foreach(fileName => loadCounts(wordNet, fileName))
+
+      val wupdate = new WUpdate(wordNet)
 
       val input = opts.get[String]("IFILE")
         .map(ifile => new FileInputStream(ifile))
@@ -109,6 +138,30 @@ object WSimMain {
           |  %dr := distinct(min(size({%r}.hypernym*[empty(hypernym)]))) + 1
           |  %ds := distinct(min(size(lcs({%l},{%r}).hypernym*[empty(hypernym)]))) + 1
           |  emit 2*%ds/(%dl + %dr)
+          |end
+        """.stripMargin)))
+
+      writer.write(emitter.emit(wupdate.execute(
+        """
+          |function tree_count emit sum(last(%A.^hypernym*.senses.word.count))
+        """.stripMargin)))
+
+      writer.write(emitter.emit(wupdate.execute(
+        """
+          |function ic do
+          |  %c := tree_count(%A)
+          |  %d := sum(last(''.count))
+          |  emit -log(%c/%d)
+          |end
+        """.stripMargin)))
+
+      writer.write(emitter.emit(wupdate.execute(
+        """
+          |function resnik_measure do
+          |  %l := {%A$a$_<$a>}
+          |  %r := {%A$a<$a>}
+          |  %lcs := lcs(%l, %r)
+          |  emit ic(%lcs)
           |end
         """.stripMargin)))
 
