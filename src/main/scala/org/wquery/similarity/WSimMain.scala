@@ -49,6 +49,7 @@ object WSimMain {
                  |
                  |options:
                  | """.stripMargin)
+      .opt[String]("field-separator", short = 'F', descr = "Set field separator", default = () => Some("\t"), required = false)
       .opt[Boolean]("help", short = 'h', descr = "Show help message")
       .opt[Boolean]("version", short = 'v', descr = "Show version")
       .opt[String]("measure", short = 'm', default = () => Some("path"),
@@ -64,6 +65,7 @@ object WSimMain {
     try {
       opts.verify
 
+      val separator = opts[String]("field-separator")
       val measure = opts[String]("measure")
 
       val wordNetInput = opts.get[String]("WORDNET")
@@ -189,7 +191,7 @@ object WSimMain {
         val result = wupdate.execute(
           s"""
             |do
-            |  %d := as_tuple(`$line`, `/ /`)
+            |  %d := as_tuple(`$line`, `/${separator}/`)
             |  %l := %d$$a$$_<$$a>
             |  %r := %d$$a<$$a>
             |  emit distinct(max(from ({%l},{%r})$$a$$b emit ${measure}_measure($$a,$$b)))
