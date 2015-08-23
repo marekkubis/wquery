@@ -5,7 +5,6 @@ import org.wquery.path.VariableTemplate
 
 import scala.collection.mutable.ListBuffer
 import scalaz.Scalaz._
-import scalaz._
 
 class DataSet(val paths: List[List[Any]], val pathVars: Map[String, List[(Int, Int)]], val stepVars: Map[String, List[Int]])
  extends ProvidesTypes with ProvidesTupleSizes {
@@ -51,6 +50,16 @@ class DataSet(val paths: List[List[Any]], val pathVars: Map[String, List[(Int, I
   def rightType(pos: Int): Set[DataType] = paths.filter(pos < _.size).map(tuple => DataType.fromValue(tuple(tuple.size - 1 - pos))).toSet
 
   def types = (for (i <- maxTupleSize.get - 1 to 0 by -1) yield rightType(i)).toList
+
+  def slice(from: Int, until: Option[Int]) = {
+    val pathBuffer = DataSetBuffers.createPathBuffer
+
+    for (path <- paths) {
+      pathBuffer.append(path.slice(from, until.getOrElse(path.length)))
+    }
+
+    DataSet.fromBuffers(pathBuffer, Map.empty, Map.empty)
+  }
 
   def toBoundPaths: List[(List[Any], Map[String, (Int, Int)], Map[String, Int])] = {
     val buffer = new ListBuffer[(List[Any], Map[String, (Int, Int)], Map[String, Int])]

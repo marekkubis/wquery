@@ -1,21 +1,19 @@
 package org.wquery.lang.operations
 
-import scala.collection.mutable.Map
-import org.wquery.model.DataType
 import org.wquery.WQueryStepVariableCannotBeBoundException
 import org.wquery.lang.Variable
-import org.wquery.path.StepVariable
-import org.wquery.path.TupleVariable
-import org.wquery.path.VariableTemplate
+import org.wquery.model.DataType
+import org.wquery.path.{StepVariable, TupleVariable, VariableTemplate}
 import org.wquery.query.SetVariable
-import scala.Some
+
+import scala.collection.mutable.Map
+import scalaz.Scalaz._
 import scalaz._
-import Scalaz._
 
 class BindingsPattern {
   val stepVariablesTypes = Map[String, Set[DataType]]()
   val tupleVariablesTypes = Map[String, (AlgebraOp, Int, Int)]()
-  val setVariablesTypes = Map[String, AlgebraOp]()
+  val setVariablesTypes = Map[String, (AlgebraOp, Int, Boolean)]()
 
   def variables = {
     val stepVariables = stepVariablesTypes.keySet.map(StepVariable(_)).asInstanceOf[Set[Variable]]
@@ -32,15 +30,15 @@ class BindingsPattern {
     tupleVariablesTypes(name) = (op, leftShift, rightShift)
   }
 
-  def bindSetVariableType(name: String, op: AlgebraOp) {
-    setVariablesTypes(name) = op
+  def bindSetVariableType(name: String, op: AlgebraOp, leftShift: Int, keepTail: Boolean) {
+    setVariablesTypes(name) = (op, leftShift, keepTail)
   }
 
   def lookupStepVariableType(name: String): Option[Set[DataType]] = stepVariablesTypes.get(name)
 
   def lookupTupleVariableType(name: String): Option[(AlgebraOp, Int, Int)] = tupleVariablesTypes.get(name)
 
-  def lookupSetVariableType(name: String): Option[AlgebraOp] = setVariablesTypes.get(name)
+  def lookupSetVariableType(name: String): Option[(AlgebraOp, Int, Boolean)] = setVariablesTypes.get(name)
 
   def isBound(variable: Variable) = variable match {
     case SetVariable(name) =>

@@ -12,7 +12,7 @@ class WLanguage(val wordNet: WordNet, parsers: WLanguageParsers) extends Logging
   val bindings = Bindings()
 
   def bindSetVariable(name: String, dataSet: DataSet) {
-    bindingsSchema.bindSetVariableType(name, ConstantOp(dataSet))
+    bindingsSchema.bindSetVariableType(name, ConstantOp(dataSet), 0, true)
     bindings.bindSetVariable(name, dataSet)
   }
 

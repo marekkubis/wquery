@@ -38,16 +38,22 @@ case class WhileDoExpr(conditionExpr: EvaluableExpr, iteratedExpr: EvaluableExpr
 
 case class FunctionDefinitionExpr(name: String, expr: EvaluableExpr) extends EvaluableExpr {
   def evaluationPlan(wordNet: WordNet#Schema, bindings: BindingsSchema, context: Context) = {
-    bindings.bindSetVariableType(SetVariable.FunctionArgumentsVariable, FunctionDefinitionArgumentsRefOp())
+    bindings.bindSetVariableType(SetVariable.FunctionArgumentsVariable, FunctionDefinitionArgumentsRefOp(), 0, true)
     FunctionDefinitionOp(name, expr.evaluationPlan(wordNet, bindings, context))
   }
 }
 
-case class VariableAssignmentExpr(variable: SetVariable, expr: EvaluableExpr) extends EvaluableExpr {
+case class VariableAssignmentExpr(variables: List[SetVariable], expr: EvaluableExpr) extends EvaluableExpr {
   def evaluationPlan(wordNet: WordNet#Schema, bindings: BindingsSchema, context: Context) = {
     val op = expr.evaluationPlan(wordNet, bindings, context)
-    bindings.bindSetVariableType(variable.name, op)
-    AssignmentOp(variable, op)
+
+    bindings.bindSetVariableType(variables.last.name, op, variables.length - 1, true)
+
+    for (pos <- 0 until variables.size - 1) {
+      bindings.bindSetVariableType(variables(pos).name, op, pos, false)
+    }
+
+    AssignmentOp(variables, op)
   }
 }
 

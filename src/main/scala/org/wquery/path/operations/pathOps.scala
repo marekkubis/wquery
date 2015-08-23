@@ -632,16 +632,22 @@ object ConstantOp {
 /*
  * Reference operations
  */
-case class SetVariableRefOp(variable: SetVariable, op: AlgebraOp) extends PathOp {
+case class SetVariableRefOp(variable: SetVariable, types: (AlgebraOp, Int, Boolean)) extends PathOp {
   def evaluate(wordNet: WordNet, bindings: Bindings, context: Context) = bindings.demandSetVariable(variable.name)
 
-  def leftType(pos: Int) = op.leftType(pos)
+  def leftType(pos: Int) = {
+    if (types._3)
+      types._1.leftType(pos + types._2)
+    else if (pos == 0)
+      types._1.leftType(types._2)
+    else DataType.empty
+  }
 
-  def rightType(pos: Int) = op.rightType(pos)
+  def rightType(pos: Int) = types._1.rightType(pos)
 
-  val minTupleSize = op.minTupleSize
+  val minTupleSize = if (types._3) types._1.minTupleSize - types._2 else 1
 
-  val maxTupleSize = op.maxTupleSize
+  val maxTupleSize = if (types._3) types._1.maxTupleSize.map(_ - types._2) else Some(1)
 
   def bindingsPattern = BindingsPattern()
 

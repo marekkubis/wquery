@@ -8,6 +8,8 @@ class ImperativeExprsTestSuite extends WQueryTestSuite {
   
   @Test def testBlockAndAssignment() = result of "from {person:1:n}$a, {person:2:n}$b do %c := $b %d := $a emit %c, %d end" should equal ("{ person:2:n } { person:1:n individual:1:n someone:1:n somebody:1:n mortal:1:n soul:2:n }\n")
 
+  @Test def testMultipleAssignments() = result of "do %c,%d := {car}.hypernym emit %c emit %d end" should equal ("hypernym { compartment:2:n }\nhypernym { motor vehicle:1:n automotive vehicle:1:n }\nhypernym { wheeled vehicle:1:n }\n{ cable car:1:n car:5:n }\n{ car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n }\n{ car:2:n railcar:1:n railway car:1:n railroad car:1:n }\n{ car:4:n elevator car:1:n }\n{ car:3:n gondola:3:n }\n")
+
   @Test def testIf() = result of "if [1 > 2] emit 3" should equal ("(no result)\n")        
     
   @Test def testIfElse() = result of "if [1 < 2] emit 3 else emit 4" should equal ("3\n")    

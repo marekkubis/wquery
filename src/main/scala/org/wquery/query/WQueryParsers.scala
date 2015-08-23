@@ -37,7 +37,9 @@ trait WQueryParsers extends WPathParsers {
 
   def set_var_decl = "%" ~> notQuotedString ^^ { SetVariable(_) }
 
-  def assignment = set_var_decl ~ ":=" ~ multipath_expr ^^ { case vdecl~_~mexpr => VariableAssignmentExpr(vdecl, mexpr) }
+  def set_var_decls = rep1sep(set_var_decl, ",")
+
+  def assignment = set_var_decls ~ ":=" ~ multipath_expr ^^ { case vdecls~_~mexpr => VariableAssignmentExpr(vdecls, mexpr) }
 
   def ifelse = "if" ~> multipath_expr ~ imp_expr ~ opt("else" ~> imp_expr) ^^ {
     case cexpr ~ iexpr ~ eexpr => IfElseExpr(cexpr, iexpr, eexpr)

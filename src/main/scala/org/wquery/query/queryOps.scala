@@ -10,7 +10,6 @@ import org.wquery.query._
 import org.wquery.utils.IntOptionW._
 
 import scalaz.Scalaz._
-import scalaz._
 
 sealed abstract class QueryOp extends AlgebraOp
 
@@ -117,10 +116,20 @@ case class BlockOp(ops: List[AlgebraOp]) extends QueryOp {
 
 }
 
-case class AssignmentOp(variable: SetVariable, op: AlgebraOp) extends QueryOp {
+case class AssignmentOp(variables: List[SetVariable], op: AlgebraOp) extends QueryOp {
   def evaluate(wordNet: WordNet, bindings: Bindings, context: Context) = {
     val result = op.evaluate(wordNet, bindings, context)
-    bindings.bindSetVariable(variable.name, result)
+
+    if (variables.size == 1) {
+      bindings.bindSetVariable(variables.head.name, result)
+    } else {
+      bindings.bindSetVariable(variables.last.name, result.slice(variables.size - 1, None))
+
+      for (pos <- 0 until variables.size - 1) {
+        bindings.bindSetVariable(variables(pos).name, result.slice(pos, Some(pos + 1)))
+      }
+    }
+
     DataSet.empty
   }
 

@@ -3,7 +3,6 @@ package org.wquery.lang.operations
 import org.wquery.model._
 
 import scalaz.Scalaz._
-import scalaz._
 
 class BindingsSchema(val parent: Option[BindingsSchema], updatesParent: Boolean) extends BindingsPattern {
   override def bindStepVariableType(name: String, types: Set[DataType]) {
@@ -22,11 +21,11 @@ class BindingsSchema(val parent: Option[BindingsSchema], updatesParent: Boolean)
     }
   }
 
-  override def bindSetVariableType(name: String, op: AlgebraOp) {
+  override def bindSetVariableType(name: String, op: AlgebraOp, leftShift: Int, keepTail: Boolean) {
     if (updatesParent && parent.some(_.lookupTupleVariableType(name).isDefined).none(false)) {
-      parent.get.bindSetVariableType(name, op)
+      parent.get.bindSetVariableType(name, op, leftShift, keepTail)
     } else {
-      super.bindSetVariableType(name, op)
+      super.bindSetVariableType(name, op, leftShift, keepTail)
     }
   }
 
@@ -40,7 +39,7 @@ class BindingsSchema(val parent: Option[BindingsSchema], updatesParent: Boolean)
       .orElse(parent.flatMap(_.lookupTupleVariableType(name)))
   }
 
-  override def lookupSetVariableType(name: String): Option[AlgebraOp] = {
+  override def lookupSetVariableType(name: String): Option[(AlgebraOp, Int, Boolean)] = {
     super.lookupSetVariableType(name)
       .orElse(parent.flatMap(_.lookupSetVariableType(name)))
   }
@@ -60,11 +59,11 @@ class BindingsSchema(val parent: Option[BindingsSchema], updatesParent: Boolean)
     for ((name, (op, left, right)) <- pattern.tupleVariablesTypes)
       sum.bindTupleVariableType(name, op, left, right)
 
-    for ((name, op) <- setVariablesTypes)
-      sum.bindSetVariableType(name, op)
+    for ((name, (op, left, tail)) <- setVariablesTypes)
+      sum.bindSetVariableType(name, op, left, tail)
 
-    for ((name, op) <- pattern.setVariablesTypes)
-      sum.bindSetVariableType(name, op)
+    for ((name, (op, left, tail)) <- pattern.setVariablesTypes)
+      sum.bindSetVariableType(name, op, left, tail)
 
     sum
   }
