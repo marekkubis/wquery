@@ -91,8 +91,7 @@ object WSimMain {
       wupdate.execute(
         """
           |function min_path_length do
-          |  %l := %A$a$_<$a>
-          |  %r := %A$a<$a>
+          |  %l, %r := %A
           |  %p := shortest(%l.hypernym*.^hypernym*.%r)
           |
           |  if [ empty(%p) ] do
@@ -122,8 +121,7 @@ object WSimMain {
       wupdate.execute(
         """
           |function lcs do
-          |  %l := %A$a$_<$a>
-          |  %r := %A$a<$a>
+          |  %l, %r := %A
           |  %lh := last(%l.hypernym*)
           |  %rh := last(%r.hypernym*)
           |  %m := maxby((%lh intersect %rh)$a<$a,size($a.hypernym*)>,2)
@@ -134,8 +132,7 @@ object WSimMain {
       wupdate.execute(
         """
           |function wup_measure do
-          |  %l := %A$a$_<$a>
-          |  %r := %A$a<$a>
+          |  %l, %r := %A
           |  %dl := distinct(min(size(%l.hypernym*[empty(hypernym)]))) + 1
           |  %dr := distinct(min(size(%r.hypernym*[empty(hypernym)]))) + 1
           |  %ds := distinct(min(size(lcs(%l,%r).hypernym*[empty(hypernym)]))) + 1
@@ -160,8 +157,7 @@ object WSimMain {
       wupdate.execute(
         """
           |function resnik_measure do
-          |  %l := %A$a$_<$a>
-          |  %r := %A$a<$a>
+          |  %l, %r := %A
           |  %lcs := lcs(%l, %r)
           |  emit ic(%lcs)
           |end
@@ -170,8 +166,7 @@ object WSimMain {
       wupdate.execute(
         """
           |function jcn_measure do
-          |  %l := %A$a$_<$a>
-          |  %r := %A$a<$a>
+          |  %l, %r := %A
           |  %lcs := lcs(%l, %r)
           |  emit 1/(ic(%l) + ic(%r) - 2*ic(%lcs))
           |end
@@ -180,8 +175,7 @@ object WSimMain {
       wupdate.execute(
         """
           |function lin_measure do
-          |  %l := %A$a$_<$a>
-          |  %r := %A$a<$a>
+          |  %l, %r := %A
           |  %lcs := lcs(%l, %r)
           |  emit 2*ic(%lcs)/(ic(%l) + ic(%r))
           |end
@@ -191,9 +185,7 @@ object WSimMain {
         val result = wupdate.execute(
           s"""
             |do
-            |  %d := as_tuple(`$line`, `/${separator}/`)
-            |  %l := %d$$a$$_<$$a>
-            |  %r := %d$$a<$$a>
+            |  %l, %r := as_tuple(`$line`, `/${separator}/`)
             |  emit distinct(max(from ({%l},{%r})$$a$$b emit ${measure}_measure($$a,$$b)))
             |end
           """.stripMargin)
