@@ -1,12 +1,12 @@
 package org.wquery.path.parsers
 
+import org.wquery.lang.Variable
 import org.wquery.lang.exprs._
 import org.wquery.lang.parsers.WLanguageParsers
 import org.wquery.model.{DataSet, Relation}
 import org.wquery.path._
 import org.wquery.path.exprs._
 import org.wquery.path.operations._
-import org.wquery.query.SetVariable
 
 import scalaz.Scalaz._
 
@@ -193,13 +193,11 @@ trait WPathParsers extends WLanguageParsers {
   def arc_generator = "\\" ~> arc_expr ^^ { ArcByArcExprReq(_) }
 
   // variables
-  def var_decl = (
+  def var_decl: Parser[Variable] = (
     step_var_decl
     | path_var_decl
-    | set_var_decl
   )
 
   def step_var_decl = "$" ~> notQuotedString ^^ { StepVariable(_) }
   def path_var_decl = "@" ~> notQuotedString ^^ { TupleVariable(_) }
-  def set_var_decl = "%" ~> notQuotedString ^^ { SetVariable(_) }
 }
