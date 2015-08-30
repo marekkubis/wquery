@@ -179,7 +179,7 @@ object WSimMain {
 
       wupdate.execute(
         """
-          |function resnik_measure do
+          |function res_measure do
           |  %l, %r := %A
           |  %lcs := lcs(%l, %r)
           |  emit ic(%lcs)
