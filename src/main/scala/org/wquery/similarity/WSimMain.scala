@@ -131,8 +131,15 @@ object WSimMain {
 
       wupdate.execute(
         """
+          |function min_size do
+          |  emit distinct(min(size(%A)))
+          |end
+        """.stripMargin)
+
+      wupdate.execute(
+        """
           |function root_dist do
-          |  emit distinct(min(size(%A.hypernym*[empty(hypernym)]))) + 1
+          |  emit min_size(%A.hypernym*[empty(hypernym)]) + 1
           |end
         """.stripMargin)
 
@@ -140,7 +147,7 @@ object WSimMain {
         """
           |function lcs_dist do
           |  %s, %lcs := %A
-          |  emit distinct(min(size(%s.hypernym*.%lcs))) - 1
+          |  emit min_size(%s.hypernym*.%lcs) - 1
           |end
         """.stripMargin)
 
