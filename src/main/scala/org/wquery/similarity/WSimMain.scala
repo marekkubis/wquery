@@ -131,12 +131,28 @@ object WSimMain {
 
       wupdate.execute(
         """
+          |function root_dist do
+          |  emit distinct(min(size(%A.hypernym*[empty(hypernym)]))) + 1
+          |end
+        """.stripMargin)
+
+      wupdate.execute(
+        """
+          |function lcs_dist do
+          |  %s, %lcs := %A
+          |  emit distinct(min(size(%s.hypernym*.%lcs))) - 1
+          |end
+        """.stripMargin)
+
+      wupdate.execute(
+        """
           |function wup_measure do
           |  %l, %r := %A
-          |  %dl := distinct(min(size(%l.hypernym*[empty(hypernym)]))) + 1
-          |  %dr := distinct(min(size(%r.hypernym*[empty(hypernym)]))) + 1
-          |  %ds := distinct(min(size(lcs(%l,%r).hypernym*[empty(hypernym)]))) + 1
-          |  emit 2*%ds/(%dl + %dr)
+          |  %lcs := lcs(%l, %r)
+          |  %dl := lcs_dist(%l, %lcs)
+          |  %dr := lcs_dist(%r, %lcs)
+          |  %dlcs := root_dist(%lcs)
+          |  emit 2*%dlcs/(%dl + %dr + 2*%dlcs)
           |end
         """.stripMargin)
 
