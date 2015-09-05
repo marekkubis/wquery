@@ -32,6 +32,8 @@ object WSimMain {
             wordNet.addSuccessor(sense, senseCountRelation, count)
           case List(word: String, count: Int) =>
             wordNet.addSuccessor(word, wordCountRelation, count)
+          case _ =>
+            /* do nothing - count for an unknown word or sense provided */
         }
       }
     }
