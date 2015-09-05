@@ -55,7 +55,10 @@ class DataSet(val paths: List[List[Any]], val pathVars: Map[String, List[(Int, I
     val pathBuffer = DataSetBuffers.createPathBuffer
 
     for (path <- paths) {
-      pathBuffer.append(path.slice(from, until.getOrElse(path.length)))
+      val pathSlice = path.slice(from, until.getOrElse(path.length))
+
+      if (pathSlice.nonEmpty)
+        pathBuffer.append(pathSlice)
     }
 
     DataSet.fromBuffers(pathBuffer, Map.empty, Map.empty)
