@@ -51,12 +51,13 @@ object WSimMain {
                  |
                  |options:
                  | """.stripMargin)
+      .opt[String]("counts", short = 'c', descr = "Word and/or sense counts for IC-based measures", required = false)
       .opt[String]("field-separator", short = 'F', descr = "Set field separator", default = () => Some("\t"), required = false)
       .opt[Boolean]("help", short = 'h', descr = "Show help message")
-      .opt[Boolean]("version", short = 'v', descr = "Show version")
       .opt[String]("measure", short = 'm', default = () => Some("path"),
         descr = "Similarity measure")
-      .opt[String]("counts", short = 'c', descr = "Word and/or sense counts for IC-based measures", required = false)
+      .opt[Boolean]("print-pairs", short = 'p', descr = "Print word/sense pairs to the output", required = false)
+      .opt[Boolean]("version", short = 'v', descr = "Show version")
       .trailArg[String](name = "WORDNET", required = false,
         descr = "A wordnet model as created by wcompile (read from stdin if not specified)")
       .trailArg[String](name = "IFILE", required = false,
@@ -69,6 +70,7 @@ object WSimMain {
 
       val separator = opts[String]("field-separator")
       val measure = opts[String]("measure")
+      val printPairs = opts[Boolean]("print-pairs")
 
       val wordNetInput = opts.get[String]("WORDNET")
         .map(inputName => new FileInputStream(inputName))
@@ -210,11 +212,18 @@ object WSimMain {
         val result = wupdate.execute(
           s"""
             |do
-            |  %l, %r := as_tuple(`$line`, `/${separator}/`)
-            |  emit distinct(max(from ({%l},{%r})$$a$$b emit ${measure}_measure($$a,$$b)))
+            |  %l, %r := as_tuple(`$line`, `/$separator/`)
+            |  emit na(distinct(max(from ({%l},{%r})$$a$$b emit ${measure}_measure($$a,$$b))))
             |end
           """.stripMargin)
+
+        if (printPairs) {
+          writer.write(line)
+          writer.write(separator)
+        }
+
         writer.write(emitter.emit(result))
+        writer.flush()
       }
 
       writer.close()
