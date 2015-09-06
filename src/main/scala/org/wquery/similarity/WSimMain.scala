@@ -94,16 +94,38 @@ object WSimMain {
 
       wupdate.execute(
         """
+          |function min_size do
+          |  emit distinct(min(size(%A)))
+          |end
+        """.stripMargin)
+
+      wupdate.execute(
+        """
+          |function min_path_length_no_root do
+          |  %l, %r := %A
+          |  emit min_size(%l.hypernym*.^hypernym*.%r)
+          |end
+        """.stripMargin)
+
+      wupdate.execute(
+        """
           |function min_path_length do
           |  %l, %r := %A
-          |  %p := shortest(%l.hypernym*.^hypernym*.%r)
+          |  %s := min_size(%l.hypernym*.^hypernym*.%r)
           |
-          |  if [ empty(%p) ] do
-          |    %ll := size(shortest(%l.hypernym*[empty(hypernym)]))
-          |    %rl := size(shortest(%r.hypernym*[empty(hypernym)]))
-          |    emit distinct(%ll + %rl + 1)
+          |  if [ empty(%s) ] do
+          |    %ll := min_size(%l.hypernym*[empty(hypernym)])
+          |    %rl := min_size(%r.hypernym*[empty(hypernym)])
+          |    emit %ll + %rl + 1
           |  end else
-          |    emit distinct(size(%p))
+          |    emit %s
+          |end
+        """.stripMargin)
+
+      wupdate.execute(
+        """
+          |function path_no_root_measure do
+          |  emit 1/min_path_length_no_root(%A)
           |end
         """.stripMargin)
 
@@ -130,13 +152,6 @@ object WSimMain {
           |  %rh := last(%r.hypernym*)
           |  %m := maxby((%lh intersect %rh)$a<$a,size($a.hypernym*)>,2)
           |  emit as_synset(distinct(%m$a$_<$a>))
-          |end
-        """.stripMargin)
-
-      wupdate.execute(
-        """
-          |function min_size do
-          |  emit distinct(min(size(%A)))
           |end
         """.stripMargin)
 
