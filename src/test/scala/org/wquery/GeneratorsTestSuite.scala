@@ -90,9 +90,9 @@ class GeneratorsTestSuite extends WQueryTestSuite {
   
   @Test def testInvertedArcGenerator() = result of "\\^hypernym" should equal ("^hypernym\n")
 
-  @Test def testAnyRelationArcGenerator() = result of "count(\\_)" should equal ("32\n")
+  @Test def testAnyRelationArcGenerator() = result of "count(\\_)" should equal ("33\n")
 
-  @Test def testAnyRelationBackwardArcGenerator() = result of "count(\\^_)" should equal ("32\n")
+  @Test def testAnyRelationBackwardArcGenerator() = result of "count(\\^_)" should equal ("33\n")
 
   @Test def testFunctionGenerator() = result of "max('').senses" should equal ("zymurgy senses zymurgy:1:n\n")
 

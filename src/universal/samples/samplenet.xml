@@ -56,6 +56,7 @@ Princeton University and LICENSEE agrees to preserve same.
         <LANG>en</LANG>
         <USAGE>An invalid example of usage example.</USAGE>
         <BCS>true</BCS>
+		<COUNT>5</COUNT>
 	</SYNSET>
     <SYNSET>
         <ID>102958343-PL</ID>
@@ -345,6 +346,7 @@ Princeton University and LICENSEE agrees to preserve same.
 		<ILR type="hypernym">102958343</ILR>
 		<ILR type="hypernym">106605396</ILR>
         <NL>false</NL>
+		<COUNT>1</COUNT>
 	</SYNSET>
 	<SYNSET>
 		<ID>102930766</ID>
@@ -537,6 +539,7 @@ Princeton University and LICENSEE agrees to preserve same.
 		<ILR type="regional_class">108860123</ILR>
 		<ILR type="hypernym">102930766</ILR>
 		<ILR type="hypernym">103770085</ILR>
+		<COUNT>3</COUNT>
 	</SYNSET>
 	<SYNSET>
 		<ID>103770085</ID>

@@ -370,6 +370,39 @@ with ClearsBindingsPattern {
   }
 }
 
+object TreeSumFunction extends DataSetFunction("tree_sum") with AcceptsTypes with ReturnsValueSetOfSimilarSize
+with ClearsBindingsPattern {
+
+  override def argumentTypes = List(NodeType.all.toSet[DataType], Set(StringType), Set(StringType))
+
+  def returnType(args: AlgebraOp) = Set(IntegerType)
+
+  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
+    DataSet.fromList(for (path <- dataSet.paths) yield {
+      val source = path(0)
+      val types = Set(DataType.fromValue(source))
+      val relationName = path(1).asInstanceOf[String]
+      val relation = wordNet.schema.demandRelation(relationName, Map(Relation.Src -> types, Relation.Dst -> types))
+      val sumRelationName = path(2).asInstanceOf[String]
+      val sumRelation = wordNet.schema.demandRelation(sumRelationName, Map(Relation.Src -> types, Relation.Dst -> Set(IntegerType)))
+
+      treeSum(wordNet, source, relation, sumRelation)
+    })
+  }
+
+  private def treeSum(wordNet: WordNet, source: Any, relation: Relation, sumRelation: Relation): Int = {
+    val succs = wordNet.getSuccessors(source, relation, Relation.Dst, Relation.Src)
+    val sumSuccs = wordNet.getSuccessors(source, sumRelation, Relation.Src, Relation.Dst)
+    val value = sumSuccs.map{_.asInstanceOf[Int]}.sum
+
+    if (succs.isEmpty) {
+      value
+    } else {
+      value + succs.map(treeSum(wordNet, _, relation, sumRelation)).sum
+    }
+  }
+}
+
 object LastFunction extends DataSetFunction("last") with AcceptsAll with ReturnsSingleValue
  with ClearsBindingsPattern {
 
@@ -674,12 +707,11 @@ with ClearsBindingsPattern {
   def returnType(args: AlgebraOp) = Set(BooleanType)
 }
 
-object AsSynsetFunction extends DataSetFunction("as_synset") with AcceptsTypes with ReturnsValueSetOfSimilarSize
+object AsSynsetFunction extends DataSetFunction("as_synset") with AcceptsAll with ReturnsValueSetOfSimilarSize
 with ClearsBindingsPattern {
-  def argumentTypes = List(DataType.all)
 
   def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
-    DataSet(dataSet.paths.filter(tuple => tuple.last.isInstanceOf[Synset]))
+    DataSet(dataSet.paths.filter(tuple => tuple.nonEmpty && tuple.last.isInstanceOf[Synset]))
   }
 
   def returnType(args: AlgebraOp) = Set(SynsetType)
@@ -918,6 +950,7 @@ object Functions {
   registerFunction(MaxByFunction)
   registerFunction(CountFunction)
   registerFunction(TreeDepthFunction)
+  registerFunction(TreeSumFunction)
   registerFunction(LastFunction)
   registerFunction(IntegerSumFunction)
   registerFunction(FloatSumFunction)

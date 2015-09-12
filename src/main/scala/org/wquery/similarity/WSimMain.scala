@@ -194,15 +194,11 @@ object WSimMain {
 
       wupdate.execute(
         """
-          |function tree_sum emit sum(last(%A.^hypernym*.count))
-        """.stripMargin)
-
-      wupdate.execute(
-        """
           |function ic do
-          |  %c := tree_sum(%A)
-          |  %root := last(%A.hypernym*[empty(hypernym)])
-          |  %d := tree_sum(%root)
+          |  %s := as_synset(%A)
+          |  %c := tree_sum(%s, `hypernym`, `count`)
+          |  %root := last(%s.hypernym*[empty(hypernym)])
+          |  %d := tree_sum(%root, `hypernym`, `count`)
           |  emit -log(%c/%d)
           |end
         """.stripMargin)
@@ -212,6 +208,7 @@ object WSimMain {
           |function res_measure do
           |  %l, %r := %A
           |  %lcs := lcs(%l, %r)
+          |
           |  emit ic(%lcs)
           |end
         """.stripMargin)
