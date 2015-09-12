@@ -5,7 +5,6 @@ package org.wquery.model
 import org.wquery.WQueryModelException
 
 import scalaz.Scalaz._
-import scalaz._
 
 sealed abstract class DataType extends Ordered[DataType] {
   def rank: Int
@@ -75,7 +74,7 @@ object DataType {
 
   implicit val DataTypeEqual = equalA[DataType]
 
-  def fromValue(value: Any) = value match {
+  def fromValue(value: Any): DataType = value match {
     case _:Synset =>
       SynsetType
     case _:Sense =>

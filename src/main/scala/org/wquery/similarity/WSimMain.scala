@@ -141,7 +141,7 @@ object WSimMain {
           |function hierarchy_depth do
           |  %lcs := lcs(%A)
           |  %root := last(%lcs.hypernym*[empty(hypernym)])
-          |  emit max_size(%root.^hypernym*) - 1
+          |  emit tree_depth(%root, `hypernym`)
           |end
         """.stripMargin)
 

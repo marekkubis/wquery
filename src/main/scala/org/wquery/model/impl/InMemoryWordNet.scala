@@ -923,4 +923,18 @@ class InMemoryWordNet extends WordNet {
       }
     }
   }
+
+  override def getSuccessors(source: Any, relation: Relation, through: String, to: String) = atomic { implicit txn =>
+    val relationSuccessors = store.successors(relation)
+    val buffer = new ListBuffer[Any]
+
+    for (relSuccs <- relationSuccessors.get((through, source)); succs <- relSuccs) {
+      if (succs.contains(to)) {
+        buffer.append(succs(to))
+      }
+    }
+
+    buffer.toList
+  }
+
 }

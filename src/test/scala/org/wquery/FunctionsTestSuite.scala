@@ -6,6 +6,8 @@ class FunctionsTestSuite extends WQueryTestSuite {
    
   @Test def testCount() = result of "count({})" should equal ("99\n")
 
+  @Test def testTreeDepth() = result of "tree_depth({entity:1}, `hypernym`)" should equal ("13\n")
+
   @Test def testMin() = result of "min(1..10)" should equal ("1\n")
 
   @Test def testMinMultipleResults() = result withoutDistinctAndSort "emit min(1..10 union 1..5)" should equal ("1\n1\n")

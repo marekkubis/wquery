@@ -95,6 +95,8 @@ trait WordNet {
   def merge(synsets: List[Synset], senses: List[Sense])
 
   // helper methods
+  def getSuccessors(predecessor: Any, relation: Relation, through: String, to: String): List[Any]
+
   def addSuccessor(predecessor: Any, relation: Relation, successor: Any) {
     addTuple(relation, Map((Relation.Src, predecessor), (Relation.Dst, successor)))
   }

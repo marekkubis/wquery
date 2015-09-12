@@ -341,6 +341,35 @@ object CountFunction extends DataSetFunction("count") with AcceptsAll with Retur
   def returnType(args: AlgebraOp) = Set(IntegerType)
 }
 
+object TreeDepthFunction extends DataSetFunction("tree_depth") with AcceptsTypes with ReturnsValueSetOfSimilarSize
+with ClearsBindingsPattern {
+
+  override def argumentTypes = List(NodeType.all.toSet[DataType], Set(StringType))
+
+  def returnType(args: AlgebraOp) = Set(IntegerType)
+
+  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
+    DataSet.fromList(for (path <- dataSet.paths) yield {
+      val source = path(0)
+      val types = Set(DataType.fromValue(source))
+      val relationName = path(1).asInstanceOf[String]
+      val relation = wordNet.schema.demandRelation(relationName, Map(Relation.Src -> types, Relation.Dst -> types))
+
+      treeDepth(wordNet, source, relation, 0)
+    })
+  }
+
+  private def treeDepth(wordNet: WordNet, source: Any, relation: Relation, depth: Int): Int = {
+    val succs = wordNet.getSuccessors(source, relation, Relation.Dst, Relation.Src)
+
+    if (succs.isEmpty) {
+      depth
+    } else {
+      succs.map(treeDepth(wordNet, _, relation, depth + 1)).max
+    }
+  }
+}
+
 object LastFunction extends DataSetFunction("last") with AcceptsAll with ReturnsSingleValue
  with ClearsBindingsPattern {
 
@@ -888,6 +917,7 @@ object Functions {
   registerFunction(MinByFunction)
   registerFunction(MaxByFunction)
   registerFunction(CountFunction)
+  registerFunction(TreeDepthFunction)
   registerFunction(LastFunction)
   registerFunction(IntegerSumFunction)
   registerFunction(FloatSumFunction)
