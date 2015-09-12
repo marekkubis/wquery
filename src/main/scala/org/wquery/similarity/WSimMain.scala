@@ -17,10 +17,11 @@ object WSimMain {
   val loader = new WnLoader
   val emitter = new TsvWQueryEmitter
 
-  def loadCounts(wordNet: WordNet, fileName: String): Unit = {
+  def loadCounts(wordNet: WordNet, fileName: String) = {
     val tupleParsers = new Object with WTupleParsers
     val senseCountRelation = Relation.binary("count", SenseType, IntegerType)
     val wordCountRelation = Relation.binary("count", StringType, IntegerType)
+    var senseCounts = false
 
     wordNet.addRelation(senseCountRelation)
     wordNet.addRelation(wordCountRelation)
@@ -30,6 +31,7 @@ object WSimMain {
         tupleParsers.parse(wordNet, line) match {
           case List(sense: Sense, count: Int) =>
             wordNet.addSuccessor(sense, senseCountRelation, count)
+            senseCounts = true
           case List(word: String, count: Int) =>
             wordNet.addSuccessor(word, wordCountRelation, count)
           case _ =>
@@ -37,6 +39,8 @@ object WSimMain {
         }
       }
     }
+
+    senseCounts
   }
 
   def main(args: Array[String]) {
@@ -77,10 +81,19 @@ object WSimMain {
         .getOrElse(System.in)
 
       val wordNet = loader.load(wordNetInput)
+      wordNet.addRelation(Relation.binary("count", SynsetType, IntegerType))
 
-      opts.get[String]("counts").foreach(fileName => loadCounts(wordNet, fileName))
+      val senseCounts = opts.get[String]("counts").exists(fileName => loadCounts(wordNet, fileName))
 
       val wupdate = new WUpdate(wordNet)
+
+      if (senseCounts) {
+        emitter.emit(wupdate.execute(
+          "from {}$a update $a count := sum(last($a.senses.count))"))
+      } else {
+        emitter.emit(wupdate.execute(
+          "from {}$a update $a count := sum(last($a.senses.word.count))"))
+      }
 
       val input = opts.get[String]("IFILE")
         .map(ifile => new FileInputStream(ifile))
@@ -181,14 +194,15 @@ object WSimMain {
 
       wupdate.execute(
         """
-          |function tree_count emit sum(last(%A.^hypernym*.senses.word.count))
+          |function tree_sum emit sum(last(%A.^hypernym*.count))
         """.stripMargin)
 
       wupdate.execute(
         """
           |function ic do
-          |  %c := tree_count(%A)
-          |  %d := sum(last(''.count))
+          |  %c := tree_sum(%A)
+          |  %root := last(%A.hypernym*[empty(hypernym)])
+          |  %d := tree_sum(%root)
           |  emit -log(%c/%d)
           |end
         """.stripMargin)
