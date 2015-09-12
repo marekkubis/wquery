@@ -131,9 +131,24 @@ object WSimMain {
 
       wupdate.execute(
         """
+          |function max_size do
+          |  emit distinct(max(size(%A)))
+          |end
+        """.stripMargin)
+
+      wupdate.execute(
+        """
+          |function hierarchy_depth do
+          |  %lcs := lcs(%A)
+          |  %root := last(%lcs.hypernym*[empty(hypernym)])
+          |  emit max_size(%root.^hypernym*) - 1
+          |end
+        """.stripMargin)
+
+      wupdate.execute(
+        """
           |function lch_measure do
-          |  %d := distinct(size(longest({}[empty(hypernym)].^hypernym*))) + 1
-          |  emit max(-log(min_path_length(%A)/(2*%d)))
+          |  emit max(-log(min_path_length(%A)/(2*hierarchy_depth(%A))))
           |end
         """.stripMargin)
 
