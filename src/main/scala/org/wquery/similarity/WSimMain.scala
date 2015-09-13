@@ -83,7 +83,7 @@ object WSimMain {
       val wordNet = loader.load(wordNetInput)
       wordNet.addRelation(Relation.binary("count", SynsetType, IntegerType))
 
-      val senseCounts = opts.get[String]("counts").exists(fileName => loadCounts(wordNet, fileName))
+      val senseCounts = opts.get[String]("counts").map(fileName => loadCounts(wordNet, fileName)).getOrElse(true)
 
       val wupdate = new WUpdate(wordNet)
 
