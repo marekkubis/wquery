@@ -573,9 +573,9 @@ case class FetchOp(relation: Relation, from: List[(String, List[Any])], to: List
       Set.empty
   }
 
-  val minTupleSize = to.size
+  val minTupleSize = if (withArcs) 2*to.size - 1 else to.size
 
-  val maxTupleSize = some(to.size)
+  val maxTupleSize = some(if (withArcs) 2*to.size - 1 else to.size)
 
   def bindingsPattern = BindingsPattern()
 
