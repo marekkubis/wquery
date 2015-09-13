@@ -87,12 +87,12 @@ object WSimMain {
 
       val wupdate = new WUpdate(wordNet)
 
+      wupdate.execute("from !instance_hypernym$a$_$b update $a hypernym += $b")
+
       if (senseCounts) {
-        emitter.emit(wupdate.execute(
-          "from {}$a update $a count := sum(last($a.senses.count))"))
+        wupdate.execute("from {}$a update $a count := sum(last($a.senses.count))")
       } else {
-        emitter.emit(wupdate.execute(
-          "from {}$a update $a count := sum(last($a.senses.word.count))"))
+        wupdate.execute("from {}$a update $a count := sum(last($a.senses.word.count))")
       }
 
       val input = opts.get[String]("IFILE")
