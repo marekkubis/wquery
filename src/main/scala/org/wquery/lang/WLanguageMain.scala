@@ -132,6 +132,7 @@ abstract class WLanguageMain(languageName: String, language: WordNet => WLanguag
 
   def executeInteractive(lang: WLanguage, reader: ConsoleReader, emitter: WQueryEmitter): Unit = {
     reader.addCompleter(new WLanguageCompleter(lang.wordNet))
+    reader.setExpandEvents(false)
     val expressionReader = new ExpressionReader(new ConsoleLineReader(reader, languageName.toLowerCase + "> "))
     val writer = reader.getOutput
 

@@ -10,7 +10,7 @@ class WLanguageCompleter(wordNet: WordNet) extends Completer {
     var offset = 0
 
     if (buffer != null && buffer.nonEmpty) {
-      val lastRelationIndex = Math.max(buffer.lastIndexOf('.'), buffer.lastIndexOf('^'))
+      val lastRelationIndex = List(buffer.lastIndexOf('.'), buffer.lastIndexOf('^'), buffer.lastIndexOf('!')).max
       val lastTypeIndex = buffer.lastIndexOf('&')
 
       if (lastRelationIndex > lastTypeIndex) {
