@@ -61,6 +61,7 @@ object WSimMain {
       .opt[String]("measure", short = 'm', default = () => Some("path"),
         descr = "Similarity measure")
       .opt[Boolean]("print-pairs", short = 'p', descr = "Print word/sense pairs to the output", required = false)
+      .opt[Boolean]("root-node", short = 'r', descr = "Introduce root nodes in the nouns and verbs hierarchies", required = false)
       .opt[Boolean]("version", short = 'v', descr = "Show version")
       .trailArg[String](name = "WORDNET", required = false,
         descr = "A wordnet model as created by wcompile (read from stdin if not specified)")
@@ -75,6 +76,7 @@ object WSimMain {
       val separator = opts[String]("field-separator")
       val measure = opts[String]("measure")
       val printPairs = opts[Boolean]("print-pairs")
+      val rootNode = opts[Boolean]("root-node")
 
       val wordNetInput = opts.get[String]("WORDNET")
         .map(inputName => new FileInputStream(inputName))
@@ -88,6 +90,13 @@ object WSimMain {
       val wupdate = new WUpdate(wordNet)
 
       wupdate.execute("from !instance_hypernym$a$_$b update $a hypernym += $b")
+
+      if (rootNode) {
+        wupdate.execute("update synsets += {ROOT:1:n}")
+        wupdate.execute("update {}[empty(hypernym) and pos = `n`] hypernym := {ROOT:1:n}")
+        wupdate.execute("update synsets += {ROOT:1:v}")
+        wupdate.execute("update {}[empty(hypernym) and pos = `v`] hypernym := {ROOT:1:v}")
+      }
 
       if (senseCounts) {
         wupdate.execute("from {}$a update $a count := sum(last($a.senses.count))")
