@@ -227,7 +227,19 @@ object WSimMain {
           |function jcn_measure do
           |  %l, %r := %A
           |  %lcs := lcs(%l, %r)
-          |  emit 1/(ic(%l) + ic(%r) - 2*ic(%lcs))
+          |  %dist := ic(%l) + ic(%r) - 2*ic(%lcs)
+          |
+          |  if [%dist = 0] do
+          |    %r := last(%lcs.hypernym*[empty(hypernym)])
+          |    %d := distinct(max(tree_sum(%r, `hypernym`, `count`)))
+          |
+          |    if [%d > 0.01]
+          |       emit 1/-log((%d - 0.01)/%d)
+          |     else
+          |       emit 0
+          |  end else do
+          |    emit 1/%dist
+          |  end
           |end
         """.stripMargin)
 
