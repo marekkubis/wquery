@@ -707,6 +707,17 @@ with ClearsBindingsPattern {
   def returnType(args: AlgebraOp) = Set(BooleanType)
 }
 
+object IsNaNFunction extends DataSetFunction("is_nan") with AcceptsTypes with ReturnsValueSetOfSimilarSize
+with ClearsBindingsPattern {
+  def argumentTypes = List(Set(FloatType))
+
+  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
+    DataSet(dataSet.paths.map(tuple => List(tuple.last.asInstanceOf[Double].isNaN)))
+  }
+
+  def returnType(args: AlgebraOp) = Set(BooleanType)
+}
+
 object AsSynsetFunction extends DataSetFunction("as_synset") with AcceptsAll with ReturnsValueSetOfSimilarSize
 with ClearsBindingsPattern {
 
@@ -975,6 +986,7 @@ object Functions {
   registerFunction(IsFloatFunction)
   registerFunction(IsBooleanFunction)
   registerFunction(IsArcFunction)
+  registerFunction(IsNaNFunction)
   registerFunction(AsSynsetFunction)
   registerFunction(NAFunction)
   registerFunction(RangeFunction)

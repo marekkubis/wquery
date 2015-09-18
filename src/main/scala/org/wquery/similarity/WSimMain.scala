@@ -229,7 +229,7 @@ object WSimMain {
           |  %lcs := lcs(%l, %r)
           |  %dist := ic(%l) + ic(%r) - 2*ic(%lcs)
           |
-          |  if [%dist = 0] do
+          |  if [%dist = 0 or is_nan(%dist)] do
           |    %r := last(%lcs.hypernym*[empty(hypernym)])
           |    %d := distinct(max(tree_sum(%r, `hypernym`, `count`)))
           |

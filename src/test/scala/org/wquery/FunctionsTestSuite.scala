@@ -172,4 +172,8 @@ class FunctionsTestSuite extends WQueryTestSuite {
 
   @Test def testIsArcFalse() = result of "is_arc(1)" should equal ("false\n")
 
+  @Test def testIsNaNTrue() = result of "is_nan(0.0/0)" should equal ("true\n")
+
+  @Test def testIsNaNFalse() = result of "is_arc(1.0/0)" should equal ("false\n")
+
 }
