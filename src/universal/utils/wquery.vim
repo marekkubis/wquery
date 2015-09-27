@@ -18,7 +18,7 @@ syn match Number "\<\d\+\>"
 syn match Operator "+\|-\|/\|*\|:=\|=\|?\|!\|<\|>\||\|\^\|\.\|\[\|\]"
 syn keyword Operator in not and or mod div union except intersect
 
-syn keyword Statement do end from emit if else while function true false
+syn keyword Statement do end from emit if else while function true false update
 
 syn region String start=/`/ end=/`/
 
