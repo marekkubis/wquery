@@ -116,25 +116,6 @@ object WSimMain {
 
       wupdate.execute(
         """
-          |function min_path_length do
-          |  %l, %r := %A
-          |  %lcs := lcs(%l, %r)
-          |
-          |  %ll := min_size(%l.hypernym*.%lcs)
-          |  %rl := min_size(%r.hypernym*.%lcs)
-          |  emit %ll + %rl - 1
-          |end
-        """.stripMargin)
-
-      wupdate.execute(
-        """
-          |function path_measure do
-          |  emit 1/min_path_length(%A)
-          |end
-        """.stripMargin)
-
-      wupdate.execute(
-        """
           |function hierarchy_depth do
           |  %lcs := lcs(%A)
           |  %root := last(%lcs.hypernym*[empty(hypernym)])

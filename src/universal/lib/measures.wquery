@@ -13,3 +13,16 @@ function lcs do
   %m := maxby((%lh intersect %rh)$a<$a,size($a.hypernym*[empty(hypernym)])>,2)
   emit as_synset(distinct(%m$a$_<$a>))
 end
+
+function min_path_length do
+  %l, %r := %A
+  %lcs := lcs(%l, %r)
+
+  %ll := min_size(%l.hypernym*.%lcs)
+  %rl := min_size(%r.hypernym*.%lcs)
+  emit %ll + %rl - 1
+end
+
+function path_measure do
+  emit 1/min_path_length(%A)
+end
