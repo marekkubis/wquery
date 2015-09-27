@@ -116,13 +116,6 @@ object WSimMain {
 
       wupdate.execute(
         """
-          |function lch_measure do
-          |  emit max(-log(min_path_length(%A)/(2*hierarchy_depth(%A))))
-          |end
-        """.stripMargin)
-
-      wupdate.execute(
-        """
           |function root_dist do
           |  emit min_size(%A.hypernym*[empty(hypernym)]) + 1
           |end

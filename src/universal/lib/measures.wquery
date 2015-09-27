@@ -1,3 +1,6 @@
+#
+# common functions
+#
 function min_size do
   emit distinct(min(size(%A)))
 end
@@ -14,6 +17,9 @@ function lcs do
   emit as_synset(distinct(%m$a$_<$a>))
 end
 
+#
+# Path measure
+#
 function min_path_length do
   %l, %r := %A
   %lcs := lcs(%l, %r)
@@ -27,8 +33,15 @@ function path_measure do
   emit 1/min_path_length(%A)
 end
 
+#
+# Leacock-Chodorow measure
+#
 function hierarchy_depth do
   %lcs := lcs(%A)
   %root := last(%lcs.hypernym*[empty(hypernym)])
   emit tree_depth(%root, `hypernym`)
+end
+
+function lch_measure do
+  emit max(-log(min_path_length(%A)/(2*hierarchy_depth(%A))))
 end

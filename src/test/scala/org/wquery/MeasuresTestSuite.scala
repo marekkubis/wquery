@@ -29,4 +29,6 @@ class MeasuresTestSuite extends WQueryTestSuite {
 
   @Test def testHierarchyDepthForBusTaxi() = result of "hierarchy_depth({bus:4:n}, {taxi:1:n})" should equal ("13\n")
 
+  @Test def testLchMeasure() = result of "lch_measure({bus:4:n}, {taxi:1:n})" should equal ("2.159484249353372\n")
+
 }
