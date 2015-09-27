@@ -26,3 +26,9 @@ end
 function path_measure do
   emit 1/min_path_length(%A)
 end
+
+function hierarchy_depth do
+  %lcs := lcs(%A)
+  %root := last(%lcs.hypernym*[empty(hypernym)])
+  emit tree_depth(%root, `hypernym`)
+end

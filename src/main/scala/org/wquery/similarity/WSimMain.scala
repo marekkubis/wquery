@@ -116,15 +116,6 @@ object WSimMain {
 
       wupdate.execute(
         """
-          |function hierarchy_depth do
-          |  %lcs := lcs(%A)
-          |  %root := last(%lcs.hypernym*[empty(hypernym)])
-          |  emit tree_depth(%root, `hypernym`)
-          |end
-        """.stripMargin)
-
-      wupdate.execute(
-        """
           |function lch_measure do
           |  emit max(-log(min_path_length(%A)/(2*hierarchy_depth(%A))))
           |end

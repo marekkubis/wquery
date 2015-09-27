@@ -25,5 +25,8 @@ class MeasuresTestSuite extends WQueryTestSuite {
 
   @Test def testPathMeasureOnEqualSynsets() = result of "path_measure({car:1:n}, {auto:1:n})" should equal ("1.0\n")
 
+  @Test def testHierarchyDepthForBusCar() = result of "hierarchy_depth({bus:4:n}, {car:1:n})" should equal ("13\n")
+
+  @Test def testHierarchyDepthForBusTaxi() = result of "hierarchy_depth({bus:4:n}, {taxi:1:n})" should equal ("13\n")
 
 }
