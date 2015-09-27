@@ -1,3 +1,15 @@
 function min_size do
   emit distinct(min(size(%A)))
 end
+
+function max_size do
+  emit distinct(max(size(%A)))
+end
+
+function lcs do
+  %l, %r := %A
+  %lh := last(%l.hypernym*)
+  %rh := last(%r.hypernym*)
+  %m := maxby((%lh intersect %rh)$a<$a,size($a.hypernym*[empty(hypernym)])>,2)
+  emit as_synset(distinct(%m$a$_<$a>))
+end

@@ -116,17 +116,6 @@ object WSimMain {
 
       wupdate.execute(
         """
-          |function lcs do
-          |  %l, %r := %A
-          |  %lh := last(%l.hypernym*)
-          |  %rh := last(%r.hypernym*)
-          |  %m := maxby((%lh intersect %rh)$a<$a,size($a.hypernym*[empty(hypernym)])>,2)
-          |  emit as_synset(distinct(%m$a$_<$a>))
-          |end
-        """.stripMargin)
-
-      wupdate.execute(
-        """
           |function min_path_length do
           |  %l, %r := %A
           |  %lcs := lcs(%l, %r)
@@ -141,13 +130,6 @@ object WSimMain {
         """
           |function path_measure do
           |  emit 1/min_path_length(%A)
-          |end
-        """.stripMargin)
-
-      wupdate.execute(
-        """
-          |function max_size do
-          |  emit distinct(max(size(%A)))
           |end
         """.stripMargin)
 
