@@ -7,6 +7,9 @@ import org.wquery.model.Relation
 
 sealed abstract class WQueryException(message: String) extends RuntimeException(message)
 
+class LibraryNotLoadedException(fileName: String, e: WQueryException)
+  extends WQueryException("Library '" + fileName + "' not loaded: " + e.getMessage)
+
 class WQueryParsingException(message: String) extends WQueryException(message)
 
 class WQueryParsingFailureException(message: String) extends WQueryParsingException(message)

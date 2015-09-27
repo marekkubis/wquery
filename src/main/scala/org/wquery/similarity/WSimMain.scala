@@ -116,13 +116,6 @@ object WSimMain {
 
       wupdate.execute(
         """
-          |function min_size do
-          |  emit distinct(min(size(%A)))
-          |end
-        """.stripMargin)
-
-      wupdate.execute(
-        """
           |function lcs do
           |  %l, %r := %A
           |  %lh := last(%l.hypernym*)
