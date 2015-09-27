@@ -45,3 +45,24 @@ end
 function lch_measure do
   emit max(-log(min_path_length(%A)/(2*hierarchy_depth(%A))))
 end
+
+#
+# Wu-Palmer measure
+#
+function root_dist do
+  emit min_size(%A.hypernym*[empty(hypernym)]) + 1
+end
+
+function lcs_dist do
+  %s, %lcs := %A
+  emit min_size(%s.hypernym*.%lcs) - 1
+end
+
+function wup_measure do
+  %l, %r := %A
+  %lcs := lcs(%l, %r)
+  %dl := lcs_dist(%l, %lcs)
+  %dr := lcs_dist(%r, %lcs)
+  %dlcs := root_dist(%lcs)
+  emit 2*%dlcs/(%dl + %dr + 2*%dlcs)
+end

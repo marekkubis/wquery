@@ -116,33 +116,6 @@ object WSimMain {
 
       wupdate.execute(
         """
-          |function root_dist do
-          |  emit min_size(%A.hypernym*[empty(hypernym)]) + 1
-          |end
-        """.stripMargin)
-
-      wupdate.execute(
-        """
-          |function lcs_dist do
-          |  %s, %lcs := %A
-          |  emit min_size(%s.hypernym*.%lcs) - 1
-          |end
-        """.stripMargin)
-
-      wupdate.execute(
-        """
-          |function wup_measure do
-          |  %l, %r := %A
-          |  %lcs := lcs(%l, %r)
-          |  %dl := lcs_dist(%l, %lcs)
-          |  %dr := lcs_dist(%r, %lcs)
-          |  %dlcs := root_dist(%lcs)
-          |  emit 2*%dlcs/(%dl + %dr + 2*%dlcs)
-          |end
-        """.stripMargin)
-
-      wupdate.execute(
-        """
           |function ic do
           |  %s := as_synset(%A)
           |  %c := tree_sum(%s, `hypernym`, `count`)
