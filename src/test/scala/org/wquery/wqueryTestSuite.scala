@@ -15,7 +15,8 @@ object WQueryTestSuiteRuntime {
   val SampleNetPath = "src/universal/samples/samplenet.xml"
   val CompiledSampleNetPath = "target/samplenet.wn"
 
-  compileSampleNet
+  compileSampleNet()
+  System.setProperty("wquery.runtime.library", "src/universal/lib")
 
   val wupdate = newWUpdate
   val emitter = new PlainWQueryEmitter(escaping = false)
