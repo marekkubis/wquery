@@ -66,3 +66,24 @@ function wup_measure do
   %dlcs := root_dist(%lcs)
   emit 2*%dlcs/(%dl + %dr + 2*%dlcs)
 end
+
+#
+# information content
+#
+function ic do
+  %s := as_synset(%A)
+  %c := tree_sum(%s, `hypernym`, `count`)
+  %root := last(%s.hypernym*[empty(hypernym)])
+  %d := tree_sum(%root, `hypernym`, `count`)
+  emit -log(%c/%d)
+end
+
+#
+# Resnik measure
+#
+function res_measure do
+  %l, %r := %A
+  %lcs := lcs(%l, %r)
+
+  emit ic(%lcs)
+end

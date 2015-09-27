@@ -47,4 +47,8 @@ class MeasuresTestSuite extends WQueryTestSuite {
 
   @Test def testWupMeasureOnEqualSynsets() = result of "wup_measure({car:1:n}, {auto:1:n})" should equal ("1.0\n")
 
+  @Test def testIC() = result of "ic({car:1:n})" should equal ("0.6931471805599453\n")
+
+  @Test def testResnikMeasure() = result of "res_measure({bus:4:n}, {taxi:1:n})" should equal ("0.6931471805599453\n")
+
 }
