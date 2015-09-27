@@ -114,15 +114,6 @@ object WSimMain {
 
       val writer = new BufferedWriter(new OutputStreamWriter(output))
 
-      wupdate.execute(
-        """
-          |function lin_measure do
-          |  %l, %r := %A
-          |  %lcs := lcs(%l, %r)
-          |  emit 2*ic(%lcs)/(ic(%l) + ic(%r))
-          |end
-        """.stripMargin)
-
       for (line <- scala.io.Source.fromInputStream(input).getLines()) {
         val result = wupdate.execute(
           s"""

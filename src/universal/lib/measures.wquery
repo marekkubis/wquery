@@ -108,3 +108,12 @@ function jcn_measure do
     emit 1/%dist
   end
 end
+
+#
+# Lin measure
+#
+function lin_measure do
+  %l, %r := %A
+  %lcs := lcs(%l, %r)
+  emit 2*ic(%lcs)/(ic(%l) + ic(%r))
+end

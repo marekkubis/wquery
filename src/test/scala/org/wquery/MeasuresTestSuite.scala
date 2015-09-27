@@ -53,4 +53,6 @@ class MeasuresTestSuite extends WQueryTestSuite {
 
   @Test def testJiangConrathMeasure() = result of "jcn_measure({bus:4:n}, {taxi:1:n})" should equal ("0.2583177668073288\n")
 
+  @Test def testLinMeasure() = result of "lin_measure({bus:4:n}, {taxi:1:n})" should equal ("0.2636796160574091\n")
+
 }
