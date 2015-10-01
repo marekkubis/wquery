@@ -9,6 +9,18 @@ function max_size do
   emit distinct(max(size(%A)))
 end
 
+function subsumers do
+  %l, %r := %A
+  %lh := last(%l.hypernym*)
+  %rh := last(%r.hypernym*)
+  emit %lh intersect %rh
+end
+
+function lcs_by_depth do
+  %m := maxby(subsumers(%A)$a<$a,min_size($a.hypernym*[empty(hypernym)])>, 2)
+  emit as_synset(distinct(%m$a$_<$a>))
+end
+
 function lcs do
   %l, %r := %A
   %lh := last(%l.hypernym*)
@@ -50,7 +62,7 @@ end
 # Wu-Palmer measure
 #
 function root_dist do
-  emit min_size(%A.hypernym*[empty(hypernym)]) + 1
+  emit min_size(%A.hypernym*[empty(hypernym)])
 end
 
 function lcs_dist do
