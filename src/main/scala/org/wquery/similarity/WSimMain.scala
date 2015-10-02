@@ -94,8 +94,10 @@ object WSimMain {
       if (rootNode) {
         wupdate.execute("update synsets += {ROOT:1:n}")
         wupdate.execute("update {}[empty(hypernym) and pos = `n`] hypernym := {ROOT:1:n}")
+        wupdate.execute("update {ROOT:1:n} pos := `n`")
         wupdate.execute("update synsets += {ROOT:1:v}")
         wupdate.execute("update {}[empty(hypernym) and pos = `v`] hypernym := {ROOT:1:v}")
+        wupdate.execute("update {ROOT:1:v} pos := `v`")
       }
 
       if (senseCounts) {

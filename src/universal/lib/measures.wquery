@@ -51,7 +51,11 @@ end
 function hierarchy_depth do
   %lcs := lcs(%A)
   %root := last(%lcs.hypernym*[empty(hypernym)])
-  emit tree_depth(%root, `hypernym`)
+  %depth := tree_depth(%root, `hypernym`)
+  if [%root.pos = `v`]
+    emit %depth + 1
+  else
+    emit %depth
 end
 
 function lch_measure do
