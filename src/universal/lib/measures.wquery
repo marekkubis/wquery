@@ -88,7 +88,12 @@ function ic do
   %c := tree_sum(%s, `hypernym`, `count`)
   %root := last(%s.hypernym*[empty(hypernym)])
   %d := tree_sum(%root, `hypernym`, `count`)
-  emit -log(%c/%d)
+  %ic := -log(%c/%d)
+
+  if [%ic = inf]
+    emit 0
+  else
+    emit %ic 
 end
 
 function lcs_by_ic do
