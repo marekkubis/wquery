@@ -88,12 +88,14 @@ function ic do
   %c := tree_sum(%s, `hypernym`, `count`)
   %root := last(%s.hypernym*[empty(hypernym)])
   %d := tree_sum(%root, `hypernym`, `count`)
-  %ic := -log(%c/%d)
+  %prob := %c/%d
 
-  if [%ic = inf]
-    emit 0
-  else
-    emit %ic 
+  from %prob$p do
+    if [$p > 0]
+      emit -log($p)
+    else
+      emit 0
+  end
 end
 
 function lcs_by_ic do
@@ -138,5 +140,11 @@ end
 function lin_measure do
   %l, %r := %A
   %lcs := lcs(%l, %r)
-  emit 2*ic(%lcs)/(ic(%l) + ic(%r))
+  %icl := ic(%l)
+  %icr := ic(%r)
+
+  if [%icl != 0 and %icr != 0]
+    emit 2*ic(%lcs)/(%icl + %icr)
+  else
+    emit 0
 end
