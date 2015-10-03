@@ -55,7 +55,19 @@ class GeneratorsTestSuite extends WQueryTestSuite {
   @Test def test0Dot5EPlus2Double() = result of "0.5e+2" should equal ("50.0\n")        
 
   @Test def test0Dot5EMinus2Double() = result of "0.5e-2" should startWith ("0.005")
-    
+
+  @Test def testInfDouble() = result of "inf" should equal ("Infinity\n")
+
+  @Test def testInfString() = result of "`inf`" should equal ("inf\n")
+
+  @Test def testNegInfDouble() = result of "-inf" should equal ("-Infinity\n")
+
+  @Test def testNegInfString() = result of "`-inf`" should equal ("-inf\n")
+
+  @Test def testNaNDouble() = result of "NaN" should equal ("NaN\n")
+
+  @Test def testNaNString() = result of "`NaN`" should equal ("NaN\n")
+
   @Test def testConstantSequence() = result of "3..8" should equal ("3\n4\n5\n6\n7\n8\n")
 
   @Test def testFilter() = result of "[1 = 1]" should equal ("true\n")    

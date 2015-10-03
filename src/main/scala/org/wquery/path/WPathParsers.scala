@@ -133,10 +133,10 @@ trait WPathParsers extends WLanguageParsers {
     boolean_generator
     | synset_generator
     | domain_generator
+    | float_generator
     | relation_generator
     | sense_generator
     | function_call_generator
-    | float_generator
     | sequence_generator
     | integer_generator
     | back_generator
@@ -182,7 +182,12 @@ trait WPathParsers extends WLanguageParsers {
     | doubleQuotedString ^^ { WordFormByRegexReq(_) }
   )
 
-  def float_generator = floatNum ^^ { value => AlgebraExpr(ConstantOp.fromValue(value)) }
+  def float_generator = (
+    "inf" ^^^ { AlgebraExpr(ConstantOp.fromValue(Double.PositiveInfinity))}
+    | "NaN" ^^^ { AlgebraExpr(ConstantOp.fromValue(Double.NaN))}
+    | floatNum ^^ { value => AlgebraExpr(ConstantOp.fromValue(value)) }
+  )
+
   def sequence_generator = integerNum ~ ".." ~ integerNum ^^ { case left~_~right => AlgebraExpr(ConstantOp(DataSet.fromList((left to right).toList))) }
   def integer_generator = integerNum ^^ { value => AlgebraExpr(ConstantOp.fromValue(value)) }
   def back_generator = "#" ^^^ { ContextByVariableReq(StepVariable.ContextVariable) }
