@@ -22,10 +22,7 @@ function lcs_by_depth do
 end
 
 function lcs do
-  %l, %r := %A
-  %lh := last(%l.hypernym*)
-  %rh := last(%r.hypernym*)
-  %m := maxby((%lh intersect %rh)$a<$a,size($a.hypernym*[empty(hypernym)])>,2)
+  %m := maxby(subsumers(%A)$a<$a,size($a.hypernym*[empty(hypernym)])>, 2)
   emit as_synset(distinct(%m$a$_<$a>))
 end
 
@@ -94,12 +91,17 @@ function ic do
   emit -log(%c/%d)
 end
 
+function lcs_by_ic do
+  %m := maxby(subsumers(%A)$a<$a,ic($a)>, 2)
+  emit as_synset(distinct(%m$a$_<$a>))
+end
+
 #
 # Resnik measure
 #
 function res_measure do
   %l, %r := %A
-  %lcs := lcs(%l, %r)
+  %lcs := lcs_by_ic(%l, %r)
 
   emit ic(%lcs)
 end
