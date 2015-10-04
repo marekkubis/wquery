@@ -100,10 +100,12 @@ object WSimMain {
         wupdate.execute("update {ROOT:1:v} pos := `v`")
       }
 
-      if (senseCounts) {
-        wupdate.execute("from {}$a update $a count := sum(last($a.senses.count))")
-      } else {
-        wupdate.execute("from {}$a update $a count := sum(last($a.senses.word.count))")
+      if (measure != "path" && measure != "wup" && measure != "lch") {
+        if (senseCounts) {
+          wupdate.execute("from {}$a update $a count := sum(last($a.senses.count))")
+        } else {
+          wupdate.execute("from {}$a update $a count := sum(last($a.senses.word.count))")
+        }
       }
 
       val input = opts.get[String]("IFILE")
