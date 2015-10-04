@@ -94,8 +94,16 @@ function ic do
     if [$p > 0]
       emit -log($p)
     else
-      emit 0
+      emit $p
   end
+end
+
+function ic2 do
+  %s := as_synset(%A)
+  %c := tree_sum(%s, `hypernym`, `count`)
+  %root := last(%s.hypernym*[empty(hypernym)])
+  %d := tree_sum(%root, `hypernym`, `count`)
+  emit -log(%c/%d)
 end
 
 function lcs_by_ic do
@@ -118,14 +126,20 @@ end
 #
 function jcn_measure do
   %l, %r := %A
-  %lcs := lcs(%l, %r)
-  %dist := ic(%l) + ic(%r) - 2*ic(%lcs)
+  %lcs := lcs_by_ic(%l, %r)
+  %icl := ic2(%l)
+  %icr := ic2(%r)
 
-  if [%dist = 0 or is_nan(%dist)] do
-    %r := last(%lcs.hypernym*[empty(hypernym)])
-    %d := distinct(max(tree_sum(%r, `hypernym`, `count`)))
+  if [%icl != 0 and %icr != 0]
+    %dist := %icl + %icr - 2*ic2(%lcs)
+  else
+    %dist := 0
 
-    if [%d > 0.01]
+  if [%dist = 0] do
+    %root := last(%lcs.hypernym*[empty(hypernym)])
+    %d := distinct(max(tree_sum(%root, `hypernym`, `count`)))
+
+    if [not empty(%d) and %d > 0.01]
        emit 1/-log((%d - 0.01)/%d)
      else
        emit 0
