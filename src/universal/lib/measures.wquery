@@ -153,7 +153,7 @@ end
 #
 function lin_measure do
   %l, %r := %A
-  %lcs := lcs(%l, %r)
+  %lcs := lcs_by_ic(%l, %r)
   %icl := ic(%l)
   %icr := ic(%r)
 
