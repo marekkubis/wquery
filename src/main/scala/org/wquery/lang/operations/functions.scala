@@ -609,11 +609,13 @@ object LowerFunction extends DataSetFunction("lower") with AcceptsTypes with Ret
   def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
     DataSet(dataSet.paths.map(tuple => tuple.last match {
       case word: String =>
-        List[Any](word.toLowerCase)
+        List[Any](lower(word))
     }))
   }
 
   def returnType(args: AlgebraOp) = Set(StringType)
+
+  def lower(word: String) = word.toLowerCase
 }
 
 object UpperFunction extends DataSetFunction("upper") with AcceptsTypes with ReturnsValueSetOfSimilarSize
@@ -623,11 +625,28 @@ object UpperFunction extends DataSetFunction("upper") with AcceptsTypes with Ret
   def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
     DataSet(dataSet.paths.map(tuple => tuple.last match {
       case word: String =>
-        List[Any](word.toUpperCase)
+        List[Any](upper(word))
     }))
   }
 
   def returnType(args: AlgebraOp) = Set(StringType)
+
+  def upper(word: String) = word.toUpperCase
+}
+
+object TitleFunction extends DataSetFunction("title") with AcceptsTypes with ReturnsValueSetOfSimilarSize
+ with ClearsBindingsPattern {
+  def argumentTypes = List(Set(StringType))
+
+  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
+    DataSet(dataSet.paths.map(tuple => tuple.last match {
+      case word: String => List[Any](title(word))
+    }))
+  }
+
+  def returnType(args: AlgebraOp) = Set(StringType)
+
+  def title(word: String) = if (word.isEmpty) word else word.head.toUpper +: word.tail.toLowerCase
 }
 
 object IsSynsetFunction extends DataSetFunction("is_synset") with AcceptsTypes with ReturnsValueSetOfSimilarSize
@@ -978,6 +997,7 @@ object Functions {
   registerFunction(ReplaceFunction)
   registerFunction(LowerFunction)
   registerFunction(UpperFunction)
+  registerFunction(TitleFunction)
   registerFunction(FormatFunction)
   registerFunction(IsSynsetFunction)
   registerFunction(IsSenseFunction)

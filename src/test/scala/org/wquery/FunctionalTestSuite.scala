@@ -397,7 +397,7 @@ class FunctionalTestSuite extends WQueryTestSuite {
 
     result(wupdate) of "{car:1:n}" should equal ("{ car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n }\n")
     result(wupdate) of "from {}$a[count(senses) > 1] merge {$a.senses.word}[not empty(senses.word<#> intersect $a.senses.word<#>) and count(senses) > 1]" should equal ("(no result)\n")
-    result(wupdate) of "{car:1:n}" should equal ("{ samochód:1:n auto:2:n auto:4:n auto:5:n cable car:1:n car:5:n car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n car:2:n railcar:1:n railway car:1:n railroad car:1:n car:3:n gondola:3:n car:4:n elevator car:1:n }\n")
+    result(wupdate) of "{car:1:n}" should equal ("{ samochód:1:n auto:2:n cable car:1:n car:5:n car:1:n auto:1:n automobile:1:n machine:6:n motorcar:1:n car:2:n railcar:1:n railway car:1:n railroad car:1:n car:3:n gondola:3:n car:4:n elevator car:1:n auto:4:n auto:5:n }\n")
   }
 
   // Q87

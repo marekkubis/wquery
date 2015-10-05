@@ -88,6 +88,10 @@ class FunctionsTestSuite extends WQueryTestSuite {
 
   @Test def testUpper() = result of "upper(`test`)" should equal ("TEST\n")
 
+  @Test def testTitleNonEmtpy() = result of "title(`tESt`)" should equal ("Test\n")
+
+  @Test def testTitleEmtpy() = result of "title(``)" should equal ("\n")
+
   @Test def testRange() = result of "range(1..10,7..15 union 23,25)" should equal ("1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12\n13\n14\n15\n23\n24\n25\n")
 
   @Test def testSort() = result of "emit sort(10..15 union 23..25 union 1..9)" should equal ("1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12\n13\n14\n15\n23\n24\n25\n")

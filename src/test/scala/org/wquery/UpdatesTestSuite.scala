@@ -116,7 +116,7 @@ class UpdatesTestSuite extends WQueryTestSuite {
     result(wupdate) of "car:1:n" should equal ("(no result)\n")
     result(wupdate) of "{car:1:n}" should equal ("(no result)\n")
     result(wupdate) of "car.senses" should equal ("car senses car:2:n\ncar senses car:3:n\ncar senses car:4:n\ncar senses car:5:n\n")
-    result(wupdate) of "{car}" should equal ("{ cable car:1:n car:5:n }\n{ auto:1:n automobile:1:n machine:6:n motorcar:1:n }\n{ car:2:n railcar:1:n railway car:1:n railroad car:1:n }\n{ car:4:n elevator car:1:n }\n{ car:3:n gondola:3:n }\n")
+    result(wupdate) of "{car}" should equal ("{ cable car:1:n car:5:n }\n{ car:2:n railcar:1:n railway car:1:n railroad car:1:n }\n{ car:4:n elevator car:1:n }\n{ car:3:n gondola:3:n }\n")
   }
 
   @Test def testRemoveWord() = {

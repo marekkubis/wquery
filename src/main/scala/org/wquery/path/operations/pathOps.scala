@@ -8,6 +8,7 @@ import org.wquery.path._
 import org.wquery.query.SetVariable
 import org.wquery.utils.IntOptionW._
 
+import scala.collection.mutable.ListBuffer
 import scalaz.Scalaz._
 
 sealed abstract class PathOp extends AlgebraOp
@@ -518,19 +519,23 @@ case class SynsetFetchOp(op: AlgebraOp) extends AlgebraOp {
        DataSet.empty
      }
    } else {
-     val contextTypes = op.rightType(0).filter(t => t === StringType || t === SenseType)
-     val patterns = contextTypes.map{ contextType => (contextType: @unchecked) match {
-       case StringType =>
-         ArcRelationalPattern(ArcPattern(Some(List(WordNet.WordFormToSynsets)), ArcPatternArgument(Relation.Src, Some(WordNet.WordFormToSynsets.sourceType)),
-           ArcPatternArgument(Relation.Dst, WordNet.WordFormToSynsets.destinationType)))
-       case SenseType =>
-         ArcRelationalPattern(ArcPattern(Some(List(WordNet.SenseToSynset)), ArcPatternArgument(Relation.Src, Some(WordNet.SenseToSynset.sourceType)),
-           ArcPatternArgument(Relation.Dst, WordNet.SenseToSynset.destinationType)))
-     }}.toList
+     val pathBuffer = new ListBuffer[List[Any]]
 
-     val projectedVariable = StepVariable("__p")
-     ProjectOp(ExtendOp(op, RelationUnionPattern(patterns), VariableTemplate(List(projectedVariable))),
-       StepVariableRefOp(projectedVariable, Set(SynsetType))).evaluate(wordNet, bindings, context)
+     for (path <- op.evaluate(wordNet, bindings, context).paths if path.nonEmpty) {
+       path.last match {
+         case word: String =>
+           val senses = wordNet.getSenses(word)
+
+           for (sense <- senses)
+             wordNet.getSynset(sense).foreach(synset => pathBuffer.append(List(synset)))
+         case sense: Sense =>
+           wordNet.getSynset(sense).foreach(synset => pathBuffer.append(List(synset)))
+         case _ =>
+           /* do nothing */
+       }
+     }
+
+     DataSet(pathBuffer.toList)
    }
 
   }
