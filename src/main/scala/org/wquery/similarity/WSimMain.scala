@@ -2,19 +2,20 @@ package org.wquery.similarity
 
 import java.io._
 
+import jline.console.ConsoleReader
 import org.rogach.scallop._
 import org.rogach.scallop.exceptions.{Help, ScallopException, Version}
-import org.wquery.WQueryProperties
 import org.wquery.emitter.TsvWQueryEmitter
-import org.wquery.lang.WTupleParsers
 import org.wquery.lang.operations.{LowerFunction, TitleFunction, UpperFunction}
+import org.wquery.lang.{WInteractiveMain, WTupleParsers}
 import org.wquery.loader.WnLoader
 import org.wquery.model._
 import org.wquery.update.WUpdate
+import org.wquery.{WQueryCommandLineException, WQueryProperties}
 
 import scala.io.Source
 
-object WSimMain {
+object WSimMain extends WInteractiveMain {
   val loader = new WnLoader
   val emitter = new TsvWQueryEmitter
 
@@ -60,6 +61,7 @@ object WSimMain {
       .opt[String]("field-separator", short = 'F', descr = "Set field separator", default = () => Some("\t"), required = false)
       .opt[Boolean]("help", short = 'h', descr = "Show help message")
       .opt[Boolean]("ignore-case", short = 'I', descr = "Ignore case while looking up words in the wordnet", required = false)
+      .opt[Boolean]("interactive", short = 'i', descr = "Run in the interactive interpreter mode", required = false)
       .opt[String]("measure", short = 'm', default = () => Some("path"),
         descr = "Similarity measure")
       .opt[Boolean]("print-pairs", short = 'p', descr = "Print word/sense pairs to the output", required = false)
@@ -76,6 +78,7 @@ object WSimMain {
       opts.verify
 
       val ignoreCase = opts[Boolean]("ignore-case")
+      val interactiveMode = opts[Boolean]("interactive")
       val separator = opts[String]("field-separator")
       val measure = opts[String]("measure")
       val printPairs = opts[Boolean]("print-pairs")
@@ -111,61 +114,62 @@ object WSimMain {
         }
       }
 
-      val input = opts.get[String]("IFILE")
-        .map(ifile => new FileInputStream(ifile))
-        .getOrElse(System.in)
+      if (interactiveMode) {
+        executeInteractive(wupdate, "wsim", new ConsoleReader(System.in, System.out), emitter)
+      } else {
+        def escape(x: String) = "as_tuple(`" + x + "`)"
 
-      val output = opts.get[String]("OFILE")
-        .map(outputName => new BufferedOutputStream(new FileOutputStream(outputName)))
-        .getOrElse(System.out)
+        def caseIgnoringQuery(x: String) = List(escape(x), escape(UpperFunction.upper(x)),
+          escape(LowerFunction.lower(x)), escape(TitleFunction.title(x))).mkString(" union ")
 
-      val writer = new BufferedWriter(new OutputStreamWriter(output))
+        val input = opts.get[String]("IFILE")
+          .map(ifile => new FileInputStream(ifile)).getOrElse(System.in)
 
-      def escape(x: String) = "as_tuple(`" + x + "`)"
+        val output = opts.get[String]("OFILE")
+          .map(outputName => new BufferedOutputStream(new FileOutputStream(outputName))).getOrElse(System.out)
 
-      for (line <- scala.io.Source.fromInputStream(input).getLines()) {
-        val fields = line.split(separator, 2)
-        val (left, right) = (fields(0), fields(1))
+        val writer = new BufferedWriter(new OutputStreamWriter(output))
 
-        val (leftSenseQuery, rightSenseQuery) = if (!ignoreCase)
-          (escape(left), escape(right))
-        else
-          (List(
-              escape(left),
-              escape(UpperFunction.upper(left)),
-              escape(LowerFunction.lower(left)),
-              escape(TitleFunction.title(left))).mkString(" union "),
-            List(
-              escape(right),
-              escape(UpperFunction.upper(right)),
-              escape(LowerFunction.lower(right)),
-              escape(TitleFunction.title(right))).mkString(" union "))
+        for (line <- scala.io.Source.fromInputStream(input).getLines()) {
+          val fields = line.split(separator, 2)
+          val (left, right) = (fields(0), fields(1))
 
-        val result = wupdate.execute(
-          s"""
-            |do
-            |  %l := {distinct($leftSenseQuery)}
-            |  %r := {distinct($rightSenseQuery)}
-            |  emit na(distinct(max(from (%l,%r)$$a$$b emit ${measure}_measure($$a,$$b))))
-            |end
+          val (leftSenseQuery, rightSenseQuery) = if (!ignoreCase)
+            (escape(left), escape(right))
+          else
+            (caseIgnoringQuery(left), caseIgnoringQuery(right))
+
+          val result = wupdate.execute(
+            s"""
+               |do
+               |  %l := {distinct($leftSenseQuery)}
+               |  %r := {distinct($rightSenseQuery)}
+               |  emit na(distinct(max(from (%l,%r)$$a$$b emit ${measure}_measure($$a,$$b))))
+               |end
           """.stripMargin)
 
-        if (printPairs) {
-          writer.write(line)
-          writer.write(separator)
+          if (printPairs) {
+            writer.write(line)
+            writer.write(separator)
+          }
+
+          writer.write(emitter.emit(result))
+          writer.flush()
         }
 
-        writer.write(emitter.emit(result))
-        writer.flush()
+        writer.close()
       }
-
-      writer.close()
     } catch {
       case e: Help =>
         opts.printHelp()
       case Version =>
         opts.printHelp()
       case e: ScallopException =>
+        println("ERROR: " + e.message)
+        println()
+        opts.printHelp()
+        sys.exit(1)
+      case e: WQueryCommandLineException =>
         println("ERROR: " + e.message)
         println()
         opts.printHelp()

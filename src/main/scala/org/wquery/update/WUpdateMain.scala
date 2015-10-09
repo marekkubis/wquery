@@ -22,12 +22,12 @@ object WUpdateMain extends WLanguageMain("WUpdate", new WUpdate(_)) {
   def doMain(lang: WLanguage, output: OutputStream, emitter: WQueryEmitter, opts: Scallop) {
     val resultLog = if (opts[Boolean]("print")) Some(new BufferedWriter(new OutputStreamWriter(System.err)), emitter) else None
 
-    opts.get[String]("file").map(executeCommandFile(lang, _, resultLog))
-    opts.get[String]("command").map(executeCommand(opts, lang, _, resultLog))
-    opts.get[String]("update").map(command => executeCommand(opts, lang, "update " + command, resultLog))
+    opts.get[String]("file").foreach(executeCommandFile(lang, _, resultLog))
+    opts.get[String]("command").foreach(executeCommand(opts, lang, _, resultLog))
+    opts.get[String]("update").foreach(command => executeCommand(opts, lang, "update " + command, resultLog))
 
     if (opts[Boolean]("interactive"))
-      executeInteractive(lang, new ConsoleReader(System.in, System.err), emitter)
+      executeInteractive(lang, "wupdate", new ConsoleReader(System.in, System.err), emitter)
 
     val printer = new WnPrinter()
 

@@ -2,17 +2,16 @@ package org.wquery.lang
 
 import java.io._
 
-import jline.console.ConsoleReader
 import org.rogach.scallop.Scallop
 import org.rogach.scallop.exceptions.{Help, ScallopException, Version}
 import org.wquery.emitter.WQueryEmitter
 import org.wquery.loader.WnLoader
 import org.wquery.model.{DataSet, WordNet}
-import org.wquery.reader.{ConsoleLineReader, ExpressionReader, InputLineReader}
+import org.wquery.reader.{ExpressionReader, InputLineReader}
 import org.wquery.utils.Logging
 import org.wquery.{WQueryCommandLineException, WQueryProperties}
 
-abstract class WLanguageMain(languageName: String, language: WordNet => WLanguage) {
+abstract class WLanguageMain(languageName: String, language: WordNet => WLanguage) extends WInteractiveMain {
   val loader = new WnLoader
   val tupleParsers = new Object with WTupleParsers
 
@@ -129,19 +128,4 @@ abstract class WLanguageMain(languageName: String, language: WordNet => WLanguag
     expressionReader.close()
     resultLog.map{ case (writer, _) => writer.flush() }
   }
-
-  def executeInteractive(lang: WLanguage, reader: ConsoleReader, emitter: WQueryEmitter): Unit = {
-    reader.addCompleter(new WLanguageCompleter(lang.wordNet))
-    reader.setExpandEvents(false)
-    val expressionReader = new ExpressionReader(new ConsoleLineReader(reader, languageName.toLowerCase + "> "))
-    val writer = reader.getOutput
-
-    expressionReader.foreach { expr =>
-      val result = lang.execute(expr)
-      writer.write(emitter.emit(result))
-    }
-
-    expressionReader.close()
-  }
-
 }
