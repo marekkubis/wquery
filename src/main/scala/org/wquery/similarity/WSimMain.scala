@@ -64,8 +64,8 @@ object WSimMain extends WInteractiveMain {
       .opt[Boolean]("help", short = 'h', descr = "Show help message")
       .opt[Boolean]("ignore-case", short = 'I', descr = "Ignore case while looking up words in the wordnet", required = false)
       .opt[Boolean]("interactive", short = 'i', descr = "Run in the interactive interpreter mode", required = false)
-      .opt[String]("measure", short = 'm', default = () => Some("path"),
-        descr = "Similarity measure")
+      .opt[String]("measure", short = 'm', default = () => Some("path"), descr = "Similarity measure")
+      .opt[List[String]]("hypernymy-names", short = 'n', default = () => Some(List("hypernym")), descr = "Hypernymy relation name(s)")
       .opt[Boolean]("print-pairs", short = 'p', descr = "Print word/sense pairs to the output", required = false)
       .opt[Boolean]("root-node", short = 'r', descr = "Introduce root nodes in the nouns and verbs hierarchies", required = false)
       .opt[Boolean]("version", short = 'v', descr = "Show version")
@@ -80,6 +80,7 @@ object WSimMain extends WInteractiveMain {
       opts.verify
 
       val emitter = WQueryEmitter.demandEmitter(opts[String]("emitter"))
+      val hypernymyNames = opts[List[String]]("hypernymy-names")
       val ignoreCase = opts[Boolean]("ignore-case")
       val interactiveMode = opts[Boolean]("interactive")
       val separator = opts[String]("field-separator")
@@ -93,12 +94,14 @@ object WSimMain extends WInteractiveMain {
 
       val wordNet = loader.load(wordNetInput)
       wordNet.addRelation(Relation.binary("count", SynsetType, IntegerType))
+      wordNet.addRelation(Relation.binary("hypernym", SynsetType, SynsetType))
 
       val senseCounts = opts.get[String]("counts").map(fileName => loadCounts(wordNet, fileName)).getOrElse(true)
-
       val wupdate = new WUpdate(wordNet)
 
-      wupdate.execute("from !instance_hypernym$a$_$b update $a hypernym += $b")
+      for (name <- hypernymyNames if name != "hypernym") {
+        wupdate.execute(s"from !$name$$a$$_$$b update $$a hypernym += $$b")
+      }
 
       if (rootNode) {
         wupdate.execute("update synsets += {ROOT:1:n}")
@@ -137,10 +140,10 @@ object WSimMain extends WInteractiveMain {
           val fields = line.split(separator, 2)
           val (left, right) = (fields(0), fields(1))
 
-          val (leftSenseQuery, rightSenseQuery) = if (!ignoreCase)
-            (escape(left), escape(right))
-          else
+          val (leftSenseQuery, rightSenseQuery) = if (ignoreCase)
             (caseIgnoringQuery(left), caseIgnoringQuery(right))
+          else
+            (escape(left), escape(right))
 
           val  pairQuery = if (printPairs) "`" + left + "`,`" + right + "`," else ""
 
