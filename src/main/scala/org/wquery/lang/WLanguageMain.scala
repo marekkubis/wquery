@@ -7,7 +7,6 @@ import org.rogach.scallop.exceptions.{Help, ScallopException, Version}
 import org.wquery.emitter.WQueryEmitter
 import org.wquery.loader.WnLoader
 import org.wquery.model.{DataSet, WordNet}
-import org.wquery.reader.{ExpressionReader, InputLineReader}
 import org.wquery.utils.Logging
 import org.wquery.{WQueryCommandLineException, WQueryProperties}
 
@@ -104,13 +103,13 @@ abstract class WLanguageMain(languageName: String, language: WordNet => WLanguag
 
         lang.bindSetVariable("D", dataSet)
         val result = lang.execute(command)
-        resultLog.map{ case (writer, emitter) => writer.write(emitter.emit(result)) }
+        resultLog.foreach{ case (writer, emitter) => writer.write(emitter.emit(result)) }
       }
 
-      resultLog.map{ case (writer, _) => writer.flush()}
+      resultLog.foreach{ case (writer, _) => writer.flush()}
     } else {
       val result = lang.execute(command)
-      resultLog.map{ case (writer, emitter) =>
+      resultLog.foreach{ case (writer, emitter) =>
         writer.write(emitter.emit(result))
         writer.flush()
       }
@@ -118,14 +117,11 @@ abstract class WLanguageMain(languageName: String, language: WordNet => WLanguag
   }
 
   def executeCommandFile(lang: WLanguage, fileName: String, resultLog: Option[(BufferedWriter, WQueryEmitter)]): Unit = {
-    val expressionReader = new ExpressionReader(new InputLineReader(new FileReader(fileName)))
+    val results = lang.executeFile(new File(fileName))
 
-    expressionReader.foreach { expr =>
-      val result = lang.execute(expr)
-      resultLog.map{ case (writer, emitter) => writer.write(emitter.emit(result)) }
+    resultLog.foreach{ case (writer, emitter) =>
+      results.foreach(result => writer.write(emitter.emit(result)))
+      writer.flush()
     }
-
-    expressionReader.close()
-    resultLog.map{ case (writer, _) => writer.flush() }
   }
 }
