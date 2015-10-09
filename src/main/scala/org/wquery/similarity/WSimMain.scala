@@ -5,7 +5,7 @@ import java.io._
 import jline.console.ConsoleReader
 import org.rogach.scallop._
 import org.rogach.scallop.exceptions.{Help, ScallopException, Version}
-import org.wquery.emitter.TsvWQueryEmitter
+import org.wquery.emitter.WQueryEmitter
 import org.wquery.lang.operations.{LowerFunction, TitleFunction, UpperFunction}
 import org.wquery.lang.{WInteractiveMain, WTupleParsers}
 import org.wquery.loader.WnLoader
@@ -17,7 +17,6 @@ import scala.io.Source
 
 object WSimMain extends WInteractiveMain {
   val loader = new WnLoader
-  val emitter = new TsvWQueryEmitter
 
   def loadCounts(wordNet: WordNet, fileName: String) = {
     val tupleParsers = new Object with WTupleParsers
@@ -58,6 +57,9 @@ object WSimMain extends WInteractiveMain {
                  |options:
                  | """.stripMargin)
       .opt[String]("counts", short = 'c', descr = "Word and/or sense counts for IC-based measures", required = false)
+      .opt[String]("emitter", short = 'e', default = () => Some("tsv"),
+        validate = arg => WQueryEmitter.emitters.contains(arg),
+        descr = "Set result emitter (i.e. output format) - either raw, plain, escaping or tsv")
       .opt[String]("field-separator", short = 'F', descr = "Set field separator", default = () => Some("\t"), required = false)
       .opt[Boolean]("help", short = 'h', descr = "Show help message")
       .opt[Boolean]("ignore-case", short = 'I', descr = "Ignore case while looking up words in the wordnet", required = false)
@@ -77,6 +79,7 @@ object WSimMain extends WInteractiveMain {
     try {
       opts.verify
 
+      val emitter = WQueryEmitter.demandEmitter(opts[String]("emitter"))
       val ignoreCase = opts[Boolean]("ignore-case")
       val interactiveMode = opts[Boolean]("interactive")
       val separator = opts[String]("field-separator")
@@ -139,19 +142,16 @@ object WSimMain extends WInteractiveMain {
           else
             (caseIgnoringQuery(left), caseIgnoringQuery(right))
 
+          val  pairQuery = if (printPairs) "`" + left + "`,`" + right + "`," else ""
+
           val result = wupdate.execute(
             s"""
                |do
                |  %l := {distinct($leftSenseQuery)}
                |  %r := {distinct($rightSenseQuery)}
-               |  emit na(distinct(max(from (%l,%r)$$a$$b emit ${measure}_measure($$a,$$b))))
+               |  emit ${pairQuery}na(distinct(max(from (%l,%r)$$a$$b emit ${measure}_measure($$a,$$b))))
                |end
           """.stripMargin)
-
-          if (printPairs) {
-            writer.write(line)
-            writer.write(separator)
-          }
 
           writer.write(emitter.emit(result))
           writer.flush()

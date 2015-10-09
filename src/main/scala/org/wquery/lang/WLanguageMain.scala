@@ -42,7 +42,7 @@ abstract class WLanguageMain(languageName: String, language: WordNet => WLanguag
       .opt[Boolean]("quiet", short = 'q', descr = "Silent mode")
       .opt[String]("emitter", short = 'e', default = () => Some("plain"),
         validate = arg => WQueryEmitter.emitters.contains(arg),
-        descr = "Set result emitter (i.e. output format) - either raw, plain or escaping")
+        descr = "Set result emitter (i.e. output format) - either raw, plain, escaping or tsv")
       .opt[Boolean]("version", short = 'v', descr = "Show version")
 
     val opts = appendOptions(coreOpts)
