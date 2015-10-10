@@ -32,8 +32,8 @@ abstract class WLanguageMain(languageName: String, language: WordNet => WLanguag
                  |options:
                  | """.stripMargin)
       .opt[Boolean]("analyze", short = 'a', descr = "Analyze input line (to be used with -l option)", required = false)
-      .opt[String]("command", short = 'c', descr = "Execute a command", required = false)
-      .opt[String]("file", short = 'f', descr = "Execute commands from a file", required = false)
+      .opt[List[String]]("command", short = 'c', descr = "Execute a command", required = false, default = () => Some(Nil))
+      .opt[List[String]]("file", short = 'f', descr = "Execute commands from a file", required = false, default = () => Some(Nil))
       .opt[String]("field-separator", short = 'F', descr = "Set field separator for -a option", default = () => Some(tupleParsers.DefaultSeparator), required = false)
       .opt[Boolean]("interactive", short = 'i', descr = "Run in the interactive interpreter mode", required = false)
       .opt[Boolean]("loop", short = 'l', descr = "Loop over stdin, pass every line of input as variable %D to -c command", required = false)

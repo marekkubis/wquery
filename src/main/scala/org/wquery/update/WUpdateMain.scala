@@ -12,7 +12,8 @@ object WUpdateMain extends WLanguageMain("WUpdate", new WUpdate(_)) {
   override def appendOptions(opts: Scallop) = {
     opts
       .opt[Boolean]("print", short = 'p', descr = "Print output of the executed commands to stderr")
-      .opt[String]("update", short = 'u', descr = "Same as -c but prepends the 'update' keyword to the command", required = false)
+      .opt[List[String]]("update", short = 'u', descr = "Same as -c but prepends the 'update' keyword to the command",
+        required = false, default = () => Some(Nil))
       .trailArg[String](name = "IFILE", required = false,
         descr = "A  wordnet model as created by wcompile (read from stdin if not specified)")
       .trailArg[String](name = "OFILE", required = false,
@@ -22,9 +23,9 @@ object WUpdateMain extends WLanguageMain("WUpdate", new WUpdate(_)) {
   def doMain(lang: WLanguage, output: OutputStream, emitter: WQueryEmitter, opts: Scallop) {
     val resultLog = if (opts[Boolean]("print")) Some(new BufferedWriter(new OutputStreamWriter(System.err)), emitter) else None
 
-    opts.get[String]("file").foreach(executeCommandFile(lang, _, resultLog))
-    opts.get[String]("command").foreach(executeCommand(opts, lang, _, resultLog))
-    opts.get[String]("update").foreach(command => executeCommand(opts, lang, "update " + command, resultLog))
+    opts[List[String]]("file").foreach(executeCommandFile(lang, _, resultLog))
+    opts[List[String]]("command").foreach(executeCommand(opts, lang, _, resultLog))
+    opts[List[String]]("update").foreach(command => executeCommand(opts, lang, "update " + command, resultLog))
 
     if (opts[Boolean]("interactive"))
       executeInteractive(lang, "wupdate", new ConsoleReader(System.in, System.err), emitter)

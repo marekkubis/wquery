@@ -20,8 +20,8 @@ class WQueryLanguageMain(languageName: String, language: WordNet => WLanguage) e
     val writer = new BufferedWriter(new OutputStreamWriter(output))
     val resultLog = Some(writer, emitter)
 
-    opts.get[String]("file").foreach(executeCommandFile(lang, _, resultLog))
-    opts.get[String]("command").foreach(executeCommand(opts, lang, _, resultLog))
+    opts[List[String]]("file").foreach(executeCommandFile(lang, _, resultLog))
+    opts[List[String]]("command").foreach(executeCommand(opts, lang, _, resultLog))
 
     if (opts[Boolean]("interactive"))
       executeInteractive(lang, languageName.toLowerCase, new ConsoleReader(System.in, output), emitter)
