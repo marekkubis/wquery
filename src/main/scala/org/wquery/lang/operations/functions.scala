@@ -344,28 +344,26 @@ object CountFunction extends DataSetFunction("count") with AcceptsAll with Retur
 object TreeDepthFunction extends DataSetFunction("tree_depth") with AcceptsTypes with ReturnsValueSetOfSimilarSize
 with ClearsBindingsPattern {
 
-  override def argumentTypes = List(NodeType.all.toSet[DataType], Set(StringType))
+  override def argumentTypes = List(NodeType.all.toSet[DataType], Set(ArcType))
 
   def returnType(args: AlgebraOp) = Set(IntegerType)
 
   def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
     DataSet.fromList(for (path <- dataSet.paths) yield {
-      val source = path(0)
-      val types = Set(DataType.fromValue(source))
-      val relationName = path(1).asInstanceOf[String]
-      val relation = wordNet.schema.demandRelation(relationName, Map(Relation.Src -> types, Relation.Dst -> types))
+      val source = path.head
+      val arc = path(1).asInstanceOf[Arc]
 
-      treeDepth(wordNet, source, relation, 0)
+      treeDepth(wordNet, source, arc, 0)
     })
   }
 
-  private def treeDepth(wordNet: WordNet, source: Any, relation: Relation, depth: Int): Int = {
-    val succs = wordNet.getSuccessors(source, relation, Relation.Dst, Relation.Src)
+  private def treeDepth(wordNet: WordNet, source: Any, arc: Arc, depth: Int): Int = {
+    val succs = wordNet.getSuccessors(source, arc.relation, arc.from, arc.to)
 
     if (succs.isEmpty) {
       depth
     } else {
-      succs.map(treeDepth(wordNet, _, relation, depth + 1)).max
+      succs.map(treeDepth(wordNet, _, arc, depth + 1)).max
     }
   }
 }
@@ -373,32 +371,29 @@ with ClearsBindingsPattern {
 object TreeSumFunction extends DataSetFunction("tree_sum") with AcceptsTypes with ReturnsValueSetOfSimilarSize
 with ClearsBindingsPattern {
 
-  override def argumentTypes = List(NodeType.all.toSet[DataType], Set(StringType), Set(StringType))
+  override def argumentTypes = List(NodeType.all.toSet[DataType], Set(ArcType), Set(ArcType))
 
   def returnType(args: AlgebraOp) = Set(IntegerType)
 
   def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
     DataSet.fromList(for (path <- dataSet.paths) yield {
-      val source = path(0)
-      val types = Set(DataType.fromValue(source))
-      val relationName = path(1).asInstanceOf[String]
-      val relation = wordNet.schema.demandRelation(relationName, Map(Relation.Src -> types, Relation.Dst -> types))
-      val sumRelationName = path(2).asInstanceOf[String]
-      val sumRelation = wordNet.schema.demandRelation(sumRelationName, Map(Relation.Src -> types, Relation.Dst -> Set(IntegerType)))
+      val source = path.head
+      val arc = path(1).asInstanceOf[Arc]
+      val sumArc = path(2).asInstanceOf[Arc]
 
-      treeSum(wordNet, source, relation, sumRelation)
+      treeSum(wordNet, source, arc, sumArc)
     })
   }
 
-  private def treeSum(wordNet: WordNet, source: Any, relation: Relation, sumRelation: Relation): Int = {
-    val succs = wordNet.getSuccessors(source, relation, Relation.Dst, Relation.Src)
-    val sumSuccs = wordNet.getSuccessors(source, sumRelation, Relation.Src, Relation.Dst)
+  private def treeSum(wordNet: WordNet, source: Any, arc: Arc, sumArc: Arc): Int = {
+    val succs = wordNet.getSuccessors(source, arc.relation, arc.from, arc.to)
+    val sumSuccs = wordNet.getSuccessors(source, sumArc.relation, sumArc.from, sumArc.to)
     val value = sumSuccs.map{_.asInstanceOf[Int]}.sum
 
     if (succs.isEmpty) {
       value
     } else {
-      value + succs.map(treeSum(wordNet, _, relation, sumRelation)).sum
+      value + succs.map(treeSum(wordNet, _, arc, sumArc)).sum
     }
   }
 }

@@ -93,7 +93,7 @@ class PWNLoader extends WordNetLoader with Logging {
     val lexicalFileRelation = wordNet.addRelation(Relation.binary("lexical_file", SynsetType, StringType))
     val posRelation = wordNet.addRelation(Relation.binary("pos", SynsetType, POSType))
     val senseKeyRelation = wordNet.addRelation(Relation.binary("sense_key", SenseType, StringType))
-    val tagCountRelation = wordNet.addRelation(Relation.binary("count", SenseType, IntegerType))
+    val tagCountRelation = wordNet.addRelation(Relation.binary("tag_count", SenseType, IntegerType))
     val verbFrameRelation = wordNet.addRelation(Relation.binary("verb_frame", SenseType, StringType))
 
     dict.open()

@@ -48,7 +48,7 @@ end
 function hierarchy_depth do
   %lcs := lcs(%A)
   %root := last(%lcs.hypernym*[empty(hypernym)])
-  %depth := tree_depth(%root, `hypernym`)
+  %depth := tree_depth(%root, \^hypernym)
   if [%root.pos = `v`]
     emit %depth + 1
   else
@@ -85,9 +85,9 @@ end
 #
 function ic do
   %s := as_synset(%A)
-  %c := tree_sum(%s, `hypernym`, `count`)
+  %c := tree_sum(%s, \^hypernym, \count)
   %root := last(%s.hypernym*[empty(hypernym)])
-  %d := tree_sum(%root, `hypernym`, `count`)
+  %d := tree_sum(%root, \^hypernym, \count)
   %prob := %c/%d
 
   from %prob$p do
@@ -100,9 +100,9 @@ end
 
 function ic2 do
   %s := as_synset(%A)
-  %c := tree_sum(%s, `hypernym`, `count`)
+  %c := tree_sum(%s, \^hypernym, \count)
   %root := last(%s.hypernym*[empty(hypernym)])
-  %d := tree_sum(%root, `hypernym`, `count`)
+  %d := tree_sum(%root, \^hypernym, \count)
   emit -log(%c/%d)
 end
 
@@ -137,7 +137,7 @@ function jcn_measure do
 
   if [%dist = 0] do
     %root := last(%lcs.hypernym*[empty(hypernym)])
-    %d := distinct(max(tree_sum(%root, `hypernym`, `count`)))
+    %d := distinct(max(tree_sum(%root, \^hypernym, \count)))
 
     if [not empty(%d) and %d > 0.01]
        emit 1/-log((%d - 0.01)/%d)

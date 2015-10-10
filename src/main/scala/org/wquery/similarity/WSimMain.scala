@@ -20,8 +20,8 @@ object WSimMain extends WInteractiveMain {
 
   def loadCounts(wordNet: WordNet, fileName: String) = {
     val tupleParsers = new Object with WTupleParsers
-    val senseCountRelation = Relation.binary("count", SenseType, IntegerType)
-    val wordCountRelation = Relation.binary("count", StringType, IntegerType)
+    val senseCountRelation = Relation.binary("tag_count", SenseType, IntegerType)
+    val wordCountRelation = Relation.binary("tag_count", StringType, IntegerType)
     var senseCounts = false
 
     wordNet.addRelation(senseCountRelation)
@@ -114,9 +114,9 @@ object WSimMain extends WInteractiveMain {
 
       if (measure != "path" && measure != "wup" && measure != "lch") {
         if (senseCounts) {
-          wupdate.execute("from {}$a update $a count := sum(last($a.senses.count))")
+          wupdate.execute("from {}$a update $a count := sum(last($a.senses.tag_count))")
         } else {
-          wupdate.execute("from {}$a update $a count := sum(last($a.senses.word.count))")
+          wupdate.execute("from {}$a update $a count := sum(last($a.senses.word.tag_count))")
         }
       }
 
