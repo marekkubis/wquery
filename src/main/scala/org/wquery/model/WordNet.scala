@@ -184,10 +184,12 @@ object WordNet {
   val SynsetToSenses = Relation.binary("senses", SynsetType, SenseType)
   val SynsetToWordForms = Relation.binary("words", SynsetType, StringType)
   val WordFormToSynsets = Relation.binary("synsets", StringType, SynsetType)
+  val Hypernym = Relation.binary("hypernym", SynsetType, SynsetType)
+  val Count = Relation.binary("count", SynsetType, IntegerType)
 
   val relations = List(IdToSynset, SynsetToId, IdToSense, SenseToId, SenseToWordForm, SenseToSenseNumber,
     SenseToPos, SynsetToWordForms, SynsetToSenses, WordFormToSenses, SenseToSynset, WordFormToSynsets,
-    SenseToWordFormSenseNumberAndPos, SynsetSet, SenseSet, WordSet, PosSet)
+    SenseToWordFormSenseNumberAndPos, SynsetSet, SenseSet, WordSet, PosSet, Hypernym, Count)
 
   val derivedRelations = List(IdToSynset, SenseToWordFormSenseNumberAndPos, WordFormToSenses, SynsetToSenses, WordFormToSynsets, SynsetToWordForms)
 

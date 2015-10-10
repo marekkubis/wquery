@@ -93,8 +93,6 @@ object WSimMain extends WInteractiveMain {
         .getOrElse(System.in)
 
       val wordNet = loader.load(wordNetInput)
-      wordNet.addRelation(Relation.binary("count", SynsetType, IntegerType))
-      wordNet.addRelation(Relation.binary("hypernym", SynsetType, SynsetType))
 
       val senseCounts = opts.get[String]("counts").map(fileName => loadCounts(wordNet, fileName)).getOrElse(true)
       val wupdate = new WUpdate(wordNet)
