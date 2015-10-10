@@ -17,11 +17,6 @@ function subsumers do
 end
 
 function lcs_by_depth do
-  %m := maxby(subsumers(%A)$a<$a,min_size($a.hypernym*[empty(hypernym)])>, 2)
-  emit as_synset(distinct(%m$a$_<$a>))
-end
-
-function lcs do
   %m := maxby(subsumers(%A)$a<$a,size($a.hypernym*[empty(hypernym)])>, 2)
   emit as_synset(distinct(%m$a$_<$a>))
 end
@@ -31,7 +26,7 @@ end
 #
 function min_path_length do
   %l, %r := %A
-  %lcs := lcs(%l, %r)
+  %lcs := lcs_by_depth(%l, %r)
 
   %ll := min_size(%l.hypernym*.%lcs)
   %rl := min_size(%r.hypernym*.%lcs)
@@ -46,7 +41,7 @@ end
 # Leacock-Chodorow measure
 #
 function hierarchy_depth do
-  %lcs := lcs(%A)
+  %lcs := lcs_by_depth(%A)
   %root := last(%lcs.hypernym*[empty(hypernym)])
   %depth := tree_depth(%root, \^hypernym)
   if [%root.pos = `v`]
@@ -73,7 +68,7 @@ end
 
 function wup_measure do
   %l, %r := %A
-  %lcs := lcs(%l, %r)
+  %lcs := lcs_by_depth(%l, %r)
   %dl := lcs_dist(%l, %lcs)
   %dr := lcs_dist(%r, %lcs)
   %dlcs := root_dist(%lcs)
