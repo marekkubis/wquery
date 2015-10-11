@@ -341,6 +341,56 @@ object CountFunction extends DataSetFunction("count") with AcceptsAll with Retur
   def returnType(args: AlgebraOp) = Set(IntegerType)
 }
 
+object LeastCommonSubsumerFunction extends DataSetFunction("lcs") with AcceptsTypes with ReturnsValueSetOfSimilarSize
+with ClearsBindingsPattern {
+
+  override def argumentTypes = List(Set(SynsetType), Set(SynsetType), Set(ArcType))
+
+  def returnType(args: AlgebraOp) = Set(SynsetType)
+
+  def evaluate(dataSet: DataSet, wordNet: WordNet, bindings: Bindings, context: Context) = {
+    DataSet.fromList(for (path <- dataSet.paths; left = path.head.asInstanceOf[Synset];
+                          right = path(1).asInstanceOf[Synset]; arc = path(2).asInstanceOf[Arc];
+                          lcs <- lcs(wordNet, left, right, arc)) yield lcs)
+  }
+
+  private def lcs(wordNet: WordNet, left: Synset, right: Synset, arc: Arc): List[Synset] = {
+    val subsumers = new ListBuffer[Synset]
+
+    for (leftPath <- paths(wordNet, left, arc); rightPath <- paths(wordNet, right, arc)) {
+      var lidx = 0
+      var stop = false
+
+      while (lidx < leftPath.length && !stop) {
+        var ridx = 0
+
+        while (ridx < rightPath.length && !stop) {
+          if (leftPath(lidx) == rightPath(ridx)) {
+            subsumers.append(leftPath(lidx))
+            stop = true
+          }
+          ridx += 1
+        }
+        lidx += 1
+      }
+    }
+
+    subsumers.toList
+  }
+
+  private def paths(wordNet: WordNet, source: Synset, arc: Arc): List[List[Synset]] = {
+    val succs = wordNet.getSuccessors(source, arc.relation, arc.from, arc.to).asInstanceOf[List[Synset]]
+
+    if (succs.isEmpty) {
+      List(List(source))
+    } else {
+      for (succ <- succs; path <- paths(wordNet, succ, arc)) yield {
+        source +: path
+      }
+    }
+  }
+}
+
 object TreeDepthFunction extends DataSetFunction("tree_depth") with AcceptsTypes with ReturnsValueSetOfSimilarSize
 with ClearsBindingsPattern {
 
@@ -974,6 +1024,7 @@ object Functions {
   registerFunction(MinByFunction)
   registerFunction(MaxByFunction)
   registerFunction(CountFunction)
+  registerFunction(LeastCommonSubsumerFunction)
   registerFunction(TreeDepthFunction)
   registerFunction(TreeSumFunction)
   registerFunction(LastFunction)

@@ -9,15 +9,9 @@ function max_size do
   emit distinct(max(size(%A)))
 end
 
-function subsumers do
-  %l, %r := %A
-  %lh := last(%l.hypernym*)
-  %rh := last(%r.hypernym*)
-  emit %lh intersect %rh
-end
-
 function lcs_by_depth do
-  %m := maxby(subsumers(%A)$a<$a,size($a.hypernym*[empty(hypernym)])>, 2)
+  %l, %r := %A$a$b<as_synset($a),as_synset($b)>
+  %m := maxby(lcs(%l, %r, \hypernym)$a<$a,size($a.hypernym*[empty(hypernym)])>, 2)
   emit as_synset(distinct(%m$a$_<$a>))
 end
 
@@ -102,7 +96,8 @@ function ic2 do
 end
 
 function lcs_by_ic do
-  %m := maxby(subsumers(%A)$a<$a,ic($a)>, 2)
+  %l, %r := %A$a$b<as_synset($a),as_synset($b)>
+  %m := maxby(lcs(%l, %r, \hypernym)$a<$a,ic($a)>, 2)
   emit as_synset(distinct(%m$a$_<$a>))
 end
 
