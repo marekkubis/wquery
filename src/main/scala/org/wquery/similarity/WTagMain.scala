@@ -25,7 +25,7 @@ object WTagMain {
       .opt[String]("field-separator", short = 'F', descr = "Set field separator", default = () => Some("\t"), required = false)
       .opt[Boolean]("help", short = 'h', descr = "Show help message")
       .opt[Boolean]("lowercase-lookup", short = 'L', descr = "Take into account the lowercase forms of words while searching the wordnet", required = false)
-      .opt[Int]("max-size", short = 'M', default = () => Some(5), descr = "Max compound size")
+      .opt[Int]("max-compound-size", short = 'M', descr = "Max compound size")
       .opt[Boolean]("version", short = 'v', descr = "Show version")
       .trailArg[String](name = "WORDNET", required = false,
         descr = "A wordnet model as created by wcompile (read from stdin if not specified)")
@@ -39,7 +39,7 @@ object WTagMain {
 
       val lowercaseLookup = opts[Boolean]("lowercase-lookup")
       val separator = opts[String]("field-separator")
-      val maxSize = opts[Int]("max-size")
+      val maxCompoundSize = opts.get[Int]("max-compound-size")
 
       val wordNetInput = opts.get[String]("WORDNET")
         .map(inputName => new FileInputStream(inputName))
@@ -53,7 +53,7 @@ object WTagMain {
       val output = opts.get[String]("OFILE")
         .map(outputName => new FileOutputStream(outputName)).getOrElse(System.out)
 
-      val tagger = new WTagger(wordNet, maxSize, lowercaseLookup, separator)
+      val tagger = new WTagger(wordNet, maxCompoundSize, lowercaseLookup, separator)
 
       tagger.tag(input, output)
     } catch {
