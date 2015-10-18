@@ -19,7 +19,10 @@ syn keyword Boolean true false
 
 syn keyword Constant inf NaN
 
-syn match Operator "+\|-\|/\|*\|:=\|=\|?\|!\|<\|>\||\|\^\|\.\|\[\|\]"
+syn match Type "\\\(\^\|[a-zA-Z_]\)\(\^\|[a-zA-Z_]\||\)*"
+
+syn match Operator "+\|-\|/\|*\|:=\|=\|?\|!\|<\|>\||\|\.\|\[\|\]"
+
 syn keyword Operator in not and or mod div union except intersect
 
 syn keyword Statement do end from emit if else while function update
