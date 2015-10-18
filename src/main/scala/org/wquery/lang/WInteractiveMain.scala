@@ -6,7 +6,7 @@ import org.wquery.reader.{ConsoleLineReader, ExpressionReader}
 
 trait WInteractiveMain {
   def executeInteractive(lang: WLanguage, prompt: String, reader: ConsoleReader, emitter: WQueryEmitter): Unit = {
-    reader.addCompleter(new WLanguageCompleter(lang.wordNet))
+    reader.addCompleter(new WLanguageCompleter(lang))
     reader.setExpandEvents(false)
     val expressionReader = new ExpressionReader(new ConsoleLineReader(reader, prompt + "> "))
     val writer = reader.getOutput
