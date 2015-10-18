@@ -6,7 +6,7 @@ import org.wquery.model.WordNet
 
 import scala.collection.mutable.ListBuffer
 
-class WTagger(wordNet: WordNet, maxSize: Int, separator: String) {
+class WTagger(wordNet: WordNet, maxSize: Int, lowercaseLookup: Boolean, separator: String) {
 
   def tagSentence(sentence: Seq[String]) = {
     val tags = sentence.map(_ => new ListBuffer[String]())
@@ -15,7 +15,10 @@ class WTagger(wordNet: WordNet, maxSize: Int, separator: String) {
 
     while (i < sentence.length) {
       val word = sentence.slice(i, j).mkString(" ")
-      val senses = wordNet.getSenses(word)
+      val senses = if (lowercaseLookup)
+        wordNet.getSenses(word) ++ wordNet.getSenses(word.toLowerCase)
+      else
+        wordNet.getSenses(word)
 
       if (senses.nonEmpty) {
         for (sense <- senses) {

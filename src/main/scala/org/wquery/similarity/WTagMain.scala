@@ -24,7 +24,7 @@ object WTagMain {
                  | """.stripMargin)
       .opt[String]("field-separator", short = 'F', descr = "Set field separator", default = () => Some("\t"), required = false)
       .opt[Boolean]("help", short = 'h', descr = "Show help message")
-      .opt[Boolean]("ignore-case", short = 'I', descr = "Ignore case while looking up words in the wordnet", required = false)
+      .opt[Boolean]("lowercase-lookup", short = 'L', descr = "Take into account the lowercase forms of words while searching the wordnet", required = false)
       .opt[Int]("max-size", short = 'M', default = () => Some(5), descr = "Max compound size")
       .opt[Boolean]("version", short = 'v', descr = "Show version")
       .trailArg[String](name = "WORDNET", required = false,
@@ -37,7 +37,7 @@ object WTagMain {
     try {
       opts.verify
 
-      val ignoreCase = opts[Boolean]("ignore-case")
+      val lowercaseLookup = opts[Boolean]("lowercase-lookup")
       val separator = opts[String]("field-separator")
       val maxSize = opts[Int]("max-size")
 
@@ -53,7 +53,7 @@ object WTagMain {
       val output = opts.get[String]("OFILE")
         .map(outputName => new FileOutputStream(outputName)).getOrElse(System.out)
 
-      val tagger = new WTagger(wordNet, maxSize, separator)
+      val tagger = new WTagger(wordNet, maxSize, lowercaseLookup, separator)
 
       tagger.tag(input, output)
     } catch {
