@@ -27,8 +27,8 @@ object WTagMain {
       .opt[Boolean]("lowercase-lookup", short = 'L', descr = "Take into account the lowercase forms of words while searching the wordnet", required = false)
       .opt[Int]("max-compound-size", short = 'M', descr = "Max compound size")
       .opt[Boolean]("version", short = 'v', descr = "Show version")
-      .trailArg[String](name = "WORDNET", required = false,
-        descr = "A wordnet model as created by wcompile (read from stdin if not specified)")
+      .trailArg[String](name = "WORDNET", required = true,
+        descr = "A wordnet model as created by wcompile")
       .trailArg[String](name = "IFILE", required = false,
         descr = "Tokenized text in the sentence per line format")
       .trailArg[String](name = "OFILE", required = false,
