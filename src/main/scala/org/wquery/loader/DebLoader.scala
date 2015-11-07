@@ -106,7 +106,7 @@ class DebHandler(wordnet: WordNet) extends DefaultHandler with Logging {
       case "SENSE" =>
         literalSense = content
       case "ILR" =>
-        synsetIlrRelationsTuples += ((ilrType.replace(' ','_').replace('-','_'), content))
+        synsetIlrRelationsTuples += ((ilrType, content))
         ilrType = null
       case "TYPE" =>
         ilrType = content
@@ -156,7 +156,7 @@ class DebHandler(wordnet: WordNet) extends DefaultHandler with Logging {
           warnInvalidSubtag("ILR", content, "type")
           "related"
         } else {
-          ilrType
+          ilrType.replace(' ','_').replace('-','_')
         }
 
         ilrRelationsTuples += ((synset, ilrName, content))
