@@ -8,7 +8,7 @@ import org.wquery.similarity.WTagger
 class WTaggerTestSuite extends WQueryTestSuite {
 
   @Test def tagOneSentence() = {
-    val tagger = new WTagger(wupdate.wordNet, None, false, "\t")
+    val tagger = new WTagger(wupdate.wordNet, None, None, false, "\t")
     val input = new ByteArrayInputStream("This is the car sentence with a cable car part .".getBytes)
     val output = new ByteArrayOutputStream()
 
@@ -16,8 +16,17 @@ class WTaggerTestSuite extends WQueryTestSuite {
     output.toString should equal ("This\nis\nthe\ncar\tB_car:1:n\tB_car:2:n\tB_car:3:n\tB_car:4:n\tB_car:5:n\nsentence\nwith\na\ncable\tB_cable car:1:n\ncar\tI_cable car:1:n\npart\n.\n\n")
   }
 
+  @Test def tagOneSentenceWithAtMostOneSense() = {
+    val tagger = new WTagger(wupdate.wordNet, None, Some(1), false, "\t")
+    val input = new ByteArrayInputStream("This is the car sentence with a cable car part .".getBytes)
+    val output = new ByteArrayOutputStream()
+
+    tagger.tag(input, output)
+    output.toString should equal ("This\nis\nthe\ncar\tB_car:1:n\nsentence\nwith\na\ncable\tB_cable car:1:n\ncar\tI_cable car:1:n\npart\n.\n\n")
+  }
+
   @Test def tagTwoSentences() = {
-    val tagger = new WTagger(wupdate.wordNet, None, false, "\t")
+    val tagger = new WTagger(wupdate.wordNet, None, None, false, "\t")
     val input = new ByteArrayInputStream("This is the car sentence .\nThis is a cable car sentence .".getBytes)
     val output = new ByteArrayOutputStream()
 
@@ -26,7 +35,7 @@ class WTaggerTestSuite extends WQueryTestSuite {
   }
 
   @Test def tagOneSentenceWithLowercaseLookup() = {
-    val tagger = new WTagger(wupdate.wordNet, None, true, "\t")
+    val tagger = new WTagger(wupdate.wordNet, None, None, true, "\t")
     val input = new ByteArrayInputStream("This is the Car sentence with a CABLE CAR part .".getBytes)
     val output = new ByteArrayOutputStream()
 
@@ -35,7 +44,7 @@ class WTaggerTestSuite extends WQueryTestSuite {
   }
 
   @Test def tagOneSentenceWithSingleWordExpressions() = {
-    val tagger = new WTagger(wupdate.wordNet, Some(1), false, "\t")
+    val tagger = new WTagger(wupdate.wordNet, Some(1), None, false, "\t")
     val input = new ByteArrayInputStream("This is the car sentence with a cable car part .".getBytes)
     val output = new ByteArrayOutputStream()
 

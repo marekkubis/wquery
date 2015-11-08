@@ -6,7 +6,7 @@ import org.wquery.model.{Relation, WordNet}
 
 import scala.collection.mutable.ListBuffer
 
-class WTagger(wordNet: WordNet, maxSize: Option[Int], lowercaseLookup: Boolean, separator: String) {
+class WTagger(wordNet: WordNet, maxSize: Option[Int], maxSenseCount: Option[Int], lowercaseLookup: Boolean, separator: String) {
 
   val maxCompoundSize = maxSize.getOrElse(findMaxCompoundSize)
 
@@ -37,7 +37,9 @@ class WTagger(wordNet: WordNet, maxSize: Option[Int], lowercaseLookup: Boolean, 
         wordNet.getSenses(word)
 
       if (senses.nonEmpty) {
-        for (sense <- senses) {
+        val tagSenses = maxSenseCount.map(senses.take).getOrElse(senses)
+
+        for (sense <- tagSenses) {
           tags(i).append("B_" + sense)
 
           for (k <- (i + 1) until j) {
