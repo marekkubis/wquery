@@ -7,8 +7,25 @@ import org.rogach.scallop.exceptions.{Help, ScallopException, Version}
 import org.wquery.loader.WnLoader
 import org.wquery.{WQueryCommandLineException, WQueryProperties}
 
+import scala.collection.mutable
+import scala.io.Source
+
 object WTagMain {
   val loader = new WnLoader
+
+  def loadBaseForms(fileName: String) = {
+    val baseForms = mutable.Map[String, String]()
+
+    for (line <- Source.fromFile(fileName).getLines() if !line.startsWith("#")) {
+      val fields = line.split('\t')
+
+      if (fields.length > 1) {
+        baseForms(fields(0)) = fields(1)
+      }
+    }
+
+    baseForms.toMap
+  }
 
   def main(args: Array[String]) {
     val opts = Scallop(args)
@@ -22,6 +39,7 @@ object WTagMain {
                  |
                  |options:
                  | """.stripMargin)
+      .opt[String]("base-forms", short = 'b', descr = "base forms to be looked up in the wordnet for given surface forms (tab-separated list of pairs)", required = false)
       .opt[String]("field-separator", short = 'F', descr = "Set field separator", default = () => Some("\t"), required = false)
       .opt[Boolean]("help", short = 'h', descr = "Show help message")
       .opt[Boolean]("lowercase-lookup", short = 'L', descr = "Take into account the lowercase forms of words while searching the wordnet", required = false)
@@ -42,6 +60,7 @@ object WTagMain {
       val separator = opts[String]("field-separator")
       val maxCompoundSize = opts.get[Int]("max-compound-size")
       val maxSenseCount = opts.get[Int]("max-sense-count")
+      val baseForms = opts.get("base-forms").map(loadBaseForms(_)).getOrElse(Map())
 
       val wordNetInput = opts.get[String]("WORDNET")
         .map(inputName => new FileInputStream(inputName))
@@ -55,7 +74,7 @@ object WTagMain {
       val output = opts.get[String]("OFILE")
         .map(outputName => new FileOutputStream(outputName)).getOrElse(System.out)
 
-      val tagger = new WTagger(wordNet, maxCompoundSize, maxSenseCount, lowercaseLookup, separator)
+      val tagger = new WTagger(wordNet, maxCompoundSize, maxSenseCount, baseForms, lowercaseLookup, separator)
 
       tagger.tag(input, output)
     } catch {
