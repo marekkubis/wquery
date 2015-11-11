@@ -60,7 +60,7 @@ object WTagMain {
       val separator = opts[String]("field-separator")
       val maxCompoundSize = opts.get[Int]("max-compound-size")
       val maxSenseCount = opts.get[Int]("max-sense-count")
-      val baseForms = opts.get("base-forms").map(loadBaseForms(_)).getOrElse(Map())
+      val baseForms = opts.get[String]("base-forms").map(loadBaseForms(_)).getOrElse(Map())
 
       val wordNetInput = opts.get[String]("WORDNET")
         .map(inputName => new FileInputStream(inputName))
