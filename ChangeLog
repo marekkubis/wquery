@@ -1,4 +1,13 @@
 =====================
+0.10.0 (15 Nov 2015)
+=====================
+        * user-defined WQuery functions
+
+        * wsim command-line tool for computing semantic similarity measures
+
+        * wtag command-line tool for tagging texts using the wordnet word senses
+
+=====================
 0.9.0 (23 Jan 2015)
 =====================
         * -l -a -F perl/AWK-like options for wpath, wquery and wupdate
